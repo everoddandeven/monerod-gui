@@ -1,0 +1,28 @@
+<nav class="navbar navbar-expand-lg d-flex justify-content-center py-3 text-bg-dark">
+    <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+        <img src="/assets/icons/monero-symbol-on-white-480.png" width="40" height="40">
+        <span class="fs-4">Monero Daemon</span>
+    </a>
+    
+    <ul class="nav nav-pills" id="pills-tab" role="tablist">
+      @for(navbarLink of navbarLinks; track navbarLink.name) {
+        <li class="nav-item" role="presentation">
+            <button [class]="navbarLink.selected ? 'nav-link active' : 'nav-link'" [id]="navbarLink.id" data-bs-toggle="pill" [attr.data-bs-target]="navbarLink.target" type="button" role="tab" [attr.aria-controls]="navbarLink.controls" [attr.aria-selected]="navbarLink.selected">{{navbarLink.name}}</button>
+        </li>
+      }
+        <!--
+        <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Overview</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Peers</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill" data-bs-target="#pills-contact" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Spans</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="pills-disabled-tab" data-bs-toggle="pill" data-bs-target="#pills-disabled" type="button" role="tab" aria-controls="pills-disabled" aria-selected="false" disabled>Disabled</button>
+      </li>
+    -->
+    </ul>
+</nav>

@@ -1,0 +1,10 @@
+<div class="row d-flex">
+    @for(card of cards; track card.header) {
+        <div class="card text-bg-dark m-3 text-center" style="max-width: 18rem;">
+          <div class="card-header">{{card.header}}</div>
+          <div class="card-body">
+            <h5 class="card-title">{{card.content}}</h5>
+          </div>
+        </div>
+    }
+</div>

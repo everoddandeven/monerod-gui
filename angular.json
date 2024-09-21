@@ -3,7 +3,8 @@
   "cli": {
     "schematicCollections": [
       "@angular-eslint/schematics"
-    ]
+    ],
+    "analytics": false
   },
   "version": 1,
   "newProjectRoot": "projects",
@@ -36,9 +37,15 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles.scss",
+              "node_modules/bootstrap-icons/font/bootstrap-icons.css",
+              "node_modules/bootstrap-table/dist/bootstrap-table.min.css"
             ],
-            "scripts": [],
+            "scripts": [
+              "node_modules/jquery/dist/jquery.min.js",
+              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js",
+              "node_modules/bootstrap-table/dist/bootstrap-table.js"
+            ],
             "customWebpackConfig": {
               "path": "./angular.webpack.js",
               "replaceDuplicatePlugins": true
@@ -142,7 +149,7 @@
           "options": {
             "polyfills": ["src/polyfills-test.ts"],
             "tsConfig": "src/tsconfig.spec.json",
-            "globalMocks": ["styleTransform", "matchMedia", "getComputedStyle"],
+            "globalMocks": ["styleTransform", "matchMedia", "getComputedStyle"]
           }
         },
         "lint": {

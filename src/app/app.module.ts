@@ -15,6 +15,10 @@ import { HomeModule } from './home/home.module';
 import { DetailModule } from './detail/detail.module';
 
 import { AppComponent } from './app.component';
+import { SidebarComponent } from "./sidebar/sidebar.component";
+import { BansModule } from './bans/bans.module';
+import { NavbarComponent } from "./navbar/navbar.component";
+import { MiningModule } from './mining/mining.module';
 
 // AoT requires an exported function for factories
 const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -29,15 +33,19 @@ const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new Transl
     SharedModule,
     HomeModule,
     DetailModule,
+    BansModule,
+    MiningModule,
     AppRoutingModule,
     TranslateModule.forRoot({
-      loader: {
-        provide: TranslateLoader,
-        useFactory: httpLoaderFactory,
-        deps: [HttpClient]
-      }
-    })
-  ],
+        loader: {
+            provide: TranslateLoader,
+            useFactory: httpLoaderFactory,
+            deps: [HttpClient]
+        }
+    }),
+    SidebarComponent,
+    NavbarComponent
+],
   providers: [],
   bootstrap: [AppComponent]
 })

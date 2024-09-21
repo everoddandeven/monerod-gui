@@ -4,11 +4,12 @@ import { PageNotFoundComponent } from './shared/components';
 
 import { HomeRoutingModule } from './home/home-routing.module';
 import { DetailRoutingModule } from './detail/detail-routing.module';
+import { HardForkInfoRoutingModule } from './hard-fork-info/hard-fork-info-routing.module';
 
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'home',
+    redirectTo: 'detail',
     pathMatch: 'full'
   },
   {
@@ -21,7 +22,8 @@ const routes: Routes = [
   imports: [
     RouterModule.forRoot(routes, {}),
     HomeRoutingModule,
-    DetailRoutingModule
+    DetailRoutingModule,
+    HardForkInfoRoutingModule
   ],
   exports: [RouterModule]
 })

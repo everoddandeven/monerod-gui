@@ -1,7 +1,39 @@
-<div class="container">
-  <h1 class="title">
-    {{ 'PAGES.DETAIL.TITLE' | translate }}
-  </h1>
+<div class="tab-content" id="pills-tabContent">
+  <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab" tabindex="0">
+    <div class="row d-flex">
 
-  <a routerLink="/">{{ 'PAGES.DETAIL.BACK_TO_HOME' | translate }}</a>
+      @for(card of cards; track card.header) {
+        <div class="card text-bg-dark m-3 text-center" style="max-width: 18rem;">
+          <div class="card-header">{{card.header}}</div>
+          <div class="card-body">
+            <h5 class="card-title">{{card.content}}</h5>
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+  <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">
+    <div class="m-3">
+      <table
+      id="table"
+      data-toggle="table"
+      data-toolbar="#toolbar"
+      data-height="460"
+      >
+      <thead>
+        <tr>
+          <th data-field="address">Remote Host</th>
+          <th data-field="peerId">Peer ID</th>
+          <th data-field="height">Height</th>
+          <th data-field="pruningSeed">Prune Seed</th>
+          <th data-field="state">State</th>
+          <th data-field="currentDownload">Download</th>
+        </tr>
+      </thead>
+    </table>
+    </div>
+  </div>
+  <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab" tabindex="0">Spans</div>
+  <div class="tab-pane fade" id="pills-disabled" role="tabpanel" aria-labelledby="pills-disabled-tab" tabindex="0">...</div>
 </div>

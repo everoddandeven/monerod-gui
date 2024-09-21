@@ -1,0 +1,53 @@
+<div class="tab-content" id="pills-tabContent">
+    <div class="tab-pane fade show active" id="pills-miner-data" role="tabpanel" aria-labelledby="pills-miner-data-tab" tabindex="0">
+      <div class="row d-flex">
+  
+        @for(card of cards; track card.header) {
+          <div class="card text-bg-dark m-3 text-center" style="max-width: 18rem;">
+            <div class="card-header">{{card.header}}</div>
+            <div class="card-body">
+              <h5 class="card-title">{{card.content}}</h5>
+            </div>
+          </div>
+        }
+  
+      </div>
+    </div>
+    <div class="tab-pane fade" id="pills-alternate-chains" role="tabpanel" aria-labelledby="pills-alternate-chains-tab" tabindex="0">
+      <div class="m-3">
+        <table
+        id="chainsTable"
+        data-toggle="chainsTable"
+        data-toolbar="#toolbar"
+        data-height="460"
+        >
+        <thead>
+          <tr>
+            <th data-field="blockHash">Block Hash</th>
+            <th data-field="height">Height</th>
+            <th data-field="length">Length</th>
+            <th data-field="mainChainParentBlock">Main Chain Parent Block</th>
+            <th data-field="wideDifficulty">Wide Difficulty</th>
+          </tr>
+        </thead>
+      </table>
+      </div>
+    </div>
+
+    <div class="tab-pane fade" id="pills-block-template" role="tabpanel" aria-labelledby="pills-block-template-tab" tabindex="0">
+        <div class="input-group flex-nowrap m-4">
+            <span class="input-group-text" id="addon-wrapping">Address</span>
+            <input type="text" class="form-control" aria-label="Address" aria-describedby="addon-wrapping">
+        </div>
+        
+        <div class="input-group flex-nowrap m-4">
+            <span class="input-group-text" id="addon-wrapping">Reserve Size</span>
+            <input type="number" class="form-control" aria-label="Reserve Size" aria-describedby="addon-wrapping">
+        </div>
+
+        <div class="input-group m-4">
+            <button class="btn btn-primary" type="button" id="getBlockTemplateButton">Get Block Template</button>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="pills-disabled" role="tabpanel" aria-labelledby="pills-disabled-tab" tabindex="0">...</div>
+  </div>
