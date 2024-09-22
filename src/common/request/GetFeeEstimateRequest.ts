@@ -2,6 +2,7 @@ import { JsonRPCRequest } from "./JsonRPCRequest";
 
 export class GetFeeEstimateRequest extends JsonRPCRequest {
     public override readonly method: string = 'get_fee_estimate';
+    public override readonly restricted: boolean = false;
     public readonly graceBlocks: number;
 
     constructor(graceBlocks: number = 0) {

@@ -1,7 +1,5 @@
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, NgZone } from '@angular/core';
 import { DaemonService } from '../core/services/daemon/daemon.service';
-import * as jquery from 'jquery';
-import * as bootstrapTable from 'bootstrap-table'
 import { SyncInfo } from '../../common/SyncInfo';
 import { Peer } from '../../common/Peer';
 import { NavbarLink } from '../navbar/navbar.model';
@@ -16,6 +14,7 @@ import { DaemonInfo } from '../../common/DaemonInfo';
 })
 export class DetailComponent implements OnInit, AfterViewInit {
 
+  public daemonRunning: boolean;
   private syncInfo?: SyncInfo;
   private daemonInfo?: DaemonInfo;
   private readonly navbarLinks: NavbarLink[];
@@ -37,9 +36,16 @@ export class DetailComponent implements OnInit, AfterViewInit {
   private nodeType: string;
   private syncProgress: string;
 
+  private isLoading: boolean;
+
+  public get loading(): boolean {
+    return this.isLoading;
+  }
+
   public cards: Card[];
 
-  constructor(private router: Router,private daemonService: DaemonService, private navbarService: NavbarService) {
+  constructor(private router: Router,private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
+    this.daemonRunning = false;
     this.syncStatus = 'Not synced';
     this.height = 0;
     this.targetHeight = 0;
@@ -55,6 +61,7 @@ export class DetailComponent implements OnInit, AfterViewInit {
     this.nodeType = 'unknown';
     this.blockchainSize = '0 GB';
     this.syncProgress = '0 %';
+    this.isLoading = true;
 
     this.navbarLinks = [
       new NavbarLink('pills-home-tab', '#pills-home', 'pills-home', true, 'Overview'),
@@ -77,27 +84,42 @@ export class DetailComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     console.log('DetailComponent AFTER VIEW INIT');
+    this.navbarService.setNavbarLinks(this.navbarLinks);
 
     setTimeout(() => {
-      const $table = $('#table');
-      $table.bootstrapTable({});
-      $table.bootstrapTable('refreshOptions', {
-        classes: 'table table-bordered table-hover table-dark table-striped'
-      });      
-      this.Load();
+      this.ngZone.run(() => {
+        const $table = $('#table');
+        $table.bootstrapTable({});
+        $table.bootstrapTable('refreshOptions', {
+          classes: 'table table-bordered table-hover table-dark table-striped'
+        });      
+        this.load();
+  
+      }, 500);
+      });
+  }
 
-    }, 500);
+  public async startDaemon(): Promise<void> {
+    if (this.daemonRunning) {
+      console.warn("Daemon already running");
+      return;
+    }
+
+    await this.daemonService.startDaemon();
+    this.daemonRunning = await this.daemonService.isRunning();
   }
 
   private onNavigationEnd(): void {
-    this.Load().then(() => {
+    this.load().then(() => {
       this.cards = this.createCards();
-      this.navbarService.setNavbarLinks(this.navbarLinks);
     });
     
   }
 
   private createCards(): Card[] {
+    if (!this.daemonRunning) {
+      return []
+    }
     return [
       new Card('Connection Status', this.connectionStatus),
       new Card('Network Type', this.networkType),
@@ -114,50 +136,64 @@ export class DetailComponent implements OnInit, AfterViewInit {
     ];
   }
 
-  public async Load(): Promise<void> {
-    const $table = $('#table');
+  private async load(): Promise<void> {
+    try {
+      this.isLoading = true;
+      this.daemonRunning = await this.daemonService.isRunning();
+
+      if (!this.daemonRunning) {
+        return;
+      }
+
+      const $table = $('#table');
+      
+      this.syncInfo = await this.daemonService.syncInfo();
+      this.height = this.syncInfo.height;
+      this.targetHeight = this.syncInfo.targetHeight;
+      this.nextNeededPruningSeed = this.syncInfo.nextNeededPruningSeed;
+
+      if (this.height > 0 && this.targetHeight == 0) {
+        this.targetHeight = this.height;
+        this.syncStatus = 'Daemon synced';
+      }
+      else if (this.height > 0 && this.targetHeight > 0 && this.height == this.targetHeight) {
+        this.syncStatus = 'Daemon synced';
+      }
+
+      this.overview = this.syncInfo.overview;
+
+      const blockCount = await this.daemonService.getBlockCount();
+
+      this.blockCount = blockCount.count;
+
+      const version = await this.daemonService.getVersion();
+
+      this.version = `${version.version}`;
+
+      this.daemonInfo = await this.daemonService.getInfo();
+
+      const capacity: number = this.daemonInfo.freeSpace + this.daemonInfo.databaseSize;
+      const diskUsage = parseInt(`${this.daemonInfo.databaseSize * 100 / capacity}`);
+      const blockchainSize = (this.daemonInfo.databaseSize / 1000 / 1000 / 1000).toFixed(2);
+      this.blockchainSize = `${blockchainSize} GB`;
+      this.diskUsage = `${diskUsage} %`;
+      this.networkType = this.daemonInfo.nettype;
+      this.connectionStatus = this.daemonInfo.offline ? 'offline' : 'online';
+      this.txCount = this.daemonInfo.txCount;
+      this.poolSize = this.daemonInfo.txPoolSize;
+      this.version = this.daemonInfo.version;
+      this.syncProgress = `${(this.height*100/this.targetHeight).toFixed(2)} %`;
+
+      //const blockchainPruned = await this.isBlockchainPruned();
+      const blockchainPruned = false;
+      this.nodeType = blockchainPruned ? 'pruned' : 'full';
+      $table.bootstrapTable('load', this.getPeers());
+    }
+    catch(error) {
+      console.error(error);
+    }
     
-    this.syncInfo = await this.daemonService.syncInfo();
-    this.height = this.syncInfo.height;
-    this.targetHeight = this.syncInfo.targetHeight;
-    this.nextNeededPruningSeed = this.syncInfo.nextNeededPruningSeed;
-
-    if (this.height > 0 && this.targetHeight == 0) {
-      this.targetHeight = this.height;
-      this.syncStatus = 'Daemon synced';
-    }
-    else if (this.height > 0 && this.targetHeight > 0 && this.height == this.targetHeight) {
-      this.syncStatus = 'Daemon synced';
-    }
-
-    this.overview = this.syncInfo.overview;
-
-    const blockCount = await this.daemonService.getBlockCount();
-
-    this.blockCount = blockCount.count;
-
-    const version = await this.daemonService.getVersion();
-
-    this.version = `${version.version}`;
-
-    this.daemonInfo = await this.daemonService.getInfo();
-
-    const capacity: number = this.daemonInfo.freeSpace + this.daemonInfo.databaseSize;
-    const diskUsage = parseInt(`${this.daemonInfo.databaseSize * 100 / capacity}`);
-    const blockchainSize = (this.daemonInfo.databaseSize / 1000 / 1000 / 1000).toFixed(2);
-    this.blockchainSize = `${blockchainSize} GB`;
-    this.diskUsage = `${diskUsage} %`;
-    this.networkType = this.daemonInfo.nettype;
-    this.connectionStatus = this.daemonInfo.offline ? 'offline' : 'online';
-    this.txCount = this.daemonInfo.txCount;
-    this.poolSize = this.daemonInfo.txPoolSize;
-    this.version = this.daemonInfo.version;
-    this.syncProgress = `${(this.height*100/this.targetHeight).toFixed(2)} %`;
-
-    //const blockchainPruned = await this.isBlockchainPruned();
-    const blockchainPruned = false;
-    this.nodeType = blockchainPruned ? 'pruned' : 'full';
-    $table.bootstrapTable('load', this.getPeers());
+    this.isLoading = false;
   }
 
   public async isBlockchainPruned(): Promise<boolean> {

@@ -20,6 +20,7 @@ export class SidebarComponent {
       new NavLink('Mining', '/mining', 'bi bi-minecart-loaded'),
       new NavLink('Hard Fork Info', '/hardforkinfo', 'bi bi-signpost-split'),
       new NavLink('Bans', '/bans', 'bi bi-ban'),
+      new NavLink('Settings', '/settings', 'bi bi-gear')
     ];
     this.isLoading = false;
     this.errorMessage = '';

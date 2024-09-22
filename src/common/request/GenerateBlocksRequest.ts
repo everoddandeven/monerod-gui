@@ -2,6 +2,7 @@ import { JsonRPCRequest } from "./JsonRPCRequest";
 
 export class GenerateBlocksRequest extends JsonRPCRequest {
     public override method: string = "generateblocks";
+    public override readonly restricted: boolean = true;
     public readonly amountOfBlocks: number;
     public readonly walletAddress: string;
     public readonly prevBlock: string;

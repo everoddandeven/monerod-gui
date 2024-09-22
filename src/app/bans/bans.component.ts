@@ -20,17 +20,19 @@ export class BansComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-      console.log('BansComponent AFTER VIEW INIT');
+    this.navbarService.removeNavbarLinks();
 
-      setTimeout(() => {
-        const $table = $('#bansTable');
-        $table.bootstrapTable({});
-        $table.bootstrapTable('refreshOptions', {
-          classes: 'table table-bordered table-hover table-dark table-striped'
-        });        
-        this.load();
-  
-      }, 500);
+    console.log('BansComponent AFTER VIEW INIT');
+
+    setTimeout(() => {
+      const $table = $('#bansTable');
+      $table.bootstrapTable({});
+      $table.bootstrapTable('refreshOptions', {
+        classes: 'table table-bordered table-hover table-dark table-striped'
+      });        
+      this.load();
+
+    }, 500);
   }
 
   private onNavigationEnd(): void {

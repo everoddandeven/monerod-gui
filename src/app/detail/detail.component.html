@@ -1,6 +1,14 @@
-<div class="tab-content" id="pills-tabContent">
+<app-load [show]="loading"></app-load>
+
+<div class="tab-content" id="pills-tabContent" [hidden]="loading">
   <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab" tabindex="0">
     <div class="row d-flex">
+
+      <div *ngIf="!daemonRunning" class="h-100 p-5 text-bg-dark rounded-3 m-4">
+        <h2>Daemon not running</h2>
+        <p>Start monero daemon</p>
+        <button class="btn btn-outline-light" type="button" (click)="startDaemon()"><i class="bi bi-play-fill"></i> Start</button>
+      </div>
 
       @for(card of cards; track card.header) {
         <div class="card text-bg-dark m-3 text-center" style="max-width: 18rem;">

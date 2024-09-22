@@ -2,6 +2,7 @@ import { JsonRPCRequest } from "./JsonRPCRequest";
 
 export class FlushCacheRequest extends JsonRPCRequest {
     public override readonly method: string = 'flush_cache';
+    public override readonly restricted: boolean = false;
     public readonly badTxs: boolean;
     public readonly badBlocks: boolean;
 

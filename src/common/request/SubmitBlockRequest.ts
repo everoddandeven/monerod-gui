@@ -2,6 +2,7 @@ import { JsonRPCRequest } from "./JsonRPCRequest";
 
 export class SubmitBlockRequest extends JsonRPCRequest {
     public override method: string = "submit_block";
+    public override readonly restricted: boolean = false;
     public readonly blockBlobData: string[];
 
     constructor(blockBlobData: string[]) {

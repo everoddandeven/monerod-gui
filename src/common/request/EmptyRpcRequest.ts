@@ -1,6 +1,6 @@
 import { JsonRPCRequest } from "./JsonRPCRequest";
 
-export class GetInfoRequest extends JsonRPCRequest {
-    public override readonly method: string = 'get_info';
+export class EmptyRpcRequest extends JsonRPCRequest {
     public override readonly restricted: boolean = false;
+    public override readonly method: string = "";
 }

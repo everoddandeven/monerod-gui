@@ -2,6 +2,7 @@ import { JsonRPCRequest } from "./JsonRPCRequest";
 
 export class RelayTxRequest extends JsonRPCRequest {
     public override readonly method: string = 'relay_tx';
+    public override readonly restricted: boolean = true;
     public readonly txIds: string[];
 
     constructor(txIds: string[]) {

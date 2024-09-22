@@ -2,6 +2,7 @@ import { JsonRPCRequest } from "./JsonRPCRequest";
 
 export class GetBlockHeaderByHeightRequest extends JsonRPCRequest {
     public override readonly method: string = 'get_block_header_by_height';
+    public override readonly restricted: boolean = false;
     public readonly height: number;
     public readonly fillPowHash: boolean;
 

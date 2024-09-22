@@ -2,6 +2,7 @@ import { JsonRPCRequest } from "./JsonRPCRequest";
 
 export class GetLastBlockHeaderRequest extends JsonRPCRequest {
     public override readonly method: string = 'get_last_block_header';
+    public override readonly restricted: boolean = false;
     public readonly fillPowHash: boolean;
 
     constructor(fillPowHash: boolean = false) {

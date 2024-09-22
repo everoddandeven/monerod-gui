@@ -6,6 +6,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { NavbarLink } from '../navbar/navbar.model';
 import { MineableTxBacklog } from '../../common/MineableTxBacklog';
 import { Chain } from '../../common/Chain';
+import { CoreIsBusyError } from '../../common/error';
 
 @Component({
   selector: 'app-mining',
@@ -15,7 +16,7 @@ import { Chain } from '../../common/Chain';
 export class MiningComponent implements AfterViewInit {
 
   private readonly navbarLinks: NavbarLink[];
-
+  private coreBusy: boolean;
   private minerData?: MinerData;
 
   private majorVersion: number;
@@ -40,6 +41,7 @@ export class MiningComponent implements AfterViewInit {
     this.alreadyGeneratedCoins = 0;
     this.alternateChains = [];
     this.cards = [];
+    this.coreBusy = false;
 
     this.navbarLinks = [
       new NavbarLink('pills-miner-data-tab', '#pills-miner-data', 'miner-data', true, 'Miner Data'),
@@ -57,6 +59,7 @@ export class MiningComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     console.log('DetailComponent AFTER VIEW INIT');
+    this.navbarService.setNavbarLinks(this.navbarLinks);
 
     setTimeout(() => {
       const $table = $('#chainsTable');
@@ -72,28 +75,39 @@ export class MiningComponent implements AfterViewInit {
   private onNavigationEnd(): void {
     this.load().then(() => {
       this.cards = this.createCards();
-      this.navbarService.setNavbarLinks(this.navbarLinks)
     });
   }
 
   private async load(): Promise<void> {
-    this.minerData = await this.daemonService.getMinerData();
+    try {
+      this.minerData = await this.daemonService.getMinerData();
+      this.majorVersion = this.minerData.majorVersion;
+      this.height = this.minerData.height;
+      this.prevId = this.minerData.prevId;
+      this.seedHash = this.minerData.seedHash;
+      this.difficulty = this.minerData.difficulty;
+      this.medianWeight = this.minerData.medianWeight;
+      this.alreadyGeneratedCoins = this.minerData.alreadyGeneratedCoins;
 
-    this.majorVersion = this.minerData.majorVersion;
-    this.height = this.minerData.height;
-    this.prevId = this.minerData.prevId;
-    this.seedHash = this.minerData.seedHash;
-    this.difficulty = this.minerData.difficulty;
-    this.medianWeight = this.minerData.medianWeight;
-    this.alreadyGeneratedCoins = this.minerData.alreadyGeneratedCoins;
+      this.alternateChains = await this.daemonService.getAlternateChains();
 
-    this.alternateChains = await this.daemonService.getAlternateChains();
-
-    const $table = $('#chainsTable');
-    $table.bootstrapTable('load', this.getChains());
+      const $table = $('#chainsTable');
+      $table.bootstrapTable('load', this.getChains());
+    }
+    catch(error) {
+      if (error instanceof CoreIsBusyError) {
+        this.coreBusy = true;
+      }
+    }
+    
   }
 
   private createCards(): Card[] {
+    if (this.coreBusy) {
+      return [
+        new Card('Error', 'Core is busy')
+      ]
+    }
     return [
       new Card('Major Fork Version', `${this.majorVersion}`),
       new Card('Current block height', `${this.height}`),

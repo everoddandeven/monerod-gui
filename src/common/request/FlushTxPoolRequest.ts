@@ -2,6 +2,7 @@ import { JsonRPCRequest } from "./JsonRPCRequest";
 
 export class FlushTxPoolRequest extends JsonRPCRequest {
     public override readonly method: string = 'flush_txpool';
+    public override readonly restricted: boolean = true;
     public txIds: string[];
 
     constructor(txIds: string[]) {

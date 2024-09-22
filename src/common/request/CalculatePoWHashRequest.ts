@@ -2,6 +2,7 @@ import { JsonRPCRequest } from "./JsonRPCRequest";
 
 export class CalculatePoWHashRequest extends JsonRPCRequest {
     public override readonly method: string = 'calc_pow';
+    public override readonly restricted: boolean = false;
     public readonly majorVersion: number;
     public readonly height: number;
     public readonly blockBlob: string;

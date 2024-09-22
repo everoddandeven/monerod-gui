@@ -2,6 +2,7 @@ import { JsonRPCRequest } from "./JsonRPCRequest";
 
 export class GetBlockTemplateRequest extends JsonRPCRequest {
     public override readonly method: string = "get_block_template";
+    public override readonly restricted: boolean = false;
     public readonly walletAddress: string;
     public readonly reserveSize: number;
   

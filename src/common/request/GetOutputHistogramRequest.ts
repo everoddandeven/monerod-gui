@@ -2,6 +2,7 @@ import { JsonRPCRequest } from "./JsonRPCRequest";
 
 export class GetOutputHistogramRequest extends JsonRPCRequest {
     public override readonly method: string = 'get_output_histogram';
+    public override readonly restricted: boolean = false;
     public readonly amounts: number[];
     public readonly minCount: number;
     public readonly maxCount: number;

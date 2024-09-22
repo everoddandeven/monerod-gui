@@ -26,3 +26,35 @@ export { PruneBlockchainRequest } from "./request/PruneBlockchainRequest";
 export { CalculatePoWHashRequest } from "./request/CalculatePoWHashRequest";
 export { FlushCacheRequest } from "./request/FlushCacheRequest";
 export { GetMinerDataRequest } from "./request/GetMinerDataRequest";
+export { GetCoinbaseTxSumRequest } from "./request/GetCoinbaseTxSumRequest";
+export { EmptyRpcRequest } from "./request/EmptyRpcRequest";
+
+/**
+ * Restricted requests
+ * flush_txpool
+generateblocks
+get_alternate_chains
+get_bans
+get_coinbase_tx_sum
+get_peer_list
+in_peers
+mining_status
+on_get_connections
+on_set_bans
+out_peers
+relay_tx
+save_bc
+set_bans
+set_limit
+set_log_categories
+set_log_hash_rate
+set_log_level
+start_mining
+start_save_graph
+stop_daemon
+stop_mining
+stop_save_graph
+sync_info
+update
+
+ */

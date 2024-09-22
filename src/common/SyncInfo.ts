@@ -28,7 +28,7 @@ export class SyncInfo {
         const rawPeers: any[] = syncInfo.peers;
         const rawSpans: any[] | undefined = syncInfo.rawSpans;
 
-        rawPeers.forEach((peer: any) => peers.push(Peer.parse(peer)));
+        if (rawPeers) rawPeers.forEach((peer: any) => peers.push(Peer.parse(peer)));
         if (rawSpans) rawSpans.forEach((span: any) => spans.push(Span.parse(span)));
 
         return new SyncInfo(height, targetHeight, nextNeededPruningSeed, overview, peers, spans);

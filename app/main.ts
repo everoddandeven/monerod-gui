@@ -1,6 +1,10 @@
-import {app, BrowserWindow, screen} from 'electron';
+import {app, BrowserWindow, ipcMain, screen} from 'electron';
+import { ChildProcess, ChildProcessWithoutNullStreams, exec, spawn } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
+
+
+const monerodFilePath: string = "/home/sidney/Documenti/monero-x86_64-linux-gnu-v0.18.3.4/monerod";
 
 let win: BrowserWindow | null = null;
 const args = process.argv.slice(1),
@@ -19,7 +23,7 @@ function createWindow(): BrowserWindow {
     webPreferences: {
       nodeIntegration: true,
       allowRunningInsecureContent: (serve),
-      contextIsolation: false,
+      contextIsolation: false
     },
   });
 
@@ -53,6 +57,81 @@ function createWindow(): BrowserWindow {
   return win;
 }
 
+function execMoneroDaemon(configFilePath: string): ChildProcess {
+  const monerodPath = path.resolve(__dirname, 'path/to/monerod'); // Percorso del binario di monerod
+  //const command = `"${monerodPath}" --config-file "${configFilePath}"`;
+  const command = `/home/sidney/Documenti/monero-x86_64-linux-gnu-v0.18.3.4/monerod --testnet --fast-block-sync 1 --prune-blockchain --sync-pruned-blocks --confirm-external-bind --max-concurrency 1 --log-level 1 --rpc-access-control-origins=*`;
+
+  const monerodProcess = exec(command, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Errore durante l'avvio di monerod: ${error.message}`);
+      return;
+    }
+
+    if (stderr) {
+      console.error(`stderr: ${stderr}`);
+      return;
+    }
+
+    console.log(`stdout: ${stdout}`);
+  });
+
+  // Gestisci l'output in tempo reale
+  if (monerodProcess.stdout == null) {
+    throw new Error("No stdout for monero process")
+  }
+  
+  if (monerodProcess.stderr == null) {
+    throw new Error("No stderr for monero process");
+  }
+
+  monerodProcess.stdout.on('data', (data) => {
+    console.log(`monerod stdout: ${data}`);
+  });
+
+  monerodProcess.stderr.on('data', (data) => {
+    console.error(`monerod stderr: ${data}`);
+  });
+
+  return monerodProcess;
+}
+
+function startMoneroDaemon(configFilePath: string): ChildProcessWithoutNullStreams {
+  const monerodPath = path.resolve(__dirname, monerodFilePath);
+
+  const args = [
+    '--testnet',
+    '--fast-block-sync', '1',
+    '--prune-blockchain',
+    '--sync-pruned-blocks',
+    '--confirm-external-bind',
+    '--max-concurrency', '1',
+    '--log-level', '1',
+    '--rpc-access-control-origins=*'
+  ];
+
+  // Avvia il processo usando spawn
+  const monerodProcess = spawn(monerodPath, args);
+
+  // Gestisci l'output di stdout in streaming
+  monerodProcess.stdout.on('data', (data) => {
+    console.log(`monerod stdout: ${data}`);
+    // Puoi anche inviare i log all'interfaccia utente tramite IPC
+  });
+
+  // Gestisci gli errori in stderr
+  monerodProcess.stderr.on('data', (data) => {
+    console.error(`monerod stderr: ${data}`);
+  });
+
+  // Gestisci la chiusura del processo
+  monerodProcess.on('close', (code) => {
+    console.log(`monerod chiuso con codice: ${code}`);
+  });
+
+  return monerodProcess;
+}
+
 try {
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
@@ -76,6 +155,10 @@ try {
       createWindow();
     }
   });
+
+  ipcMain.on('start-monerod', (event, configFilePath) => {
+    startMoneroDaemon(configFilePath);
+  })
 
 } catch (e) {
   // Catch Error

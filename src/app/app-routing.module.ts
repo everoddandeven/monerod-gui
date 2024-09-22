@@ -5,6 +5,7 @@ import { PageNotFoundComponent } from './shared/components';
 import { HomeRoutingModule } from './home/home-routing.module';
 import { DetailRoutingModule } from './detail/detail-routing.module';
 import { HardForkInfoRoutingModule } from './hard-fork-info/hard-fork-info-routing.module';
+import { SettingsModule } from './settings/settings.module';
 
 const routes: Routes = [
   {
@@ -23,7 +24,8 @@ const routes: Routes = [
     RouterModule.forRoot(routes, {}),
     HomeRoutingModule,
     DetailRoutingModule,
-    HardForkInfoRoutingModule
+    HardForkInfoRoutingModule,
+    SettingsModule
   ],
   exports: [RouterModule]
 })

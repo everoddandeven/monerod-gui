@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { AfterViewInit, Component } from '@angular/core';
 import { DaemonService } from '../core/services/daemon/daemon.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { NavbarService } from '../navbar/navbar.service';
@@ -8,7 +8,7 @@ import { NavbarService } from '../navbar/navbar.service';
   templateUrl: './hard-fork-info.component.html',
   styleUrl: './hard-fork-info.component.scss'
 })
-export class HardForkInfoComponent {
+export class HardForkInfoComponent implements AfterViewInit {
   public cards: Card[];
   private earliestHeight: number;
   private enabled: boolean;
@@ -36,10 +36,13 @@ export class HardForkInfoComponent {
     });
   }
 
+  ngAfterViewInit(): void {
+      this.navbarService.removeNavbarLinks();
+  }
+
   private onNavigationEnd(): void {
     this.load().then(() => {
       this.cards = this.createCards();
-      this.navbarService.removeNavbarLinks();
     });
     
   }

@@ -2,6 +2,8 @@ import { JsonRPCRequest } from "./JsonRPCRequest";
 
 export class BannedRequest extends JsonRPCRequest {
     public override readonly method: string = 'banned';
+    public override readonly restricted: boolean = false;
+
     public readonly address: string;
 
     constructor(address: string) {

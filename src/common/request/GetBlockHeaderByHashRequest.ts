@@ -2,6 +2,7 @@ import { JsonRPCRequest } from "./JsonRPCRequest";
 
 export class GetBlockHeaderByHashRequest extends JsonRPCRequest {
     public override readonly method: string = 'get_block_header_by_hash';
+    public override readonly restricted: boolean = false;
     public readonly hash: string;
     public readonly fillPowHash: boolean;
 

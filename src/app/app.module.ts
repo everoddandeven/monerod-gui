@@ -16,6 +16,7 @@ import { DetailModule } from './detail/detail.module';
 
 import { AppComponent } from './app.component';
 import { SidebarComponent } from "./sidebar/sidebar.component";
+import { LoadComponent } from "./load/load.component";
 import { BansModule } from './bans/bans.module';
 import { NavbarComponent } from "./navbar/navbar.component";
 import { MiningModule } from './mining/mining.module';
@@ -44,7 +45,8 @@ const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new Transl
         }
     }),
     SidebarComponent,
-    NavbarComponent
+    NavbarComponent,
+    LoadComponent
 ],
   providers: [],
   bootstrap: [AppComponent]

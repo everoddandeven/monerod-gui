@@ -2,6 +2,7 @@ import { JsonRPCRequest } from "./JsonRPCRequest";
 
 export class GetBlockHashRequest extends JsonRPCRequest {
     public override readonly method: string = "on_get_block_hash";
+    public override readonly restricted: boolean = false;
     public readonly blockHeight: number;
   
     constructor(blockHeight: number) {

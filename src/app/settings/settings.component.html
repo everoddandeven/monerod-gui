@@ -1,0 +1,380 @@
+<div class="tab-content" id="pills-settings-tabContent">
+  <div class="tab-pane fade show active" id="pills-rpc" role="tabpanel" aria-labelledby="pills-rpc-tab" tabindex="0">
+    <div class="row g-5 m-2">
+      <div class="col-md-7 col-lg-10">
+        <h4 class="mb-3">General</h4>
+        <div class="row gy-3">
+
+          <div class="form-check form-switch col-md-6">
+            <label for="offline" class="form-check-label">Offline</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="offline">
+            <br>
+            <small class="text-body-secondary">Do not listen for peers, nor connect to any</small>
+          </div>
+
+          <div class="form-check form-switch col-md-6">
+            <label for="public-node" class="form-check-label">Public node</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="public-node">
+            <br>
+            <small class="text-body-secondary">Allow other users to use the node as a remote (restricted RPC mode, view-only commands) and advertise it over P2P</small>
+          </div>
+
+          <div class="form-check form-switch col-md-6">
+            <label for="restricted-rpc" class="form-check-label">Restricted RPC</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="restricted-rpc">
+            <br>
+            <small class="text-body-secondary">Restrict RPC to view-only commands and do not return privacy sensitive data in RPC calls</small>
+          </div>
+
+          <div class="form-check form-switch col-md-6">
+            <label for="confirm-external-bind" class="form-check-label">Confirm external bind</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="confirm-external-bind">
+            <br>
+            <small class="text-body-secondary">Confirm Bind IP is not a loopback (local) IP</small>
+          </div>
+
+          <div class="form-check form-switch col-md-6">
+            <label for="rpc-ignore-ipv4" class="form-check-label">Ignore IPv4</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-ignore-ipv4">
+            <br>
+            <small class="text-body-secondary">Ignore unsuccessful IPv4 bind for RPC</small>
+          </div>
+
+          <div class="form-check form-switch col-md-6">
+            <label for="disable-rpc-ban" class="form-check-label">Disable ban</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="disable-rpc-ban">
+            <br>
+            <small class="text-body-secondary">Do not ban hosts on RPC errors</small>
+          </div>
+
+          <div class="col-md-6">
+            <label for="rpc-bind-ip" class="form-label">Bind IP</label>
+            <input type="text" class="form-control" id="rpc-bind-ip" placeholder="127.0.0.1">
+            <small class="text-body-secondary">Specify IP to bind RPC server</small>
+          </div>
+
+          <div class="col-md-6">
+            <label for="rpc-bind-port" class="form-label">Bind port</label>
+            <input type="number" class="form-control" id="rpc-bind-port" placeholder="18081">
+            <small class="text-body-secondary">18081 for mainnet, 28081 for testnet, 38081 for stagenet</small>
+          </div>
+
+          <div class="col-sm-6">
+            <label for="rpc-login-user" class="form-label">Username</label>
+            <input type="text" class="form-control" id="rpc-login-user" placeholder="" value="">
+            <small class="text-body-secondary">Specify username required for RPC server</small>
+          </div>
+  
+          <div class="col-sm-6">
+            <label for="rpc-login-password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="rpc-login-password" placeholder="" value="">
+            <small class="text-body-secondary">Specify password required for RPC server</small>
+          </div>
+
+          <div class="col-sm-12">
+            <label for="rpc-access-control-origins" class="form-label">Access control origins</label>
+            <input type="text" class="form-control" id="rpc-access-control-origins" placeholder="" value="">
+            <small class="text-body-secondary">Specify a comma separated list of origins to allow cross origin resource sharing</small>
+          </div>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="row g-3">
+          <h4 class="mb-3">IPv6</h4>
+
+          <div class="form-check form-switch col-md-12">
+            <label for="rpc-use-ipv6" class="form-check-label">Enabled</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-use-ipv6">
+            <br>
+            <small class="text-body-secondary">Allow IPv6 for RPC</small>
+          </div>
+
+          <div class="col-md-6">
+            <label for="rpc-bind-ipv6-address" class="form-label">Bind IPv6 address</label>
+            <input type="text" class="form-control" id="rpc-bind-ipv6-address" placeholder="::1">
+            <small class="text-body-secondary">Specify IPv6 address to bind RPC server</small>
+          </div>
+
+          <div class="col-md-6">
+            <label for="rpc-restricted-bind-ipv6-address" class="form-label">Restricted bind IPv6 address</label>
+            <input type="text" class="form-control" id="rpc-restricted-bind-ipv6-address" placeholder="::1">
+            <small class="text-body-secondary">Specify IPv6 address to bind restricted RPC server</small>
+          </div>
+
+        </div>
+
+        <hr class="my-4">
+
+        <div class="row g-3">
+          <h4 class="mb-3">ZMQ</h4>
+
+          <div class="form-check form-switch col-md-12">
+            <label for="enable-zmq" class="form-check-label">Enabled</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="enable-zmq">
+            <br>
+            <small class="text-body-secondary">Enable ZMQ RPC Server</small>
+          </div>
+
+          <div class="col-md-6">
+            <label for="zmq-rpc-bind-ip" class="form-label">Bind IP</label>
+            <input type="text" class="form-control" id="zmq-rpc-bind-ip" placeholder="127.0.0.1">
+            <small class="text-body-secondary">IP for ZMQ RPC Server to listen on</small>
+          </div>
+
+          <div class="col-md-6">
+            <label for="zmq-rpc-bind-port" class="form-label">Bind port</label>
+            <input type="number" class="form-control" id="zmq-rpc-bind-port" placeholder="18082">
+            <small class="text-body-secondary">18082 for mainnet, 28082 for testnet, 38082 for stagenet</small>
+          </div>
+
+          <div class="col-md-6">
+            <label for="zmq-pub" class="form-label">ZMQ Pub</label>
+            <input type="text" class="form-control" id="zmq-pub" placeholder="tcp://ip:port or ipc://path">
+            <small class="text-body-secondary">Address for ZMQ Pub</small>
+          </div>
+
+        </div>
+
+        <hr class="my-4">
+
+        <div class="row g-3">
+          <h4 class="mb-3">Payment</h4>
+
+          <div class="col-md-12">
+            <label for="rpc-payment-address" class="form-label">Address</label>
+            <input type="text" class="form-control" id="rpc-payment-address">
+            <small class="text-body-secondary">Restrict RPC to clients sending micropayment to this address</small>
+          </div>
+
+          <div class="col-md-6">
+            <label for="rpc-payment-difficulty" class="form-label">Difficulty</label>
+            <input type="number" class="form-control" id="rpc-payment-difficulty" placeholder="1000">
+            <small class="text-body-secondary">Restrict RPC to clients sending micropayment at this difficulty</small>
+          </div>
+
+          <div class="col-md-6">
+            <label for="rpc-payment-credits" class="form-label">Credits</label>
+            <input type="number" class="form-control" id="rpc-payment-credits" placeholder="100">
+            <small class="text-body-secondary">Restrict RPC to clients sending micropayment, yelds that many credits per payment</small>
+          </div>
+
+          <div class="form-check form-switch col-md-6">
+            <label for="rpc-payment-allow-free-loopback" class="form-check-label">Allow free loopback</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-payment-allow-free-loopback">
+            <br>
+            <small class="text-body-secondary">Allow free access from the loopback address (ie, the local host)</small>
+          </div>
+
+        </div>
+
+        <hr class="my-4">
+
+        <div class="row g-3">
+          <h4 class="mb-3">SSL</h4>
+          
+          <div class="col-md-4">
+            <label for="rpc-ssl" class="form-label">SSL Mode</label>
+            <select class="form-select" id="rpc-ssl">
+              <option value="autodetect">Autodetect</option>
+              <option value="enabled">Enabled</option>
+              <option value="disabled">Disabled</option>
+            </select>
+          </div>
+
+
+          <div class="form-check form-switch col-md-4">
+            <label for="rpc-ssl-allow-chained" class="form-check-label">Allow chained</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-ssl-allow-chained">
+            <br>
+            <small class="text-body-secondary">Allow user chain certificates</small>
+          </div>
+
+          <div class="form-check form-switch col-md-4">
+            <label for="rpc-ssl-allow-any-cert" class="form-check-label">Allow any cert</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-ssl-allow-any-cert">
+            <br>
+            <small class="text-body-secondary">Allow any peer certificate</small>
+          </div>
+
+          <div class="col-md-12">
+            <label for="rpc-ssl-private-key" class="form-label">Private key</label>
+            <input type="file" class="form-control" id="rpc-ssl-private-key">
+            <small class="text-body-secondary">Path to a PEM format private key</small>
+          </div>
+
+          <div class="col-md-12">
+            <label for="rpc-ssl-certificate" class="form-label">Certificate</label>
+            <input type="file" class="form-control" id="rpc-ssl-certificate">
+            <small class="text-body-secondary">Path to a PEM format certificate</small>
+          </div>
+
+          <div class="col-md-12">
+            <label for="rpc-ssl-ca-certificates" class="form-label">CA Certificates</label>
+            <input type="file" class="form-control" id="rpc-ssl-ca-certificates">
+            <small class="text-body-secondary">Path to file containing concatenated PEM format certificate(s) to replace system CA(s)</small>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id="pills-blockchain" role="tabpanel" aria-labelledby="pills-blockchain-tab" tabindex="0">
+    <div class="row g-5 m-2">
+      <div class="col-md-7 col-lg-10">
+        <h4 class="mb-3">Bootstrap Daemon</h4>
+        <form class="needs-validation" novalidate="">
+          <div class="row g-3">
+      
+            <div class="col-12">
+                <label for="address" class="form-label">Address</label>
+                <input type="text" class="form-control" id="address" placeholder="Use 'auto' to enable automatic discovering and switching">
+                <small class="text-body-secondary">URL of a bootstrap remote daemon that the connected wallets can use while this daemon is still not fully synced.</small>
+            </div>
+    
+            <div class="col-sm-6">
+              <label for="firstName" class="form-label">Username</label>
+              <input type="text" class="form-control" id="firstName" placeholder="" value="">
+              <small class="text-body-secondary">Specify username for the bootstrap daemon login</small>
+            </div>
+    
+            <div class="col-sm-6">
+              <label for="lastName" class="form-label">Password</label>
+              <input type="password" class="form-control" id="lastName" placeholder="" value="">
+              <small class="text-body-secondary">Specify password for the bootstrap daemon login</small>
+
+            </div>
+
+            <div class="col-12">
+              <label for="bootstrap-daemon-proxy" class="form-label">Proxy</label>
+              <input type="text" class="form-control" id="bootstrap-daemon-proxy" placeholder="ip:port">
+              <small class="text-body-secondary">Socks proxy to use for bootstrap daemon connection</small>
+            </div>
+    
+          </div>
+    
+          <hr class="my-4">
+    
+          <div class="row g-3">
+              <h4 class="mb-3">Synchronization</h4>
+              
+              <div class="form-check form-switch col-md-12">
+                <label for="sync-enabled" class="form-check-label">Enabled</label>
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="sync-enabled" checked>
+                <br>
+                <small class="text-body-secondary">Synchronize the blockchain with other peers</small>
+              </div>
+    
+              <div class="col-md-4">
+                  <label for="block-sync-size" class="form-label">Block sync size</label>
+                  <input type="number" class="form-control" id="block-sync-size" placeholder="" value="0">
+              </div>
+      
+              <div class="col-md-4">
+                  <label for="block-download-max-size" class="form-label">Block download max size</label>
+                  <input type="number" class="form-control" id="block-download-max-size" placeholder="" value="0">
+              </div>
+    
+              <div class="col-md-4">
+                  <label for="db-sync-mode" class="form-label">Database sync mode</label>
+                  <input type="text" class="form-control" id="db-sync-mode" placeholder="fast:async:250000000bytes">
+              </div>
+      
+              <br>
+              <br>
+      
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="same-address">
+                <label class="form-check-label" for="same-address">Prune blockchain</label>
+              </div>
+      
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="save-info">
+                <label class="form-check-label" for="save-info">Sync pruned blocks</label>
+              </div>
+      
+              <div class="form-check">
+                  <input type="checkbox" class="form-check-input" id="fast-block-sync">
+                  <label class="form-check-label" for="fast-block-sync">Fast block sync</label>
+              </div>
+      
+              <div class="form-check">
+                  <input type="checkbox" class="form-check-input" id="relay-fluffy-blocks" checked>
+                  <label class="form-check-label" for="fast-block-sync">Relay fluffy blocks</label>
+              </div>
+      
+              <div class="form-check">
+                  <input type="checkbox" class="form-check-input" id="keep-alt-blocks">
+                  <label class="form-check-label" for="keep-alt-block">Keep alternative blocks on restart</label>
+              </div>
+      
+              <hr class="my-4">
+      
+              <h4 class="mb-3">Network type</h4>
+      
+              <div class="my-3">
+                <div class="form-check">
+                  <input id="credit" name="paymentMethod" type="radio" class="form-check-input" checked="" required="">
+                  <label class="form-check-label" for="credit">mainnet</label>
+                </div>
+                <div class="form-check">
+                  <input id="debit" name="paymentMethod" type="radio" class="form-check-input" required="">
+                  <label class="form-check-label" for="debit">testnet</label>
+                </div>
+                <div class="form-check">
+                  <input id="paypal" name="paymentMethod" type="radio" class="form-check-input" required="">
+                  <label class="form-check-label" for="paypal">stagenet</label>
+                </div>
+              </div>
+          </div>
+    
+          <!--
+          <div class="row gy-3">
+            <div class="col-md-6">
+              <label for="cc-name" class="form-label">Name on card</label>
+              <input type="text" class="form-control" id="cc-name" placeholder="" required="">
+              <small class="text-body-secondary">Full name as displayed on card</small>
+              <div class="invalid-feedback">
+                Name on card is required
+              </div>
+            </div>
+    
+            <div class="col-md-6">
+              <label for="cc-number" class="form-label">Credit card number</label>
+              <input type="text" class="form-control" id="cc-number" placeholder="" required="">
+              <div class="invalid-feedback">
+                Credit card number is required
+              </div>
+            </div>
+    
+            <div class="col-md-3">
+              <label for="cc-expiration" class="form-label">Expiration</label>
+              <input type="text" class="form-control" id="cc-expiration" placeholder="" required="">
+              <div class="invalid-feedback">
+                Expiration date required
+              </div>
+            </div>
+    
+            <div class="col-md-3">
+              <label for="cc-cvv" class="form-label">CVV</label>
+              <input type="text" class="form-control" id="cc-cvv" placeholder="" required="">
+              <div class="invalid-feedback">
+                Security code required
+              </div>
+            </div>
+          </div>
+      -->
+    
+          <hr class="my-4">
+    
+        </form>
+      </div>
+    </div>
+  </div>
+  <hr class="my-4">
+
+  <button class="w-50 btn btn-primary btn-lg" type="submit">Save</button>
+
+</div>

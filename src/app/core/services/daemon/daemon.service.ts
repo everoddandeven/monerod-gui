@@ -16,7 +16,8 @@ import {
   PruneBlockchainRequest,
   CalculatePoWHashRequest,
   FlushCacheRequest,
-  GetMinerDataRequest
+  GetMinerDataRequest,
+  EmptyRpcRequest
 } from '../../../../common/request';
 import { BlockTemplate } from '../../../../common/BlockTemplate';
 import { GeneratedBlocks } from '../../../../common/GeneratedBlocks';
@@ -34,21 +35,63 @@ import { RelayTxRequest } from '../../../../common/request/RelayTxRequest';
 import { TxBacklogEntry } from '../../../../common/TxBacklogEntry';
 import { BlockchainPruneInfo } from '../../../../common/BlockchainPruneInfo';
 import { MinerData } from '../../../../common/MinerData';
+import { CoreIsBusyError } from '../../../../common/error';
+import { ElectronService } from '../electron/electron.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DaemonService {
+  private readonly configFilePath: string = './config';
   private url: string = "http://127.0.0.1:28081";
+  //private url: string = "http://node2.monerodevs.org:28089";
+  //private url: string = "https://testnet.xmr.ditatompel.com";
+  //private url: string = "https://xmr.yemekyedim.com:18081";
+  //private url: string = "https://moneronode.org:18081";
   
   private readonly headers: { [key: string]: string } = {
-    'Content-Type': 'application/json'
+    "Access-Control-Allow-Headers": "*", // this will allow all CORS requests
+    "Access-Control-Allow-Methods": 'POST,GET' // this states the allowed methods
   };
 
-  constructor(private httpClient: HttpClient) { }
+  constructor(private httpClient: HttpClient, private electronService: ElectronService) { }
 
   private async callJsonRpc(params: JsonRPCRequest): Promise<{ [key: string]: any }> {
     return await firstValueFrom<{ [key: string]: any }>(this.httpClient.post(`${this.url}/json_rpc`, params.toDictionary(), this.headers));
+  }
+
+  public async startDaemon(): Promise<void> {
+    if (await this.isRunning()) {
+      console.warn("Daemon already running");
+      return;
+    }
+
+    if (!this.electronService.isElectron) {
+      console.error("Could not start monero daemon: not electron app");
+      return;
+    }
+
+    console.log("Starting daemon");
+
+    this.electronService.ipcRenderer.send('start-monerod', this.configFilePath);
+
+    console.log("Daemon started");
+
+    setTimeout(() => {
+    }, 500)
+  }
+
+  public async isRunning(): Promise<boolean> {
+    try {
+      const response = await this.callJsonRpc(new EmptyRpcRequest());
+      console.log(response);
+      return true;
+    }
+    catch(error) {
+      console.error(error);
+      return false;
+    }
+
   }
 
   public async getBlockCount(): Promise<BlockCount> {
@@ -147,10 +190,15 @@ export class DaemonService {
 
   public async getBans(): Promise<Ban[]> {
     const response = await this.callJsonRpc(new GetBansRequest());
+    
+    if (response.error) {
+      this.raiseRpcError(response.error);
+    }
+
     const bans: any[] = response.bans;
     const result: Ban[] = [];
 
-    bans.forEach((ban: any) => result.push(Ban.parse(ban)));
+    if (bans) bans.forEach((ban: any) => result.push(Ban.parse(ban)));
 
     return result;
   }
@@ -249,7 +297,23 @@ export class DaemonService {
   public async getMinerData(): Promise<MinerData> {
     const response = await this.callJsonRpc(new GetMinerDataRequest());
 
+    if (response.error) {
+      this.raiseRpcError(response.error);
+    }
+
     return MinerData.parse(response.result);
+  }
+
+  private raiseRpcError(error: { code: number, message: string }): void {
+
+    if (error.code == -9) {
+      throw new CoreIsBusyError();
+    }
+    else 
+    {
+      throw new Error(error.message);
+    }
+
   }
 
 }
