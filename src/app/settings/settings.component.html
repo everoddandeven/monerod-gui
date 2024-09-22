@@ -260,11 +260,46 @@
           <div class="row g-3">
               <h4 class="mb-3">Synchronization</h4>
               
-              <div class="form-check form-switch col-md-12">
+              <div class="form-check form-switch col-md-6">
                 <label for="sync-enabled" class="form-check-label">Enabled</label>
                 <input class="form-control form-check-input" type="checkbox" role="switch" id="sync-enabled" checked>
                 <br>
                 <small class="text-body-secondary">Synchronize the blockchain with other peers</small>
+              </div>
+
+              <div class="form-check form-switch col-md-6">
+                <label for="prune-blockchain" class="form-check-label">Prune Blockchain</label>
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="prune-blockchain">
+                <br>
+                <small class="text-body-secondary">Reduce blockchain disk usage</small>
+              </div>
+
+              <div class="form-check form-switch col-md-6">
+                <label for="sync-pruned-blocks" class="form-check-label">Sync pruned blocks</label>
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="sync-pruned-blocks">
+                <br>
+                <small class="text-body-secondary">Allow syncing from nodes with only pruned blocks</small>
+              </div>
+
+              <div class="form-check form-switch col-md-6">
+                <label for="fast-block-sync" class="form-check-label">Fast block sync</label>
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="fast-block-sync">
+                <br>
+                <small class="text-body-secondary">Sync up most of the way by using embedded, known block hashes</small>
+              </div>
+
+              <div class="form-check form-switch col-md-6">
+                <label for="relay-fluffly-blocks" class="form-check-label">Relay fluffy blocks</label>
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="relay-fluffly-blocks" checked>
+                <br>
+                <small class="text-body-secondary">Relay blocks as fluffy blocks</small>
+              </div>
+
+              <div class="form-check form-switch col-md-6">
+                <label for="keep-alt-blocks" class="form-check-label">Keep alternative blocks</label>
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="keep-alt-blocks">
+                <br>
+                <small class="text-body-secondary">Keep alternative blocks on restart</small>
               </div>
     
               <div class="col-md-4">
@@ -280,34 +315,6 @@
               <div class="col-md-4">
                   <label for="db-sync-mode" class="form-label">Database sync mode</label>
                   <input type="text" class="form-control" id="db-sync-mode" placeholder="fast:async:250000000bytes">
-              </div>
-      
-              <br>
-              <br>
-      
-              <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="same-address">
-                <label class="form-check-label" for="same-address">Prune blockchain</label>
-              </div>
-      
-              <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="save-info">
-                <label class="form-check-label" for="save-info">Sync pruned blocks</label>
-              </div>
-      
-              <div class="form-check">
-                  <input type="checkbox" class="form-check-input" id="fast-block-sync">
-                  <label class="form-check-label" for="fast-block-sync">Fast block sync</label>
-              </div>
-      
-              <div class="form-check">
-                  <input type="checkbox" class="form-check-input" id="relay-fluffy-blocks" checked>
-                  <label class="form-check-label" for="fast-block-sync">Relay fluffy blocks</label>
-              </div>
-      
-              <div class="form-check">
-                  <input type="checkbox" class="form-check-input" id="keep-alt-blocks">
-                  <label class="form-check-label" for="keep-alt-block">Keep alternative blocks on restart</label>
               </div>
       
               <hr class="my-4">

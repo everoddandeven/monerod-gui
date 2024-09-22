@@ -1,3 +1,4 @@
+export { RPCRequest } from "./request/RPCRequest";
 export { JsonRPCRequest } from "./request/JsonRPCRequest";
 export { GetBlockCountRequest } from "./request/GetBlockCountRequest";
 export { GetBlockHashRequest } from "./request/GetBlockHashRequest";

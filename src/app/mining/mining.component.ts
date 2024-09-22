@@ -7,6 +7,7 @@ import { NavbarLink } from '../navbar/navbar.model';
 import { MineableTxBacklog } from '../../common/MineableTxBacklog';
 import { Chain } from '../../common/Chain';
 import { CoreIsBusyError } from '../../common/error';
+import { CommonModule, NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-mining',
@@ -16,7 +17,7 @@ import { CoreIsBusyError } from '../../common/error';
 export class MiningComponent implements AfterViewInit {
 
   private readonly navbarLinks: NavbarLink[];
-  private coreBusy: boolean;
+  public coreBusy: boolean;
   private minerData?: MinerData;
 
   private majorVersion: number;

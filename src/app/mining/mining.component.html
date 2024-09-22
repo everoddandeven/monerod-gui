@@ -1,4 +1,4 @@
-<div class="tab-content" id="pills-tabContent">
+<div *ngIf="!coreBusy" class="tab-content" id="pills-tabContent">
     <div class="tab-pane fade show active" id="pills-miner-data" role="tabpanel" aria-labelledby="pills-miner-data-tab" tabindex="0">
       <div class="row d-flex">
   
@@ -50,4 +50,20 @@
         </div>
     </div>
     <div class="tab-pane fade" id="pills-disabled" role="tabpanel" aria-labelledby="pills-disabled-tab" tabindex="0">...</div>
-  </div>
+</div>
+
+<div *ngIf="coreBusy" class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column text-center">
+
+  <main class="px-3">
+    <h1>Core is busy.</h1>
+    <p class="lead">Mining capabilities are not available during daemon sync.</p>
+    <p class="lead">
+      <a href="#" class="btn btn-lg btn-light fw-bold border-white bg-white">Learn more</a>
+    </p>
+  </main>
+<!--
+  <footer class="mt-auto text-white-50">
+    <p>Cover template for <a href="https://getbootstrap.com/" class="text-white">Bootstrap</a>, by <a href="https://twitter.com/mdo" class="text-white">mdo</a>.</p>
+  </footer>
+-->
+</div>
