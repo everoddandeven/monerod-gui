@@ -2,8 +2,8 @@ import { Component, OnInit, AfterViewInit, NgZone, OnDestroy } from '@angular/co
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { SyncInfo } from '../../../common/SyncInfo';
 import { Peer } from '../../../common/Peer';
-import { NavbarLink } from '../../navbar/navbar.model';
-import { NavbarService } from '../../navbar/navbar.service';
+import { NavbarLink } from '../../shared/components/navbar/navbar.model';
+import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { DaemonInfo } from '../../../common/DaemonInfo';
 

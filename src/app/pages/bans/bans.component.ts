@@ -1,6 +1,6 @@
 import { AfterViewInit, Component } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { NavbarService } from '../../navbar/navbar.service';
+import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 
 @Component({

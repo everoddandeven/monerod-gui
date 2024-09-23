@@ -1,7 +1,7 @@
 import { AfterViewInit, Component } from '@angular/core';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { NavigationEnd, Router } from '@angular/router';
-import { NavbarService } from '../../navbar/navbar.service';
+import { NavbarService } from '../../shared/components/navbar/navbar.service';
 
 @Component({
   selector: 'app-hard-fork-info',

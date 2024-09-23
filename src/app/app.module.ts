@@ -15,9 +15,9 @@ import { HomeModule } from './pages/home/home.module';
 import { DetailModule } from './pages/detail/detail.module';
 
 import { AppComponent } from './app.component';
-import { LoadComponent } from "./load/load.component";
+import { LoadComponent } from "./shared/components/load/load.component";
 import { BansModule } from './pages/bans/bans.module';
-import { NavbarComponent } from "./navbar/navbar.component";
+import { NavbarComponent } from "./shared/components/navbar/navbar.component";
 import { MiningModule } from './pages/mining/mining.module';
 import { TransactionsModule } from './pages/transactions/transactions.module';
 import { OutputsModule } from './pages/outputs/outputs.module';
