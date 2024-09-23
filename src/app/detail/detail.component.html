@@ -5,9 +5,13 @@
     <div class="row d-flex">
 
       <div *ngIf="!daemonRunning" class="h-100 p-5 text-bg-dark rounded-3 m-4">
-        <h2>Daemon not running</h2>
+        <h2><i class="bi bi-exclamation-diamond"></i> Daemon not running</h2>
         <p>Start monero daemon</p>
-        <button class="btn btn-outline-light" type="button" (click)="startDaemon()"><i class="bi bi-play-fill"></i> Start</button>
+        <button *ngIf="!startingDaemon" class="btn btn-outline-light" type="button" (click)="startDaemon()"><i class="bi bi-play-fill"></i> Start</button>
+        <button *ngIf="startingDaemon" class="btn btn-outline-light" type="button" disabled>
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          Starting daemon
+        </button>
       </div>
 
       @for(card of cards; track card.header) {

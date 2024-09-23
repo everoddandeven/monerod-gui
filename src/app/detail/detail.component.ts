@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, NgZone } from '@angular/core';
+import { Component, OnInit, AfterViewInit, NgZone, OnDestroy } from '@angular/core';
 import { DaemonService } from '../core/services/daemon/daemon.service';
 import { SyncInfo } from '../../common/SyncInfo';
 import { Peer } from '../../common/Peer';
@@ -12,9 +12,10 @@ import { DaemonInfo } from '../../common/DaemonInfo';
   templateUrl: './detail.component.html',
   styleUrls: ['./detail.component.scss']
 })
-export class DetailComponent implements OnInit, AfterViewInit {
+export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public daemonRunning: boolean;
+  public startingDaemon: boolean;
   private syncInfo?: SyncInfo;
   private daemonInfo?: DaemonInfo;
   private readonly navbarLinks: NavbarLink[];
@@ -38,6 +39,8 @@ export class DetailComponent implements OnInit, AfterViewInit {
 
   private isLoading: boolean;
 
+  private loadInterval?: any;
+
   public get loading(): boolean {
     return this.isLoading;
   }
@@ -46,6 +49,7 @@ export class DetailComponent implements OnInit, AfterViewInit {
 
   constructor(private router: Router,private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
     this.daemonRunning = false;
+    this.startingDaemon = false;
     this.syncStatus = 'Not synced';
     this.height = 0;
     this.targetHeight = 0;
@@ -86,8 +90,11 @@ export class DetailComponent implements OnInit, AfterViewInit {
     console.log('DetailComponent AFTER VIEW INIT');
     this.navbarService.setNavbarLinks(this.navbarLinks);
 
-    setTimeout(() => {
+    this.loadInterval = setInterval(() => {
       this.ngZone.run(() => {
+        if (this.isLoading) {
+          return;
+        }
         const $table = $('#table');
         $table.bootstrapTable({});
         $table.bootstrapTable('refreshOptions', {
@@ -95,8 +102,16 @@ export class DetailComponent implements OnInit, AfterViewInit {
         });      
         this.load();
   
-      }, 500);
       });
+      }, 5000);
+  }
+
+  ngOnDestroy(): void {
+      console.log("DetailComponent ON DESTROY");
+
+      if(this.loadInterval != null) {
+        clearInterval(this.loadInterval);
+      }
   }
 
   public async startDaemon(): Promise<void> {
@@ -104,9 +119,17 @@ export class DetailComponent implements OnInit, AfterViewInit {
       console.warn("Daemon already running");
       return;
     }
+    this.startingDaemon = true;
 
-    await this.daemonService.startDaemon();
-    this.daemonRunning = await this.daemonService.isRunning();
+    try {
+      await this.daemonService.startDaemon();
+      this.daemonRunning = await this.daemonService.isRunning();
+    }
+    catch(error) {
+      console.error(error);
+    }
+
+    this.startingDaemon = false;
   }
 
   private onNavigationEnd(): void {
