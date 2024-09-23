@@ -19,7 +19,7 @@ export class SettingsComponent implements AfterViewInit {
       new NavbarLink('pills-p2p-tab', '#pills-p2p', 'pills-p2p', false, 'P2P'),
       new NavbarLink('pills-blockchain-tab', '#pills-blockchain', 'pills-blockchain', false, 'Blockchain'),
       new NavbarLink('pills-mining-tab', '#pills-mining', 'pills-mining', false, 'Mining'),
-      new NavbarLink('pills-log-tab', '#pills-log', 'pills-log', false, 'Logs')
+      new NavbarLink('pills-logs-tab', '#pills-logs', 'pills-logs', false, 'Logs')
     ];
 
     this.router.events.subscribe((event) => {

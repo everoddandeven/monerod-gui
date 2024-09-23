@@ -221,6 +221,69 @@
     </div>
   </div>
 
+  <div class="tab-pane fade" id="pills-p2p" role="tabpanel" aria-labelledby="pills-p2p-tab" tabindex="0">
+    <div class="row g-5 m-2">
+      <div class="col-md-7 col-lg-10">
+        <h4 class="mb-3">General</h4>
+        <div class="row gy-3">
+
+          <div class="form-check form-switch col-md-6">
+            <label for="allow-local-ip" class="form-check-label">Allow local IP</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="allow-local-ip">
+            <br>
+            <small class="text-body-secondary">Allow local ip add to peer list, mostly in debug process</small>
+          </div>
+
+          <div class="form-check form-switch col-md-6">
+            <label for="p2p-ignore-ipv4" class="form-check-label">Ignore IPv4</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="p2p-ignore-ipv4">
+            <br>
+            <small class="text-body-secondary">Ignore unsuccessful IPv4 bind for P2P</small>
+          </div>
+
+          <div class="col-md-6">
+            <label for="p2p-bind-ip" class="form-label">Bind IP</label>
+            <input type="text" class="form-control" id="p2p-bind-ip" placeholder="0.0.0.0">
+            <small class="text-body-secondary">Interface for p2p network protocol</small>
+          </div>
+
+          <div class="col-md-6">
+            <label for="p2p-bind-port" class="form-label">Bind port</label>
+            <input type="number" class="form-control" id="p2p-bind-port" placeholder="18080">
+            <small class="text-body-secondary">18080 for mainnet, 28080 for testnet, 38080 for stagenet</small>
+          </div>
+
+          <div class="col-md-6">
+            <label for="p2p-external-port" class="form-label">External port</label>
+            <input type="number" class="form-control" id="p2p-external-port" placeholder="18080">
+            <small class="text-body-secondary">External port for p2p network protocol (if port forwarding used with NAT)</small>
+          </div>
+
+        <hr class="my-4">
+
+        <div class="row g-3">
+          <h4 class="mb-3">IPv6</h4>
+
+          <div class="col-md-6">
+            <label for="p2p-bind-ipv6-address" class="form-label">Bind IPv6 address</label>
+            <input type="text" class="form-control" id="p2p-bind-ipv6-address" placeholder="::1">
+            <small class="text-body-secondary">Specify IPv6 address to bind RPC server</small>
+          </div>
+
+          <div class="col-md-6">
+            <label for="p2p-bind-port-ipv6" class="form-label">Bind IPv6 port</label>
+            <input type="number" class="form-control" id="p2p-bind-port-ipv6" placeholder="18080">
+            <small class="text-body-secondary">18080 for mainnet, 28080 for testnet, 38080 for stagenet</small>
+          </div>
+
+        </div>
+
+        <hr class="my-4">
+      </div>
+    </div>
+  </div>
+  </div>
+
   <div class="tab-pane fade" id="pills-blockchain" role="tabpanel" aria-labelledby="pills-blockchain-tab" tabindex="0">
     <div class="row g-5 m-2">
       <div class="col-md-7 col-lg-10">
@@ -380,6 +443,91 @@
       </div>
     </div>
   </div>
+
+  <div class="tab-pane fade" id="pills-mining" role="tabpanel" aria-labelledby="pills-mining-tab" tabindex="0">
+    <div class="row g-5 m-2">
+      <div class="col-md-7 col-lg-10">
+        <form class="needs-validation" novalidate="">
+    
+          <div class="row g-3">
+              <h4 class="mb-3">Background mining</h4>
+              
+              <div class="form-check form-switch col-md-6">
+                <label for="bg-mining-enable" class="form-check-label">Enabled</label>
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="bg-mining-enable">
+                <br>
+                <small class="text-body-secondary">Enable background mining</small>
+              </div>
+
+              <div class="form-check form-switch col-md-6">
+                <label for="bg-mining-ignore-battery" class="form-check-label">Ignore battery</label>
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="bg-mining-ignore-battery">
+                <br>
+                <small class="text-body-secondary">Reduce blockchain disk usage</small>
+              </div>
+    
+              <div class="col-md-4">
+                  <label for="bg-mining-min-idle-interval" class="form-label">Minimum idle interval</label>
+                  <input type="number" class="form-control" id="bg-mining-min-idle-interval" placeholder="" value="">
+                  <small class="text-body-secondary">Specify min lookback interval in seconds for determining idle state</small>
+              </div>
+      
+              <div class="col-md-4">
+                  <label for="bg-mining-idle-threshold" class="form-label">Idle threshold</label>
+                  <input type="number" class="form-control" id="bg-mining-idle-threshold" placeholder="" value="">
+                  <small class="text-body-secondary">Specify minimum avg idle percentage over lookback interval</small>  
+              </div>
+    
+              <div class="col-md-4">
+                  <label for="bg-mining-miner-target" class="form-label">Miner target</label>
+                  <input type="number" class="form-control" id="bg-mining-miner-target" placeholder="">
+                  <small class="text-body-secondary">Specify maximum percentage cpu use by miners</small>
+              </div>
+      
+          </div>
+    
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id="pills-logs" role="tabpanel" aria-labelledby="pills-logs-tab" tabindex="0">
+    <div class="row g-5 m-2">
+      <div class="col-md-7 col-lg-10">
+        <form class="needs-validation" novalidate="">
+    
+          <div class="row g-3">
+              <h4 class="mb-3">General</h4>
+              
+              <div class="col-md-4">
+                <label for="log-level" class="form-label">Log level</label>
+                <select class="form-select" id="log-level">
+                  <option value="0">Info</option>
+                  <option value="1">Warning</option>
+                  <option value="2">Debug</option>
+                  <option value="3">Error</option>
+                  <option value="4">Trace</option>
+                </select>
+              </div>
+    
+              <div class="col-md-4">
+                  <label for="max-log-file-size" class="form-label">Max log file size</label>
+                  <input type="number" class="form-control" id="max-log-file-size" placeholder="104850000" value="">
+                  <small class="text-body-secondary">Specify maximum log file size [B]</small>
+              </div>
+      
+              <div class="col-md-4">
+                  <label for="max-log-files" class="form-label">Max log files</label>
+                  <input type="number" class="form-control" id="max-log-files" placeholder="50" value="">
+                  <small class="text-body-secondary">Specify maximum number of rotated log files to be saved (no limit by setting to 0)</small>  
+              </div>  
+          </div>
+    
+        </form>
+      </div>
+    </div>
+  </div>
+
   <hr class="my-4">
 
   <button class="w-50 btn btn-primary btn-lg" type="submit">Save</button>

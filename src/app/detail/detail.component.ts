@@ -64,8 +64,8 @@ export class DetailComponent implements OnInit, AfterViewInit {
     this.isLoading = true;
 
     this.navbarLinks = [
-      new NavbarLink('pills-home-tab', '#pills-home', 'pills-home', true, 'Overview'),
-      new NavbarLink('pills-profile-tab', '#pills-profile', 'pills-profile', false, 'Peers')
+      new NavbarLink('pills-home-tab', '#pills-home', 'pills-home', true, 'Overview', true),
+      new NavbarLink('pills-profile-tab', '#pills-profile', 'pills-profile', false, 'Peers', true)
     ];
 
     this.cards = [];
@@ -142,8 +142,12 @@ export class DetailComponent implements OnInit, AfterViewInit {
       this.daemonRunning = await this.daemonService.isRunning();
 
       if (!this.daemonRunning) {
+        this.navbarService.disableNavbarLinks();
+        this.isLoading = false;
         return;
       }
+
+      this.navbarService.enableNavbarLinks();
 
       const $table = $('#table');
       

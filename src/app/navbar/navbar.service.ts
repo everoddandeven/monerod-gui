@@ -25,4 +25,12 @@ export class NavbarService {
     this.setNavbarLinks([]);
   }
 
+  public disableNavbarLinks(): void {
+    this._navbarLinks.forEach((link) => link.disabled = true);
+  }
+
+  public enableNavbarLinks(): void {
+    this._navbarLinks.forEach((link) => link.disabled = false);
+  }
+
 }

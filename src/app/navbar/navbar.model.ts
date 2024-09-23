@@ -6,13 +6,15 @@ export class NavbarLink {
     public controls: string;
     public selected: boolean;
     public name: string;
+    public disabled: boolean;
 
-    constructor(id: string, target: string, controls: string, selected: boolean, name: string) {
+    constructor(id: string, target: string, controls: string, selected: boolean, name: string, disabled: boolean = false) {
         this.id = id;
         this.target = target;
         this.controls = controls;
         this.selected = selected;
         this.name = name;
+        this.disabled = disabled;
     }
 
 }

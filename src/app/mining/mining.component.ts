@@ -81,6 +81,13 @@ export class MiningComponent implements AfterViewInit {
 
   private async load(): Promise<void> {
     try {
+      const running = await this.daemonService.isRunning();
+      
+      if (!running) {
+        this.coreBusy = false;
+        throw new Error("Daemon not running");
+      }
+
       this.minerData = await this.daemonService.getMinerData();
       this.majorVersion = this.minerData.majorVersion;
       this.height = this.minerData.height;
@@ -94,8 +101,11 @@ export class MiningComponent implements AfterViewInit {
 
       const $table = $('#chainsTable');
       $table.bootstrapTable('load', this.getChains());
+      this.coreBusy = false;
+      this.navbarService.enableNavbarLinks();
     }
     catch(error) {
+      this.navbarService.disableNavbarLinks();
       if (error instanceof CoreIsBusyError) {
         this.coreBusy = true;
       }
@@ -106,7 +116,6 @@ export class MiningComponent implements AfterViewInit {
   private createCards(): Card[] {
     if (this.coreBusy) {
       return [
-        new Card('Error', 'Core is busy')
       ]
     }
     return [

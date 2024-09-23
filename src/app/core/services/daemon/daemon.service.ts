@@ -42,6 +42,7 @@ import { ElectronService } from '../electron/electron.service';
   providedIn: 'root'
 })
 export class DaemonService {
+  private daemonRunning?: boolean;
   private readonly configFilePath: string = './config';
   private url: string = "http://127.0.0.1:28081";
   //private url: string = "http://node2.monerodevs.org:28089";
@@ -81,16 +82,22 @@ export class DaemonService {
     }, 500)
   }
 
-  public async isRunning(): Promise<boolean> {
+  public async isRunning(force: boolean = false): Promise<boolean> {
     try {
+      if (!force && this.daemonRunning != undefined) {
+        return this.daemonRunning;
+      }
+
       const response = await this.callJsonRpc(new EmptyRpcRequest());
       console.log(response);
-      return true;
+      this.daemonRunning = true;
     }
     catch(error) {
       console.error(error);
-      return false;
+      this.daemonRunning = false;
     }
+
+    return this.daemonRunning;
 
   }
 
