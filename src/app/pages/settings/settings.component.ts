@@ -1,7 +1,7 @@
 import { AfterViewInit, Component } from '@angular/core';
-import { NavbarService } from '../navbar/navbar.service';
+import { NavbarService } from '../../navbar/navbar.service';
 import { NavigationEnd, NavigationStart, Router } from '@angular/router';
-import { NavbarLink } from '../navbar/navbar.model';
+import { NavbarLink } from '../../navbar/navbar.model';
 
 @Component({
   selector: 'app-settings',

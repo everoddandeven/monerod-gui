@@ -11,17 +11,17 @@ import { AppRoutingModule } from './app-routing.module';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
-import { HomeModule } from './home/home.module';
-import { DetailModule } from './detail/detail.module';
+import { HomeModule } from './pages/home/home.module';
+import { DetailModule } from './pages/detail/detail.module';
 
 import { AppComponent } from './app.component';
-import { SidebarComponent } from "./sidebar/sidebar.component";
 import { LoadComponent } from "./load/load.component";
-import { BansModule } from './bans/bans.module';
+import { BansModule } from './pages/bans/bans.module';
 import { NavbarComponent } from "./navbar/navbar.component";
-import { MiningModule } from './mining/mining.module';
-import { TransactionsModule } from './transactions/transactions.module';
-import { OutputsModule } from './outputs/outputs.module';
+import { MiningModule } from './pages/mining/mining.module';
+import { TransactionsModule } from './pages/transactions/transactions.module';
+import { OutputsModule } from './pages/outputs/outputs.module';
+import { SidebarComponent } from './shared/components';
 
 // AoT requires an exported function for factories
 const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -49,7 +49,6 @@ const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new Transl
             deps: [HttpClient]
         }
     }),
-    SidebarComponent,
     NavbarComponent,
     LoadComponent
 ],

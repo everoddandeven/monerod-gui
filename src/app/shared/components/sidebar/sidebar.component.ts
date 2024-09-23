@@ -4,10 +4,8 @@ import { ChildActivationEnd, ChildActivationStart, NavigationCancel, NavigationE
 
 @Component({
   selector: 'app-sidebar',
-  standalone: true,
   templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.scss',
-  imports: [RouterModule, NgClass]
+  styleUrl: './sidebar.component.scss'
 })
 export class SidebarComponent {
   public readonly navLinks: NavLink[];

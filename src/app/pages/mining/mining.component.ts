@@ -1,12 +1,12 @@
 import { AfterViewInit, Component } from '@angular/core';
-import { DaemonService } from '../core/services/daemon/daemon.service';
-import { NavbarService } from '../navbar/navbar.service';
-import { MinerData } from '../../common/MinerData';
+import { DaemonService } from '../../core/services/daemon/daemon.service';
+import { NavbarService } from '../../navbar/navbar.service';
+import { MinerData } from '../../../common/MinerData';
 import { NavigationEnd, Router } from '@angular/router';
-import { NavbarLink } from '../navbar/navbar.model';
-import { MineableTxBacklog } from '../../common/MineableTxBacklog';
-import { Chain } from '../../common/Chain';
-import { CoreIsBusyError } from '../../common/error';
+import { NavbarLink } from '../../navbar/navbar.model';
+import { MineableTxBacklog } from '../../../common/MineableTxBacklog';
+import { Chain } from '../../../common/Chain';
+import { CoreIsBusyError } from '../../../common/error';
 import { CommonModule, NgIf } from '@angular/common';
 
 @Component({

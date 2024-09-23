@@ -1,7 +1,7 @@
 import { AfterViewInit, Component } from '@angular/core';
-import { DaemonService } from '../core/services/daemon/daemon.service';
-import { NavbarService } from '../navbar/navbar.service';
-import { NavbarLink } from '../navbar/navbar.model';
+import { DaemonService } from '../../core/services/daemon/daemon.service';
+import { NavbarService } from '../../navbar/navbar.service';
+import { NavbarLink } from '../../navbar/navbar.model';
 
 @Component({
   selector: 'app-transactions',

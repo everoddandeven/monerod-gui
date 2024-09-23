@@ -1,11 +1,11 @@
 import { Component, OnInit, AfterViewInit, NgZone, OnDestroy } from '@angular/core';
-import { DaemonService } from '../core/services/daemon/daemon.service';
-import { SyncInfo } from '../../common/SyncInfo';
-import { Peer } from '../../common/Peer';
-import { NavbarLink } from '../navbar/navbar.model';
-import { NavbarService } from '../navbar/navbar.service';
+import { DaemonService } from '../../core/services/daemon/daemon.service';
+import { SyncInfo } from '../../../common/SyncInfo';
+import { Peer } from '../../../common/Peer';
+import { NavbarLink } from '../../navbar/navbar.model';
+import { NavbarService } from '../../navbar/navbar.service';
 import { NavigationEnd, Router } from '@angular/router';
-import { DaemonInfo } from '../../common/DaemonInfo';
+import { DaemonInfo } from '../../../common/DaemonInfo';
 
 @Component({
   selector: 'app-detail',
