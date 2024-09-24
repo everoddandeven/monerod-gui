@@ -1,6 +1,6 @@
 <app-navbar></app-navbar>
 <div class="d-flex">
-    <app-sidebar></app-sidebar>
+    <app-sidebar [isDaemonRunning]="daemonRunning"></app-sidebar>
     <div class="col-md-10">
         <router-outlet></router-outlet>
     </div>

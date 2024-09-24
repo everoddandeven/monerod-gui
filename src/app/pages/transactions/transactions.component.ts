@@ -11,6 +11,8 @@ import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 export class TransactionsComponent implements AfterViewInit {
   private readonly navbarLinks: NavbarLink[];
 
+  public canRelay: boolean;
+
   constructor(private daemonService: DaemonService, private navbarService: NavbarService) {
     this.navbarLinks = [
       new NavbarLink('pills-relay-tx-tab', '#pills-relay-tx', 'pills-relay-tx', true, 'Relay Tx', true),
@@ -18,6 +20,8 @@ export class TransactionsComponent implements AfterViewInit {
       new NavbarLink('pills-flush-tx-pool-tab', '#pills-flush-tx-pool', 'pills-flush-tx-pool', false, 'Flush Tx Pool', true),
       new NavbarLink('pills-flush-cahe', '#pills-flush-cache', 'pills-flush-cache', false, 'Flush Cache', true)
     ];
+
+    this.canRelay = false;
   }
 
   ngAfterViewInit(): void {
@@ -26,5 +30,9 @@ export class TransactionsComponent implements AfterViewInit {
 
   private async load(): Promise<void> {
 
+  }
+
+  public async onRelay(): Promise<void> {
+    
   }
 }

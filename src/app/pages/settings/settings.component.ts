@@ -2,17 +2,27 @@ import { AfterViewInit, Component } from '@angular/core';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
+import { DaemonSettings } from '../../../common/DaemonSettings';
+import { FormsModule, NgModel } from '@angular/forms';
 
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.component.html',
-  styleUrl: './settings.component.scss'
+  styleUrl: './settings.component.scss',
+  imports: [FormsModule],
+  standalone: true
 })
 export class SettingsComponent implements AfterViewInit {
 
   private readonly navbarLinks: NavbarLink[];
+  private originalSettings: DaemonSettings;
+  public currentSettings: DaemonSettings;
+
+  public rpcLoginUser: string;
+  public rpcLoginPassword: string;
 
   constructor(private router: Router, private navbarService: NavbarService) {
+    
 
     this.navbarLinks = [
       new NavbarLink('pills-rpc-tab', '#pills-rpc', 'pills-rpc', true, 'RPC'),
@@ -21,6 +31,18 @@ export class SettingsComponent implements AfterViewInit {
       new NavbarLink('pills-mining-tab', '#pills-mining', 'pills-mining', false, 'Mining'),
       new NavbarLink('pills-logs-tab', '#pills-logs', 'pills-logs', false, 'Logs')
     ];
+    
+    this.originalSettings = new DaemonSettings();
+    this.currentSettings = this.originalSettings.clone();
+    const loginArgs = this.currentSettings.rpcLogin.split(":");
+    if (loginArgs.length == 2) {
+      this.rpcLoginPassword = loginArgs[0];
+      this.rpcLoginUser = loginArgs[1];
+    }
+    else {
+      this.rpcLoginUser = '';
+      this.rpcLoginPassword = '';
+    }
 
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
@@ -30,12 +52,65 @@ export class SettingsComponent implements AfterViewInit {
     });
   }
 
+  public get modified(): boolean {
+    if (!this.currentSettings.equals(this.originalSettings)) {
+      return true;
+    }
+
+  
+    return false;
+  }
+
   ngAfterViewInit(): void {
       this.navbarService.setNavbarLinks(this.navbarLinks);
   }
 
+  public OnOfflineChange() {
+    this.currentSettings.offline = !this.currentSettings.offline;
+  }
+
+  public OnPublicNodeChange() {
+    this.currentSettings.publicNode = !this.currentSettings.publicNode;
+  }
+
+  public OnRestrictedRPCChange() {
+    this.currentSettings.restrictedRpc = !this.currentSettings.restrictedRpc;
+  }
+
+  public OnConfirmExternalBindChange() {
+    this.currentSettings.confirmExternalBind = !this.currentSettings.confirmExternalBind;
+  }
+
+  public OnIgnoreIPv4Change() {
+    this.currentSettings.rpcIgnoreIpv4 = !this.currentSettings.rpcIgnoreIpv4;
+  }
+
+  public OnDisableRpcBanChange() {
+    this.currentSettings.disableRpcBan = !this.currentSettings.disableRpcBan;
+  }
+
+  public OnRpcUseIPv6Change(): void {
+    this.currentSettings.rpcUseIpv6 = !this.currentSettings.rpcUseIpv6;
+  }
+
+  public OnNoZmqChange(): void {
+    this.currentSettings.noZmq = !this.currentSettings.noZmq;
+  }
+
+  public OnSyncEnableChange(): void {
+    this.currentSettings.noSync != this.currentSettings.noSync;
+  }
+
+  public OnRelayFlufflyBlocksChange(): void {
+    this.currentSettings.noFluffyBlocks = !this.currentSettings.noFluffyBlocks;
+  }
+
   private onNavigationEnd(): void {
 
+  }
+
+  public OnSave(): void {
+    
   }
 }
 /**

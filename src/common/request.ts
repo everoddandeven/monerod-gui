@@ -1,5 +1,6 @@
 export { RPCRequest } from "./request/RPCRequest";
 export { JsonRPCRequest } from "./request/JsonRPCRequest";
+export { GetBlockRequest } from "./request/GetBlockRequest";
 export { GetBlockCountRequest } from "./request/GetBlockCountRequest";
 export { GetBlockHashRequest } from "./request/GetBlockHashRequest";
 export { GetBlockTemplateRequest } from "./request/GetBlockTemplateRequest";
@@ -16,7 +17,9 @@ export { SetBansRequest } from "./request/SetBansRequest";
 export { GetBansRequest } from "./request/GetBansRequest";
 export { BannedRequest } from "./request/BannedRequest";
 export { FlushTxPoolRequest } from "./request/FlushTxPoolRequest";
+export { GetOutsRequest } from "./request/GetOutsRequest";
 export { GetOutputHistogramRequest } from "./request/GetOutputHistogramRequest";
+export { GetOutputDistributionRequest } from "./request/GetOutputDistributionRequest";
 export { SyncInfoRequest } from "./request/SyncInfoRequest";
 export { GetVersionRequest } from "./request/GetVersionRequest";
 export { GetFeeEstimateRequest } from "./request/GetFeeEstimateRequest";
@@ -28,7 +31,29 @@ export { CalculatePoWHashRequest } from "./request/CalculatePoWHashRequest";
 export { FlushCacheRequest } from "./request/FlushCacheRequest";
 export { GetMinerDataRequest } from "./request/GetMinerDataRequest";
 export { GetCoinbaseTxSumRequest } from "./request/GetCoinbaseTxSumRequest";
+export { AddAuxPoWRequest } from "./request/AddAuxPoWRequest";
 export { EmptyRpcRequest } from "./request/EmptyRpcRequest";
+export { UpdateRequest } from "./request/UpdateRequest";
+export { CheckUpdateRequest } from "./request/CheckUpdateRequest";
+export { DownloadUpdateRequest } from "./request/DownloadUpdateRequest";
+
+export { PopBlocksRequest } from "./request/PopBlocksRequest";
+export { GetTransactionPoolHashesRequest } from "./request/GetTransactionPoolHashesRequest";
+export { GetTransactionPoolHashesBinaryRequest } from "./request/GetTransactionPoolHashesBinaryRequest";
+export { GetPublicNodesRequest } from "./request/GetPublicNodesRequest";
+export { GetNetStatsRequest } from "./request/GetNetStatsRequest";
+export { InPeersRequest } from "./request/InPeersRequest";
+export { OutPeersRequest } from "./request/OutPeersRequest";
+export { SetLimitRequest } from "./request/SetLimitRequest";
+export { StopDaemonRequest } from "./request/StopDaemonRequest";
+export { MiningStatusRequest } from "./request/MiningStatusRequest";
+export { StartMiningRequest } from "./request/StartMiningRequest";
+export { StopMiningRequest } from "./request/StopMiningRequest";
+export { SendRawTransactionRequest } from "./request/SendRawTransactionRequest";
+export { IsKeyImageSpentRequest } from "./request/IsKeyImageSpentRequest";
+export { GetAltBlockHashesRequest } from "./request/GetAltBlockHashesRequest";
+export { SaveBcRequest } from "./request/SaveBcRequest";
+export { SetBootstrapDaemonRequest } from "./request/SetBootstrapDaemonRequest";
 
 /**
  * Restricted requests

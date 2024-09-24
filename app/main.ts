@@ -96,22 +96,13 @@ function execMoneroDaemon(configFilePath: string): ChildProcess {
   return monerodProcess;
 }
 
-function startMoneroDaemon(configFilePath: string): ChildProcessWithoutNullStreams {
+function startMoneroDaemon(commandOptions: string[]): ChildProcessWithoutNullStreams {
   const monerodPath = path.resolve(__dirname, monerodFilePath);
-
-  const args = [
-    '--testnet',
-    '--fast-block-sync', '1',
-    '--prune-blockchain',
-    '--sync-pruned-blocks',
-    '--confirm-external-bind',
-    '--max-concurrency', '1',
-    '--log-level', '1',
-    '--rpc-access-control-origins=*'
-  ];
+  
+  console.log("Starting monerod daemon with options: " + commandOptions.join(" "));
 
   // Avvia il processo usando spawn
-  const monerodProcess = spawn(monerodPath, args);
+  const monerodProcess = spawn(monerodPath, commandOptions);
 
   // Gestisci l'output di stdout in streaming
   monerodProcess.stdout.on('data', (data) => {

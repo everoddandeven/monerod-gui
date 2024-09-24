@@ -7,73 +7,73 @@
 
           <div class="form-check form-switch col-md-6">
             <label for="offline" class="form-check-label">Offline</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="offline">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="offline" (change)="OnOfflineChange()">
             <br>
             <small class="text-body-secondary">Do not listen for peers, nor connect to any</small>
           </div>
 
           <div class="form-check form-switch col-md-6">
             <label for="public-node" class="form-check-label">Public node</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="public-node">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="public-node" (change)="OnPublicNodeChange()">
             <br>
             <small class="text-body-secondary">Allow other users to use the node as a remote (restricted RPC mode, view-only commands) and advertise it over P2P</small>
           </div>
 
           <div class="form-check form-switch col-md-6">
             <label for="restricted-rpc" class="form-check-label">Restricted RPC</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="restricted-rpc">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="restricted-rpc" (change)="OnRestrictedRPCChange()">
             <br>
             <small class="text-body-secondary">Restrict RPC to view-only commands and do not return privacy sensitive data in RPC calls</small>
           </div>
 
           <div class="form-check form-switch col-md-6">
             <label for="confirm-external-bind" class="form-check-label">Confirm external bind</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="confirm-external-bind">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="confirm-external-bind" (change)="OnConfirmExternalBindChange()">
             <br>
             <small class="text-body-secondary">Confirm Bind IP is not a loopback (local) IP</small>
           </div>
 
           <div class="form-check form-switch col-md-6">
             <label for="rpc-ignore-ipv4" class="form-check-label">Ignore IPv4</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-ignore-ipv4">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-ignore-ipv4" (change)="OnIgnoreIPv4Change()">
             <br>
             <small class="text-body-secondary">Ignore unsuccessful IPv4 bind for RPC</small>
           </div>
 
           <div class="form-check form-switch col-md-6">
             <label for="disable-rpc-ban" class="form-check-label">Disable ban</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="disable-rpc-ban">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="disable-rpc-ban" (change)="OnDisableRpcBanChange()">
             <br>
             <small class="text-body-secondary">Do not ban hosts on RPC errors</small>
           </div>
 
           <div class="col-md-6">
             <label for="rpc-bind-ip" class="form-label">Bind IP</label>
-            <input type="text" class="form-control" id="rpc-bind-ip" placeholder="127.0.0.1">
+            <input type="text" class="form-control" id="rpc-bind-ip" placeholder="127.0.0.1" [(ngModel)]="currentSettings.rpcBindIp" [ngModelOptions]="{standalone: true}" >
             <small class="text-body-secondary">Specify IP to bind RPC server</small>
           </div>
 
           <div class="col-md-6">
             <label for="rpc-bind-port" class="form-label">Bind port</label>
-            <input type="number" class="form-control" id="rpc-bind-port" placeholder="18081">
+            <input type="number" class="form-control" id="rpc-bind-port" placeholder="18081" [(ngModel)]="currentSettings.rpcBindPort" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">18081 for mainnet, 28081 for testnet, 38081 for stagenet</small>
           </div>
 
           <div class="col-sm-6">
             <label for="rpc-login-user" class="form-label">Username</label>
-            <input type="text" class="form-control" id="rpc-login-user" placeholder="" value="">
+            <input type="text" class="form-control" id="rpc-login-user" placeholder="" [(ngModel)]="rpcLoginUser" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Specify username required for RPC server</small>
           </div>
   
           <div class="col-sm-6">
             <label for="rpc-login-password" class="form-label">Password</label>
-            <input type="password" class="form-control" id="rpc-login-password" placeholder="" value="">
+            <input type="password" class="form-control" id="rpc-login-password" placeholder="" [(ngModel)]="rpcLoginPassword" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Specify password required for RPC server</small>
           </div>
 
           <div class="col-sm-12">
             <label for="rpc-access-control-origins" class="form-label">Access control origins</label>
-            <input type="text" class="form-control" id="rpc-access-control-origins" placeholder="" value="">
+            <input type="text" class="form-control" id="rpc-access-control-origins" placeholder="" [(ngModel)]="currentSettings.rpcAccessControlOrigins" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Specify a comma separated list of origins to allow cross origin resource sharing</small>
           </div>
         </div>
@@ -85,14 +85,14 @@
 
           <div class="form-check form-switch col-md-12">
             <label for="rpc-use-ipv6" class="form-check-label">Enabled</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-use-ipv6">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-use-ipv6" [(ngModel)]="currentSettings.rpcUseIpv6" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Allow IPv6 for RPC</small>
           </div>
 
           <div class="col-md-6">
             <label for="rpc-bind-ipv6-address" class="form-label">Bind IPv6 address</label>
-            <input type="text" class="form-control" id="rpc-bind-ipv6-address" placeholder="::1">
+            <input type="text" class="form-control" id="rpc-bind-ipv6-address" placeholder="::1" [(ngModel)]="currentSettings.rpcBindIpv6Address" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Specify IPv6 address to bind RPC server</small>
           </div>
 
@@ -111,26 +111,26 @@
 
           <div class="form-check form-switch col-md-12">
             <label for="enable-zmq" class="form-check-label">Enabled</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="enable-zmq">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="enable-zmq" [checked]="!currentSettings.noZmq" (change)="OnNoZmqChange()">
             <br>
             <small class="text-body-secondary">Enable ZMQ RPC Server</small>
           </div>
 
           <div class="col-md-6">
             <label for="zmq-rpc-bind-ip" class="form-label">Bind IP</label>
-            <input type="text" class="form-control" id="zmq-rpc-bind-ip" placeholder="127.0.0.1">
+            <input type="text" class="form-control" id="zmq-rpc-bind-ip" placeholder="127.0.0.1" [(ngModel)]="currentSettings.zmqRpcBindIp" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">IP for ZMQ RPC Server to listen on</small>
           </div>
 
           <div class="col-md-6">
             <label for="zmq-rpc-bind-port" class="form-label">Bind port</label>
-            <input type="number" class="form-control" id="zmq-rpc-bind-port" placeholder="18082">
+            <input type="number" class="form-control" id="zmq-rpc-bind-port" placeholder="18082" [(ngModel)]="currentSettings.zmqRpcBindPort" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">18082 for mainnet, 28082 for testnet, 38082 for stagenet</small>
           </div>
 
           <div class="col-md-6">
             <label for="zmq-pub" class="form-label">ZMQ Pub</label>
-            <input type="text" class="form-control" id="zmq-pub" placeholder="tcp://ip:port or ipc://path">
+            <input type="text" class="form-control" id="zmq-pub" placeholder="tcp://ip:port or ipc://path" [(ngModel)]="currentSettings.zmqPub" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Address for ZMQ Pub</small>
           </div>
 
@@ -143,25 +143,25 @@
 
           <div class="col-md-12">
             <label for="rpc-payment-address" class="form-label">Address</label>
-            <input type="text" class="form-control" id="rpc-payment-address">
+            <input type="text" class="form-control" id="rpc-payment-address" [(ngModel)]="currentSettings.rpcPaymentAddress" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Restrict RPC to clients sending micropayment to this address</small>
           </div>
 
           <div class="col-md-6">
             <label for="rpc-payment-difficulty" class="form-label">Difficulty</label>
-            <input type="number" class="form-control" id="rpc-payment-difficulty" placeholder="1000">
+            <input type="number" class="form-control" id="rpc-payment-difficulty" placeholder="1000" [(ngModel)]="currentSettings.rpcPaymentDifficuly" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Restrict RPC to clients sending micropayment at this difficulty</small>
           </div>
 
           <div class="col-md-6">
             <label for="rpc-payment-credits" class="form-label">Credits</label>
-            <input type="number" class="form-control" id="rpc-payment-credits" placeholder="100">
+            <input type="number" class="form-control" id="rpc-payment-credits" placeholder="100" [(ngModel)]="currentSettings.rpcPaymentCredits" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Restrict RPC to clients sending micropayment, yelds that many credits per payment</small>
           </div>
 
           <div class="form-check form-switch col-md-6">
             <label for="rpc-payment-allow-free-loopback" class="form-check-label">Allow free loopback</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-payment-allow-free-loopback">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-payment-allow-free-loopback" [(ngModel)]="currentSettings.rpcPaymentAllowFreeLoopback" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Allow free access from the loopback address (ie, the local host)</small>
           </div>
@@ -175,43 +175,43 @@
           
           <div class="col-md-4">
             <label for="rpc-ssl" class="form-label">SSL Mode</label>
-            <select class="form-select" id="rpc-ssl">
-              <option value="autodetect">Autodetect</option>
-              <option value="enabled">Enabled</option>
-              <option value="disabled">Disabled</option>
+            <select class="form-select" id="rpc-ssl" [(ngModel)]="currentSettings.rpcSsl" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="'autodetect'">Autodetect</option>
+              <option [ngValue]="'enabled'">Enabled</option>
+              <option [ngValue]="'disabled'">Disabled</option>
             </select>
           </div>
 
 
           <div class="form-check form-switch col-md-4">
             <label for="rpc-ssl-allow-chained" class="form-check-label">Allow chained</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-ssl-allow-chained">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-ssl-allow-chained" [(ngModel)]="currentSettings.rpcSslAllowChained" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Allow user chain certificates</small>
           </div>
 
           <div class="form-check form-switch col-md-4">
             <label for="rpc-ssl-allow-any-cert" class="form-check-label">Allow any cert</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-ssl-allow-any-cert">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-ssl-allow-any-cert" [(ngModel)]="currentSettings.rpcSslAllowAnyCert" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Allow any peer certificate</small>
           </div>
 
           <div class="col-md-12">
             <label for="rpc-ssl-private-key" class="form-label">Private key</label>
-            <input type="file" class="form-control" id="rpc-ssl-private-key">
+            <input type="file" class="form-control" id="rpc-ssl-private-key" [(ngModel)]="currentSettings.rpcSslPrivateKey" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Path to a PEM format private key</small>
           </div>
 
           <div class="col-md-12">
             <label for="rpc-ssl-certificate" class="form-label">Certificate</label>
-            <input type="file" class="form-control" id="rpc-ssl-certificate">
+            <input type="file" class="form-control" id="rpc-ssl-certificate" [(ngModel)]="currentSettings.rpcSslCertificate" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Path to a PEM format certificate</small>
           </div>
 
           <div class="col-md-12">
             <label for="rpc-ssl-ca-certificates" class="form-label">CA Certificates</label>
-            <input type="file" class="form-control" id="rpc-ssl-ca-certificates">
+            <input type="file" class="form-control" id="rpc-ssl-ca-certificates" [(ngModel)]="currentSettings.rpcSslCACertificates" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Path to file containing concatenated PEM format certificate(s) to replace system CA(s)</small>
           </div>
 
@@ -229,33 +229,33 @@
 
           <div class="form-check form-switch col-md-6">
             <label for="allow-local-ip" class="form-check-label">Allow local IP</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="allow-local-ip">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="allow-local-ip" [(ngModel)]="currentSettings.allowLocalIp" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Allow local ip add to peer list, mostly in debug process</small>
           </div>
 
           <div class="form-check form-switch col-md-6">
             <label for="p2p-ignore-ipv4" class="form-check-label">Ignore IPv4</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="p2p-ignore-ipv4">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="p2p-ignore-ipv4" [(ngModel)]="currentSettings.p2pIgnoreIpv4">
             <br>
             <small class="text-body-secondary">Ignore unsuccessful IPv4 bind for P2P</small>
           </div>
 
           <div class="col-md-6">
             <label for="p2p-bind-ip" class="form-label">Bind IP</label>
-            <input type="text" class="form-control" id="p2p-bind-ip" placeholder="0.0.0.0">
+            <input type="text" class="form-control" id="p2p-bind-ip" placeholder="0.0.0.0" [(ngModel)]="currentSettings.p2pBindIp" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Interface for p2p network protocol</small>
           </div>
 
           <div class="col-md-6">
             <label for="p2p-bind-port" class="form-label">Bind port</label>
-            <input type="number" class="form-control" id="p2p-bind-port" placeholder="18080">
+            <input type="number" class="form-control" id="p2p-bind-port" placeholder="18080" [(ngModel)]="currentSettings.p2pBindPort" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">18080 for mainnet, 28080 for testnet, 38080 for stagenet</small>
           </div>
 
           <div class="col-md-6">
             <label for="p2p-external-port" class="form-label">External port</label>
-            <input type="number" class="form-control" id="p2p-external-port" placeholder="18080">
+            <input type="number" class="form-control" id="p2p-external-port" placeholder="18080" [(ngModel)]="currentSettings.p2pExternalPort" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">External port for p2p network protocol (if port forwarding used with NAT)</small>
           </div>
 
@@ -266,13 +266,13 @@
 
           <div class="col-md-6">
             <label for="p2p-bind-ipv6-address" class="form-label">Bind IPv6 address</label>
-            <input type="text" class="form-control" id="p2p-bind-ipv6-address" placeholder="::1">
+            <input type="text" class="form-control" id="p2p-bind-ipv6-address" placeholder="::1" [(ngModel)]="currentSettings.p2pBindIpv6Address" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Specify IPv6 address to bind RPC server</small>
           </div>
 
           <div class="col-md-6">
             <label for="p2p-bind-port-ipv6" class="form-label">Bind IPv6 port</label>
-            <input type="number" class="form-control" id="p2p-bind-port-ipv6" placeholder="18080">
+            <input type="number" class="form-control" id="p2p-bind-port-ipv6" placeholder="18080" [(ngModel)]="currentSettings.p2pBindPortIpv6" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">18080 for mainnet, 28080 for testnet, 38080 for stagenet</small>
           </div>
 
@@ -293,13 +293,13 @@
       
             <div class="col-12">
                 <label for="address" class="form-label">Address</label>
-                <input type="text" class="form-control" id="address" placeholder="Use 'auto' to enable automatic discovering and switching">
+                <input type="text" class="form-control" id="address" placeholder="Use 'auto' to enable automatic discovering and switching" [(ngModel)]="currentSettings.bootstrapDaemonAddress" [ngModelOptions]="{standalone: true}">
                 <small class="text-body-secondary">URL of a bootstrap remote daemon that the connected wallets can use while this daemon is still not fully synced.</small>
             </div>
     
             <div class="col-sm-6">
               <label for="firstName" class="form-label">Username</label>
-              <input type="text" class="form-control" id="firstName" placeholder="" value="">
+              <input type="text" class="form-control" id="firstName" placeholder="">
               <small class="text-body-secondary">Specify username for the bootstrap daemon login</small>
             </div>
     
@@ -312,7 +312,7 @@
 
             <div class="col-12">
               <label for="bootstrap-daemon-proxy" class="form-label">Proxy</label>
-              <input type="text" class="form-control" id="bootstrap-daemon-proxy" placeholder="ip:port">
+              <input type="text" class="form-control" id="bootstrap-daemon-proxy" placeholder="ip:port" [(ngModel)]="currentSettings.bootstrapDaemonProxy" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">Socks proxy to use for bootstrap daemon connection</small>
             </div>
     
@@ -325,59 +325,59 @@
               
               <div class="form-check form-switch col-md-6">
                 <label for="sync-enabled" class="form-check-label">Enabled</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="sync-enabled" checked>
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="sync-enabled" [checked]="!currentSettings.noSync" (change)="OnSyncEnableChange()">
                 <br>
                 <small class="text-body-secondary">Synchronize the blockchain with other peers</small>
               </div>
 
               <div class="form-check form-switch col-md-6">
                 <label for="prune-blockchain" class="form-check-label">Prune Blockchain</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="prune-blockchain">
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="prune-blockchain" [(ngModel)]="currentSettings.pruneBlockchain" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">Reduce blockchain disk usage</small>
               </div>
 
               <div class="form-check form-switch col-md-6">
                 <label for="sync-pruned-blocks" class="form-check-label">Sync pruned blocks</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="sync-pruned-blocks">
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="sync-pruned-blocks" [(ngModel)]="currentSettings.syncPrunedBlocks" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">Allow syncing from nodes with only pruned blocks</small>
               </div>
 
               <div class="form-check form-switch col-md-6">
                 <label for="fast-block-sync" class="form-check-label">Fast block sync</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="fast-block-sync">
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="fast-block-sync" [(ngModel)]="currentSettings.fastBlockSync" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">Sync up most of the way by using embedded, known block hashes</small>
               </div>
 
               <div class="form-check form-switch col-md-6">
                 <label for="relay-fluffly-blocks" class="form-check-label">Relay fluffy blocks</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="relay-fluffly-blocks" checked>
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="relay-fluffly-blocks" [checked]="!currentSettings.noFluffyBlocks" (change)="OnRelayFlufflyBlocksChange()">
                 <br>
                 <small class="text-body-secondary">Relay blocks as fluffy blocks</small>
               </div>
 
               <div class="form-check form-switch col-md-6">
                 <label for="keep-alt-blocks" class="form-check-label">Keep alternative blocks</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="keep-alt-blocks">
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="keep-alt-blocks" [(ngModel)]="currentSettings.keepAltBlocks" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">Keep alternative blocks on restart</small>
               </div>
     
               <div class="col-md-4">
                   <label for="block-sync-size" class="form-label">Block sync size</label>
-                  <input type="number" class="form-control" id="block-sync-size" placeholder="" value="0">
+                  <input type="number" class="form-control" id="block-sync-size" placeholder="" [(ngModel)]="currentSettings.blockSyncSize" [ngModelOptions]="{standalone: true}">
               </div>
       
               <div class="col-md-4">
                   <label for="block-download-max-size" class="form-label">Block download max size</label>
-                  <input type="number" class="form-control" id="block-download-max-size" placeholder="" value="0">
+                  <input type="number" class="form-control" id="block-download-max-size" placeholder="" [(ngModel)]="currentSettings.blockDownloadMaxSize" [ngModelOptions]="{standalone: true}">
               </div>
     
               <div class="col-md-4">
                   <label for="db-sync-mode" class="form-label">Database sync mode</label>
-                  <input type="text" class="form-control" id="db-sync-mode" placeholder="fast:async:250000000bytes">
+                  <input type="text" class="form-control" id="db-sync-mode" placeholder="fast:async:250000000bytes" [(ngModel)]="currentSettings.dbSyncMode" [ngModelOptions]="{standalone: true}">
               </div>
       
               <hr class="my-4">
@@ -386,59 +386,20 @@
       
               <div class="my-3">
                 <div class="form-check">
-                  <input id="credit" name="paymentMethod" type="radio" class="form-check-input" checked="" required="">
+                  <input id="credit" name="paymentMethod" type="radio" class="form-check-input">
                   <label class="form-check-label" for="credit">mainnet</label>
                 </div>
                 <div class="form-check">
-                  <input id="debit" name="paymentMethod" type="radio" class="form-check-input" required="">
+                  <input id="debit" name="paymentMethod" type="radio" class="form-check-input" [(ngModel)]="currentSettings.testnet" [ngModelOptions]="{standalone: true}">
                   <label class="form-check-label" for="debit">testnet</label>
                 </div>
                 <div class="form-check">
-                  <input id="paypal" name="paymentMethod" type="radio" class="form-check-input" required="">
+                  <input id="paypal" name="paymentMethod" type="radio" class="form-check-input" [(ngModel)]="currentSettings.stagenet" [ngModelOptions]="{standalone: true}">
                   <label class="form-check-label" for="paypal">stagenet</label>
                 </div>
               </div>
           </div>
-    
-          <!--
-          <div class="row gy-3">
-            <div class="col-md-6">
-              <label for="cc-name" class="form-label">Name on card</label>
-              <input type="text" class="form-control" id="cc-name" placeholder="" required="">
-              <small class="text-body-secondary">Full name as displayed on card</small>
-              <div class="invalid-feedback">
-                Name on card is required
-              </div>
-            </div>
-    
-            <div class="col-md-6">
-              <label for="cc-number" class="form-label">Credit card number</label>
-              <input type="text" class="form-control" id="cc-number" placeholder="" required="">
-              <div class="invalid-feedback">
-                Credit card number is required
-              </div>
-            </div>
-    
-            <div class="col-md-3">
-              <label for="cc-expiration" class="form-label">Expiration</label>
-              <input type="text" class="form-control" id="cc-expiration" placeholder="" required="">
-              <div class="invalid-feedback">
-                Expiration date required
-              </div>
-            </div>
-    
-            <div class="col-md-3">
-              <label for="cc-cvv" class="form-label">CVV</label>
-              <input type="text" class="form-control" id="cc-cvv" placeholder="" required="">
-              <div class="invalid-feedback">
-                Security code required
-              </div>
-            </div>
-          </div>
-      -->
-    
-          <hr class="my-4">
-    
+
         </form>
       </div>
     </div>
@@ -454,33 +415,33 @@
               
               <div class="form-check form-switch col-md-6">
                 <label for="bg-mining-enable" class="form-check-label">Enabled</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="bg-mining-enable">
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="bg-mining-enable" [(ngModel)]="currentSettings.bgMiningEnable" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">Enable background mining</small>
               </div>
 
               <div class="form-check form-switch col-md-6">
                 <label for="bg-mining-ignore-battery" class="form-check-label">Ignore battery</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="bg-mining-ignore-battery">
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="bg-mining-ignore-battery" [(ngModel)]="currentSettings.bgMiningIgnoreBattery" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">Reduce blockchain disk usage</small>
               </div>
     
               <div class="col-md-4">
                   <label for="bg-mining-min-idle-interval" class="form-label">Minimum idle interval</label>
-                  <input type="number" class="form-control" id="bg-mining-min-idle-interval" placeholder="" value="">
+                  <input type="number" class="form-control" id="bg-mining-min-idle-interval" placeholder="" [(ngModel)]="currentSettings.bgMiningMinIdleInterval" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">Specify min lookback interval in seconds for determining idle state</small>
               </div>
       
               <div class="col-md-4">
                   <label for="bg-mining-idle-threshold" class="form-label">Idle threshold</label>
-                  <input type="number" class="form-control" id="bg-mining-idle-threshold" placeholder="" value="">
+                  <input type="number" class="form-control" id="bg-mining-idle-threshold" placeholder="" [(ngModel)]="currentSettings.bgMiningIdleThreshold" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">Specify minimum avg idle percentage over lookback interval</small>  
               </div>
     
               <div class="col-md-4">
                   <label for="bg-mining-miner-target" class="form-label">Miner target</label>
-                  <input type="number" class="form-control" id="bg-mining-miner-target" placeholder="">
+                  <input type="number" class="form-control" id="bg-mining-miner-target" placeholder="" [(ngModel)]="currentSettings.bgMiningMinerTarget" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">Specify maximum percentage cpu use by miners</small>
               </div>
       
@@ -501,24 +462,24 @@
               
               <div class="col-md-4">
                 <label for="log-level" class="form-label">Log level</label>
-                <select class="form-select" id="log-level">
-                  <option value="0">Info</option>
-                  <option value="1">Warning</option>
-                  <option value="2">Debug</option>
-                  <option value="3">Error</option>
-                  <option value="4">Trace</option>
+                <select class="form-select" id="log-level" [(ngModel)]="currentSettings.logLevel" [ngModelOptions]="{standalone: true}">
+                  <option [ngValue]="0">Info</option>
+                  <option [ngValue]="1">Warning</option>
+                  <option [ngValue]="2">Debug</option>
+                  <option [ngValue]="3">Error</option>
+                  <option [ngValue]="4">Trace</option>
                 </select>
               </div>
     
               <div class="col-md-4">
                   <label for="max-log-file-size" class="form-label">Max log file size</label>
-                  <input type="number" class="form-control" id="max-log-file-size" placeholder="104850000" value="">
+                  <input type="number" class="form-control" id="max-log-file-size" placeholder="104850000" [(ngModel)]="currentSettings.maxLogFileSize" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">Specify maximum log file size [B]</small>
               </div>
       
               <div class="col-md-4">
                   <label for="max-log-files" class="form-label">Max log files</label>
-                  <input type="number" class="form-control" id="max-log-files" placeholder="50" value="">
+                  <input type="number" class="form-control" id="max-log-files" placeholder="50" [(ngModel)]="currentSettings.maxLogFiles" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">Specify maximum number of rotated log files to be saved (no limit by setting to 0)</small>  
               </div>  
           </div>
@@ -530,6 +491,6 @@
 
   <hr class="my-4">
 
-  <button class="w-50 btn btn-primary btn-lg" type="submit">Save</button>
+  <button class="w-50 btn btn-primary btn-lg" type="submit" [disabled]="!modified" (click)="OnSave()">Save</button>
 
 </div>

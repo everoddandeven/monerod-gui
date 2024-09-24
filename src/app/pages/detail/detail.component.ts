@@ -90,7 +90,7 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
     console.log('DetailComponent AFTER VIEW INIT');
     this.navbarService.setNavbarLinks(this.navbarLinks);
 
-    this.loadInterval = setInterval(() => {
+    setTimeout(() => {
       this.ngZone.run(() => {
         if (this.isLoading) {
           return;
@@ -103,7 +103,7 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
         this.load();
   
       });
-      }, 5000);
+      }, 500);
   }
 
   ngOnDestroy(): void {

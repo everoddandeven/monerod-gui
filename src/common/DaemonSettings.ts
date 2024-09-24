@@ -128,8 +128,121 @@ export class DaemonSettings {
     public rpcPaymentAllowFreeLoopback: boolean = false;
     public disableRpcBan: boolean = false;
 
-    public toCommandOptions(): string {
-        let options: string = '';
+    public equals(settings: DaemonSettings): boolean {
+        return this.toCommandOptions().join('') == settings.toCommandOptions().join('');
+    }
+
+    public clone(): DaemonSettings {
+        return Object.assign(new DaemonSettings(), this);
+    }
+
+    public static parse(data: any): DaemonSettings {
+        const settings = new DaemonSettings();
+        Object.assign(settings, data);
+        return settings;
+    }
+
+    public toCommandOptions(): string[] {
+        const options: string[] = [];
+
+        if (this.mainnet) options.push(`--mainnet`);
+        else if (this.testnet) options.push(`--testnet`);
+        else if (this.stagenet) options.push(`--stagenet`);
+
+        if (this.logFile != '') options.push('--log-file', this.logFile);
+        if (this.logLevel >= 0 && this.logLevel <= 4) options.push('--log-level', `${this.logLevel}`);
+        if (this.maxLogFileSize) options.push(`--max-log-file-size=${this.maxLogFileSize}`);
+        if (this.maxLogFiles) options.push(`--max-log-files=${this.maxLogFiles}`);
+        if (this.maxConcurrency) options.push(`--max-concurrency=${this.maxConcurrency}`);
+        if (this.proxy != '') options.push(`--proxy=${this.proxy}`);
+        if (this.proxyAllowDnsLeaks) options.push(`--proxy-allow-dns-leaks`);
+        if (this.publicNode) options.push(`--public-node`);
+        if (this.noZmq) options.push(`--no-zmq`);
+        if (!this.noZmq && this.zmqRpcBindIp != '') options.push(`--zmq-rpc-bind-ip`, this.zmqRpcBindIp);
+        if (!this.noZmq && this.zmqRpcBindPort) options.push(`--zmq-rpc-bind-port`, `${this.zmqRpcBindPort}`);
+        if (!this.noZmq && this.zmqPub != '') options.push(`--zmq-pub`, this.zmqPub);
+        if (this.testDropDownload) options.push(`--test-drop-download`);
+        if (this.testDropDownload && this.testDropDownloadHeight) options.push(`--test-drop-download-height`);
+        if (this.testDbgLockSleep) options.push(`--tet-dbg-lock-sleep`, `${this.testDbgLockSleep}`);
+        if (this.regtest) options.push(`--regtest`);
+        if (this.keepFakeChain) options.push(`--keep-fakechain`);
+        if (this.fixedDifficulty) options.push(`--fixed-difficulty`, `${this.fixedDifficulty}`);
+        if (this.enforceDnsCheckpoint) options.push(`--enforce-dns-checkpoint`);
+        if (this.prepBlocksThreads) options.push(`--prep-block-threads`, `${this.prepBlocksThreads}`);
+        if (this.fastBlockSync) options.push(`--fast-block-sync`, `1`);
+        if (this.showTimeStats) options.push(`--show-time-stats`);
+        if (this.blockSyncSize) options.push(`--block-sync-size`, `${this.blockSyncSize}`);
+        if (this.checkUpdates) options.push(`--check-updates`, this.checkUpdates);
+        if (this.noFluffyBlocks) options.push(`--no-fluffy-blocks`);
+        if (this.offline) options.push(`--offline`);
+        if (this.disableDnsCheckpoints) options.push(`--disable-dns-checkpoints`);
+        if (this.blockDownloadMaxSize) options.push(`--block-download-max-size`, `${this.blockDownloadMaxSize}`);
+        if (this.syncPrunedBlocks) options.push(`--sync-pruned-blocks`);
+        if (this.maxTxPoolWeight) options.push(`--max-txpool-weight`, `${this.maxTxPoolWeight}`);
+        if (this.blockNotify != '') options.push(`--block-notify`, this.blockNotify);
+        if (this.pruneBlockchain) options.push('--prune-blockchain');
+        if (this.reorgNotify != '') options.push(`--reorg-notify`, this.reorgNotify);
+        if (this.blockRateNotify != '') options.push(`--block-rate-notify`, this.blockRateNotify);
+        if (this.keepAltBlocks) options.push(`--keep-alt-blocks`);
+        if (this.extraMessagesFile != '') options.push(`--extra-messages-file`, this.extraMessagesFile);
+        if (this.startMining != '') options.push(`--start-mining`, this.startMining);
+        if (this.miningThreds) options.push(`--mining-threads`, `${this.miningThreds}`);
+        if (this.bgMiningEnable) options.push(`--bg-mining-enable`);
+        if (this.bgMiningIgnoreBattery) options.push(`--bg-mining-ignore-battery`);
+        if (this.bgMiningIdleThreshold) options.push(`--bg-mining-idle-threshold`, `${this.bgMiningIdleThreshold}`);
+        if (this.bgMiningMinIdleInterval) options.push(`--bg-mining-idle-interval`, `${this.bgMiningMinIdleInterval}`);
+        if (this.bgMiningMinerTarget) options.push(`--bg-mining-miner-target`, `${this.bgMiningMinerTarget}`);
+        if (this.dbSyncMode != '') options.push(`--db-sync-mode`, `${this.dbSyncMode}`);
+        if (this.dbSalvage) options.push(`--db-salvage`);
+        if (this.p2pBindIp != '') options.push(`--p2p-bind-ip`, this.p2pBindIp);
+        if (this.p2pBindIpv6Address != '') options.push(`--p2p-bind-ipv6-address`, this.p2pBindIpv6Address);
+        if (this.p2pBindPort) options.push(`--p2p-bind-port`, `${this.p2pBindPort}`);
+        if (this.p2pBindPortIpv6) options.push(`--p2p-bind-port-ipv6`, `${this.p2pBindPortIpv6}`);
+        if (this.p2pUseIpv6) options.push(`--p2p-use-ipv6`);
+        if (this.p2pIgnoreIpv4) options.push(`--p2p-ignore-ipv4`);
+        if (this.p2pExternalPort) options.push(`--p2p-external-port`, `${this.p2pExternalPort}`);
+        if (this.allowLocalIp) options.push(`--allow-local-ip`);
+        if (this.addPeer != '') options.push('--add-peer', this.addPeer);
+        if (this.addPriorityNode != '') options.push(`--add-priority-node`, this.addPriorityNode);
+        if (this.addExclusiveNode != '') options.push(`--add-exlcusive-node`, this.addExclusiveNode);
+        if (this.seedNode != '') options.push(`--seed-node`, this.seedNode);
+        if (this.txProxy != '') options.push(`--tx-proxy`, this.txProxy);
+        if (this.anonymousInbound != '') options.push(`--anonymous-inbound`, this.anonymousInbound);
+        if (this.banList != '') options.push(`--ban-list`, this.banList);
+        if (this.hideMyPort) options.push(`--hide-my-port`);
+        if (this.noSync) options.push(`--no-sync`);
+        if (this.enableDnsBlocklist) options.push(`--enable-dns-block-list`);
+        if (this.noIgd) options.push(`--no-igd`);
+        if (this.outPeers >= 0) options.push(`--out-peers`, `${this.outPeers}`);
+        if (this.inPeers >= 0) options.push(`--in-peers`, `${this.inPeers}`);
+        if (this.tosFlag >= 0) options.push(`--tos-flag`, `${this.tosFlag}`);
+        if (this.limitRate >= 0) options.push(`--limit-rate`, `${this.limitRate}`);
+        if (this.limitRateUp >= 0) options.push(`--limit-rate-up`, `${this.limitRateUp}`);
+        if (this.limitRateDown >= 0) options.push(`--limit-rate-down`, `${this.limitRateDown}`);
+        if (this.padTransactions) options.push(`--pad-transactions`);
+        if (this.maxConnectionsPerIp >= 0) options.push(`--max-connections-per-ip`, `${this.maxConnectionsPerIp}`);
+        if (this.rpcBindIp != '') options.push(`--rpc-bind-ip`, `${this.rpcBindIp}`);
+        if (this.rpcBindPort) options.push(`--rpc-bind-ip`, `${this.rpcBindIp}`);
+        if (this.restrictedBindPort) options.push(`--restricted-bind-port`, `${this.restrictedBindPort}`);
+        if (this.restrictedRpc) options.push(`--restricted-rpc`);
+        if (this.bootstrapDaemonAddress != '') options.push(`--bootstrap-daemon-address`, this.bootstrapDaemonAddress);
+        if (this.bootstrapDaemonLogin != '') options.push(`--bootstrap-daemon-login`, this.bootstrapDaemonLogin);
+        if (this.bootstrapDaemonProxy != '') options.push(`--bootstrap-daemon-proxy`, this.bootstrapDaemonProxy);
+        if (this.confirmExternalBind) options.push(`--confirm-external-bind`);
+        if (this.rpcAccessControlOrigins != '') options.push(`--rpc-access-control-origins=${this.rpcAccessControlOrigins}`);
+        if (this.rpcSsl) options.push(`--rpc-ssl`, this.rpcSsl);
+        if (this.rpcSslPrivateKey) options.push(`--rpc-ssl-private-key`, this.rpcSslPrivateKey);
+        if (this.rpcSslCertificate) options.push(`--rpc-ssl-certificate`, this.rpcSslCertificate);
+        if (this.rpcSslCACertificates) options.push(`--rpc-ssl-ca-certificates`, this.rpcSslCACertificates);
+        if (this.rpcAllowedFingerprints) options.push(`--rpc-allowed-fingerprints`, this.rpcAllowedFingerprints);
+        if (this.rpcSslAllowChained) options.push(`--rpc-ssl-allow-chained`);
+        if (this.rpcSslAllowAnyCert) options.push(`--rpc-ssl-allow-any-cert`);
+
+        if (this.rpcPaymentAddress != '') options.push(`--rpc-payment-address`, this.rpcPaymentAddress);
+        if (this.rpcPaymentDifficuly) options.push(`--rpc-payment-difficulty`, `${this.rpcPaymentDifficuly}`);
+        if (this.rpcPaymentCredits) options.push(`--rpc-payment-credits`, `${this.rpcPaymentCredits}`);
+        if (this.rpcPaymentAllowFreeLoopback) options.push(`--rpc-payment-allow-free-loopback`);
+        if (this.disableRpcBan) options.push(`--disable-rpc-ban`);
 
         return options;
     }

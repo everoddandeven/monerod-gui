@@ -7,8 +7,8 @@ import {
   SubmitBlockRequest, GenerateBlocksRequest, GetLastBlockHeaderRequest, 
   GetBlockHeaderByHashRequest, GetBlockHeaderByHeightRequest, GetBlockHeadersRangeRequest, 
   GetConnectionsRequest, GetInfoRequest, HardForkInfoRequest, SetBansRequest, GetBansRequest, 
-  BannedRequest, FlushTxPoolRequest, GetOutputHistogramRequest, 
-  SyncInfoRequest,
+  BannedRequest, FlushTxPoolRequest, GetOutputHistogramRequest, GetCoinbaseTxSumRequest,
+  SyncInfoRequest, GetOutsRequest,
   GetVersionRequest,
   GetFeeEstimateRequest,
   GetAlternateChainsRequest,
@@ -17,7 +17,28 @@ import {
   CalculatePoWHashRequest,
   FlushCacheRequest,
   GetMinerDataRequest,
-  EmptyRpcRequest
+  EmptyRpcRequest, RPCRequest,
+  AddAuxPoWRequest,
+  GetOutputDistributionRequest,
+  GetBlockRequest,
+  UpdateRequest,
+  PopBlocksRequest,
+  GetTransactionPoolHashesRequest,
+  GetTransactionPoolHashesBinaryRequest,
+  GetPublicNodesRequest,
+  GetNetStatsRequest,
+  InPeersRequest,
+  OutPeersRequest,
+  SetLimitRequest,
+  StopDaemonRequest,
+  MiningStatusRequest,
+  StopMiningRequest,
+  StartMiningRequest,
+  SendRawTransactionRequest,
+  IsKeyImageSpentRequest,
+  GetAltBlockHashesRequest,
+  SaveBcRequest,
+  SetBootstrapDaemonRequest
 } from '../../../../common/request';
 import { BlockTemplate } from '../../../../common/BlockTemplate';
 import { GeneratedBlocks } from '../../../../common/GeneratedBlocks';
@@ -37,14 +58,28 @@ import { BlockchainPruneInfo } from '../../../../common/BlockchainPruneInfo';
 import { MinerData } from '../../../../common/MinerData';
 import { CoreIsBusyError } from '../../../../common/error';
 import { ElectronService } from '../electron/electron.service';
+import { AddedAuxPow } from '../../../../common/AddedAuxPow';
+import { AuxPoW } from '../../../../common/AuxPoW';
+import { OutputDistribution } from '../../../../common/OutputDistribution';
+import { CoinbaseTxSum } from '../../../../common/CoinbaseTxSum';
+import { Block } from '../../../../common/Block';
+import { Output } from '../../../../common/Output';
+import { OutKey } from '../../../../common/OutKey';
+import { UpdateInfo } from '../../../../common/UpdateInfo';
+import { PublicNode } from '../../../../common/PublicNode';
+import { NetStats } from '../../../../common/NetStats';
+import { MiningStatus } from '../../../../common/MiningStatus';
+import { TxInfo } from '../../../../common/TxInfo';
+import { DaemonSettings } from '../../../../common/DaemonSettings';
+import { MethodNotFoundError } from '../../../../common/error/MethodNotFoundError';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DaemonService {
   private daemonRunning?: boolean;
-  private readonly configFilePath: string = './config';
   private url: string = "http://127.0.0.1:28081";
+  public settings: DaemonSettings;
   //private url: string = "http://node2.monerodevs.org:28089";
   //private url: string = "https://testnet.xmr.ditatompel.com";
   //private url: string = "https://xmr.yemekyedim.com:18081";
@@ -55,10 +90,66 @@ export class DaemonService {
     "Access-Control-Allow-Methods": 'POST,GET' // this states the allowed methods
   };
 
-  constructor(private httpClient: HttpClient, private electronService: ElectronService) { }
+  constructor(private httpClient: HttpClient, private electronService: ElectronService) {
+    this.settings = this.loadSettings();
+  }
 
-  private async callJsonRpc(params: JsonRPCRequest): Promise<{ [key: string]: any }> {
-    return await firstValueFrom<{ [key: string]: any }>(this.httpClient.post(`${this.url}/json_rpc`, params.toDictionary(), this.headers));
+  private loadSettings(): DaemonSettings {
+      /*
+  const args = [
+    '--testnet',
+    '--fast-block-sync', '1',
+    '--prune-blockchain',
+    '--sync-pruned-blocks',
+    '--confirm-external-bind',
+    '--max-concurrency', '1',
+    '--log-level', '1',
+    '--rpc-access-control-origins=*'
+  ];
+  */
+    const settings = new DaemonSettings();
+    settings.testnet = true;
+    settings.fastBlockSync = true;
+    settings.pruneBlockchain = true;
+    settings.syncPrunedBlocks = true;
+    settings.confirmExternalBind = true;
+    settings.logLevel = 1;
+    settings.rpcAccessControlOrigins = "*";
+    return settings;
+  }
+
+  private raiseRpcError(error: { code: number, message: string }): void {
+
+    if (error.code == -9) {
+      throw new CoreIsBusyError();
+    }
+    else if (error.code == -32601) {
+      throw new MethodNotFoundError();
+    }
+    else 
+    {
+      throw new Error(error.message);
+    }
+
+  }
+
+  private async callRpc(request: RPCRequest): Promise<{ [key: string]: any }> {
+    let method: string = '';
+
+    if (request instanceof JsonRPCRequest) {
+      method = 'json_rpc';
+    }
+    else {
+      method = request.method;
+    }
+
+    const response = await firstValueFrom<{ [key: string]: any }>(this.httpClient.post(`${this.url}/${method}`, request.toDictionary(), this.headers));
+
+    if (response.error) {
+      this.raiseRpcError(response.error);
+    }
+
+    return response;
   }
 
   public async startDaemon(): Promise<void> {
@@ -74,7 +165,7 @@ export class DaemonService {
 
     console.log("Starting daemon");
 
-    this.electronService.ipcRenderer.send('start-monerod', this.configFilePath);
+    this.electronService.ipcRenderer.send('start-monerod', this.settings.toCommandOptions());
 
     console.log("Daemon started");
 
@@ -88,39 +179,52 @@ export class DaemonService {
         return this.daemonRunning;
       }
 
-      const response = await this.callJsonRpc(new EmptyRpcRequest());
-      console.log(response);
-      this.daemonRunning = true;
+      await this.callRpc(new EmptyRpcRequest());
     }
     catch(error) {
+      if (error instanceof MethodNotFoundError) {
+        this.daemonRunning = true;
+        return this.daemonRunning;
+      }
+      
       console.error(error);
-      this.daemonRunning = false;
     }
-
+    
+    this.daemonRunning = false;
     return this.daemonRunning;
 
   }
 
+  public async getBlock(heightOrHash: number | string, fillPowHash: boolean = false): Promise<Block> {
+    const response = await this.callRpc(new GetBlockRequest(heightOrHash, fillPowHash));
+
+    if (response.error) {
+      this.raiseRpcError(response.error);
+    }
+
+    return Block.parse(response.result);
+  }
+
   public async getBlockCount(): Promise<BlockCount> {
-    const response = await this.callJsonRpc(new GetBlockCountRequest());
+    const response = await this.callRpc(new GetBlockCountRequest());
     
     return BlockCount.parse(response.result);
   }
 
   public async getBlockHash(blockHeight: number): Promise<string> {
-    const response = await this.callJsonRpc(new GetBlockHashRequest(blockHeight));
+    const response = await this.callRpc(new GetBlockHashRequest(blockHeight));
 
     return response.result;
   }
 
   public async getBlockTemplate(walletAddress: string, reserveSize: number) {
-    const response = await this.callJsonRpc(new GetBlockTemplateRequest(walletAddress, reserveSize));
+    const response = await this.callRpc(new GetBlockTemplateRequest(walletAddress, reserveSize));
 
     return BlockTemplate.parse(response.result);
   }
 
   public async submitBlock(... blockBlobData: string[]): Promise<void> {
-    const response = await this.callJsonRpc(new SubmitBlockRequest(blockBlobData));
+    const response = await this.callRpc(new SubmitBlockRequest(blockBlobData));
 
     if (response.error) {
       if (!response.message) {
@@ -132,31 +236,31 @@ export class DaemonService {
   }
 
   public async generateBlocks(amountOfBlocks: number, walletAddress: string, prevBlock: string = '', startingNonce: number): Promise<GeneratedBlocks> {
-    const response = await this.callJsonRpc(new GenerateBlocksRequest(amountOfBlocks, walletAddress, prevBlock, startingNonce));
+    const response = await this.callRpc(new GenerateBlocksRequest(amountOfBlocks, walletAddress, prevBlock, startingNonce));
 
     return GeneratedBlocks.parse(response.result);
   }
 
   public async getLastBlockHeader(fillPowHash: boolean = false): Promise<BlockHeader> {
-    const response = await this.callJsonRpc(new GetLastBlockHeaderRequest(fillPowHash));
+    const response = await this.callRpc(new GetLastBlockHeaderRequest(fillPowHash));
 
     return BlockHeader.parse(response.block_header);
   }
 
   public async getBlockHeaderByHash(hash: string, fillPowHash: boolean = false): Promise<BlockHeader> {
-    const response = await this.callJsonRpc(new GetBlockHeaderByHashRequest(hash, fillPowHash));
+    const response = await this.callRpc(new GetBlockHeaderByHashRequest(hash, fillPowHash));
 
     return BlockHeader.parse(response.block_header);
   }
 
   public async getBlockHeaderByHeight(height: number, fillPowHash: boolean = false): Promise<BlockHeader> {
-    const response = await this.callJsonRpc(new GetBlockHeaderByHeightRequest(height, fillPowHash));
+    const response = await this.callRpc(new GetBlockHeaderByHeightRequest(height, fillPowHash));
 
     return BlockHeader.parse(response.block_header);
   }
 
   public async getBlockHeadersRange(startHeight: number, endHeight: number, fillPowHash: boolean = false): Promise<BlockHeader[]> {
-    const response = await this.callJsonRpc(new GetBlockHeadersRangeRequest(startHeight, endHeight, fillPowHash));
+    const response = await this.callRpc(new GetBlockHeadersRangeRequest(startHeight, endHeight, fillPowHash));
     const block_headers: any[] = response.block_headers;
     const result: BlockHeader[] = [];
 
@@ -166,7 +270,7 @@ export class DaemonService {
   }
 
   public async getConnections(): Promise<Connection[]> {
-    const response = await this.callJsonRpc(new GetConnectionsRequest());
+    const response = await this.callRpc(new GetConnectionsRequest());
     const connections: any[] = response.connections;
     const result: Connection[] = [];
 
@@ -176,19 +280,19 @@ export class DaemonService {
   }
 
   public async getInfo(): Promise<DaemonInfo> {
-    const response = await this.callJsonRpc(new GetInfoRequest());
+    const response = await this.callRpc(new GetInfoRequest());
     
     return DaemonInfo.parse(response.result);
   }
 
   public async hardForkInfo(): Promise<HardForkInfo> {
-    const response = await this.callJsonRpc(new HardForkInfoRequest());
+    const response = await this.callRpc(new HardForkInfoRequest());
 
     return HardForkInfo.parse(response.result);
   }
 
   public async setBans(...bans: Ban[]) {
-    const response = await this.callJsonRpc(new SetBansRequest(bans));
+    const response = await this.callRpc(new SetBansRequest(bans));
 
     if (response.status != 'OK') {
       throw new Error(`Error code: ${response.status}`);
@@ -196,7 +300,7 @@ export class DaemonService {
   }
 
   public async getBans(): Promise<Ban[]> {
-    const response = await this.callJsonRpc(new GetBansRequest());
+    const response = await this.callRpc(new GetBansRequest());
     
     if (response.error) {
       this.raiseRpcError(response.error);
@@ -211,7 +315,7 @@ export class DaemonService {
   }
 
   public async banned(address: string): Promise<Ban> {
-    const response = await this.callJsonRpc(new BannedRequest(address));
+    const response = await this.callRpc(new BannedRequest(address));
     const result = response.result;
 
     if (result.status != 'OK') {
@@ -222,43 +326,78 @@ export class DaemonService {
   }
 
   public async flushTxPool(... txIds: string[]): Promise<void> {
-    const response = await this.callJsonRpc(new FlushTxPoolRequest(txIds));
+    const response = await this.callRpc(new FlushTxPoolRequest(txIds));
 
     if (response.status != 'OK') {
       throw new Error(`Error code: ${response.status}`);
     }
   }
 
+  public async getOuts(outputs: Output[], getTxId: boolean): Promise<OutKey[]> {
+    const response = await this.callRpc(new GetOutsRequest(outputs, getTxId));
+
+    if (response.error) {
+      this.raiseRpcError(response.error);
+    }
+
+    const _outkeys: any[] | undefined = response.outs;
+    const outkeys: OutKey[] = [];
+
+    if (_outkeys) _outkeys.forEach((outkey) => outkeys.push(OutKey.parse(outkey)));
+
+    return outkeys;
+  }
+
   public async getOutputHistogram(amounts: number[], minCount: number, maxCount: number, unlocked: boolean, recentCutoff: number): Promise<HistogramEntry[]> {
-    const response = await this.callJsonRpc(new GetOutputHistogramRequest(amounts, minCount, maxCount, unlocked, recentCutoff));
-    const entries: any[] = response.histogram;
+    const response = await this.callRpc(new GetOutputHistogramRequest(amounts, minCount, maxCount, unlocked, recentCutoff));
+
+    if (response.error) {
+      this.raiseRpcError(response.error);
+    }
+
+    const entries: any[] = response.result.histogram;
     const result: HistogramEntry[] = [];
 
-    entries.forEach((entry: any) => result.push(HistogramEntry.parse(entry)));
+    if (entries) entries.forEach((entry: any) => result.push(HistogramEntry.parse(entry)));
 
     return result;
   }
 
+  public async getOutputDistribution(amounts: number[], cumulative: boolean, fromHeight: number, toHeight: number): Promise<OutputDistribution[]> {
+    const response = await this.callRpc(new GetOutputDistributionRequest(amounts, cumulative, fromHeight, toHeight));
+
+    if (response.error) {
+      this.raiseRpcError(response.error);
+    }
+
+    const entries: any[] = response.result.distributions;
+    const distributions: OutputDistribution[] = [];
+
+    if (entries) entries.forEach((entry) => distributions.push(OutputDistribution.parse(entry)));
+
+    return distributions;
+  }
+
   public async syncInfo(): Promise<SyncInfo> {
-    const response = await this.callJsonRpc(new SyncInfoRequest());
+    const response = await this.callRpc(new SyncInfoRequest());
 
     return SyncInfo.parse(response.result);
   }
 
   public async getVersion(): Promise<DaemonVersion> {
-    const response = await this.callJsonRpc(new GetVersionRequest());
+    const response = await this.callRpc(new GetVersionRequest());
 
     return DaemonVersion.parse(response.result);
   }
 
   public async getFeeEstimate(): Promise<FeeEstimate> {
-    const response = await this.callJsonRpc(new GetFeeEstimateRequest());
+    const response = await this.callRpc(new GetFeeEstimateRequest());
 
     return FeeEstimate.parse(response.result);
   }
 
   public async getAlternateChains(): Promise<Chain[]> {
-    const response = await this.callJsonRpc(new GetAlternateChainsRequest());
+    const response = await this.callRpc(new GetAlternateChainsRequest());
     const chains: any[] = response.result.chains ? response.result.chains : [];
     const result: Chain[] = [];
 
@@ -267,8 +406,18 @@ export class DaemonService {
     return result;
   }
 
+  public async getCoinbaseTxSum(height: number, count: number): Promise<CoinbaseTxSum> {
+    const response = await this.callRpc(new GetCoinbaseTxSumRequest(height, count));
+
+    if (response.error) {
+      this.raiseRpcError(response.error);
+    }
+
+    return CoinbaseTxSum.parse(response.result);
+  }
+
   public async relayTx(... txIds: string[]): Promise<void> {
-    const response = await this.callJsonRpc(new RelayTxRequest(txIds));
+    const response = await this.callRpc(new RelayTxRequest(txIds));
 
     if (response.result.status != 'OK') {
       throw new Error(`Error code: ${response.result.status}`);
@@ -276,25 +425,25 @@ export class DaemonService {
   }
 
   public async getTxPoolBacklog(): Promise<TxBacklogEntry[]> {
-    const response = await this.callJsonRpc(new GetTxPoolBacklogRequest());
+    const response = await this.callRpc(new GetTxPoolBacklogRequest());
 
     return TxBacklogEntry.fromBinary(response.backlog);
   }
 
   public async pruneBlockchain(check: boolean = false): Promise<BlockchainPruneInfo> {
-    const response = await this.callJsonRpc(new PruneBlockchainRequest(check));
+    const response = await this.callRpc(new PruneBlockchainRequest(check));
 
     return BlockchainPruneInfo.parse(response.result);
   }
 
   public async calculatePoWHash(majorVersion: number, height: number, blockBlob: string, seedHash: string): Promise<string> {
-    const response = await this.callJsonRpc(new CalculatePoWHashRequest(majorVersion, height, blockBlob, seedHash));
+    const response = await this.callRpc(new CalculatePoWHashRequest(majorVersion, height, blockBlob, seedHash));
 
     return response.result;
   }
 
   public async flushCache(badTxs: boolean = false, badBlocks: boolean = false): Promise<void> {
-    const response = await this.callJsonRpc(new FlushCacheRequest(badTxs, badBlocks));
+    const response = await this.callRpc(new FlushCacheRequest(badTxs, badBlocks));
 
     if(response.result.status != 'OK') {
       throw new Error(`Error code: ${response.result.status}`);
@@ -302,25 +451,151 @@ export class DaemonService {
   }
 
   public async getMinerData(): Promise<MinerData> {
-    const response = await this.callJsonRpc(new GetMinerDataRequest());
-
-    if (response.error) {
-      this.raiseRpcError(response.error);
-    }
+    const response = await this.callRpc(new GetMinerDataRequest());
 
     return MinerData.parse(response.result);
   }
 
-  private raiseRpcError(error: { code: number, message: string }): void {
+  public async AddAuxPoW(blockTemplateBlob: string, auxPoW: AuxPoW[]): Promise<AddedAuxPow> {
+    const response = await this.callRpc(new AddAuxPoWRequest(blockTemplateBlob, auxPoW));
 
-    if (error.code == -9) {
-      throw new CoreIsBusyError();
-    }
-    else 
-    {
-      throw new Error(error.message);
-    }
+    return AddedAuxPow.parse(response.result);
+  }
 
+  public async setBootstrapDaemon(address: string, username: string = '', password: string = '', proxy: string = ''): Promise<void> {
+    const response = await this.callRpc(new SetBootstrapDaemonRequest(address, username, password, proxy));
+
+    if (typeof response.status == 'string' && response.status != 'OK') {
+      throw new Error(`Could not set bootstrap daemon: ${response.status}`);
+    }
+  }
+
+  public async saveBc(): Promise<void> {
+    const response = await this.callRpc(new SaveBcRequest());
+
+    if (typeof response.status == 'string' && response.status != 'OK') {
+      throw new Error(`Could not save blockchain: ${response.status}`);
+    }
+  }
+
+  public async getAltBlockHashes(): Promise<string[]> {
+    const response = await this.callRpc(new GetAltBlockHashesRequest());
+
+    return response.blks_hashes;
+  }
+
+  public async isKeyImageSpent(...keyImages: string[]): Promise<number[]> {
+    const response = await this.callRpc(new IsKeyImageSpentRequest(keyImages));
+
+    return response.spent_status;
+  }
+
+  public async sendRawTransaction(txAsHex: string, doNotRelay: boolean = false): Promise<TxInfo> {
+    const response = await this.callRpc(new SendRawTransactionRequest(txAsHex, doNotRelay));
+
+    return TxInfo.parse(response);
+  }
+
+  public async startMining(doBackgroundMining: boolean, ignoreBattery: boolean, minerAddress: string, threadsCount: number): Promise<void> {
+    const response = await this.callRpc(new StartMiningRequest(doBackgroundMining, ignoreBattery, minerAddress, threadsCount));
+    
+    if (typeof response.status == 'string' && response.status != 'OK') {
+      throw new Error(`Could not start mining: ${response.status}`);
+    }
+  }
+
+  public async stopMining(): Promise<void> {
+    const response = await this.callRpc(new StopMiningRequest());
+
+    if (typeof response.status == 'string' && response.status != 'OK') {
+      throw new Error(`Could not stop mining: ${response.status}`);
+    }
+  }
+
+  public async miningStatus(): Promise<MiningStatus> {
+    const response = await this.callRpc(new MiningStatusRequest());
+
+    return MiningStatus.parse(response);
+  }
+
+  public async stopDaemon(): Promise<void> {
+    const response = await this.callRpc(new StopDaemonRequest());
+
+    if (typeof response.status == 'string' && response.status != 'OK') {
+      throw new Error(`Could not stop daemon: ${response.status}`);
+    }
+  }
+
+  public async setLimit(limitDown: number, limitUp: number): Promise<{ limitDown: number, limitUp: number }> {
+    const response = await this.callRpc(new SetLimitRequest(limitDown, limitUp));
+
+    return {
+      limitDown: response.limit_down,
+      limitUp: response.limit_up
+    };
+  }
+
+  public async inPeers(inPeers: number): Promise<number> {
+    const response = await this.callRpc(new InPeersRequest(inPeers));
+
+    return response.in_peers;
+  }
+
+  public async outPeers(outPeers: number): Promise<number> {
+    const response = await this.callRpc(new OutPeersRequest(outPeers));
+
+    return response.out_peers;
+  }
+
+  public async getNetStats(): Promise<NetStats> {
+    const response = await this.callRpc(new GetNetStatsRequest());
+
+    return NetStats.parse(response);
+  }
+
+  public async getPublicNodes(whites: boolean = true, grays: boolean = false, includeBlocked: boolean = false): Promise<PublicNode[]> {
+    const response = await this.callRpc(new GetPublicNodesRequest(whites, grays, includeBlocked));
+
+    const _whites: any[] | undefined = response.whites;
+    const _grays: any[] | undefined = response.grays;
+    const nodes: PublicNode[] = [];
+
+    if (_whites) _whites.forEach((white) => nodes.push(PublicNode.parse(white, 'white')));
+    if (_grays) _grays.forEach((gray) => nodes.push(PublicNode.parse(gray, 'gray')));
+
+    return nodes;
+  }
+
+  public async getTransactionPoolHashes(): Promise<string[]> {
+    const response = await this.callRpc(new GetTransactionPoolHashesRequest());
+
+    return response.tx_hashes;
+  }
+
+  public async getTransactionPoolHashesBinary(): Promise<string> {
+    const response = await this.callRpc(new GetTransactionPoolHashesBinaryRequest());
+
+    return response.tx_hashes;
+  }
+
+  public async popBlocks(nBlocks: number): Promise<number> {
+    const response = await this.callRpc(new PopBlocksRequest(nBlocks));
+
+    return response.height;
+  }
+
+  public async update(command: 'check' | 'download', path: string = ''): Promise<UpdateInfo> {
+    const response = await this.callRpc(new UpdateRequest(command, path));
+    
+    return UpdateInfo.parse(response);
+  }
+
+  public async checkUpdate(): Promise<UpdateInfo> {
+    return await this.update('check');
+  }
+
+  public async downloadUpdate(path: string = ''): Promise<UpdateInfo> {
+    return await this.update('download', path);
   }
 
 }

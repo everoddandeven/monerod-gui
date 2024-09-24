@@ -1,1 +1,22 @@
-<p>transactions works!</p>
+<div class="tab-pane fade show active" id="pills-rpc" role="tabpanel" aria-labelledby="pills-rpc-tab" tabindex="0">
+    <div class="row g-5 m-2">
+        <div class="col-md-7 col-lg-10">
+          <h4 class="mb-3">Relay a list of transaction IDs</h4>
+          <form class="needs-validation" novalidate="">
+            <div class="row g-3">
+        
+              <div class="col-12">
+                  <label for="tx_ids" class="form-label">Tx Ids</label>
+                  <textarea type="text" class="form-control" id="tx_ids" placeholder="" rows="15" cols="15"></textarea>
+                  <small class="text-body-secondary">List of transaction IDs to relay</small>
+              </div>
+      
+            <hr class="my-4">
+            </div>
+
+          </form>
+        </div>
+    </div>
+    <button class="w-100 btn btn-primary btn-lg" type="button" [disabled]="!canRelay" (click)="onRelay()">Relay Tx</button>
+</div>
+

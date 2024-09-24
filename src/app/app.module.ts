@@ -22,6 +22,7 @@ import { MiningModule } from './pages/mining/mining.module';
 import { TransactionsModule } from './pages/transactions/transactions.module';
 import { OutputsModule } from './pages/outputs/outputs.module';
 import { SidebarComponent } from './shared/components';
+import { SettingsModule } from './pages/settings/settings.module';
 
 // AoT requires an exported function for factories
 const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -40,6 +41,7 @@ const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new Transl
     MiningModule,
     TransactionsModule,
     OutputsModule,
+    SettingsModule,
     TranslateModule,
     AppRoutingModule,
     TranslateModule.forRoot({

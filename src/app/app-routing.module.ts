@@ -7,6 +7,7 @@ import { DetailRoutingModule } from './pages/detail/detail-routing.module';
 import { HardForkInfoRoutingModule } from './pages/hard-fork-info/hard-fork-info-routing.module';
 import { SettingsModule } from './pages/settings/settings.module';
 import { TransactionsModule } from './pages/transactions/transactions.module';
+import { FormsModule } from '@angular/forms';
 
 const routes: Routes = [
   {
@@ -23,6 +24,7 @@ const routes: Routes = [
 @NgModule({
   imports: [
     RouterModule.forRoot(routes, {}),
+    FormsModule,
     HomeRoutingModule,
     DetailRoutingModule,
     TransactionsModule,
