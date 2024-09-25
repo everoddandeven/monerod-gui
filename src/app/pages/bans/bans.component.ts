@@ -20,7 +20,7 @@ export class BansComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.navbarService.removeNavbarLinks();
+    this.navbarService.removeLinks();
 
     console.log('BansComponent AFTER VIEW INIT');
 
@@ -36,7 +36,7 @@ export class BansComponent implements AfterViewInit {
   }
 
   private onNavigationEnd(): void {
-    this.navbarService.removeNavbarLinks();
+    this.navbarService.removeLinks();
   }
 
   private async load(): Promise<void> {

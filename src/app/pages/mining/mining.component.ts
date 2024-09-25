@@ -7,7 +7,6 @@ import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { MineableTxBacklog } from '../../../common/MineableTxBacklog';
 import { Chain } from '../../../common/Chain';
 import { CoreIsBusyError } from '../../../common/error';
-import { CommonModule, NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-mining',
@@ -64,7 +63,7 @@ export class MiningComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     console.log('DetailComponent AFTER VIEW INIT');
-    this.navbarService.setNavbarLinks(this.navbarLinks);
+    this.navbarService.setLinks(this.navbarLinks);
 
     setTimeout(() => {
       const $table = $('#chainsTable');
@@ -106,10 +105,10 @@ export class MiningComponent implements AfterViewInit {
       const $table = $('#chainsTable');
       $table.bootstrapTable('load', this.getChains());
       this.coreBusy = false;
-      this.navbarService.enableNavbarLinks();
+      this.navbarService.enableLinks();
     }
     catch(error) {
-      this.navbarService.disableNavbarLinks();
+      this.navbarService.disableLinks();
       if (error instanceof CoreIsBusyError) {
         this.coreBusy = true;
       }

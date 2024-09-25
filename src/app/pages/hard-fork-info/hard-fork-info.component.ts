@@ -37,7 +37,7 @@ export class HardForkInfoComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-      this.navbarService.removeNavbarLinks();
+      this.navbarService.removeLinks();
   }
 
   private onNavigationEnd(): void {

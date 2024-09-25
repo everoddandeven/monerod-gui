@@ -15,12 +15,12 @@ export class OutputsComponent implements AfterViewInit {
     this.navbarLinks = [
       new NavbarLink('pills-outputs-overview-tab', '#pills-outputs-overview', 'outputs-overview', true, 'Overview'),
       new NavbarLink('pills-outputs-histogram-tab', '#pills-outputs-histogram', 'outputs-histogram', false, 'Histogram'),
-      new NavbarLink('pills-outputs-distribution-tab', '#pills-outputs-distribution', 'outputs-distribution', false, 'Distribution')
-
+      new NavbarLink('pills-outputs-distribution-tab', '#pills-outputs-distribution', 'outputs-distribution', false, 'Distribution'),
+      new NavbarLink('pills-is-key-image-spent-tab', '#pills-is-key-image-spent', 'is-key-image-spent', false, 'Is Key Image Spent')
     ];
   }
 
   ngAfterViewInit(): void {
-      this.navbarService.setNavbarLinks(this.navbarLinks);
+      this.navbarService.setLinks(this.navbarLinks);
   }
 }

@@ -1,4 +1,5 @@
-<div class="tab-pane fade show active" id="pills-rpc" role="tabpanel" aria-labelledby="pills-rpc-tab" tabindex="0">
+<div class="tab-content" id="pills-tabContent">
+  <div class="tab-pane fade show active" id="pills-relay-tx" role="tabpanel" aria-labelledby="pills-relay-tx-tab" tabindex="0">
     <div class="row g-5 m-2">
         <div class="col-md-7 col-lg-10">
           <h4 class="mb-3">Relay a list of transaction IDs</h4>
@@ -7,7 +8,13 @@
         
               <div class="col-12">
                   <label for="tx_ids" class="form-label">Tx Ids</label>
-                  <textarea type="text" class="form-control" id="tx_ids" placeholder="" rows="15" cols="15"></textarea>
+                  <textarea type="text" class="form-control" id="tx_ids" placeholder="[
+  'tx_hash_1',
+  'tx_hash_2',
+  ... ,
+  'tx_hash_n'
+]" 
+                  rows="15" cols="15"></textarea>
                   <small class="text-body-secondary">List of transaction IDs to relay</small>
               </div>
       
@@ -18,5 +25,93 @@
         </div>
     </div>
     <button class="w-100 btn btn-primary btn-lg" type="button" [disabled]="!canRelay" (click)="onRelay()">Relay Tx</button>
+  </div>
+
+  <div class="tab-pane fade" id="pills-coinbase-tx-sum" role="tabpanel" aria-labelledby="pills-coinbase-tx-sum-tab" tabindex="0">
+    <div class="row g-5 m-2">
+        <div class="col-md-7 col-lg-10">
+          <h4 class="mb-3">Get coinbase tx sum</h4>
+          <form class="needs-validation" novalidate="">
+            <div class="row g-3">
+        
+              <div class="col-md-4">
+                <label for="height" class="form-label">Height</label>
+                <input type="number" class="form-control" id="height" placeholder="" [(ngModel)]="height" [ngModelOptions]="{standalone: true}">
+                <small class="text-body-secondary">Block height from which getting the amounts</small>
+              </div>
+
+              <div class="col-md-4">
+                <label for="count" class="form-label">Count</label>
+                <input type="number" class="form-control" id="count" placeholder="" [(ngModel)]="count" [ngModelOptions]="{standalone: true}">
+                <small class="text-body-secondary">Number of blocks to include in the sum</small>
+              </div>
+      
+            <hr class="my-4">
+            </div>
+
+          </form>
+        </div>
+    </div>
+    <button class="w-100 btn btn-primary btn-lg" type="button" (click)="onGetCoinbaseTxSum()">Get Coinbase Tx Sum</button>
+  </div>
+
+  <div class="tab-pane fade" id="pills-flush-tx-pool" role="tabpanel" aria-labelledby="pills-flush-tx-pool-tab" tabindex="0">
+    <div class="row g-5 m-2">
+        <div class="col-md-7 col-lg-10">
+          <h4 class="mb-3">Flush a list of transaction IDs</h4>
+          <form class="needs-validation" novalidate="">
+            <div class="row g-3">
+        
+              <div class="col-12">
+                  <label for="tx_ids" class="form-label">Tx Ids</label>
+                  <textarea type="text" class="form-control" id="tx_ids" placeholder="[
+  'tx_hash_1',
+  'tx_hash_2',
+  ... ,
+  'tx_hash_n'
+]" 
+                    rows="15" cols="15"></textarea>
+                  <small class="text-body-secondary">List of transaction IDs to flush in tx pool</small>
+              </div>
+      
+            <hr class="my-4">
+            </div>
+
+          </form>
+        </div>
+    </div>
+    <button class="w-100 btn btn-primary btn-lg" type="button" [disabled]="!canRelay" (click)="onFlush()">Flush Tx Pool</button>
+  </div>
+
+  <div class="tab-pane fade" id="pills-flush-cache" role="tabpanel" aria-labelledby="pills-flush-cache-tab" tabindex="0">
+    <div class="row g-5 m-2">
+        <div class="col-md-7 col-lg-10">
+          <h4 class="mb-3">Flush a list of bad transaction IDs from cache</h4>
+          <form class="needs-validation" novalidate="">
+            <div class="row g-3">
+        
+              <div class="col-12">
+                  <label for="tx_ids" class="form-label">Tx Ids</label>
+                  <textarea type="text" class="form-control" id="tx_ids" placeholder="[
+  'tx_hash_1',
+  'tx_hash_2',
+  ... ,
+  'tx_hash_n'
+]" 
+                    rows="15" cols="15"></textarea>
+                  <small class="text-body-secondary">List of bad transaction IDs to flush from cache</small>
+              </div>
+      
+            <hr class="my-4">
+            </div>
+
+          </form>
+        </div>
+    </div>
+    <button class="w-100 btn btn-primary btn-lg" type="button" [disabled]="!canRelay" (click)="onFlushFromCache()">Flush Bad Txs</button>
+  </div>
+
+
 </div>
+
 

@@ -96,7 +96,7 @@ function execMoneroDaemon(configFilePath: string): ChildProcess {
   return monerodProcess;
 }
 
-function startMoneroDaemon(commandOptions: string[]): ChildProcessWithoutNullStreams {
+function startMoneroDaemon(commandOptions: string[], logHandler?: (message: string) => void): ChildProcessWithoutNullStreams {
   const monerodPath = path.resolve(__dirname, monerodFilePath);
   
   console.log("Starting monerod daemon with options: " + commandOptions.join(" "));
@@ -107,17 +107,20 @@ function startMoneroDaemon(commandOptions: string[]): ChildProcessWithoutNullStr
   // Gestisci l'output di stdout in streaming
   monerodProcess.stdout.on('data', (data) => {
     console.log(`monerod stdout: ${data}`);
+    win?.webContents.send('monero-stdout', `${data}`);
     // Puoi anche inviare i log all'interfaccia utente tramite IPC
   });
 
   // Gestisci gli errori in stderr
   monerodProcess.stderr.on('data', (data) => {
     console.error(`monerod stderr: ${data}`);
+    win?.webContents.send('monero-stderr', `${data}`);
   });
 
   // Gestisci la chiusura del processo
   monerodProcess.on('close', (code) => {
     console.log(`monerod chiuso con codice: ${code}`);
+    win?.webContents.send('monero-stdout', `monerod exited with code: ${code}`);
   });
 
   return monerodProcess;
@@ -147,8 +150,8 @@ try {
     }
   });
 
-  ipcMain.on('start-monerod', (event, configFilePath) => {
-    startMoneroDaemon(configFilePath);
+  ipcMain.on('start-monerod', (event, configFilePath: string[], logHandler?: (message: string) => void) => {
+    startMoneroDaemon(configFilePath, logHandler);
   })
 
 } catch (e) {

@@ -12,7 +12,7 @@ import { NavbarLink } from './navbar.model';
 export class NavbarComponent {
 
   public get navbarLinks(): NavbarLink[] {
-    return this.navbarService.navbarLinks;
+    return this.navbarService.links;
   }
 
   constructor(private navbarService: NavbarService) {

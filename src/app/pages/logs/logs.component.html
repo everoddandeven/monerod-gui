@@ -1,0 +1,8 @@
+<div class="terminal bg-dark text-light p-3 m-4">
+    <div class="terminal-output" id="terminalOutput">
+      <ng-container *ngFor="let line of lines; trackBy: trackByFn">
+        <div>{{ line }}</div>
+      </ng-container>
+    </div>
+</div>
+  

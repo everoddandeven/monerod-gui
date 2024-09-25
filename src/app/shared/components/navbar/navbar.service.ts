@@ -7,29 +7,29 @@ import { NavbarLink } from './navbar.model';
 export class NavbarService {
   private _navbarLinks: NavbarLink[] = [];
 
-  public get navbarLinks(): NavbarLink[] {
+  public get links(): NavbarLink[] {
     return this._navbarLinks;
   }
 
   constructor() { }
 
-  public addNavbarLink(... navbarLinks: NavbarLink[]): void {
+  public addLink(... navbarLinks: NavbarLink[]): void {
     navbarLinks.forEach((navLink: NavbarLink) => this._navbarLinks.push(navLink));
   }
 
-  public setNavbarLinks(navbarLinks: NavbarLink[]): void {
+  public setLinks(navbarLinks: NavbarLink[]): void {
     this._navbarLinks = navbarLinks;
   }
 
-  public removeNavbarLinks(): void {
-    this.setNavbarLinks([]);
+  public removeLinks(): void {
+    this.setLinks([]);
   }
 
-  public disableNavbarLinks(): void {
+  public disableLinks(): void {
     this._navbarLinks.forEach((link) => link.disabled = true);
   }
 
-  public enableNavbarLinks(): void {
+  public enableLinks(): void {
     this._navbarLinks.forEach((link) => link.disabled = false);
   }
 

@@ -21,44 +21,41 @@ export class SidebarComponent implements OnChanges {
     this.errorMessage = '';
     this.daemonService.onDaemonStart.subscribe((started: boolean) => {
       if (!started) {
-        this.navLinks = [
-          new NavLink('Dashboard', '/detail', 'bi bi-speedometer2'),
-          new NavLink('Settings', '/settings', 'bi bi-gear')
-        ];
+        this.navLinks = this.createLightLinks();
       }
       else {
-        this.navLinks = [
-          new NavLink('Dashboard', '/detail', 'bi bi-speedometer2'),
-          new NavLink('Blockchain', '/blockchain', 'bi bi-bounding-box'),
-          new NavLink('Transactions', '/transactions', 'bi bi-credit-card-2-front'),
-          new NavLink('Outputs', '/outputs', 'bi bi-circle-fill'),
-          new NavLink('Mining', '/mining', 'bi bi-minecart-loaded'),
-          new NavLink('Hard Fork Info', '/hardforkinfo', 'bi bi-signpost-split'),
-          new NavLink('Bans', '/bans', 'bi bi-ban'),
-          new NavLink('Settings', '/settings', 'bi bi-gear')
-        ];
+        this.navLinks = this.createFullLinks();
       }
     });
   }
 
+  private createLightLinks(): NavLink[] {
+    return [
+      new NavLink('Dashboard', '/detail', 'bi bi-speedometer2'),
+      new NavLink('Settings', '/settings', 'bi bi-gear')
+    ];
+  }
+
+  private createFullLinks(): NavLink[] {
+    return this.navLinks = [
+      new NavLink('Dashboard', '/detail', 'bi bi-speedometer2'),
+      new NavLink('Transactions', '/transactions', 'bi bi-credit-card-2-front'),
+      new NavLink('Outputs', '/outputs', 'bi bi-circle-fill'),
+      new NavLink('Mining', '/mining', 'bi bi-minecart-loaded'),
+      new NavLink('Hard Fork Info', '/hardforkinfo', 'bi bi-signpost-split'),
+      new NavLink('Bans', '/bans', 'bi bi-ban'),
+      new NavLink('Logs', '/logs', 'bi bi-terminal'),
+      new NavLink('Version', '/version', 'bi bi-git'),
+      new NavLink('Settings', '/settings', 'bi bi-gear')
+    ];
+  }
+
   private updateLinks(): void {
     if (!this.isDaemonRunning) {
-      this.navLinks = [
-        new NavLink('Dashboard', '/detail', 'bi bi-speedometer2'),
-        new NavLink('Settings', '/settings', 'bi bi-gear')
-      ];
+      this.navLinks = this.createLightLinks();
     }
     else {
-      this.navLinks = [
-        new NavLink('Dashboard', '/detail', 'bi bi-speedometer2'),
-        new NavLink('Blockchain', '/blockchain', 'bi bi-bounding-box'),
-        new NavLink('Transactions', '/transactions', 'bi bi-credit-card-2-front'),
-        new NavLink('Outputs', '/outputs', 'bi bi-circle-fill'),
-        new NavLink('Mining', '/mining', 'bi bi-minecart-loaded'),
-        new NavLink('Hard Fork Info', '/hardforkinfo', 'bi bi-signpost-split'),
-        new NavLink('Bans', '/bans', 'bi bi-ban'),
-        new NavLink('Settings', '/settings', 'bi bi-gear')
-      ];
+      this.navLinks = this.createFullLinks();
     }
   }
 
@@ -68,22 +65,10 @@ export class SidebarComponent implements OnChanges {
 
   public ngOnChanges(changes: SimpleChanges): void {
     if (!this.isDaemonRunning) {
-      this.navLinks = [
-        new NavLink('Dashboard', '/detail', 'bi bi-speedometer2'),
-        new NavLink('Settings', '/settings', 'bi bi-gear')
-      ];
+      this.navLinks = this.createLightLinks();
     }
     else {
-      this.navLinks = [
-        new NavLink('Dashboard', '/detail', 'bi bi-speedometer2'),
-        new NavLink('Blockchain', '/blockchain', 'bi bi-bounding-box'),
-        new NavLink('Transactions', '/transactions', 'bi bi-credit-card-2-front'),
-        new NavLink('Outputs', '/outputs', 'bi bi-circle-fill'),
-        new NavLink('Mining', '/mining', 'bi bi-minecart-loaded'),
-        new NavLink('Hard Fork Info', '/hardforkinfo', 'bi bi-signpost-split'),
-        new NavLink('Bans', '/bans', 'bi bi-ban'),
-        new NavLink('Settings', '/settings', 'bi bi-gear')
-      ];
+      this.navLinks = this.createFullLinks();
     }
   }
 

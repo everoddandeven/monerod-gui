@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { EventEmitter, Injectable } from '@angular/core';
 import { BlockCount } from '../../../../common/BlockCount';
 import { firstValueFrom } from 'rxjs';
@@ -181,23 +181,41 @@ export class DaemonService {
 
   }
 
+  private async delay(ms: number = 0): Promise<void> {
+    await new Promise<void>(f => setTimeout(f, ms));
+  }
+
   private async callRpc(request: RPCRequest): Promise<{ [key: string]: any }> {
-    let method: string = '';
+    try {
+      let method: string = '';
 
-    if (request instanceof JsonRPCRequest) {
-      method = 'json_rpc';
+      if (request instanceof JsonRPCRequest) {
+        method = 'json_rpc';
+      }
+      else {
+        method = request.method;
+      }
+
+      const response = await firstValueFrom<{ [key: string]: any }>(this.httpClient.post(`${this.url}/${method}`, request.toDictionary(), this.headers));
+
+      if (response.error) {
+        this.raiseRpcError(response.error);
+      }
+
+      return response;
     }
-    else {
-      method = request.method;
+    catch (error) {
+      if (error instanceof HttpErrorResponse && error.status == 0) {
+        const wasRunning = this.daemonRunning;
+        this.daemonRunning = false;
+
+        if (wasRunning) {
+          this.onDaemonStart.emit(false);
+        }
+      }
+
+      throw error;
     }
-
-    const response = await firstValueFrom<{ [key: string]: any }>(this.httpClient.post(`${this.url}/${method}`, request.toDictionary(), this.headers));
-
-    if (response.error) {
-      this.raiseRpcError(response.error);
-    }
-
-    return response;
   }
 
   public async startDaemon(): Promise<void> {
@@ -215,7 +233,7 @@ export class DaemonService {
     const settings = await this.getSettings();
     this.electronService.ipcRenderer.send('start-monerod', settings.toCommandOptions());
 
-    await new Promise(f => setTimeout(f, 3000));
+    await this.delay(3000);
 
     if (await this.isRunning(true)) {
       console.log("Daemon started");
@@ -485,7 +503,20 @@ export class DaemonService {
   public async getTxPoolBacklog(): Promise<TxBacklogEntry[]> {
     const response = await this.callRpc(new GetTxPoolBacklogRequest());
 
-    return TxBacklogEntry.fromBinary(response.backlog);
+    if (typeof response.status == 'string' && response.status != 'OK') {
+      throw new Error(`Error code: ${response.status}`)
+    }
+
+    if (!response.bakclog && !response.result) {
+      return [];
+    }
+    
+    if (response.backlog) {
+      return TxBacklogEntry.fromBinary(response.backlog);
+    }
+    else if (response.result.backlog) return TxBacklogEntry.fromBinary(response.result.backlog);
+    
+    return [];
   }
 
   public async pruneBlockchain(check: boolean = false): Promise<BlockchainPruneInfo> {
@@ -577,11 +608,20 @@ export class DaemonService {
   }
 
   public async stopDaemon(): Promise<void> {
+    if (!this.daemonRunning) {
+      console.warn("Daemon not running");
+      return;
+    }
+
     const response = await this.callRpc(new StopDaemonRequest());
+    console.log(response);
 
     if (typeof response.status == 'string' && response.status != 'OK') {
       throw new Error(`Could not stop daemon: ${response.status}`);
     }
+
+    this.daemonRunning = false;
+    this.onDaemonStart.emit(false);
   }
 
   public async setLimit(limitDown: number, limitUp: number): Promise<{ limitDown: number, limitUp: number }> {

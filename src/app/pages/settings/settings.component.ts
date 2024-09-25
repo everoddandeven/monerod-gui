@@ -75,7 +75,7 @@ export class SettingsComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-      this.navbarService.setNavbarLinks(this.navbarLinks);
+      this.navbarService.setLinks(this.navbarLinks);
   }
 
   public OnOfflineChange() {

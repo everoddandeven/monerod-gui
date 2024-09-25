@@ -9,6 +9,7 @@ import { DaemonInfo } from '../../../common/DaemonInfo';
 
 import * as $ from 'jquery';
 import * as bootstrapTable from 'bootstrap-table';
+import { LogsService } from '../logs/logs.service';
 
 @Component({
   selector: 'app-detail',
@@ -19,6 +20,7 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public daemonRunning: boolean;
   public startingDaemon: boolean;
+  public stoppingDaemon: boolean;
   private syncInfo?: SyncInfo;
   private daemonInfo?: DaemonInfo;
   private readonly navbarLinks: NavbarLink[];
@@ -50,9 +52,10 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public cards: Card[];
 
-  constructor(private router: Router,private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
+  constructor(private router: Router,private daemonService: DaemonService, private navbarService: NavbarService, private logsService: LogsService) {
     this.daemonRunning = false;
     this.startingDaemon = false;
+    this.stoppingDaemon = false;
     this.syncStatus = 'Not synced';
     this.height = 0;
     this.targetHeight = 0;
@@ -72,7 +75,9 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.navbarLinks = [
       new NavbarLink('pills-home-tab', '#pills-home', 'pills-home', true, 'Overview', true),
-      new NavbarLink('pills-profile-tab', '#pills-profile', 'pills-profile', false, 'Peers', true)
+      new NavbarLink('pills-profile-tab', '#pills-profile', 'pills-profile', false, 'Peers', true),
+      new NavbarLink('pills-spans-tab', '#pills-spans', 'pills-spans', false, 'Spans', true),
+      new NavbarLink('pills-save-bc-tab', '#pills-save-bc', 'pills-save-bc', false, 'Save Blockchain', true)
     ];
 
     this.cards = this.createLoadingCards();
@@ -91,8 +96,10 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     console.log('DetailComponent AFTER VIEW INIT');
-    this.navbarService.setNavbarLinks(this.navbarLinks);
+    this.navbarService.setLinks(this.navbarLinks);
     
+    if (this.loadInterval != null) return;
+
     this.load().then(() => {
       this.cards = this.createCards();
     });
@@ -106,6 +113,8 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
       });
       */
 
+      if (this.stoppingDaemon) return;
+
       this.load().then(() => {
         this.cards = this.createCards();
       });
@@ -114,7 +123,7 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
       console.log("DetailComponent ON DESTROY");
-
+      
       if(this.loadInterval != null) {
         clearInterval(this.loadInterval);
       }
@@ -125,6 +134,11 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
       console.warn("Daemon already running");
       return;
     }
+
+    if (this.startingDaemon || this.stoppingDaemon) {
+      return;
+    }
+
     this.startingDaemon = true;
 
     setTimeout(async () => {
@@ -139,6 +153,27 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
   
       this.startingDaemon = false;
     }, 500);
+  }
+
+  public async stopDaemon(): Promise<void> {
+    if (this.stoppingDaemon || this.startingDaemon || !this.daemonRunning) {
+      return;
+    }
+
+    this.stoppingDaemon = true;
+
+    try {
+      if (this.loadInterval) clearInterval(this.loadInterval);
+
+      await this.daemonService.stopDaemon();
+
+      this.daemonRunning = false;
+    }
+    catch (error) {
+      console.error(error);
+    }
+
+    this.stoppingDaemon = false;
   }
 
   private onNavigationEnd(): void {
@@ -194,12 +229,12 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
       this.daemonRunning = await this.daemonService.isRunning();
 
       if (!this.daemonRunning) {
-        this.navbarService.disableNavbarLinks();
+        this.navbarService.disableLinks();
         this.isLoading = false;
         return;
       }
 
-      this.navbarService.enableNavbarLinks();
+      this.navbarService.enableLinks();
 
       const $table = $('#table');
       
