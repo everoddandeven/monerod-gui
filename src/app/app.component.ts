@@ -38,6 +38,21 @@ export class AppComponent {
   private async load(): Promise<void> {
     this.loading = true;
 
+    if (!window.indexedDB) {
+      console.log("Il tuo browser non supporta indexedDB");
+    }
+    else {
+      console.log("Browser supports IndexedDB");
+      var request = window.indexedDB.open("dati", 1);
+      console.log(request);
+
+      request.onsuccess = function(event: Event) {
+        if(event.target instanceof IDBOpenDBRequest) {
+          console.log(event.target.result)
+        }
+      };
+    }
+
     try {
       this.daemonRunning = await this.daemonService.isRunning();
     }

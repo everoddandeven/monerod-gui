@@ -1,10 +1,8 @@
-<app-load [show]="loading"></app-load>
-
-<div class="tab-content" id="pills-tabContent" [hidden]="loading">
+<div class="tab-content" id="pills-tabContent">
   <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab" tabindex="0">
     <div class="row d-flex">
 
-      <div *ngIf="!daemonRunning" class="h-100 p-5 text-bg-dark rounded-3 m-4 text-center">
+      <div *ngIf="!daemonRunning && !loading" class="h-100 p-5 text-bg-dark rounded-3 m-4 text-center">
         <h2><i class="bi bi-exclamation-diamond"></i> Daemon not running</h2>
         <p>Start monero daemon</p>
         <button *ngIf="!startingDaemon" class="btn btn-outline-light" type="button" (click)="startDaemon()"><i class="bi bi-play-fill"></i> Start</button>
@@ -15,12 +13,30 @@
       </div>
 
       @for(card of cards; track card.header) {
-        <div class="card text-bg-dark m-3 text-center" style="max-width: 18rem;">
-          <div class="card-header"><strong>{{card.header}}</strong></div>
-          <div class="card-body">
-            <h5 class="card-title">{{card.content}}</h5>
+        @if(card.loading) {
+          <div class="card text-bg-dark m-3 text-center" style="max-width: 18rem;" aria-hidden="true">
+            <div class="card-header">{{card.header}}</div>
+            <div class="card-body">
+
+              <p class="card-text placeholder-glow">
+                <span class="placeholder col-7"></span>
+                <span class="placeholder col-4"></span>
+                <span class="placeholder col-4"></span>
+                <span class="placeholder col-6"></span>
+                <span class="placeholder col-8"></span>
+              </p>
+            </div>
           </div>
-        </div>
+        }
+        @else {
+          <div class="card text-bg-dark m-3 text-center" style="max-width: 18rem;">
+            <div class="card-header"><strong>{{card.header}}</strong></div>
+            <div class="card-body">
+              <h5 class="card-title">{{card.content}}</h5>
+            </div>
+          </div>
+        }
+        
       }
 
     </div>

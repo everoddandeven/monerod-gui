@@ -20,7 +20,7 @@ export class DaemonSettings {
     public testDbgLockSleep: number = 0;
     
     public testnet: boolean = false;
-    public mainnet: boolean = false;
+    public mainnet: boolean = true;
     public stagenet: boolean = false;
 
     public regtest: boolean = false;

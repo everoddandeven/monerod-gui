@@ -7,6 +7,9 @@ import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { DaemonInfo } from '../../../common/DaemonInfo';
 
+import * as $ from 'jquery';
+import * as bootstrapTable from 'bootstrap-table';
+
 @Component({
   selector: 'app-detail',
   templateUrl: './detail.component.html',
@@ -72,12 +75,12 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
       new NavbarLink('pills-profile-tab', '#pills-profile', 'pills-profile', false, 'Peers', true)
     ];
 
-    this.cards = [];
+    this.cards = this.createLoadingCards();
 
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
         if (event.url != '/detail') return;
-        this.onNavigationEnd();
+        //this.onNavigationEnd();
       }
     });
    }
@@ -89,21 +92,24 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     console.log('DetailComponent AFTER VIEW INIT');
     this.navbarService.setNavbarLinks(this.navbarLinks);
+    
+    this.load().then(() => {
+      this.cards = this.createCards();
+    });
 
-    setTimeout(() => {
-      this.ngZone.run(() => {
-        if (this.isLoading) {
-          return;
-        }
-        const $table = $('#table');
-        $table.bootstrapTable({});
-        $table.bootstrapTable('refreshOptions', {
-          classes: 'table table-bordered table-hover table-dark table-striped'
-        });      
-        this.load();
-  
+    this.loadInterval = setInterval(() => {
+      /*
+      const $table = $('#table');
+      $table.bootstrapTable({});
+      $table.bootstrapTable('refreshOptions', {
+        classes: 'table table-bordered table-hover table-dark table-striped'
       });
-      }, 500);
+      */
+
+      this.load().then(() => {
+        this.cards = this.createCards();
+      });
+      }, 5000);
   }
 
   ngOnDestroy(): void {
@@ -121,27 +127,50 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.startingDaemon = true;
 
-    try {
-      await this.daemonService.startDaemon();
-      this.daemonRunning = await this.daemonService.isRunning();
-    }
-    catch(error) {
-      console.error(error);
-    }
-
-    this.startingDaemon = false;
+    setTimeout(async () => {
+      try {
+        await this.daemonService.startDaemon();
+        this.daemonRunning = await this.daemonService.isRunning();
+      }
+      catch(error) {
+        console.error(error);
+        this.daemonRunning = false;
+      }
+  
+      this.startingDaemon = false;
+    }, 500);
   }
 
   private onNavigationEnd(): void {
     this.load().then(() => {
-      this.cards = this.createCards();
+      //this.cards = this.createCards();
     });
     
   }
 
+  private createLoadingCards(): Card[] {
+    return [
+      new Card('Connection Status', this.connectionStatus, true),
+      new Card('Network Type', this.networkType, true),
+      new Card('Node Type', this.nodeType, true),
+      new Card('Sync progress', this.syncProgress, true),
+      new Card('Scan Height', `${this.height} / ${this.targetHeight}`, true),
+      new Card('Next needed pruning seed', `${this.nextNeededPruningSeed}`, true),
+      new Card('Block count', `${this.blockCount}`, true),
+      new Card('Monero version', this.version, true),
+      new Card('Blockchain size', this.blockchainSize, true),
+      new Card('Disk usage', this.diskUsage, true),
+      new Card('Transaction count', `${this.txCount}`, true),
+      new Card('Pool size', `${this.poolSize}`, true)
+    ];
+  }
+
   private createCards(): Card[] {
     if (!this.daemonRunning) {
-      return []
+      return [];
+    }
+    if (this.isLoading) {
+      return this.createLoadingCards();
     }
     return [
       new Card('Connection Status', this.connectionStatus),
@@ -193,9 +222,9 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.blockCount = blockCount.count;
 
-      const version = await this.daemonService.getVersion();
+      //const version = await this.daemonService.getVersion();
 
-      this.version = `${version.version}`;
+      //this.version = `${version.version}`;
 
       this.daemonInfo = await this.daemonService.getInfo();
 
@@ -211,8 +240,8 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
       this.version = this.daemonInfo.version;
       this.syncProgress = `${(this.height*100/this.targetHeight).toFixed(2)} %`;
 
-      //const blockchainPruned = await this.isBlockchainPruned();
-      const blockchainPruned = false;
+      const blockchainPruned = await this.isBlockchainPruned();
+      //const blockchainPruned = false;
       this.nodeType = blockchainPruned ? 'pruned' : 'full';
       $table.bootstrapTable('load', this.getPeers());
     }
@@ -251,9 +280,11 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
 class Card {
   public header: string;
   public content: string;
+  public loading: boolean;
 
-  constructor(header: string, content: string) {
+  constructor(header: string, content: string, loading: boolean = false) {
     this.header = header;
     this.content = content;
+    this.loading = loading;
   }
 }

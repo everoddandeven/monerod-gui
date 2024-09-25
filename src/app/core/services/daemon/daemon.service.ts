@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable } from '@angular/core';
 import { BlockCount } from '../../../../common/BlockCount';
 import { firstValueFrom } from 'rxjs';
 import { 
@@ -72,11 +72,17 @@ import { MiningStatus } from '../../../../common/MiningStatus';
 import { TxInfo } from '../../../../common/TxInfo';
 import { DaemonSettings } from '../../../../common/DaemonSettings';
 import { MethodNotFoundError } from '../../../../common/error/MethodNotFoundError';
+import { openDB, IDBPDatabase } from "idb"
+import { resolve } from 'path';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DaemonService {
+  private dbName = 'DaemonSettingsDB';
+  private storeName = 'settingsStore';
+  private openDbPromise: Promise<IDBPDatabase>;
+
   private daemonRunning?: boolean;
   private url: string = "http://127.0.0.1:28081";
   public settings: DaemonSettings;
@@ -84,14 +90,56 @@ export class DaemonService {
   //private url: string = "https://testnet.xmr.ditatompel.com";
   //private url: string = "https://xmr.yemekyedim.com:18081";
   //private url: string = "https://moneronode.org:18081";
-  
+
+  public readonly onDaemonStart: EventEmitter<boolean> = new EventEmitter<boolean>();
+
   private readonly headers: { [key: string]: string } = {
     "Access-Control-Allow-Headers": "*", // this will allow all CORS requests
     "Access-Control-Allow-Methods": 'POST,GET' // this states the allowed methods
   };
 
   constructor(private httpClient: HttpClient, private electronService: ElectronService) {
+    this.openDbPromise = this.openDatabase();
     this.settings = this.loadSettings();
+  }
+
+  private async openDatabase(): Promise<IDBPDatabase> {
+    return openDB(this.dbName, 1, {
+      upgrade(db) {
+        // Crea un archivio (store) per i settings se non esiste già
+        if (!db.objectStoreNames.contains('settingsStore')) {
+          db.createObjectStore('settingsStore', {
+            keyPath: 'id',
+            autoIncrement: true,
+          });
+        }
+      },
+    });
+  }
+
+  public async saveSettings(settings: DaemonSettings): Promise<void> {
+    const db = await this.openDbPromise;
+    await db.put(this.storeName, { id: 1, ...settings });
+    this.settings = settings;
+  }
+
+  public async getSettings(): Promise<DaemonSettings> {
+    const db = await this.openDbPromise;
+    const result = await db.get(this.storeName, 1);
+    if (result) {
+      this.settings = DaemonSettings.parse(result);
+    }
+    else
+    {
+      this.settings = new DaemonSettings();
+    }
+
+    return this.settings;
+  }
+
+  public async deleteSettings(): Promise<void> {
+    const db = await this.openDbPromise;
+    await db.delete(this.storeName, 1);
   }
 
   private loadSettings(): DaemonSettings {
@@ -164,10 +212,20 @@ export class DaemonService {
     }
 
     console.log("Starting daemon");
+    const settings = await this.getSettings();
+    this.electronService.ipcRenderer.send('start-monerod', settings.toCommandOptions());
 
-    this.electronService.ipcRenderer.send('start-monerod', this.settings.toCommandOptions());
+    await new Promise(f => setTimeout(f, 3000));
 
-    console.log("Daemon started");
+    if (await this.isRunning(true)) {
+      console.log("Daemon started");
+      this.onDaemonStart.emit(true);
+    }
+    else 
+    {
+      console.log("Daemon not started");
+      this.onDaemonStart.emit(false);
+    }
 
     setTimeout(() => {
     }, 500)

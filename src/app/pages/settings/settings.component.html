@@ -1,4 +1,4 @@
-<div class="tab-content" id="pills-settings-tabContent">
+<div *ngIf="!loading" class="tab-content" id="pills-settings-tabContent">
   <div class="tab-pane fade show active" id="pills-rpc" role="tabpanel" aria-labelledby="pills-rpc-tab" tabindex="0">
     <div class="row g-5 m-2">
       <div class="col-md-7 col-lg-10">
@@ -7,42 +7,42 @@
 
           <div class="form-check form-switch col-md-6">
             <label for="offline" class="form-check-label">Offline</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="offline" (change)="OnOfflineChange()">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="offline" [checked]="currentSettings.offline" (change)="OnOfflineChange()">
             <br>
             <small class="text-body-secondary">Do not listen for peers, nor connect to any</small>
           </div>
 
           <div class="form-check form-switch col-md-6">
             <label for="public-node" class="form-check-label">Public node</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="public-node" (change)="OnPublicNodeChange()">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="public-node" [checked]="currentSettings.publicNode" (change)="OnPublicNodeChange()">
             <br>
             <small class="text-body-secondary">Allow other users to use the node as a remote (restricted RPC mode, view-only commands) and advertise it over P2P</small>
           </div>
 
           <div class="form-check form-switch col-md-6">
             <label for="restricted-rpc" class="form-check-label">Restricted RPC</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="restricted-rpc" (change)="OnRestrictedRPCChange()">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="restricted-rpc" [checked]="currentSettings.restrictedRpc" (change)="OnRestrictedRPCChange()">
             <br>
             <small class="text-body-secondary">Restrict RPC to view-only commands and do not return privacy sensitive data in RPC calls</small>
           </div>
 
           <div class="form-check form-switch col-md-6">
             <label for="confirm-external-bind" class="form-check-label">Confirm external bind</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="confirm-external-bind" (change)="OnConfirmExternalBindChange()">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="confirm-external-bind" [checked]="currentSettings.confirmExternalBind" (change)="OnConfirmExternalBindChange()">
             <br>
             <small class="text-body-secondary">Confirm Bind IP is not a loopback (local) IP</small>
           </div>
 
           <div class="form-check form-switch col-md-6">
             <label for="rpc-ignore-ipv4" class="form-check-label">Ignore IPv4</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-ignore-ipv4" (change)="OnIgnoreIPv4Change()">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-ignore-ipv4" [checked]="currentSettings.rpcIgnoreIpv4" (change)="OnIgnoreIPv4Change()">
             <br>
             <small class="text-body-secondary">Ignore unsuccessful IPv4 bind for RPC</small>
           </div>
 
           <div class="form-check form-switch col-md-6">
             <label for="disable-rpc-ban" class="form-check-label">Disable ban</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="disable-rpc-ban" (change)="OnDisableRpcBanChange()">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="disable-rpc-ban" [checked]="currentSettings.disableRpcBan" (change)="OnDisableRpcBanChange()">
             <br>
             <small class="text-body-secondary">Do not ban hosts on RPC errors</small>
           </div>
@@ -85,7 +85,7 @@
 
           <div class="form-check form-switch col-md-12">
             <label for="rpc-use-ipv6" class="form-check-label">Enabled</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-use-ipv6" [(ngModel)]="currentSettings.rpcUseIpv6" [ngModelOptions]="{standalone: true}">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-use-ipv6" [checked]="currentSettings.rpcUseIpv6" [(ngModel)]="currentSettings.rpcUseIpv6" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Allow IPv6 for RPC</small>
           </div>
@@ -161,7 +161,7 @@
 
           <div class="form-check form-switch col-md-6">
             <label for="rpc-payment-allow-free-loopback" class="form-check-label">Allow free loopback</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-payment-allow-free-loopback" [(ngModel)]="currentSettings.rpcPaymentAllowFreeLoopback" [ngModelOptions]="{standalone: true}">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-payment-allow-free-loopback" [checked]="currentSettings.allowLocalIp" [(ngModel)]="currentSettings.rpcPaymentAllowFreeLoopback" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Allow free access from the loopback address (ie, the local host)</small>
           </div>
@@ -176,23 +176,23 @@
           <div class="col-md-4">
             <label for="rpc-ssl" class="form-label">SSL Mode</label>
             <select class="form-select" id="rpc-ssl" [(ngModel)]="currentSettings.rpcSsl" [ngModelOptions]="{standalone: true}">
-              <option [ngValue]="'autodetect'">Autodetect</option>
-              <option [ngValue]="'enabled'">Enabled</option>
-              <option [ngValue]="'disabled'">Disabled</option>
+              <option [ngValue]="'autodetect'" [selected]="currentSettings.rpcSsl == 'autodetect'">Autodetect</option>
+              <option [ngValue]="'enabled'" [selected]="currentSettings.rpcSsl == 'enabled'">Enabled</option>
+              <option [ngValue]="'disabled'" [selected]="currentSettings.rpcSsl == 'disabled'">Disabled</option>
             </select>
           </div>
 
 
           <div class="form-check form-switch col-md-4">
             <label for="rpc-ssl-allow-chained" class="form-check-label">Allow chained</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-ssl-allow-chained" [(ngModel)]="currentSettings.rpcSslAllowChained" [ngModelOptions]="{standalone: true}">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-ssl-allow-chained" [checked]="currentSettings.rpcSslAllowChained" [(ngModel)]="currentSettings.rpcSslAllowChained" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Allow user chain certificates</small>
           </div>
 
           <div class="form-check form-switch col-md-4">
             <label for="rpc-ssl-allow-any-cert" class="form-check-label">Allow any cert</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-ssl-allow-any-cert" [(ngModel)]="currentSettings.rpcSslAllowAnyCert" [ngModelOptions]="{standalone: true}">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-ssl-allow-any-cert" [checked]="currentSettings.rpcSslAllowAnyCert" [(ngModel)]="currentSettings.rpcSslAllowAnyCert" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Allow any peer certificate</small>
           </div>
@@ -229,14 +229,14 @@
 
           <div class="form-check form-switch col-md-6">
             <label for="allow-local-ip" class="form-check-label">Allow local IP</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="allow-local-ip" [(ngModel)]="currentSettings.allowLocalIp" [ngModelOptions]="{standalone: true}">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="allow-local-ip" [checked]="currentSettings.allowLocalIp" [(ngModel)]="currentSettings.allowLocalIp" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Allow local ip add to peer list, mostly in debug process</small>
           </div>
 
           <div class="form-check form-switch col-md-6">
             <label for="p2p-ignore-ipv4" class="form-check-label">Ignore IPv4</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="p2p-ignore-ipv4" [(ngModel)]="currentSettings.p2pIgnoreIpv4">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="p2p-ignore-ipv4" [checked]="currentSettings.p2pIgnoreIpv4" [(ngModel)]="currentSettings.p2pIgnoreIpv4">
             <br>
             <small class="text-body-secondary">Ignore unsuccessful IPv4 bind for P2P</small>
           </div>
@@ -332,21 +332,21 @@
 
               <div class="form-check form-switch col-md-6">
                 <label for="prune-blockchain" class="form-check-label">Prune Blockchain</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="prune-blockchain" [(ngModel)]="currentSettings.pruneBlockchain" [ngModelOptions]="{standalone: true}">
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="prune-blockchain" [checked]="currentSettings.pruneBlockchain" [(ngModel)]="currentSettings.pruneBlockchain" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">Reduce blockchain disk usage</small>
               </div>
 
               <div class="form-check form-switch col-md-6">
                 <label for="sync-pruned-blocks" class="form-check-label">Sync pruned blocks</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="sync-pruned-blocks" [(ngModel)]="currentSettings.syncPrunedBlocks" [ngModelOptions]="{standalone: true}">
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="sync-pruned-blocks" [checked]="currentSettings.syncPrunedBlocks" [(ngModel)]="currentSettings.syncPrunedBlocks" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">Allow syncing from nodes with only pruned blocks</small>
               </div>
 
               <div class="form-check form-switch col-md-6">
                 <label for="fast-block-sync" class="form-check-label">Fast block sync</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="fast-block-sync" [(ngModel)]="currentSettings.fastBlockSync" [ngModelOptions]="{standalone: true}">
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="fast-block-sync" [checked]="currentSettings.fastBlockSync" [(ngModel)]="currentSettings.fastBlockSync" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">Sync up most of the way by using embedded, known block hashes</small>
               </div>
@@ -360,7 +360,7 @@
 
               <div class="form-check form-switch col-md-6">
                 <label for="keep-alt-blocks" class="form-check-label">Keep alternative blocks</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="keep-alt-blocks" [(ngModel)]="currentSettings.keepAltBlocks" [ngModelOptions]="{standalone: true}">
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="keep-alt-blocks" [checked]="currentSettings.keepAltBlocks" [(ngModel)]="currentSettings.keepAltBlocks" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">Keep alternative blocks on restart</small>
               </div>
@@ -379,6 +379,8 @@
                   <label for="db-sync-mode" class="form-label">Database sync mode</label>
                   <input type="text" class="form-control" id="db-sync-mode" placeholder="fast:async:250000000bytes" [(ngModel)]="currentSettings.dbSyncMode" [ngModelOptions]="{standalone: true}">
               </div>
+
+              
       
               <hr class="my-4">
       
@@ -386,15 +388,15 @@
       
               <div class="my-3">
                 <div class="form-check">
-                  <input id="credit" name="paymentMethod" type="radio" class="form-check-input">
+                  <input id="credit" name="paymentMethod" type="radio" class="form-check-input" [value]="'mainnet'" [(ngModel)]="networkType" [ngModelOptions]="{standalone: true}" (change)="OnNetworkTypeChange()">
                   <label class="form-check-label" for="credit">mainnet</label>
                 </div>
                 <div class="form-check">
-                  <input id="debit" name="paymentMethod" type="radio" class="form-check-input" [(ngModel)]="currentSettings.testnet" [ngModelOptions]="{standalone: true}">
+                  <input id="debit" name="paymentMethod" type="radio" class="form-check-input" [value]="'testnet'" [(ngModel)]="networkType" [ngModelOptions]="{standalone: true}" (change)="OnNetworkTypeChange()">
                   <label class="form-check-label" for="debit">testnet</label>
                 </div>
                 <div class="form-check">
-                  <input id="paypal" name="paymentMethod" type="radio" class="form-check-input" [(ngModel)]="currentSettings.stagenet" [ngModelOptions]="{standalone: true}">
+                  <input id="paypal" name="paymentMethod" type="radio" class="form-check-input" [value]="'stagenet'" [(ngModel)]="networkType" [ngModelOptions]="{standalone: true}" (change)="OnNetworkTypeChange()">
                   <label class="form-check-label" for="paypal">stagenet</label>
                 </div>
               </div>
@@ -415,14 +417,14 @@
               
               <div class="form-check form-switch col-md-6">
                 <label for="bg-mining-enable" class="form-check-label">Enabled</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="bg-mining-enable" [(ngModel)]="currentSettings.bgMiningEnable" [ngModelOptions]="{standalone: true}">
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="bg-mining-enable" [checked]="currentSettings.bgMiningEnable" [(ngModel)]="currentSettings.bgMiningEnable" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">Enable background mining</small>
               </div>
 
               <div class="form-check form-switch col-md-6">
                 <label for="bg-mining-ignore-battery" class="form-check-label">Ignore battery</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="bg-mining-ignore-battery" [(ngModel)]="currentSettings.bgMiningIgnoreBattery" [ngModelOptions]="{standalone: true}">
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="bg-mining-ignore-battery" [checked]="currentSettings.bgMiningIgnoreBattery" [(ngModel)]="currentSettings.bgMiningIgnoreBattery" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">Reduce blockchain disk usage</small>
               </div>
@@ -491,6 +493,6 @@
 
   <hr class="my-4">
 
-  <button class="w-50 btn btn-primary btn-lg" type="submit" [disabled]="!modified" (click)="OnSave()">Save</button>
+  <button class="w-100 btn btn-primary btn-lg" type="submit" [disabled]="!modified" (click)="OnSave()">Save</button>
 
 </div>

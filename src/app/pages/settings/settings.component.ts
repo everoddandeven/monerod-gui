@@ -4,13 +4,12 @@ import { NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonSettings } from '../../../common/DaemonSettings';
 import { FormsModule, NgModel } from '@angular/forms';
+import { DaemonService } from '../../core/services/daemon/daemon.service';
 
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.component.html',
-  styleUrl: './settings.component.scss',
-  imports: [FormsModule],
-  standalone: true
+  styleUrl: './settings.component.scss'
 })
 export class SettingsComponent implements AfterViewInit {
 
@@ -20,9 +19,12 @@ export class SettingsComponent implements AfterViewInit {
 
   public rpcLoginUser: string;
   public rpcLoginPassword: string;
+  public loading: boolean;
 
-  constructor(private router: Router, private navbarService: NavbarService) {
-    
+  public networkType: 'mainnet' | 'testnet' | 'stagenet' = 'mainnet';
+
+  constructor(private router: Router, private navbarService: NavbarService, private daemonService: DaemonService) {
+    this.loading = true;
 
     this.navbarLinks = [
       new NavbarLink('pills-rpc-tab', '#pills-rpc', 'pills-rpc', true, 'RPC'),
@@ -50,6 +52,17 @@ export class SettingsComponent implements AfterViewInit {
         this.onNavigationEnd();
       }
     });
+
+    this.load();
+  }
+
+  private async load(): Promise<void> {
+    console.log("getting settings");
+    this.originalSettings = await this.daemonService.getSettings();
+    this.currentSettings = this.originalSettings.clone();
+    this.loading = false;
+
+    this.networkType = this.currentSettings.mainnet ? 'mainnet' : this.currentSettings.testnet ? 'testnet' : this.currentSettings.stagenet ? 'stagenet' : 'mainnet';
   }
 
   public get modified(): boolean {
@@ -105,12 +118,36 @@ export class SettingsComponent implements AfterViewInit {
     this.currentSettings.noFluffyBlocks = !this.currentSettings.noFluffyBlocks;
   }
 
+  public OnNetworkTypeChange(): void {
+    if (this.networkType == 'mainnet') {
+      this.currentSettings.mainnet = true;
+      this.currentSettings.testnet = false;
+      this.currentSettings.stagenet = false;
+    }
+    else if (this.networkType == 'testnet') {
+      this.currentSettings.mainnet = false;
+      this.currentSettings.testnet = true;
+      this.currentSettings.stagenet = false;
+    }
+    else if (this.networkType == 'stagenet') {
+      this.currentSettings.mainnet = false;
+      this.currentSettings.testnet = false;
+      this.currentSettings.stagenet = true;
+    }
+  }
+
   private onNavigationEnd(): void {
 
   }
 
-  public OnSave(): void {
-    
+  public async OnSave(): Promise<void> {
+    if (!this.modified) {
+      return;
+    }
+
+    await this.daemonService.saveSettings(this.currentSettings);
+
+    this.originalSettings = this.currentSettings.clone();
   }
 }
 /**
