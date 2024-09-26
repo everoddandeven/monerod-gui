@@ -1,0 +1,1 @@
+export { SimpleBootstrapCard } from "./SimpleBootstrapCard";

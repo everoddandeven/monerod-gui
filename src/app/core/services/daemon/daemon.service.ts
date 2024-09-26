@@ -79,6 +79,7 @@ import { resolve } from 'path';
   providedIn: 'root'
 })
 export class DaemonService {
+  private readonly versionApiUrl: string = 'https://api.github.com/repos/monero-project/monero/releases/latest';
   private dbName = 'DaemonSettingsDB';
   private storeName = 'settingsStore';
   private openDbPromise: Promise<IDBPDatabase>;
@@ -185,6 +186,14 @@ export class DaemonService {
     await new Promise<void>(f => setTimeout(f, ms));
   }
 
+  private async get(uri: string): Promise<{[key: string]: any}> {
+    return await firstValueFrom<{ [key: string]: any }>(this.httpClient.get(`${uri}`,this.headers));
+  }
+
+  private async post(uri: string, params: {[key: string]: any} = {}): Promise<{[key: string]: any}> {
+    return await firstValueFrom<{ [key: string]: any }>(this.httpClient.post(`${uri}`, params, this.headers));
+  }
+
   private async callRpc(request: RPCRequest): Promise<{ [key: string]: any }> {
     try {
       let method: string = '';
@@ -196,7 +205,7 @@ export class DaemonService {
         method = request.method;
       }
 
-      const response = await firstValueFrom<{ [key: string]: any }>(this.httpClient.post(`${this.url}/${method}`, request.toDictionary(), this.headers));
+      const response = await this.post(`${this.url}/${method}`, request.toDictionary());
 
       if (response.error) {
         this.raiseRpcError(response.error);
@@ -460,10 +469,51 @@ export class DaemonService {
     return SyncInfo.parse(response.result);
   }
 
-  public async getVersion(): Promise<DaemonVersion> {
-    const response = await this.callRpc(new GetVersionRequest());
+  public async getLatestVersion(): Promise<DaemonVersion> {
+    const response = await this.get(this.versionApiUrl);
 
-    return DaemonVersion.parse(response.result);
+    if (typeof response.tag_name != 'string') {
+      throw new Error("Could not get tag name version");
+    }
+
+    if (typeof response.name != 'string') {
+      throw new Error("Could not get name version");
+    }
+
+    const nameComponents = response.name.split(",");
+
+    if (nameComponents.length == 0) {
+      throw new Error("Could not get name");
+    }
+
+    const name = nameComponents[0];
+
+    return new DaemonVersion(0, true, `Monero '${name}' (${response.tag_name}-release)`);
+  }
+
+  public async getVersion(dontUseRpc: boolean = false): Promise<DaemonVersion> {
+    if(!dontUseRpc && this.daemonRunning) {
+      const response = await this.callRpc(new GetVersionRequest());
+
+      return DaemonVersion.parse(response.result);
+    }
+    else if (dontUseRpc) {
+      const monerodPath: string = ''; // TO DO get local monerod path
+
+      return new Promise<DaemonVersion>((resolve, reject) => {
+        this.electronService.ipcRenderer.on('on-monerod-version', (event, version: string) => {
+          resolve(DaemonVersion.parse(version));
+        });
+        
+        this.electronService.ipcRenderer.on('on-monerod-version-error', (event, version: string) => {
+          reject(version);
+        });
+
+        this.electronService.ipcRenderer.send('get-monerod-version', monerodPath);
+      });
+    }
+
+    throw new Error("Daemon not running");
   }
 
   public async getFeeEstimate(): Promise<FeeEstimate> {

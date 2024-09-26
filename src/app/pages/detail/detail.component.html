@@ -28,7 +28,7 @@
       </div>
 
       @for(card of cards; track card.header) {
-        @if(card.loading) {
+        @if(card.loading && !stoppingDaemon) {
           <div class="card text-bg-dark m-3 text-center" style="max-width: 18rem;" aria-hidden="true">
             <div class="card-header"><strong>{{card.header}}</strong></div>
             <div class="card-body">
@@ -43,7 +43,7 @@
             </div>
           </div>
         }
-        @else {
+        @else if (!stoppingDaemon) {
           <div class="card text-bg-dark m-3 text-center" style="max-width: 18rem;">
             <div class="card-header"><strong>{{card.header}}</strong></div>
             <div class="card-body">

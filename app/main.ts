@@ -10,6 +10,10 @@ let win: BrowserWindow | null = null;
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
 
+function getMonerodPath(): string {
+  return path.resolve(__dirname, monerodFilePath);
+}
+
 function createWindow(): BrowserWindow {
 
   const size = screen.getPrimaryDisplay().workAreaSize;
@@ -25,6 +29,7 @@ function createWindow(): BrowserWindow {
       allowRunningInsecureContent: (serve),
       contextIsolation: false
     },
+    icon: path.join(__dirname, 'assets/icons/favicon.ico')
   });
 
   if (serve) {
@@ -96,8 +101,20 @@ function execMoneroDaemon(configFilePath: string): ChildProcess {
   return monerodProcess;
 }
 
-function startMoneroDaemon(commandOptions: string[], logHandler?: (message: string) => void): ChildProcessWithoutNullStreams {
-  const monerodPath = path.resolve(__dirname, monerodFilePath);
+function getMonerodVersion(monerodFilePath: string): void {
+  const monerodProcess = spawn(getMonerodPath(), [ '--version' ]);
+
+  monerodProcess.stdout.on('data', (data) => {
+    win?.webContents.send('on-monerod-version', `${data}`);
+  })
+
+  monerodProcess.stderr.on('data', (data) => {
+    win?.webContents.send('on-monerod-version-error', `${data}`);
+  })
+}
+
+function startMoneroDaemon(commandOptions: string[]): ChildProcessWithoutNullStreams {
+  const monerodPath = getMonerodPath();
   
   console.log("Starting monerod daemon with options: " + commandOptions.join(" "));
 
@@ -106,14 +123,14 @@ function startMoneroDaemon(commandOptions: string[], logHandler?: (message: stri
 
   // Gestisci l'output di stdout in streaming
   monerodProcess.stdout.on('data', (data) => {
-    console.log(`monerod stdout: ${data}`);
+    //console.log(`monerod stdout: ${data}`);
     win?.webContents.send('monero-stdout', `${data}`);
     // Puoi anche inviare i log all'interfaccia utente tramite IPC
   });
 
   // Gestisci gli errori in stderr
   monerodProcess.stderr.on('data', (data) => {
-    console.error(`monerod stderr: ${data}`);
+    //console.error(`monerod stderr: ${data}`);
     win?.webContents.send('monero-stderr', `${data}`);
   });
 
@@ -150,9 +167,13 @@ try {
     }
   });
 
-  ipcMain.on('start-monerod', (event, configFilePath: string[], logHandler?: (message: string) => void) => {
-    startMoneroDaemon(configFilePath, logHandler);
+  ipcMain.on('start-monerod', (event, configFilePath: string[]) => {
+    startMoneroDaemon(configFilePath);
   })
+
+  ipcMain.on('get-monerod-version', (event, configFilePath: string) => {
+    getMonerodVersion(configFilePath);
+  });
 
 } catch (e) {
   // Catch Error

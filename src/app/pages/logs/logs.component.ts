@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, NgZone } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
 import { LogsService } from './logs.service';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 
@@ -8,6 +8,7 @@ import { NavbarService } from '../../shared/components/navbar/navbar.service';
   styleUrl: './logs.component.scss'
 })
 export class LogsComponent implements AfterViewInit {
+  @ViewChild('logTerminal', { read: ElementRef }) public logTerminal?: ElementRef<any>;
 
   constructor(private navbarService: NavbarService, private logsService: LogsService, private ngZone: NgZone) {
     this.logsService.onLog.subscribe((message: string) => this.onLog());
@@ -18,14 +19,16 @@ export class LogsComponent implements AfterViewInit {
   }
 
   private onLog(): void {
+    if (this.logTerminal) this.logTerminal.nativeElement.scrollTop = this.logTerminal.nativeElement.scrollHeight;
     // Scorri automaticamente in basso
     setTimeout(() => {
       this.ngZone.run(() => {
         this.lines;
-        const terminalOutput = document.getElementById('terminalOutput');
+        const terminalOutput = <HTMLDivElement | null>document.getElementById('terminalOutput');
         if (terminalOutput) {
           terminalOutput.style.width = `${window.innerWidth}`;
-          terminalOutput.scrollTop = terminalOutput.scrollHeight;
+          console.log(`scrolling from ${terminalOutput.offsetTop} to ${terminalOutput.scrollHeight}`)
+          terminalOutput.scrollBy(0, terminalOutput.scrollHeight)
         }
       })
       

@@ -1,4 +1,9 @@
-<div class="terminal bg-dark text-light p-3 m-4">
+<div *ngIf="lines.length == 0" class="h-100 p-5 text-bg-dark rounded-3 m-4 text-center">
+  <h2><i class="bi bi-exclamation-diamond"></i> No logs</h2>
+  <p>Start monero daemon to enable session logging</p>
+</div>
+
+<div *ngIf="lines.length > 0" class="terminal bg-dark text-light p-3 m-4" #logTerminal>
     <div class="terminal-output" id="terminalOutput">
       <ng-container *ngFor="let line of lines; trackBy: trackByFn">
         <div>{{ line }}</div>

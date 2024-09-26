@@ -32,6 +32,8 @@ export class SidebarComponent implements OnChanges {
   private createLightLinks(): NavLink[] {
     return [
       new NavLink('Dashboard', '/detail', 'bi bi-speedometer2'),
+      new NavLink('Logs', '/logs', 'bi bi-terminal'),
+      new NavLink('Version', '/version', 'bi bi-git'),
       new NavLink('Settings', '/settings', 'bi bi-gear')
     ];
   }

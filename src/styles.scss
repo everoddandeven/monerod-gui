@@ -13,7 +13,9 @@ html, body {
   padding: 0;
   background-color: #373636;
   height: 100%;
+  min-height: 100vh;
   font-family: Arial, Helvetica, sans-serif;
+  min-height: -webkit-fill-available;
 }
 
 html {

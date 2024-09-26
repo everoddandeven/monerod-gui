@@ -150,6 +150,8 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
         console.error(error);
         this.daemonRunning = false;
       }
+
+      this.cards = this.createLoadingCards();
   
       this.startingDaemon = false;
     }, 500);
