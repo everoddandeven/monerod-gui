@@ -13,6 +13,7 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
 import { HomeModule } from './pages/home/home.module';
 import { DetailModule } from './pages/detail/detail.module';
+import { BlockchainModule } from './pages/blockchain/blockchain.module';
 
 import { AppComponent } from './app.component';
 import { LoadComponent } from "./shared/components/load/load.component";
@@ -25,6 +26,7 @@ import { SidebarComponent } from './shared/components';
 import { SettingsModule } from './pages/settings/settings.module';
 import { LogsModule } from './pages/logs/logs.module';
 import { VersionModule } from './pages/version/version.module';
+import { HardForkInfoModule } from './pages/hard-fork-info/hard-fork-info.module';
 
 // AoT requires an exported function for factories
 const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -39,12 +41,14 @@ const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new Transl
     SharedModule,
     HomeModule,
     DetailModule,
+    BlockchainModule,
     BansModule,
     MiningModule,
     TransactionsModule,
     OutputsModule,
     LogsModule,
     SettingsModule,
+    HardForkInfoModule,
     VersionModule,
     TranslateModule,
     AppRoutingModule,

@@ -1,10 +1,20 @@
-<div class="row d-flex">
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2">Hard Fork Info</h1>
+  <div class="btn-toolbar mb-2 mb-md-0">
+    <ul class="nav nav-pills m-3" id="pills-tab" role="tablist">
+    </ul>
+  </div>
+</div>
+
+<div *ngIf="daemonRunning" class="row d-flex justify-content-center">
     @for(card of cards; track card.header) {
-        <div class="card text-bg-dark m-3 text-center" style="max-width: 18rem;">
-          <div class="card-header">{{card.header}}</div>
-          <div class="card-body">
-            <h5 class="card-title">{{card.content}}</h5>
-          </div>
+      <div class="card text-bg-dark m-3 text-center" style="max-width: 18rem;">
+        <div class="card-header">{{card.header}}</div>
+        <div class="card-body">
+          <h5 class="card-title">{{card.content}}</h5>
         </div>
+      </div>
     }
 </div>
+
+<app-daemon-not-running></app-daemon-not-running>

@@ -23,7 +23,7 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
   public stoppingDaemon: boolean;
   private syncInfo?: SyncInfo;
   private daemonInfo?: DaemonInfo;
-  private readonly navbarLinks: NavbarLink[];
+  public readonly navbarLinks: NavbarLink[];
 
   private syncStatus: string;
   private height: number;
@@ -52,7 +52,7 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public cards: Card[];
 
-  constructor(private router: Router,private daemonService: DaemonService, private navbarService: NavbarService, private logsService: LogsService) {
+  constructor(private router: Router,private daemonService: DaemonService, private navbarService: NavbarService, private logsService: LogsService, private ngZone: NgZone) {
     this.daemonRunning = false;
     this.startingDaemon = false;
     this.stoppingDaemon = false;
@@ -76,8 +76,7 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
     this.navbarLinks = [
       new NavbarLink('pills-home-tab', '#pills-home', 'pills-home', true, 'Overview', true),
       new NavbarLink('pills-profile-tab', '#pills-profile', 'pills-profile', false, 'Peers', true),
-      new NavbarLink('pills-spans-tab', '#pills-spans', 'pills-spans', false, 'Spans', true),
-      new NavbarLink('pills-save-bc-tab', '#pills-save-bc', 'pills-save-bc', false, 'Save Blockchain', true)
+      new NavbarLink('pills-spans-tab', '#pills-spans', 'pills-spans', false, 'Spans', true)
     ];
 
     this.cards = this.createLoadingCards();
@@ -87,6 +86,12 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
         if (event.url != '/detail') return;
         //this.onNavigationEnd();
       }
+    });
+
+    this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
+      this.ngZone.run(() => {
+        this.daemonRunning = running;
+      })
     });
    }
 

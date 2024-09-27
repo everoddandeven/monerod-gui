@@ -9,7 +9,7 @@ import { NavbarService } from '../../shared/components/navbar/navbar.service';
   styleUrl: './outputs.component.scss'
 })
 export class OutputsComponent implements AfterViewInit {
-  private readonly navbarLinks: NavbarLink[];
+  public readonly navbarLinks: NavbarLink[];
 
   constructor(private daemonService: DaemonService, private navbarService: NavbarService) {
     this.navbarLinks = [

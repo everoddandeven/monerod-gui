@@ -4,6 +4,7 @@ import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { SimpleBootstrapCard } from '../../shared/utils';
 import { DaemonVersion } from '../../../common/DaemonVersion';
+import { ElectronService } from '../../core/services';
 
 @Component({
   selector: 'app-version',
@@ -16,7 +17,7 @@ export class VersionComponent implements AfterViewInit {
   public currentVersion?: DaemonVersion;
   public latestVersion?: DaemonVersion;
 
-  constructor(private navbarService: NavbarService, private daemonService: DaemonService) {
+  constructor(private navbarService: NavbarService, private daemonService: DaemonService, private electronService: ElectronService) {
     this.links = [
       new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', true, 'Overview')
     ];
@@ -51,7 +52,7 @@ export class VersionComponent implements AfterViewInit {
   }
 
   public async load(): Promise<void> {
-    const version = await this.daemonService.getVersion(true);
+    const version = await this.daemonService.getVersion(this.electronService.isElectron);
     const latestVersion = await this.daemonService.getLatestVersion();
 
     this.currentVersion = version;

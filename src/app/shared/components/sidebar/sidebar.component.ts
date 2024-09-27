@@ -15,50 +15,38 @@ export class SidebarComponent implements OnChanges {
   public isLoading: boolean;
   public errorMessage: string;
 
+  public get topLinks(): NavLink[] {
+    return this.navLinks.filter((link) => link.position == 'top');
+  }
+
+  public get bottomLinks(): NavLink[] {
+    return this.navLinks.filter((link) => link.position == 'bottom');
+  }
+
   constructor(private router: Router, private daemonService: DaemonService) {
     this.updateLinks();
     this.isLoading = false;
     this.errorMessage = '';
-    this.daemonService.onDaemonStart.subscribe((started: boolean) => {
-      if (!started) {
-        this.navLinks = this.createLightLinks();
-      }
-      else {
-        this.navLinks = this.createFullLinks();
-      }
-    });
-  }
-
-  private createLightLinks(): NavLink[] {
-    return [
-      new NavLink('Dashboard', '/detail', 'bi bi-speedometer2'),
-      new NavLink('Logs', '/logs', 'bi bi-terminal'),
-      new NavLink('Version', '/version', 'bi bi-git'),
-      new NavLink('Settings', '/settings', 'bi bi-gear')
-    ];
   }
 
   private createFullLinks(): NavLink[] {
     return this.navLinks = [
       new NavLink('Dashboard', '/detail', 'bi bi-speedometer2'),
+      new NavLink('Blockchain', '/blockchain', 'bi bi-bounding-box'),
       new NavLink('Transactions', '/transactions', 'bi bi-credit-card-2-front'),
       new NavLink('Outputs', '/outputs', 'bi bi-circle-fill'),
       new NavLink('Mining', '/mining', 'bi bi-minecart-loaded'),
       new NavLink('Hard Fork Info', '/hardforkinfo', 'bi bi-signpost-split'),
-      new NavLink('Bans', '/bans', 'bi bi-ban'),
-      new NavLink('Logs', '/logs', 'bi bi-terminal'),
-      new NavLink('Version', '/version', 'bi bi-git'),
-      new NavLink('Settings', '/settings', 'bi bi-gear')
+      new NavLink('Bans', '/bans', 'bi bi-ban', 'bottom'),
+      new NavLink('Logs', '/logs', 'bi bi-terminal', 'bottom'),
+      new NavLink('Version', '/version', 'bi bi-git', 'bottom'),
+      new NavLink('Settings', '/settings', 'bi bi-gear', 'bottom')
     ];
   }
 
   private updateLinks(): void {
-    if (!this.isDaemonRunning) {
-      this.navLinks = this.createLightLinks();
-    }
-    else {
-      this.navLinks = this.createFullLinks();
-    }
+    this.navLinks = this.createFullLinks();
+
   }
 
   public isActive(navLink: NavLink): boolean {
@@ -66,12 +54,8 @@ export class SidebarComponent implements OnChanges {
   }
 
   public ngOnChanges(changes: SimpleChanges): void {
-    if (!this.isDaemonRunning) {
-      this.navLinks = this.createLightLinks();
-    }
-    else {
-      this.navLinks = this.createFullLinks();
-    }
+    this.navLinks = this.createFullLinks();
+
   }
 
 }
@@ -81,9 +65,12 @@ class NavLink {
   public readonly path: string;
   public readonly icon: string;
 
-  constructor(title: string, path: string, icon: string) {
+  public readonly position: 'top' | 'bottom';
+
+  constructor(title: string, path: string, icon: string, position: 'top' | 'bottom' = 'top') {
     this.title = title;
     this.path = path;
     this.icon = icon;
+    this.position = position;
   }
 }

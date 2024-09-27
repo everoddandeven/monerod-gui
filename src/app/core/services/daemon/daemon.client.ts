@@ -1,105 +1,33 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { EventEmitter, Injectable } from '@angular/core';
-import { BlockCount } from '../../../../common/BlockCount';
-import { firstValueFrom } from 'rxjs';
-import { 
-  GetBlockCountRequest, GetBlockHashRequest, GetBlockTemplateRequest, JsonRPCRequest, 
-  SubmitBlockRequest, GenerateBlocksRequest, GetLastBlockHeaderRequest, 
-  GetBlockHeaderByHashRequest, GetBlockHeaderByHeightRequest, GetBlockHeadersRangeRequest, 
-  GetConnectionsRequest, GetInfoRequest, HardForkInfoRequest, SetBansRequest, GetBansRequest, 
-  BannedRequest, FlushTxPoolRequest, GetOutputHistogramRequest, GetCoinbaseTxSumRequest,
-  SyncInfoRequest, GetOutsRequest,
-  GetVersionRequest,
-  GetFeeEstimateRequest,
-  GetAlternateChainsRequest,
-  GetTxPoolBacklogRequest,
-  PruneBlockchainRequest,
-  CalculatePoWHashRequest,
-  FlushCacheRequest,
-  GetMinerDataRequest,
-  EmptyRpcRequest, RPCRequest,
-  AddAuxPoWRequest,
-  GetOutputDistributionRequest,
-  GetBlockRequest,
-  UpdateRequest,
-  PopBlocksRequest,
-  GetTransactionPoolHashesRequest,
-  GetTransactionPoolHashesBinaryRequest,
-  GetPublicNodesRequest,
-  GetNetStatsRequest,
-  InPeersRequest,
-  OutPeersRequest,
-  SetLimitRequest,
-  StopDaemonRequest,
-  MiningStatusRequest,
-  StopMiningRequest,
-  StartMiningRequest,
-  SendRawTransactionRequest,
-  IsKeyImageSpentRequest,
-  GetAltBlockHashesRequest,
-  SaveBcRequest,
-  SetBootstrapDaemonRequest
-} from '../../../../common/request';
-import { BlockTemplate } from '../../../../common/BlockTemplate';
-import { GeneratedBlocks } from '../../../../common/GeneratedBlocks';
-import { BlockHeader } from '../../../../common/BlockHeader';
-import { Connection } from '../../../../common/Connection';
-import { DaemonInfo } from '../../../../common/DaemonInfo';
-import { HardForkInfo } from '../../../../common/HardForkInfo';
-import { Ban } from '../../../../common/Ban';
-import { HistogramEntry } from '../../../../common/HistogramEntry';
-import { SyncInfo } from '../../../../common/SyncInfo';
-import { DaemonVersion } from '../../../../common/DaemonVersion';
-import { FeeEstimate } from '../../../../common/FeeEstimate';
-import { Chain } from '../../../../common/Chain';
-import { RelayTxRequest } from '../../../../common/request/RelayTxRequest';
-import { TxBacklogEntry } from '../../../../common/TxBacklogEntry';
-import { BlockchainPruneInfo } from '../../../../common/BlockchainPruneInfo';
-import { MinerData } from '../../../../common/MinerData';
-import { CoreIsBusyError } from '../../../../common/error';
-import { ElectronService } from '../electron/electron.service';
-import { AddedAuxPow } from '../../../../common/AddedAuxPow';
-import { AuxPoW } from '../../../../common/AuxPoW';
-import { OutputDistribution } from '../../../../common/OutputDistribution';
-import { CoinbaseTxSum } from '../../../../common/CoinbaseTxSum';
-import { Block } from '../../../../common/Block';
-import { Output } from '../../../../common/Output';
-import { OutKey } from '../../../../common/OutKey';
-import { UpdateInfo } from '../../../../common/UpdateInfo';
-import { PublicNode } from '../../../../common/PublicNode';
-import { NetStats } from '../../../../common/NetStats';
-import { MiningStatus } from '../../../../common/MiningStatus';
-import { TxInfo } from '../../../../common/TxInfo';
-import { DaemonSettings } from '../../../../common/DaemonSettings';
-import { MethodNotFoundError } from '../../../../common/error/MethodNotFoundError';
-import { openDB, IDBPDatabase } from "idb"
-import { resolve } from 'path';
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
+import { CoreIsBusyError, MethodNotFoundError, JsonRPCRequest, RPCRequest, AddAuxPoWRequest, AddedAuxPow, AuxPoW, Ban, BannedRequest, Block, BlockchainPruneInfo, BlockCount, BlockHeader, BlockTemplate, CalculatePoWHashRequest, Chain, CoinbaseTxSum, Connection, DaemonInfo, DaemonVersion, FeeEstimate, FlushCacheRequest, FlushTxPoolRequest, GenerateBlocksRequest, GeneratedBlocks, GetAltBlockHashesRequest, GetAlternateChainsRequest, GetBansRequest, GetBlockCountRequest, GetBlockHashRequest, GetBlockHeaderByHashRequest, GetBlockHeaderByHeightRequest, GetBlockHeadersRangeRequest, GetBlockRequest, GetBlockTemplateRequest, GetCoinbaseTxSumRequest, GetConnectionsRequest, GetFeeEstimateRequest, GetInfoRequest, GetLastBlockHeaderRequest, GetMinerDataRequest, GetNetStatsRequest, GetOutputDistributionRequest, GetOutputHistogramRequest, GetOutsRequest, GetPublicNodesRequest, GetTransactionPoolHashesBinaryRequest, GetTransactionPoolHashesRequest, GetTxPoolBacklogRequest, GetVersionRequest, HardForkInfo, HardForkInfoRequest, HistogramEntry, InPeersRequest, IsKeyImageSpentRequest, MinerData, MiningStatus, MiningStatusRequest, NetStats, OutKey, OutPeersRequest, Output, OutputDistribution, PopBlocksRequest, PruneBlockchainRequest, PublicNode, RelayTxRequest, SaveBcRequest, SendRawTransactionRequest, SetBansRequest, SetBootstrapDaemonRequest, SetLimitRequest, StartMiningRequest, StopMiningRequest, SubmitBlockRequest, SyncInfo, SyncInfoRequest, TxBacklogEntry, TxInfo, UpdateInfo, UpdateRequest, StopDaemonRequest, EmptyRpcRequest, DaemonSettings } from "../../../../common";
+import { firstValueFrom } from "rxjs";
+import { ElectronService } from "../electron/electron.service";
+import { IDBPDatabase, openDB } from "idb";
 
-@Injectable({
-  providedIn: 'root'
-})
-export class DaemonService {
+export class DaemonClient {
+  private electronService: ElectronService;
+  private httpClient: HttpClient;
+  private url: string;
+
   private readonly versionApiUrl: string = 'https://api.github.com/repos/monero-project/monero/releases/latest';
   private dbName = 'DaemonSettingsDB';
   private storeName = 'settingsStore';
   private openDbPromise: Promise<IDBPDatabase>;
 
-  private daemonRunning?: boolean;
-  private url: string = "http://127.0.0.1:28081";
+  public daemonRunning: boolean;
   public settings: DaemonSettings;
-  //private url: string = "http://node2.monerodevs.org:28089";
-  //private url: string = "https://testnet.xmr.ditatompel.com";
-  //private url: string = "https://xmr.yemekyedim.com:18081";
-  //private url: string = "https://moneronode.org:18081";
 
-  public readonly onDaemonStatusChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   private readonly headers: { [key: string]: string } = {
     "Access-Control-Allow-Headers": "*", // this will allow all CORS requests
     "Access-Control-Allow-Methods": 'POST,GET' // this states the allowed methods
   };
 
-  constructor(private httpClient: HttpClient, private electronService: ElectronService) {
+  constructor(httpClient: HttpClient, url: string, electronService: ElectronService) {
+    this.httpClient = httpClient;
+    this.url = url;
+    this.electronService = electronService;
+    this.daemonRunning = false;
     this.openDbPromise = this.openDatabase();
     this.settings = this.loadSettings();
   }
@@ -144,18 +72,6 @@ export class DaemonService {
   }
 
   private loadSettings(): DaemonSettings {
-      /*
-  const args = [
-    '--testnet',
-    '--fast-block-sync', '1',
-    '--prune-blockchain',
-    '--sync-pruned-blocks',
-    '--confirm-external-bind',
-    '--max-concurrency', '1',
-    '--log-level', '1',
-    '--rpc-access-control-origins=*'
-  ];
-  */
     const settings = new DaemonSettings();
     settings.testnet = true;
     settings.fastBlockSync = true;
@@ -168,7 +84,6 @@ export class DaemonService {
   }
 
   private raiseRpcError(error: { code: number, message: string }): void {
-
     if (error.code == -9) {
       throw new CoreIsBusyError();
     }
@@ -219,7 +134,7 @@ export class DaemonService {
         this.daemonRunning = false;
 
         if (wasRunning) {
-          this.onDaemonStatusChanged.emit(false);
+            //this.onDaemonStart.emit(false);
         }
       }
 
@@ -227,15 +142,16 @@ export class DaemonService {
     }
   }
 
-  public async startDaemon(): Promise<void> {
+
+  public async startDaemon(): Promise<boolean> {
     if (await this.isRunning()) {
       console.warn("Daemon already running");
-      return;
+      return false;
     }
 
     if (!this.electronService.isElectron) {
       console.error("Could not start monero daemon: not electron app");
-      return;
+      return false;
     }
 
     console.log("Starting daemon");
@@ -246,16 +162,13 @@ export class DaemonService {
 
     if (await this.isRunning(true)) {
       console.log("Daemon started");
-      this.onDaemonStatusChanged.emit(true);
+      return true;
     }
     else 
     {
       console.log("Daemon not started");
-      this.onDaemonStatusChanged.emit(false);
+      return false;
     }
-
-    setTimeout(() => {
-    }, 500)
   }
 
   public async isRunning(force: boolean = false): Promise<boolean> {
@@ -279,6 +192,26 @@ export class DaemonService {
     return this.daemonRunning;
 
   }
+
+  public async stopDaemon(): Promise<boolean> {
+    if (!this.daemonRunning) {
+      console.warn("Daemon not running");
+      return false;
+    }
+
+    const response = await this.callRpc(new StopDaemonRequest());
+    console.log(response);
+
+    if (typeof response.status == 'string' && response.status != 'OK') {
+      throw new Error(`Could not stop daemon: ${response.status}`);
+    }
+
+    this.daemonRunning = false;
+    
+    return true;
+  }
+
+    //#region Request
 
   public async getBlock(heightOrHash: number | string, fillPowHash: boolean = false): Promise<Block> {
     const response = await this.callRpc(new GetBlockRequest(heightOrHash, fillPowHash));
@@ -657,23 +590,6 @@ export class DaemonService {
     return MiningStatus.parse(response);
   }
 
-  public async stopDaemon(): Promise<void> {
-    if (!this.daemonRunning) {
-      console.warn("Daemon not running");
-      return;
-    }
-
-    const response = await this.callRpc(new StopDaemonRequest());
-    console.log(response);
-
-    if (typeof response.status == 'string' && response.status != 'OK') {
-      throw new Error(`Could not stop daemon: ${response.status}`);
-    }
-
-    this.daemonRunning = false;
-    this.onDaemonStatusChanged.emit(false);
-  }
-
   public async setLimit(limitDown: number, limitUp: number): Promise<{ limitDown: number, limitUp: number }> {
     const response = await this.callRpc(new SetLimitRequest(limitDown, limitUp));
 
@@ -745,6 +661,7 @@ export class DaemonService {
   public async downloadUpdate(path: string = ''): Promise<UpdateInfo> {
     return await this.update('download', path);
   }
+  
 
+    //#endregion
 }
-

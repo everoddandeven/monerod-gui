@@ -1,0 +1,11 @@
+<div *ngIf="!daemonRunning" class="h-100 p-5 text-bg-dark rounded-3 m-4 text-center">
+    <h2><i class="bi bi-exclamation-diamond m-4"></i> Daemon not running</h2>
+    <p>Start monero daemon</p>
+    <button *ngIf="!startingDaemon" class="btn btn-outline-light" type="button" (click)="startDaemon()"><i class="bi bi-play-fill"></i> Start</button>
+    <button *ngIf="startingDaemon" class="btn btn-outline-light" type="button" disabled>
+      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      Starting daemon
+    </button>
+    &nbsp;
+    <button routerLink="/settings" class="btn btn-outline-light" type="button" [disabled]="startingDaemon"><i class="bi bi-gear"></i> Configure</button>
+</div>

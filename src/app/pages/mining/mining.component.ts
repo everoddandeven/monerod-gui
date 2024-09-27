@@ -1,4 +1,4 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { MinerData } from '../../../common/MinerData';
@@ -15,7 +15,7 @@ import { CoreIsBusyError } from '../../../common/error';
 })
 export class MiningComponent implements AfterViewInit {
 
-  private readonly navbarLinks: NavbarLink[];
+  public readonly navbarLinks: NavbarLink[];
   public coreBusy: boolean;
   private minerData?: MinerData;
 
@@ -29,8 +29,9 @@ export class MiningComponent implements AfterViewInit {
   private alternateChains: Chain[];
   //private txBacklog: MineableTxBacklog[]
   public cards: Card[];
+  public daemonRunning: boolean;
 
-  constructor(private router: Router, private daemonService: DaemonService, private navbarService: NavbarService) {
+  constructor(private router: Router, private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
 
     this.majorVersion = 0;
     this.height = 0;
@@ -58,6 +59,18 @@ export class MiningComponent implements AfterViewInit {
         if (event.url != '/mining') return;
         this.onNavigationEnd();
       }
+    });
+    
+    this.daemonRunning = true;
+    this.daemonService.onDaemonStatusChanged.subscribe((running) => {
+      this.ngZone.run(() => {
+        this.daemonRunning = running;
+      });
+    });
+    this.daemonService.isRunning().then((value: boolean) => {
+      this.ngZone.run(() => {
+        this.daemonRunning = value;
+      });
     });
   }
 
@@ -108,9 +121,11 @@ export class MiningComponent implements AfterViewInit {
       this.navbarService.enableLinks();
     }
     catch(error) {
-      this.navbarService.disableLinks();
       if (error instanceof CoreIsBusyError) {
         this.coreBusy = true;
+      }
+      else {
+        this.navbarService.disableLinks();
       }
     }
     

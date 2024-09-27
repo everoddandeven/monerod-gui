@@ -1,4 +1,4 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
@@ -18,7 +18,9 @@ export class HardForkInfoComponent implements AfterViewInit {
   private voting: number;
   private window: number;
 
-  constructor(private router: Router, private daemonService: DaemonService, private navbarService: NavbarService) {
+  public daemonRunning: boolean;
+
+  constructor(private router: Router, private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
     this.cards = [];
     this.enabled = false;
     this.earliestHeight = 0;
@@ -27,6 +29,7 @@ export class HardForkInfoComponent implements AfterViewInit {
     this.votes = 0;
     this.voting = 0;
     this.window = 0;
+    this.daemonRunning = false;
 
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
@@ -34,6 +37,17 @@ export class HardForkInfoComponent implements AfterViewInit {
         this.onNavigationEnd();
       }
     });
+
+    this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
+      this.daemonRunning = running;
+    });
+
+    this.daemonService.isRunning().then((running: boolean) => {
+      this.ngZone.run(() => {
+        this.daemonRunning = running;
+      });
+    });
+
   }
 
   ngAfterViewInit(): void {
@@ -48,6 +62,9 @@ export class HardForkInfoComponent implements AfterViewInit {
   }
 
   private async load(): Promise<void> {
+    if (!await this.daemonService.isRunning()) {
+      return;
+    }
     const info = await this.daemonService.hardForkInfo();
 
     this.earliestHeight = info.earliestHeight;

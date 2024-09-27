@@ -1,7 +1,8 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Outputs</h1>
+    <h1 class="h2">Blockchain</h1>
     <div class="btn-toolbar mb-2 mb-md-0">
       <ul class="nav nav-pills m-3" id="pills-tab" role="tablist">
+        
         @for(navbarLink of navbarLinks; track navbarLink.name) {
           <li class="nav-item mr-2" role="presentation">
               <button [class]="navbarLink.selected ? 'nav-link active btn-sm' : 'nav-link btn-sm'" [id]="navbarLink.id" data-bs-toggle="pill" [attr.data-bs-target]="navbarLink.target" type="button" role="tab" [attr.aria-controls]="navbarLink.controls" [attr.aria-selected]="navbarLink.selected" [disabled]="navbarLink.disabled">{{navbarLink.name}}</button>

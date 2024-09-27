@@ -13,7 +13,7 @@ import { DaemonService } from '../../core/services/daemon/daemon.service';
 })
 export class SettingsComponent implements AfterViewInit {
 
-  private readonly navbarLinks: NavbarLink[];
+  public readonly navbarLinks: NavbarLink[];
   private originalSettings: DaemonSettings;
   public currentSettings: DaemonSettings;
 

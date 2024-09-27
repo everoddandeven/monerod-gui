@@ -1,6 +1,19 @@
-<div *ngIf="!coreBusy" class="tab-content" id="pills-tabContent">
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2">Mining</h1>
+  <div class="btn-toolbar mb-2 mb-md-0">
+    <ul class="nav nav-pills m-3" id="pills-tab" role="tablist">
+      @for(navbarLink of navbarLinks; track navbarLink.name) {
+        <li class="nav-item mr-2" role="presentation">
+            <button [class]="navbarLink.selected ? 'nav-link active btn-sm' : 'nav-link btn-sm'" [id]="navbarLink.id" data-bs-toggle="pill" [attr.data-bs-target]="navbarLink.target" type="button" role="tab" [attr.aria-controls]="navbarLink.controls" [attr.aria-selected]="navbarLink.selected" [disabled]="navbarLink.disabled">{{navbarLink.name}}</button>
+        </li>
+      }
+    </ul>
+  </div>
+</div>
+
+<div *ngIf="!coreBusy && daemonRunning" class="tab-content" id="pills-tabContent">
     <div class="tab-pane fade show active" id="pills-miner-data" role="tabpanel" aria-labelledby="pills-miner-data-tab" tabindex="0">
-      <div class="row d-flex">
+      <div class="row d-flex justify-content-center">
   
         @for(card of cards; track card.header) {
           <div class="card text-bg-dark m-3 text-center" style="max-width: 18rem;">
@@ -52,10 +65,10 @@
     <div class="tab-pane fade" id="pills-disabled" role="tabpanel" aria-labelledby="pills-disabled-tab" tabindex="0">...</div>
 </div>
 
-<div *ngIf="coreBusy" class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column text-bg-dark rounded-3 m-4 text-center">
+<div *ngIf="coreBusy && daemonRunning" class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column text-bg-dark rounded-3 m-4 text-center">
 
   <main class="px-3">
-    <h1><i class="bi bi-exclamation-diamond"></i> Core is busy.</h1>
+    <h1><i class="bi bi-exclamation-diamond m-4"></i> Core is busy</h1>
     <p class="lead">Mining capabilities are not available during daemon sync.</p>
     <!--
     <p class="lead">
@@ -69,3 +82,5 @@
   </footer>
 -->
 </div>
+
+<app-daemon-not-running></app-daemon-not-running>
