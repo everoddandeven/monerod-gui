@@ -11,8 +11,9 @@
   </div>
 </div>
 <app-daemon-not-running></app-daemon-not-running>
+<app-daemon-stopping></app-daemon-stopping>
 
-<div *ngIf="daemonRunning" class="tab-content" id="pills-tabContent">
+<div *ngIf="daemonRunning && !stoppingDaemon" class="tab-content" id="pills-tabContent">
   <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab" tabindex="0">
     <div class="row d-flex justify-content-center">
 

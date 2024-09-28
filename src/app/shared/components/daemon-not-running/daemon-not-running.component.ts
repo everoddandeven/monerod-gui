@@ -9,7 +9,11 @@ import { DaemonService } from '../../../core/services/daemon/daemon.service';
 export class DaemonNotRunningComponent {
 
   public daemonRunning: boolean = false;
-  public startingDaemon: boolean = false;
+  
+  public get startingDaemon(): boolean {
+    return this.daemonService.starting;
+  }
+
   private stoppingDaemon: boolean = false;
 
 
@@ -33,8 +37,6 @@ export class DaemonNotRunningComponent {
       return;
     }
 
-    this.startingDaemon = true;
-
     setTimeout(async () => {
       try {
         await this.daemonService.startDaemon();
@@ -44,8 +46,6 @@ export class DaemonNotRunningComponent {
         console.error(error);
         this.daemonRunning = false;
       }
-  
-      this.startingDaemon = false;
     }, 500);
   }  
 

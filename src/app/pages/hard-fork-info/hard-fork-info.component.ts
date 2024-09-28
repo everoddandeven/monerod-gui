@@ -2,6 +2,7 @@ import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
+import { SimpleBootstrapCard } from '../../shared/utils';
 
 @Component({
   selector: 'app-hard-fork-info',
@@ -9,7 +10,7 @@ import { NavbarService } from '../../shared/components/navbar/navbar.service';
   styleUrl: './hard-fork-info.component.scss'
 })
 export class HardForkInfoComponent implements AfterViewInit {
-  public cards: Card[];
+  public cards: SimpleBootstrapCard[];
   private earliestHeight: number;
   private enabled: boolean;
   private threshold: number;
@@ -19,6 +20,8 @@ export class HardForkInfoComponent implements AfterViewInit {
   private window: number;
 
   public daemonRunning: boolean;
+
+  public loading: boolean = false;
 
   constructor(private router: Router, private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
     this.cards = [];
@@ -65,36 +68,37 @@ export class HardForkInfoComponent implements AfterViewInit {
     if (!await this.daemonService.isRunning()) {
       return;
     }
-    const info = await this.daemonService.hardForkInfo();
+    this.cards = this.createCards();
 
-    this.earliestHeight = info.earliestHeight;
-    this.threshold = info.threshold;
-    this.blockVersion = info.version;
-    this.votes = info.votes;
-    this.voting = info.voting;
-    this.window = info.window;
+    this.loading = true;
+
+    try {
+      const info = await this.daemonService.hardForkInfo();
+
+      this.earliestHeight = info.earliestHeight;
+      this.threshold = info.threshold;
+      this.blockVersion = info.version;
+      this.votes = info.votes;
+      this.voting = info.voting;
+      this.window = info.window;
+    }
+    catch(error) {
+      console.error(error);
+    }
+
+    this.loading = false;
   }
 
-  private createCards(): Card[] {
+  private createCards(): SimpleBootstrapCard[] {
     return [
-      new Card('Status', this.enabled ? 'enabled' : 'disabled'),
-      new Card('Earliest height', `${this.earliestHeight}`),
-      new Card('Threshold', `${this.threshold}`),
-      new Card('Block version', `${this.blockVersion}`),
-      new Card('Votes', `${this.votes}`),
-      new Card('Voting', `${this.voting}`),
-      new Card('Window', `${this.window}`)
+      new SimpleBootstrapCard('Status', this.enabled ? 'enabled' : 'disabled'),
+      new SimpleBootstrapCard('Earliest height', `${this.earliestHeight}`),
+      new SimpleBootstrapCard('Threshold', `${this.threshold}`),
+      new SimpleBootstrapCard('Block version', `${this.blockVersion}`),
+      new SimpleBootstrapCard('Votes', `${this.votes}`),
+      new SimpleBootstrapCard('Voting', `${this.voting}`),
+      new SimpleBootstrapCard('Window', `${this.window}`)
     ]
   }
 
-}
-
-class Card {
-  public header: string;
-  public content: string;
-
-  constructor(header: string, content: string) {
-    this.header = header;
-    this.content = content;
-  }
 }

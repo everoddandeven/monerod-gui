@@ -8,6 +8,7 @@ import { ElectronService } from '../../core/services';
 export class LogsService {
   public readonly onLog: EventEmitter<string> = new EventEmitter<string>();
   public readonly lines: string[] = [];
+  private readonly ansiRegex: RegExp = /\u001b\[[0-9;]*m/g;
 
   constructor(private electronService: ElectronService, private ngZone: NgZone) {
     if (this.electronService.isElectron) {
@@ -17,10 +18,14 @@ export class LogsService {
     
   }
 
+  public cleanLog(message: string): string {
+    return message.replace(this.ansiRegex, '').replace(/[\r\n]+/g, '\n').trim();
+  }
+
   public log(message: string): void {
     this.ngZone.run(() => {
-      this.lines.push(message);
-      this.onLog.emit(message);
+      this.lines.push(this.cleanLog(message));
+      this.onLog.emit(this.cleanLog(message));
     });
 
   }

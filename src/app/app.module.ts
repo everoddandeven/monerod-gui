@@ -59,7 +59,6 @@ const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new Transl
             deps: [HttpClient]
         }
     }),
-    NavbarComponent,
     LoadComponent
 ],
   providers: [],

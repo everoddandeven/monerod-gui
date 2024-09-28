@@ -87,12 +87,16 @@ export class DaemonService {
   private daemonRunning?: boolean;
   private url: string = "http://127.0.0.1:28081";
   public settings: DaemonSettings;
+
   //private url: string = "http://node2.monerodevs.org:28089";
   //private url: string = "https://testnet.xmr.ditatompel.com";
   //private url: string = "https://xmr.yemekyedim.com:18081";
   //private url: string = "https://moneronode.org:18081";
-
+  public stopping: boolean = false;
+  public starting: boolean = false;
   public readonly onDaemonStatusChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
+  public readonly onDaemonStopStart: EventEmitter<void> = new EventEmitter<void>();
+  public readonly onDaemonStopEnd: EventEmitter<void> = new EventEmitter<void>();
 
   private readonly headers: { [key: string]: string } = {
     "Access-Control-Allow-Headers": "*", // this will allow all CORS requests
@@ -102,6 +106,19 @@ export class DaemonService {
   constructor(private httpClient: HttpClient, private electronService: ElectronService) {
     this.openDbPromise = this.openDatabase();
     this.settings = this.loadSettings();
+
+    if (this.electronService.isElectron) {
+      this.electronService.ipcRenderer.on('monero-close', (event, code: number | null) => {
+        this.onClose();
+      });
+    }
+  }
+
+  private onClose(): void {
+    this.daemonRunning = false;
+    this.stopping = false;
+    this.onDaemonStatusChanged.emit(false);
+    this.onDaemonStopEnd.emit();
   }
 
   private async openDatabase(): Promise<IDBPDatabase> {
@@ -238,6 +255,8 @@ export class DaemonService {
       return;
     }
 
+    this.starting = true;
+
     console.log("Starting daemon");
     const settings = await this.getSettings();
     this.electronService.ipcRenderer.send('start-monerod', settings.toCommandOptions());
@@ -254,8 +273,8 @@ export class DaemonService {
       this.onDaemonStatusChanged.emit(false);
     }
 
-    setTimeout(() => {
-    }, 500)
+    this.starting = false;
+
   }
 
   public async isRunning(force: boolean = false): Promise<boolean> {
@@ -662,6 +681,8 @@ export class DaemonService {
       console.warn("Daemon not running");
       return;
     }
+    this.stopping = true;
+    this.onDaemonStopStart.emit();
 
     const response = await this.callRpc(new StopDaemonRequest());
     console.log(response);
@@ -670,8 +691,13 @@ export class DaemonService {
       throw new Error(`Could not stop daemon: ${response.status}`);
     }
 
+    if (this.electronService.isElectron) {
+      return;
+    }
+
     this.daemonRunning = false;
     this.onDaemonStatusChanged.emit(false);
+    this.onDaemonStopEnd.emit();
   }
 
   public async setLimit(limitDown: number, limitUp: number): Promise<{ limitDown: number, limitUp: number }> {
@@ -744,6 +770,10 @@ export class DaemonService {
 
   public async downloadUpdate(path: string = ''): Promise<UpdateInfo> {
     return await this.update('download', path);
+  }
+
+  public getGuiVersion(): string {
+    return "0.1.0-alpha";
   }
 
 }

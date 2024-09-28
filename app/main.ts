@@ -4,6 +4,11 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 
+import * as https from 'https';
+import { createHash } from 'crypto';
+import * as tar from 'tar';
+
+
 const monerodFilePath: string = "/home/sidney/Documenti/monero-x86_64-linux-gnu-v0.18.3.4/monerod";
 
 let win: BrowserWindow | null = null;
@@ -138,10 +143,98 @@ function startMoneroDaemon(commandOptions: string[]): ChildProcessWithoutNullStr
   monerodProcess.on('close', (code) => {
     console.log(`monerod chiuso con codice: ${code}`);
     win?.webContents.send('monero-stdout', `monerod exited with code: ${code}`);
+    win?.webContents.send('monero-close', code);
   });
 
   return monerodProcess;
 }
+
+
+// Funzione per il download
+const downloadFile = (url: string, destination: string, onProgress: (progress: number) => void): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const file = fs.createWriteStream(destination);
+    https.get(url, (response) => {
+      if (response.statusCode === 200) {
+        const totalBytes = parseInt(response.headers['content-length'] || '0', 10);
+        let downloadedBytes = 0;
+
+        response.on('data', (chunk) => {
+          downloadedBytes += chunk.length;
+          const progress = (downloadedBytes / totalBytes) * 100;
+          onProgress(progress); // Notifica il progresso
+        });
+
+        response.pipe(file);
+
+        file.on('finish', () => {
+          file.close(() => resolve());
+        });
+      } else {
+        reject(new Error(`Failed to download: ${response.statusCode}`));
+      }
+    }).on('error', (err) => {
+      fs.unlink(destination, () => reject(err));
+    });
+  });
+};
+
+// Funzione per scaricare e verificare l'hash
+const downloadAndVerifyHash = async (hashUrl: string, fileName: string, filePath: string): Promise<boolean> => {
+  const hashFilePath = path.join(app.getPath('temp'), 'monero_hashes.txt');
+
+  // Scarica il file di hash
+  await downloadFile(hashUrl, hashFilePath, () => {});
+
+  // Leggi il file di hash e cerca l'hash corrispondente
+  const hashContent = fs.readFileSync(hashFilePath, 'utf8');
+  const hashLines = hashContent.split('\n');
+  let expectedHash: string | null = null;
+
+  for (const line of hashLines) {
+    const match = line.match(/^(\w+)\s+(\S+)/);
+    if (match && match[2] === fileName) {
+      expectedHash = match[1];
+      break;
+    }
+  }
+
+  if (!expectedHash) {
+    throw new Error('Hash not found for the downloaded file.');
+  }
+
+  // Verifica l'hash del file scaricato
+  const calculatedHash = await verifyFileHash(filePath);
+  return calculatedHash === expectedHash;
+};
+
+// Funzione per verificare l'hash del file
+const verifyFileHash = (filePath: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const hash = createHash('sha256');
+    const fileStream = fs.createReadStream(filePath);
+
+    fileStream.on('data', (data) => {
+      hash.update(data);
+    });
+
+    fileStream.on('end', () => {
+      resolve(hash.digest('hex'));
+    });
+
+    fileStream.on('error', (err) => {
+      reject(err);
+    });
+  });
+};
+
+// Funzione per estrarre tar.bz2
+const extractTarBz2 = (filePath: string, destination: string): Promise<void> => {
+  return tar.x({
+    file: filePath,
+    cwd: destination,
+  });
+};
 
 try {
   // This method will be called when Electron has finished
@@ -174,6 +267,38 @@ try {
   ipcMain.on('get-monerod-version', (event, configFilePath: string) => {
     getMonerodVersion(configFilePath);
   });
+
+  
+  // Gestione IPC
+  ipcMain.handle('download-monero', async (event, downloadUrl: string, destination: string) => {
+    try {
+      const fileName = path.basename(downloadUrl);
+      const filePath = path.join(destination, fileName);
+      const hashUrl = 'https://www.getmonero.org/downloads/hashes.txt';
+
+      // Inizializza il progresso
+      event.sender.send('download-progress', { progress: 0, status: 'Starting download...' });
+
+      // Scarica il file Monero
+      await downloadFile(downloadUrl, filePath, (progress) => {
+        event.sender.send('download-progress', { progress, status: 'Downloading...' });
+      });
+
+      // Scarica e verifica l'hash
+      event.sender.send('download-progress', { progress: 100, status: 'Verifying hash...' });
+      await downloadAndVerifyHash(hashUrl, fileName, filePath);
+
+      // Estrai il file
+      event.sender.send('download-progress', { progress: 100, status: 'Extracting...' });
+      await extractTarBz2(filePath, destination);
+
+      event.sender.send('download-progress', { progress: 100, status: 'Download and extraction completed successfully.' });
+    } catch (error) {
+      event.sender.send('download-progress', { progress: 0, status: `Error: ${error}` });
+      throw new Error(`Error: ${error}`);
+    }
+  });
+  
 
 } catch (e) {
   // Catch Error

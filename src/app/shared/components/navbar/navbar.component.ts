@@ -1,21 +1,46 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { NavbarService } from './navbar.service';
 import { NavbarLink } from './navbar.model';
+import { DaemonService } from '../../../core/services/daemon/daemon.service';
 
 @Component({
   selector: 'app-navbar',
-  standalone: true,
-  imports: [],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent {
 
+  private _running: boolean = false;
+
   public get navbarLinks(): NavbarLink[] {
     return this.navbarService.links;
   }
 
-  constructor(private navbarService: NavbarService) {
+  public get running(): boolean {
+    return this._running;
+  }
+
+  public get starting(): boolean {
+    return this.daemonService.starting;
+  }
+
+  public get stopping(): boolean {
+    return this.daemonService.stopping;
+  }
+
+  constructor(private navbarService: NavbarService, private daemonService: DaemonService, private ngZone: NgZone) {
+    
+    this.daemonService.isRunning().then((running: boolean) => {
+      this.ngZone.run(() => {
+        this._running = running;
+      });
+    });
+
+    this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
+      this.ngZone.run(() => {
+        this._running = running;
+      });
+    });
 
   }
 }

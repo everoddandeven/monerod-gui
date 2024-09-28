@@ -10,6 +10,7 @@ import { DaemonInfo } from '../../../common/DaemonInfo';
 import * as $ from 'jquery';
 import * as bootstrapTable from 'bootstrap-table';
 import { LogsService } from '../logs/logs.service';
+import { ElectronService } from '../../core/services';
 
 @Component({
   selector: 'app-detail',
@@ -52,7 +53,10 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public cards: Card[];
 
-  constructor(private router: Router,private daemonService: DaemonService, private navbarService: NavbarService, private logsService: LogsService, private ngZone: NgZone) {
+  constructor(
+    private router: Router,private daemonService: DaemonService, 
+    private navbarService: NavbarService, private logsService: LogsService, 
+    private ngZone: NgZone, private electronService: ElectronService) {
     this.daemonRunning = false;
     this.startingDaemon = false;
     this.stoppingDaemon = false;
@@ -91,6 +95,9 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
     this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
       this.ngZone.run(() => {
         this.daemonRunning = running;
+        if (!running && this.stoppingDaemon) {
+          this.stoppingDaemon = false;
+        }
       })
     });
    }
@@ -174,13 +181,13 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
 
       await this.daemonService.stopDaemon();
 
-      this.daemonRunning = false;
+      if(!this.electronService.isElectron) this.daemonRunning = false;
     }
     catch (error) {
       console.error(error);
     }
 
-    this.stoppingDaemon = false;
+    if(!this.electronService.isElectron) this.stoppingDaemon = false;
   }
 
   private onNavigationEnd(): void {
@@ -208,10 +215,10 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private createCards(): Card[] {
-    if (!this.daemonRunning) {
+    if (!this.daemonRunning && !this.daemonService.starting) {
       return [];
     }
-    if (this.isLoading) {
+    if (this.isLoading || this.daemonService.starting) {
       return this.createLoadingCards();
     }
     return [

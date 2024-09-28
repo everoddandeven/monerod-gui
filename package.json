@@ -57,10 +57,13 @@
     "bootstrap": "5.3.3",
     "bootstrap-icons": "1.11.3",
     "bootstrap-table": "1.23.4",
+    "crypto": "1.0.1",
     "idb": "8.0.0",
     "jquery": "3.7.1",
     "rxjs": "7.8.1",
+    "tar": "7.4.3",
     "tslib": "2.6.2",
+    "unbzip2-stream": "1.4.3",
     "zone.js": "0.14.4"
   },
   "devDependencies": {
@@ -81,6 +84,7 @@
     "@types/jest": "29.5.12",
     "@types/jquery": "3.5.30",
     "@types/node": "20.12.7",
+    "@types/unbzip2-stream": "1.4.3",
     "@typescript-eslint/eslint-plugin": "7.7.1",
     "@typescript-eslint/parser": "7.7.1",
     "conventional-changelog-cli": "4.1.0",

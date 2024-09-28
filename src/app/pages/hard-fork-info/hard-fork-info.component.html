@@ -7,14 +7,33 @@
 </div>
 
 <div *ngIf="daemonRunning" class="row d-flex justify-content-center">
-    @for(card of cards; track card.header) {
-      <div class="card text-bg-dark m-3 text-center" style="max-width: 18rem;">
-        <div class="card-header">{{card.header}}</div>
-        <div class="card-body">
-          <h5 class="card-title">{{card.content}}</h5>
+    @if(!loading) {
+      @for(card of cards; track card.header) {
+        <div class="card text-bg-dark m-3 text-center" style="max-width: 18rem;">
+          <div class="card-header">{{card.header}}</div>
+          <div class="card-body">
+            <h5 class="card-title">{{card.content}}</h5>
+          </div>
         </div>
-      </div>
+      }
+    }
+    @else {
+      @for(card of cards; track card.header) {
+        <div class="card text-bg-dark m-3 text-center" style="max-width: 18rem;">
+          <div class="card-header">{{card.header}}</div>
+          <div class="card-body">
+            <p class="card-text placeholder-glow">
+              <span class="placeholder col-7"></span>
+              <span class="placeholder col-4"></span>
+              <span class="placeholder col-4"></span>
+              <span class="placeholder col-6"></span>
+              <span class="placeholder col-8"></span>
+            </p>
+          </div>
+        </div>
+      }
     }
 </div>
 
 <app-daemon-not-running></app-daemon-not-running>
+<app-daemon-stopping></app-daemon-stopping>
