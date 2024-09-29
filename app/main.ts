@@ -7,8 +7,9 @@ import * as fs from 'fs';
 import * as https from 'https';
 import { createHash } from 'crypto';
 import * as tar from 'tar';
-
-
+//import bz2 from 'unbzip2-stream';
+//import * as bz2 from 'unbzip2-stream';
+const bz2 = require('unbzip2-stream');
 const monerodFilePath: string = "/home/sidney/Documenti/monero-x86_64-linux-gnu-v0.18.3.4/monerod";
 
 let win: BrowserWindow | null = null;
@@ -151,7 +152,7 @@ function startMoneroDaemon(commandOptions: string[]): ChildProcessWithoutNullStr
 
 
 // Funzione per il download
-const downloadFile = (url: string, destination: string, onProgress: (progress: number) => void): Promise<void> => {
+const downloadFileOld = (url: string, destination: string, onProgress: (progress: number) => void): Promise<void> => {
   return new Promise((resolve, reject) => {
     const file = fs.createWriteStream(destination);
     https.get(url, (response) => {
@@ -179,12 +180,71 @@ const downloadFile = (url: string, destination: string, onProgress: (progress: n
   });
 };
 
+const downloadFile = (url: string, destinationDir: string, onProgress: (progress: number) => void): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const request = (url: string) => {
+      https.get(url, (response) => {
+        if (response.statusCode === 200) {
+          const contentDisposition = response.headers['content-disposition'];
+          let finalFilename = '';
+
+          // Estrai il nome del file dall'URL o dal content-disposition
+          if (contentDisposition && contentDisposition.includes('filename')) {
+            const match = contentDisposition.match(/filename="(.+)"/);
+            if (match) {
+              finalFilename = match[1];
+            }
+          } else {
+            // Se non c'è content-disposition, prendiamo il nome dall'URL
+            finalFilename = url.split('/').pop() || 'downloaded-file';
+          }
+
+          const destination = `${destinationDir}/${finalFilename}`;
+          const file = fs.createWriteStream(destination);
+
+          const totalBytes = parseInt(response.headers['content-length'] || '0', 10);
+          let downloadedBytes = 0;
+
+          response.on('data', (chunk) => {
+            downloadedBytes += chunk.length;
+            const progress = (downloadedBytes / totalBytes) * 100;
+            onProgress(progress); // Notifica il progresso
+          });
+
+          response.pipe(file);
+
+          file.on('finish', () => {
+            file.close(() => resolve(finalFilename)); // Restituisci il nome del file finale
+          });
+        } else if (response.statusCode === 301 || response.statusCode === 302) {
+          // Se è un redirect, effettua una nuova richiesta verso il location header
+          const newUrl = response.headers.location;
+          if (newUrl) {
+            request(newUrl); // Ripeti la richiesta con il nuovo URL
+          } else {
+            reject(new Error('Redirection failed without a location header'));
+          }
+        } else {
+          reject(new Error(`Failed to download: ${response.statusCode}`));
+        }
+      }).on('error', (err) => {
+        reject(err);
+      });
+    };
+
+    request(url); // Inizia la richiesta
+  });
+};
+
+
+
 // Funzione per scaricare e verificare l'hash
 const downloadAndVerifyHash = async (hashUrl: string, fileName: string, filePath: string): Promise<boolean> => {
-  const hashFilePath = path.join(app.getPath('temp'), 'monero_hashes.txt');
+  //const hashFilePath = path.join(app.getPath('temp'), 'monero_hashes.txt');
 
   // Scarica il file di hash
-  await downloadFile(hashUrl, hashFilePath, () => {});
+  const hashFileName = await downloadFile(hashUrl, app.getPath('temp'), () => {});
+  const hashFilePath = `${app.getPath('temp')}/${hashFileName}`;
 
   // Leggi il file di hash e cerca l'hash corrispondente
   const hashContent = fs.readFileSync(hashFilePath, 'utf8');
@@ -204,7 +264,7 @@ const downloadAndVerifyHash = async (hashUrl: string, fileName: string, filePath
   }
 
   // Verifica l'hash del file scaricato
-  const calculatedHash = await verifyFileHash(filePath);
+  const calculatedHash = await verifyFileHash(`${filePath}/${fileName}`);
   return calculatedHash === expectedHash;
 };
 
@@ -229,10 +289,38 @@ const verifyFileHash = (filePath: string): Promise<string> => {
 };
 
 // Funzione per estrarre tar.bz2
-const extractTarBz2 = (filePath: string, destination: string): Promise<void> => {
+const extractTarBz2Old = (filePath: string, destination: string): Promise<void> => {
   return tar.x({
     file: filePath,
     cwd: destination,
+  });
+};
+
+const extractTarBz2 = (filePath: string, destination: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    // Crea il file decomprimendo il .bz2 in uno .tar temporaneo
+    const tarPath = path.join(destination, 'temp.tar');
+    const fileStream = fs.createReadStream(filePath);
+    const decompressedStream = fileStream.pipe(bz2());
+
+    const writeStream = fs.createWriteStream(tarPath);
+
+    decompressedStream.pipe(writeStream);
+
+    writeStream.on('finish', () => {
+      // Una volta che il file .tar è stato creato, estrailo
+      tar.extract({ cwd: destination, file: tarPath })
+        .then(() => {
+          // Elimina il file .tar temporaneo dopo l'estrazione
+          fs.unlink(tarPath, (err) => {
+            if (err) reject(err);
+            else resolve();
+          });
+        })
+        .catch(reject);
+    });
+
+    writeStream.on('error', reject);
   });
 };
 
@@ -272,25 +360,25 @@ try {
   // Gestione IPC
   ipcMain.handle('download-monero', async (event, downloadUrl: string, destination: string) => {
     try {
-      const fileName = path.basename(downloadUrl);
-      const filePath = path.join(destination, fileName);
+      //const fileName = path.basename(downloadUrl);
+      //const filePath = path.join(destination, fileName);
       const hashUrl = 'https://www.getmonero.org/downloads/hashes.txt';
 
       // Inizializza il progresso
       event.sender.send('download-progress', { progress: 0, status: 'Starting download...' });
 
       // Scarica il file Monero
-      await downloadFile(downloadUrl, filePath, (progress) => {
+      const fileName = await downloadFile(downloadUrl, destination, (progress) => {
         event.sender.send('download-progress', { progress, status: 'Downloading...' });
       });
 
       // Scarica e verifica l'hash
       event.sender.send('download-progress', { progress: 100, status: 'Verifying hash...' });
-      await downloadAndVerifyHash(hashUrl, fileName, filePath);
+      await downloadAndVerifyHash(hashUrl, fileName, destination);
 
       // Estrai il file
       event.sender.send('download-progress', { progress: 100, status: 'Extracting...' });
-      await extractTarBz2(filePath, destination);
+      await extractTarBz2(`${destination}${fileName}`, destination);
 
       event.sender.send('download-progress', { progress: 100, status: 'Download and extraction completed successfully.' });
     } catch (error) {
