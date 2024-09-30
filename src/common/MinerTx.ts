@@ -4,9 +4,9 @@ export class MinerTx {
     public readonly vin: TxInput[];
     public readonly vout: TxOutput[];
     public readonly extra: number[];
-    public readonly rctSignatures: RctSignatures;
+    public readonly rctSignatures?: RctSignatures;
 
-    constructor(version: number, unlockTime: number, vin: TxInput[], vout: TxOutput[], extra: number[], rctSignatures: RctSignatures) {
+    constructor(version: number, unlockTime: number, vin: TxInput[], vout: TxOutput[], extra: number[], rctSignatures?: RctSignatures) {
         this.version = version;
         this.unlockTime = unlockTime;
         this.vin = vin;
@@ -21,8 +21,12 @@ export class MinerTx {
         const _vin: any[] | undefined = minerTx.vin;
         const _vout: any[] | undefined = minerTx.vout;
         const extra = minerTx.extra;
-        const rctSignatures = RctSignatures.parse(minerTx.rct_signatures);
+        let rctSignatures;
 
+        if (minerTx.rct_signatures) {
+          rctSignatures = RctSignatures.parse(minerTx.rct_signatures);
+        }
+        
         const vin: TxInput[] = [];
         const vout: TxOutput[] = [];
 
@@ -93,33 +97,20 @@ export class RctSignatures {
 }
 
 export class TxOutputTarget {
-    public readonly taggedKey: TaggedKey;
-
-    constructor(taggedKey: TaggedKey) 
-    {
-        this.taggedKey = taggedKey;
-    }
-
-    public static parse(target: any): TxOutputTarget {
-        const taggedKey = TaggedKey.parse(target.tagged_key);
-
-        return new TxOutputTarget(taggedKey);
-    }
-}
-
-export class TaggedKey {
-    public readonly key: string;
+    public readonly viewKey: string;
     public readonly viewTag: string;
 
-    constructor(key: string, viewTag: string) {
-        this.key = key;
+    constructor(viewKey: string, viewTag: string) 
+    {
+        this.viewKey = viewKey;
         this.viewTag = viewTag;
     }
 
-    public static parse(taggedKey: any): TaggedKey {
-        const key = taggedKey.key;
-        const viewTag = taggedKey.view_tag;
+    public static parse(target: any): TxOutputTarget {
+      const viewKey = target.view_key ? target.view_key : '';
+      const viewTag = target.view_tag ? target.view_tag : '';
 
-        return new TaggedKey(key, viewTag);
+      return new TxOutputTarget(viewKey, viewTag);
     }
 }
+

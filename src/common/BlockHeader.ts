@@ -25,8 +25,6 @@
     },
  */
 
-import { ThisReceiver } from "@angular/compiler";
-
 export class BlockHeader {
     public readonly blockSize: number;
     public readonly blockWeight: number;

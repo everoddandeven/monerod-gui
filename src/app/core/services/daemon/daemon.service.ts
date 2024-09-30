@@ -106,9 +106,15 @@ export class DaemonService {
   constructor(private httpClient: HttpClient, private electronService: ElectronService) {
     this.openDbPromise = this.openDatabase();
     this.settings = this.loadSettings();
+    const wdw = (window as any);
 
     if (this.electronService.isElectron) {
       this.electronService.ipcRenderer.on('monero-close', (event, code: number | null) => {
+        this.onClose();
+      });
+    }
+    else if (wdw.electronAPI && wdw.electronAPI.onMoneroClose) {
+      wdw.electronAPI.onMoneroClose((event: any, code: number) => {
         this.onClose();
       });
     }
@@ -250,16 +256,22 @@ export class DaemonService {
       return;
     }
 
+    /*
     if (!this.electronService.isElectron) {
       console.error("Could not start monero daemon: not electron app");
       return;
     }
+    */
 
     this.starting = true;
 
     console.log("Starting daemon");
     const settings = await this.getSettings();
-    this.electronService.ipcRenderer.send('start-monerod', settings.toCommandOptions());
+    
+    if (this.electronService.ipcRenderer) this.electronService.ipcRenderer.send('start-monerod', settings.toCommandOptions());
+    else {
+      const wdw = (window as any).electronAPI.startMonerod(settings.toCommandOptions());
+    }
 
     await this.delay(3000);
 
@@ -348,19 +360,23 @@ export class DaemonService {
   public async getLastBlockHeader(fillPowHash: boolean = false): Promise<BlockHeader> {
     const response = await this.callRpc(new GetLastBlockHeaderRequest(fillPowHash));
 
-    return BlockHeader.parse(response.block_header);
+    if (response.result && response.result.status == 'BUSY') {
+      throw new CoreIsBusyError();
+    }
+
+    return BlockHeader.parse(response.result.block_header);
   }
 
   public async getBlockHeaderByHash(hash: string, fillPowHash: boolean = false): Promise<BlockHeader> {
     const response = await this.callRpc(new GetBlockHeaderByHashRequest(hash, fillPowHash));
 
-    return BlockHeader.parse(response.block_header);
+    return BlockHeader.parse(response.result.block_header);
   }
 
   public async getBlockHeaderByHeight(height: number, fillPowHash: boolean = false): Promise<BlockHeader> {
     const response = await this.callRpc(new GetBlockHeaderByHeightRequest(height, fillPowHash));
 
-    return BlockHeader.parse(response.block_header);
+    return BlockHeader.parse(response.result.block_header);
   }
 
   public async getBlockHeadersRange(startHeight: number, endHeight: number, fillPowHash: boolean = false): Promise<BlockHeader[]> {
@@ -410,7 +426,11 @@ export class DaemonService {
       this.raiseRpcError(response.error);
     }
 
-    const bans: any[] = response.bans;
+    if (!response.result) {
+      return [];
+    }
+
+    const bans: any[] = response.result.bans;
     const result: Ban[] = [];
 
     if (bans) bans.forEach((ban: any) => result.push(Ban.parse(ban)));
@@ -691,6 +711,7 @@ export class DaemonService {
       throw new Error(`Could not stop daemon: ${response.status}`);
     }
 
+    /*
     if (this.electronService.isElectron) {
       return;
     }
@@ -698,6 +719,7 @@ export class DaemonService {
     this.daemonRunning = false;
     this.onDaemonStatusChanged.emit(false);
     this.onDaemonStopEnd.emit();
+    */
   }
 
   public async setLimit(limitDown: number, limitUp: number): Promise<{ limitDown: number, limitUp: number }> {

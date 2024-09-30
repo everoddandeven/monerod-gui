@@ -11,6 +11,449 @@
       </ul>
     </div>
 </div>
+<div *ngIf="daemonRunning" class="tab-content" id="pills-tabContent">
+  
+  <div class="tab-pane fade show active" id="pills-last-block-header" role="tabpanel" aria-labelledby="pills-last-block-header-tab" tabindex="0">
+    <div *ngIf="getLastBlockError != ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+      <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+      <div>
+        {{getLastBlockError}}
+      </div>
+    </div>
+    <div *ngIf="getLastBlockError == ''" class="card p-1">
+      <div class="card-header bg-primary text-white d-flex">
+        <h4>Block Header Details</h4>
+      </div>
+      <div class="card-body">
+        @if(lastBlockHeader) {
+          <div class="row">
+            <div class="col-md-6">
+              <h6>Block Information</h6>
+              <ul class="list-group">
+                <li class="list-group-item"><strong>Block Size:</strong> {{ lastBlockHeader.blockSize }} bytes</li>
+                <li class="list-group-item"><strong>Block Weight:</strong> {{ lastBlockHeader.blockWeight }} units</li>
+                <li class="list-group-item"><strong>Height:</strong> {{ lastBlockHeader.height }}</li>
+                <li class="list-group-item"><strong>Major Version:</strong> {{ lastBlockHeader.majorVersion }}</li>
+                <li class="list-group-item"><strong>Minor Version:</strong> {{ lastBlockHeader.minorVersion }}</li>
+                <li class="list-group-item"><strong>Nonce:</strong> {{ lastBlockHeader.nonce }}</li>
+                <li class="list-group-item"><strong>Number of Transactions:</strong> {{ lastBlockHeader.numTxes }}</li>
+                <li class="list-group-item"><strong>Reward:</strong> {{ lastBlockHeader.reward }} XMR</li>
+                <li class="list-group-item"><strong>Timestamp:</strong> {{ lastBlockHeader.timestamp | date:'medium' }}</li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <h6>Hashes & Difficulty</h6>
+              <ul class="list-group">
+                <li class="list-group-item"><strong>Block Hash:</strong> {{ lastBlockHeader.hash }}</li>
+                <li class="list-group-item"><strong>Previous Hash:</strong> {{ lastBlockHeader.prevHash }}</li>
+                <li class="list-group-item"><strong>PoW Hash:</strong> {{ lastBlockHeader.powHash }}</li>
+                <li class="list-group-item"><strong>Miner Transaction Hash:</strong> {{ lastBlockHeader.minerTxHash }}</li>
+                <li class="list-group-item"><strong>Cumulative Difficulty:</strong> {{ lastBlockHeader.cumulativeDifficulty }}</li>
+                <li class="list-group-item"><strong>Wide Cumulative Difficulty:</strong> {{ lastBlockHeader.wideCumulativeDifficulty }}</li>
+                <li class="list-group-item"><strong>Difficulty:</strong> {{ lastBlockHeader.difficulty }}</li>
+                <li class="list-group-item"><strong>Wide Difficulty:</strong> {{ lastBlockHeader.wideDifficulty }}</li>
+              </ul>
+            </div>
+          </div>
+          <div class="row mt-4">
+            <div class="col-md-12">
+              <h6>Miscellaneous</h6>
+              <ul class="list-group">
+                <li class="list-group-item"><strong>Orphan Status:</strong> {{ lastBlockHeader.orphanStatus ? 'Yes' : 'No' }}</li>
+                <li class="list-group-item"><strong>Depth:</strong> {{ lastBlockHeader.depth }}</li>
+                <li class="list-group-item"><strong>Long Term Weight:</strong> {{ lastBlockHeader.longTermWeight }}</li>
+              </ul>
+            </div>
+          </div>
+        }
+        @else {
+          <div class="row">
+            <div class="col-md-6">
+              <h6>Block Information</h6>
+              <ul class="list-group">
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <h6>Hashes & Difficulty</h6>
+              <ul class="list-group">
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+              </ul>
+            </div>
+          </div>
+          <div class="row mt-4">
+            <div class="col-md-12">
+              <h6>Miscellaneous</h6>
+              <ul class="list-group">
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+              </ul>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
 
+  <div class="tab-pane fade" id="pills-get-block" role="tabpanel" aria-labelledby="pills-get-block-tab" tabindex="0">
+    <div *ngIf="getBlockError != ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+      <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+      <div>
+        {{getBlockError}}
+      </div>
+    </div>
+
+    <div *ngIf="block" class="card">
+      <div class="card-header bg-dark text-white">
+        <h4>Block Details</h4>
+      </div>
+      <div class="card-body">
+        <!-- Placeholder mentre i dati sono in caricamento -->
+        <ng-container *ngIf="block && !gettingLastBlock; else loading">
+          <div class="row">
+            <div class="col-md-12">
+              <h6>Block Blob</h6>
+              <p class="text-break bg-dark p-2">{{ block.blob }}</p>
+            </div>
+          </div>
+          
+          <!-- Dettagli del BlockHeader -->
+          <div class="row mt-4">
+            <div class="col-md-12">
+              <h6>Block Header</h6>
+              <div class="card">
+                <div class="card-body">
+                  <ul class="list-group">
+                    <li class="list-group-item"><strong>Block Size:</strong> {{ block.blockHeader.blockSize }} bytes</li>
+                    <li class="list-group-item"><strong>Block Weight:</strong> {{ block.blockHeader.blockWeight }} units</li>
+                    <li class="list-group-item"><strong>Height:</strong> {{ block.blockHeader.height }}</li>
+                    <li class="list-group-item"><strong>Hash:</strong> {{ block.blockHeader.hash }}</li>
+                    <li class="list-group-item"><strong>Previous Hash:</strong> {{ block.blockHeader.prevHash }}</li>
+                    <li class="list-group-item"><strong>Miner Transaction Hash:</strong> {{ block.blockHeader.minerTxHash }}</li>
+                    <li class="list-group-item"><strong>Difficulty:</strong> {{ block.blockHeader.difficulty }}</li>
+                    <li class="list-group-item"><strong>Timestamp:</strong> {{ block.blockHeader.timestamp | date:'medium' }}</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Dettagli del BlockDetails -->
+          <div class="row mt-4">
+            <div class="col-md-12">
+              <h6>Block Additional Details</h6>
+              <div class="card">
+                <div class="card-body">
+                  <ul class="list-group">
+                    <li class="list-group-item"><strong>Major Version:</strong> {{ block.details.majorVersion }}</li>
+                    <li class="list-group-item"><strong>Minor Version:</strong> {{ block.details.minorVersion }}</li>
+                    <li class="list-group-item"><strong>Timestamp:</strong> {{ block.details.timestamp | date:'medium' }}</li>
+                    <li class="list-group-item"><strong>Previous ID:</strong> {{ block.details.prevId }}</li>
+                    <li class="list-group-item"><strong>Nonce:</strong> {{ block.details.nonce }}</li>
+                    <li class="list-group-item"><strong>Transaction Hashes:</strong>
+                      <ul>
+                        <li *ngFor="let hash of block.details.txHashes">{{ hash }}</li>
+                      </ul>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+  
+        <!-- Placeholder di caricamento -->
+        <ng-template #loading>
+          <div class="row">
+            <div class="col-md-12">
+              <h6>Block Blob</h6>
+              <p class="placeholder-glow bg-light p-2"><span class="placeholder col-8"></span></p>
+            </div>
+          </div>
+  
+          <div class="row mt-4">
+            <div class="col-md-12">
+              <h6>Block Header</h6>
+              <div class="card">
+                <div class="card-body">
+                  <ul class="list-group">
+                    <li class="list-group-item placeholder-glow"><span class="placeholder col-6"></span></li>
+                    <li class="list-group-item placeholder-glow"><span class="placeholder col-6"></span></li>
+                    <li class="list-group-item placeholder-glow"><span class="placeholder col-6"></span></li>
+                    <li class="list-group-item placeholder-glow"><span class="placeholder col-6"></span></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+  
+          <div class="row mt-4">
+            <div class="col-md-12">
+              <h6>Block Additional Details</h6>
+              <div class="card">
+                <div class="card-body">
+                  <ul class="list-group">
+                    <li class="list-group-item placeholder-glow"><span class="placeholder col-6"></span></li>
+                    <li class="list-group-item placeholder-glow"><span class="placeholder col-6"></span></li>
+                    <li class="list-group-item placeholder-glow"><span class="placeholder col-6"></span></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+    
+    <hr *ngIf="block" class="my-4">
+
+    <div class="row g-5 p-2">
+      <div class="cold-md-7 col-lg-12">
+        <div class="row gy-3">
+          <div class="form-check form-switch col-md-6">
+            <label for="get-block-by-hash" class="form-check-label">Look up by hash</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="get-block-by-hash" [checked]="getBlockByHash" [(ngModel)]="getBlockByHash" [ngModelOptions]="{standalone: true}">
+            <br>
+            <small class="text-body-secondary">Get block information by hash</small>
+          </div>
+
+          <div class="form-check form-switch col-md-6">
+            <label for="fill-pow-hash" class="form-check-label">Fill PoW hash</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="fill-pow-hash" [checked]="fillPoWHash" [(ngModel)]="fillPoWHash" [ngModelOptions]="{standalone: true}">
+            <br>
+            <small class="text-body-secondary">Add PoW hash to block header response</small>
+          </div>
+          
+          <div *ngIf="getBlockByHash" class="col-sm-6">
+            <label for="get-block-hash" class="form-label">Block hash</label>
+            <input type="text" class="form-control" id="get-block-hash" placeholder="" [(ngModel)]="getBlockHash" [ngModelOptions]="{standalone: true}" [disabled]="!getBlockByHash">
+            <small class="text-body-secondary">Block hash</small>
+          </div>
+
+          <div *ngIf="!getBlockByHash" class="col-sm-3">
+            <label for="get-block-height" class="form-label">Block height</label>
+            <input type="number" class="form-control" id="get-block-height" placeholder="" [(ngModel)]="getBlockHeight" [ngModelOptions]="{standalone: true}" [disabled]="getBlockByHash">
+            <small class="text-body-secondary">Block height</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="my-4">
+
+    <button *ngIf="!gettingLastBlock" class="w-100 btn btn-primary btn-lg" type="button" (click)="getBlock()">Get Block</button>
+    <button *ngIf="gettingLastBlock" class="w-100 btn btn-primary btn-lg" type="button" disabled>Getting Block ...</button>
+  
+  </div>
+
+  <div class="tab-pane fade" id="pills-get-block-header" role="tabpanel" aria-labelledby="pills-get-block-header-tab" tabindex="0">
+    <div *ngIf="blockHeader" class="card p-1">
+      <div class="card-header bg-primary text-white d-flex">
+        <h4>Block Header Details</h4>
+      </div>
+      <div class="card-body">
+        @if(blockHeader) {
+          <div class="row">
+            <div class="col-md-6">
+              <h6>Block Information</h6>
+              <ul class="list-group">
+                <li class="list-group-item"><strong>Block Size:</strong> {{ blockHeader.blockSize }} bytes</li>
+                <li class="list-group-item"><strong>Block Weight:</strong> {{ blockHeader.blockWeight }} units</li>
+                <li class="list-group-item"><strong>Height:</strong> {{ blockHeader.height }}</li>
+                <li class="list-group-item"><strong>Major Version:</strong> {{ blockHeader.majorVersion }}</li>
+                <li class="list-group-item"><strong>Minor Version:</strong> {{ blockHeader.minorVersion }}</li>
+                <li class="list-group-item"><strong>Nonce:</strong> {{ blockHeader.nonce }}</li>
+                <li class="list-group-item"><strong>Number of Transactions:</strong> {{ blockHeader.numTxes }}</li>
+                <li class="list-group-item"><strong>Reward:</strong> {{ blockHeader.reward }} XMR</li>
+                <li class="list-group-item"><strong>Timestamp:</strong> {{ blockHeader.timestamp | date:'medium' }}</li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <h6>Hashes & Difficulty</h6>
+              <ul class="list-group">
+                <li class="list-group-item"><strong>Block Hash:</strong> {{ blockHeader.hash }}</li>
+                <li class="list-group-item"><strong>Previous Hash:</strong> {{ blockHeader.prevHash }}</li>
+                <li class="list-group-item"><strong>PoW Hash:</strong> {{ blockHeader.powHash }}</li>
+                <li class="list-group-item"><strong>Miner Transaction Hash:</strong> {{ blockHeader.minerTxHash }}</li>
+                <li class="list-group-item"><strong>Cumulative Difficulty:</strong> {{ blockHeader.cumulativeDifficulty }}</li>
+                <li class="list-group-item"><strong>Wide Cumulative Difficulty:</strong> {{ blockHeader.wideCumulativeDifficulty }}</li>
+                <li class="list-group-item"><strong>Difficulty:</strong> {{ blockHeader.difficulty }}</li>
+                <li class="list-group-item"><strong>Wide Difficulty:</strong> {{ blockHeader.wideDifficulty }}</li>
+              </ul>
+            </div>
+          </div>
+          <div class="row mt-4">
+            <div class="col-md-12">
+              <h6>Miscellaneous</h6>
+              <ul class="list-group">
+                <li class="list-group-item"><strong>Orphan Status:</strong> {{ blockHeader.orphanStatus ? 'Yes' : 'No' }}</li>
+                <li class="list-group-item"><strong>Depth:</strong> {{ blockHeader.depth }}</li>
+                <li class="list-group-item"><strong>Long Term Weight:</strong> {{ blockHeader.longTermWeight }}</li>
+              </ul>
+            </div>
+          </div>
+        }
+        @else {
+          <div class="row">
+            <div class="col-md-6">
+              <h6>Block Information</h6>
+              <ul class="list-group">
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <h6>Hashes & Difficulty</h6>
+              <ul class="list-group">
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+              </ul>
+            </div>
+          </div>
+          <div class="row mt-4">
+            <div class="col-md-12">
+              <h6>Miscellaneous</h6>
+              <ul class="list-group">
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+              </ul>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <hr *ngIf="blockHeader" class="my-4">
+
+    <div class="row g-5 p-2">
+      <div class="cold-md-7 col-lg-12">
+        <div class="row gy-3">
+          <div class="form-check form-switch col-md-6">
+            <label for="get-block-header-by-hash" class="form-check-label">Look up by hash</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="get-block-header-by-hash" [checked]="getBlockHeaderByHash" [(ngModel)]="getBlockHeaderByHash" [ngModelOptions]="{standalone: true}">
+            <br>
+            <small class="text-body-secondary">Get block header information by hash</small>
+          </div>
+
+          <div class="form-check form-switch col-md-6">
+            <label for="fill-pow-hash" class="form-check-label">Fill PoW hash</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="fill-pow-hash" [checked]="fillPoWHash" [(ngModel)]="fillPoWHash" [ngModelOptions]="{standalone: true}">
+            <br>
+            <small class="text-body-secondary">Add PoW hash to block header response</small>
+          </div>
+          
+          <div *ngIf="getBlockHeaderByHash" class="col-sm-6">
+            <label for="get-block-header-hash" class="form-label">Block header hash</label>
+            <input type="text" class="form-control" id="get-block-header-hash" placeholder="" [(ngModel)]="getBlockHeaderHash" [ngModelOptions]="{standalone: true}" [disabled]="!getBlockHeaderByHash">
+            <small class="text-body-secondary">Block header hash</small>
+          </div>
+
+          <div *ngIf="!getBlockHeaderByHash" class="col-sm-3">
+            <label for="get-block-header-height" class="form-label">Block header height</label>
+            <input type="number" class="form-control" id="get-block-header-height" placeholder="" [(ngModel)]="getBlockHeaderHeight" [ngModelOptions]="{standalone: true}" [disabled]="getBlockHeaderByHash">
+            <small class="text-body-secondary">Block header height</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="my-4">
+
+    <button *ngIf="!gettingBlockHeader" class="w-100 btn btn-primary btn-lg" type="button" (click)="getBlockHeader()">Get Block Header</button>
+    <button *ngIf="gettingBlockHeader" class="w-100 btn btn-primary btn-lg" type="button" disabled>Getting Block Header ...</button>
+  
+  </div>
+
+  <div class="tab-pane fade" id="pills-pop-blocks" role="tabpanel" aria-labelledby="pills-pop-blocks-tab" tabindex="0">
+    <div *ngIf="popBlocksError != ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+      <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+      <div>
+        {{popBlocksError}}
+      </div>
+    </div>
+
+    <div *ngIf="popBlocksResult != undefined" class="alert alert-success d-flex align-items-center justify-content-center text-center" role="alert">
+      <h4><i class="bi bi-check-circle m-2"></i></h4>&nbsp;&nbsp;
+      <div>
+        New blockchain height: {{popBlocksResult}}
+      </div>
+    </div>
+
+    <div class="row g-5 p-2">
+      <div class="cold-md-7 col-lg-12">
+        <div class="row gy-3">
+
+          <div class="col-sm-6">
+            <label for="pop-blocks-nblocks" class="form-label">Blocks to pop</label>
+            <input type="number" class="form-control" id="pop-blocks-nblocks" placeholder="" [(ngModel)]="popBlocksNBlocks" [ngModelOptions]="{standalone: true}" [disabled]="getBlockHeaderByHash">
+            <small class="text-body-secondary">Number of blocks top pop from blockchain</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="my-4">
+
+    <button *ngIf="!poppingBlocks" class="w-100 btn btn-primary btn-lg" type="button" (click)="popBlocks()">Pop Blocks</button>
+    <button *ngIf="poppingBlocks" class="w-100 btn btn-primary btn-lg" type="button" disabled>Popping Blocks ...</button>
+  
+  </div>
+
+
+  <div class="tab-pane fade" id="pills-save-bc" role="tabpanel" aria-labelledby="pills-save-bc-tab" tabindex="0">
+    <div *ngIf="saveBlockchainError != ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+      <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+      <div>
+        {{saveBlockchainError}}
+      </div>
+    </div>
+
+    <div *ngIf="blockchainSaved" class="alert alert-success d-flex align-items-center justify-content-center text-center" role="alert">
+      <h4><i class="bi bi-check-circle m-2"></i></h4>&nbsp;&nbsp;
+      <div>
+        Successfully saved blockchain
+      </div>
+    </div>
+
+    <div class="alert alert-info d-flex text-center" role="alert">
+      <div>
+        The blockchain does not need saving and is always saved when modified, however it does a sync to flush the filesystem cache onto the disk for safety purposes against Operating System or Hardware crashes.      
+      </div>
+    </div>
+
+    <hr class="my-4">
+
+    <button *ngIf="!savingBlockchain" class="w-100 btn btn-primary btn-lg" type="button" (click)="saveBlockchain()">Save Blockchain</button>
+    <button *ngIf="savingBlockchain" class="w-100 btn btn-primary btn-lg" type="button" disabled>Saving Blockchain ...</button>
+  
+  </div>
+
+
+
+</div>
 <app-daemon-not-running></app-daemon-not-running>
 <app-daemon-stopping></app-daemon-stopping>

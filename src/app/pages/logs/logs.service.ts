@@ -11,9 +11,15 @@ export class LogsService {
   private readonly ansiRegex: RegExp = /\u001b\[[0-9;]*m/g;
 
   constructor(private electronService: ElectronService, private ngZone: NgZone) {
+    const wdw = (window as any);
     if (this.electronService.isElectron) {
       this.electronService.ipcRenderer.on('monero-stdout', (event, message: string) => this.log(message));
       this.electronService.ipcRenderer.on('monero-stderr', (event, message: string) => this.log(message));
+    }
+    else if (wdw.electronAPI && wdw.electronAPI.onMoneroStdout) {
+      wdw.electronAPI.onMoneroStdout((event: any, message: string) => {
+        this.log(message);
+      });
     }
     
   }

@@ -7,8 +7,7 @@ import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { DaemonInfo } from '../../../common/DaemonInfo';
 
-import * as $ from 'jquery';
-import * as bootstrapTable from 'bootstrap-table';
+
 import { LogsService } from '../logs/logs.service';
 import { ElectronService } from '../../core/services';
 
@@ -75,7 +74,7 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
     this.nodeType = 'unknown';
     this.blockchainSize = '0 GB';
     this.syncProgress = '0 %';
-    this.isLoading = true;
+    this.isLoading = false;
 
     this.navbarLinks = [
       new NavbarLink('pills-home-tab', '#pills-home', 'pills-home', true, 'Overview', true),
@@ -104,18 +103,38 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     console.log('DetailComponent INIT');
+      
   }
 
   ngAfterViewInit(): void {
     console.log('DetailComponent AFTER VIEW INIT');
     this.navbarService.setLinks(this.navbarLinks);
+      setTimeout(() => {
+        this.ngZone.run(() => {
+
+          const $table = $('#table');
+          $table.bootstrapTable({});
+          $table.bootstrapTable('refreshOptions', {
+            classes: 'table table-bordered table-hover table-dark table-striped'
+          });
+          $table.bootstrapTable('showLoading');
+          /*
+          $table.bootstrapTable('refreshOptions', {
+            classes: 'table table-bordered table-hover table-dark table-striped'
+          });
+          */
+        });
+      }, 1000);
+    
     
     if (this.loadInterval != null) return;
-
-    this.load().then(() => {
-      this.cards = this.createCards();
+    
+    this.ngZone.run(() => {
+      this.load().then(() => {
+        this.cards = this.createCards();
+      });
     });
-
+    
     this.loadInterval = setInterval(() => {
       /*
       const $table = $('#table');
@@ -124,13 +143,17 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
         classes: 'table table-bordered table-hover table-dark table-striped'
       });
       */
-
       if (this.stoppingDaemon) return;
 
-      this.load().then(() => {
-        this.cards = this.createCards();
-      });
-      }, 5000);
+      this.ngZone.run(() => {
+
+        this.load().then(() => {
+          this.cards = this.createCards();
+        });
+        }, 5000);
+      })
+
+      
   }
 
   ngOnDestroy(): void {
@@ -190,13 +213,6 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
     if(!this.electronService.isElectron) this.stoppingDaemon = false;
   }
 
-  private onNavigationEnd(): void {
-    this.load().then(() => {
-      //this.cards = this.createCards();
-    });
-    
-  }
-
   private createLoadingCards(): Card[] {
     return [
       new Card('Connection Status', this.connectionStatus, true),
@@ -238,6 +254,10 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private async load(): Promise<void> {
+    if (this.isLoading) {
+      return;
+    }
+
     try {
       this.isLoading = true;
       this.daemonRunning = await this.daemonService.isRunning();
@@ -251,6 +271,11 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
       this.navbarService.enableLinks();
 
       const $table = $('#table');
+      $table.bootstrapTable({});
+      $table.bootstrapTable('refreshOptions', {
+        classes: 'table table-bordered table-hover table-dark table-striped'
+      });
+      if (this.getPeers().length == 0) $table.bootstrapTable('showLoading');
       
       this.syncInfo = await this.daemonService.syncInfo();
       this.height = this.syncInfo.height;
@@ -293,6 +318,8 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
       //const blockchainPruned = false;
       this.nodeType = blockchainPruned ? 'pruned' : 'full';
       $table.bootstrapTable('load', this.getPeers());
+      $table.bootstrapTable('hideLoading');
+
     }
     catch(error) {
       console.error(error);

@@ -31,9 +31,11 @@ function createWindow(): BrowserWindow {
     width: size.width,
     height: size.height,
     webPreferences: {
-      nodeIntegration: true,
-      allowRunningInsecureContent: (serve),
-      contextIsolation: false
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false,
+      allowRunningInsecureContent: true,
+      contextIsolation: true,
+      devTools: true
     },
     icon: path.join(__dirname, 'assets/icons/favicon.ico')
   });
@@ -348,7 +350,7 @@ try {
     }
   });
 
-  ipcMain.on('start-monerod', (event, configFilePath: string[]) => {
+  ipcMain.handle('start-monerod', (event, configFilePath: string[]) => {
     startMoneroDaemon(configFilePath);
   })
 

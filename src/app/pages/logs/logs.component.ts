@@ -19,23 +19,22 @@ export class LogsComponent implements AfterViewInit {
   }
 
   private scrollToBottom(): void {
-    this.lines;
-    const terminalOutput = <HTMLDivElement | null>document.getElementById('terminalOutput');
-    if (terminalOutput) {
-      terminalOutput.style.width = `${window.innerWidth}`;
-      console.log(`scrolling from ${terminalOutput.offsetTop} to ${terminalOutput.scrollHeight}`)
-      terminalOutput.scrollBy(0, terminalOutput.scrollHeight)
-    }
+    this.ngZone.run(() => {
+      this.lines;
+      const terminalOutput = <HTMLDivElement | null>document.getElementById('terminalOutput');
+      if (terminalOutput) {
+        terminalOutput.style.width = `${window.innerWidth}`;
+        console.log(`scrolling from ${terminalOutput.offsetTop} to ${terminalOutput.scrollHeight}`)
+        terminalOutput.scrollBy(0, terminalOutput.scrollHeight)
+      }
+    });
   }
 
   private onLog(): void {
     if (this.logTerminal) this.logTerminal.nativeElement.scrollTop = this.logTerminal.nativeElement.scrollHeight;
     // Scorri automaticamente in basso
     setTimeout(() => {
-      this.ngZone.run(() => {
-        this.scrollToBottom();
-      })
-      
+      this.scrollToBottom();
     }, 100);
   }
 
@@ -45,6 +44,8 @@ export class LogsComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
       this.navbarService.removeLinks();
-      this.scrollToBottom();
-  }
+      
+      setTimeout(() => {
+        this.scrollToBottom();
+      }, 500);  }
 }

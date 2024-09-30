@@ -7,7 +7,7 @@ import { ElectronService } from '../electron/electron.service';
 export class MoneroInstallerService {
   constructor(private electronService: ElectronService) {}
 
-  downloadMonero(downloadUrl: string, destination: string): Promise<void> {
+  public downloadMonero(downloadUrl: string, destination: string): Promise<void> {
     return new Promise((resolve, reject) => {
       this.electronService.ipcRenderer.invoke('download-monero', downloadUrl, destination)
         .then(() => resolve())
