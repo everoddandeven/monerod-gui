@@ -7,6 +7,7 @@ import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { MineableTxBacklog } from '../../../common/MineableTxBacklog';
 import { Chain } from '../../../common/Chain';
 import { CoreIsBusyError } from '../../../common/error';
+import { BlockTemplate, GeneratedBlocks, MiningStatus } from '../../../common';
 
 @Component({
   selector: 'app-mining',
@@ -18,6 +19,39 @@ export class MiningComponent implements AfterViewInit {
   public readonly navbarLinks: NavbarLink[];
   public coreBusy: boolean;
   private minerData?: MinerData;
+  public miningStatus?: MiningStatus;
+  public  miningStatusLoading?: boolean = false;
+
+  public gettingBlockTemplate: boolean = false;
+  public getBlockTemplateAddress: string = '';
+  public getBlockTemplateReserveSize: number = 0;
+  public getBlockTemplateError: string = '';
+
+  public blockTemplate?: BlockTemplate;
+
+  public submittingBlock: boolean = false;
+  public submitBlockError: string = '';
+  public submitBlockSuccess: boolean = false;
+  public submitBlockBlobDataJsonString: string = '';
+  public get modifiedSubmitBlockBlobData(): boolean {
+    return this.submitBlockBlobDataJsonString != '';
+  }
+  
+  public gettingCalcPow: boolean = false;
+  public calcPowBlobData: string = '';
+  public calcPowMajorVersion: number = 0;
+  public calcPowHeight: number = 0;
+  public calcPowSeed: string = '';
+  public calcPowError: string = '';
+  public calculatedPowHash: string = '';
+
+  public generatedBlocks?: GeneratedBlocks;
+  public generatingBlocks: boolean = false;
+  public generateBlocksError: string = '';
+  public generateBlocksAmountOfBlocks: number = 0;
+  public generateBlocksAddress: string = '';
+  public generateBlockPrevBlock: string = '';
+  public generateStartingNonce: number = 0;
 
   private majorVersion: number;
   private height: number;
@@ -45,7 +79,8 @@ export class MiningComponent implements AfterViewInit {
     this.coreBusy = false;
 
     this.navbarLinks = [
-      new NavbarLink('pills-miner-data-tab', '#pills-miner-data', 'miner-data', true, 'Miner Data'),
+      new NavbarLink('pills-mining-status-tab', '#pills-mining-status', 'mining-status', true, 'Status'),
+      new NavbarLink('pills-miner-data-tab', '#pills-miner-data', 'miner-data', false, 'Miner Data'),
       new NavbarLink('pills-alternate-chains-tab', '#pills-alternate-chains', 'alternate-chains', false, 'Alternate Chains'),
       new NavbarLink('pills-block-template-tab', '#pills-block-template', 'block-template', false, 'Block Template'),
       new NavbarLink('pills-generate-blocks-tab', '#pills-generate-blocks', 'generate-blocks', false, 'Generate Blocks'),
@@ -95,7 +130,74 @@ export class MiningComponent implements AfterViewInit {
     });
   }
 
+  private async getMiningStatus(): Promise<void> {
+    this.miningStatusLoading = true;
+    try {
+      this.miningStatus = await this.daemonService.miningStatus();
+    } catch(error) {
+      console.error(error);
+      this.miningStatus = undefined;
+    }
+    this.miningStatusLoading = false;
+  }
+
+  public async getBlockTemplate(): Promise<void> {
+    this.gettingBlockTemplate = true;
+
+    try {
+      this.blockTemplate = await this.daemonService.getBlockTemplate(this.getBlockTemplateAddress, this.getBlockTemplateReserveSize);
+      this.getBlockTemplateError = '';
+    } catch(error) {
+      this.getBlockTemplateError = `${error}`;
+    }
+
+    this.gettingBlockTemplate = false;
+  }
+
+  public async submitBlock(): Promise<void> {
+    if (!this.validBlobData()) {
+      return;
+    }
+
+    this.submittingBlock = true;
+
+    try {
+      const blobData: string[] = JSON.parse(this.submitBlockBlobDataJsonString);
+      await this.daemonService.submitBlock(...blobData);
+      this.submitBlockError = '';
+      this.submitBlockSuccess = true;
+    }
+    catch(error) {
+      console.error(error);
+      this.submitBlockError = `${error}`;
+    }
+    this.submittingBlock = false;
+  }
+
+  public validBlobData(): boolean {
+    try {
+      const parsed: any[] = JSON.parse(this.submitBlockBlobDataJsonString);
+
+      if (!Array.isArray(parsed)) {
+        throw new Error();
+      }
+
+      parsed.forEach((blob) => {
+        if (typeof blob != 'string') {
+          return false;
+        }
+      })
+
+      return true;
+
+    } catch (error) {
+      return false;
+    }
+  }
+
   private async load(): Promise<void> {
+    await this.getMiningStatus();
+
     try {
       const running = await this.daemonService.isRunning();
       
@@ -159,6 +261,32 @@ export class MiningComponent implements AfterViewInit {
     }))
 
     return chains;
+  }
+
+  public async calcPowHash() {
+    this.gettingCalcPow = true;
+
+    try {
+      this.calculatedPowHash = await this.daemonService.calculatePoWHash(this.calcPowMajorVersion, this.calcPowHeight, this.calcPowBlobData, this.calcPowSeed)
+    } catch(error) {
+      this.calcPowError = `${error}`;
+    }
+
+    this.gettingCalcPow = false;
+  }
+
+  public async generateBlocks(): Promise<void> {
+    this.generatingBlocks = true;
+
+    try {
+      this.generatedBlocks = await this.daemonService.generateBlocks(this.generateBlocksAmountOfBlocks, this.generateBlocksAddress, this.generateBlockPrevBlock, this.generateStartingNonce);
+      this.generateBlocksError = '';
+    }
+    catch(error) {
+      this.generateBlocksError = `${error}`;
+    }
+
+    this.generatingBlocks = false;
   }
 
 }

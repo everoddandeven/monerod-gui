@@ -342,17 +342,25 @@ export class DaemonService {
   public async submitBlock(... blockBlobData: string[]): Promise<void> {
     const response = await this.callRpc(new SubmitBlockRequest(blockBlobData));
 
-    if (response.error) {
-      if (!response.message) {
-        throw new Error(`Error code: ${response.code}`);
+    if (response.result && typeof response.result.status == 'string' && response.result.status != 'OK') {
+      if (response.result.status == 'BUSY') {
+        throw new CoreIsBusyError();
       }
 
-      throw new Error(response.message);
+      throw new Error(response.result.status);
     }
   }
 
   public async generateBlocks(amountOfBlocks: number, walletAddress: string, prevBlock: string = '', startingNonce: number): Promise<GeneratedBlocks> {
     const response = await this.callRpc(new GenerateBlocksRequest(amountOfBlocks, walletAddress, prevBlock, startingNonce));
+
+    if(response.result && response.result.status != 'OK') {
+      if (response.result.status == 'BUSY') {
+        throw new CoreIsBusyError();
+      }
+
+      throw new Error(response.result.status);
+    }
 
     return GeneratedBlocks.parse(response.result);
   }
