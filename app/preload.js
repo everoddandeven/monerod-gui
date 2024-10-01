@@ -10,5 +10,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   onMoneroClose: (callback) => {
     ipcRenderer.on('monero-close', callback);
+  },
+  getMoneroVersion: () => {
+    ipcRenderer.invoke('get-monero-version');
+  },
+  onMoneroVersion: (callback) => {
+    ipcRenderer.on('monero-version', callback);
+  },
+  onMoneroVersionError: (callback) => {
+    ipcRenderer.on('monero-version-error', callback);
   }
 });

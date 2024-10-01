@@ -256,13 +256,6 @@ export class DaemonService {
       return;
     }
 
-    /*
-    if (!this.electronService.isElectron) {
-      console.error("Could not start monero daemon: not electron app");
-      return;
-    }
-    */
-
     this.starting = true;
 
     console.log("Starting daemon");
@@ -270,7 +263,7 @@ export class DaemonService {
     
     if (this.electronService.ipcRenderer) this.electronService.ipcRenderer.send('start-monerod', settings.toCommandOptions());
     else {
-      const wdw = (window as any).electronAPI.startMonerod(settings.toCommandOptions());
+      (window as any).electronAPI.startMonerod(settings.toCommandOptions());
     }
 
     await this.delay(3000);
@@ -546,17 +539,29 @@ export class DaemonService {
     }
     else if (dontUseRpc) {
       const monerodPath: string = ''; // TO DO get local monerod path
+      const wdw = (window as any);
 
       return new Promise<DaemonVersion>((resolve, reject) => {
-        this.electronService.ipcRenderer.on('on-monerod-version', (event, version: string) => {
-          resolve(DaemonVersion.parse(version));
-        });
-        
-        this.electronService.ipcRenderer.on('on-monerod-version-error', (event, version: string) => {
-          reject(version);
-        });
-
-        this.electronService.ipcRenderer.send('get-monerod-version', monerodPath);
+        if (this.electronService.isElectron) {
+          this.electronService.ipcRenderer.on('on-monerod-version', (event, version: string) => {
+            resolve(DaemonVersion.parse(version));
+          });
+          
+          this.electronService.ipcRenderer.on('on-monerod-version-error', (event, version: string) => {
+            reject(version);
+          });
+  
+          this.electronService.ipcRenderer.send('get-monerod-version', monerodPath);
+        }
+        else if (wdw.electronAPI && wdw.electronAPI.getMoneroVersion) {
+          wdw.electronAPI.onMoneroVersion((event: any, version: string) => {
+            resolve(DaemonVersion.parse(version));
+          })
+          wdw.electronAPI.onMoneroVersionError((event: any, error: string) => {
+            reject(error);
+          });
+          wdw.electronAPI.getMoneroVersion();
+        }
       });
     }
 

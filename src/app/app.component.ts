@@ -3,6 +3,8 @@ import { ElectronService } from './core/services';
 import { TranslateService } from '@ngx-translate/core';
 import { APP_CONFIG } from '../environments/environment';
 import { DaemonService } from './core/services/daemon/daemon.service';
+import { DaemonDataService } from './core/services/daemon/daemon-data.service';
+import { LogsService } from './pages/logs/logs.service';
 
 @Component({
   selector: 'app-root',
@@ -13,10 +15,16 @@ export class AppComponent {
   public loading: boolean;
   public daemonRunning: boolean;
 
+  public get initializing(): boolean {
+    return this.daemonData.initializing;
+  }
+
   constructor(
     private electronService: ElectronService,
     private translate: TranslateService,
-    private daemonService: DaemonService
+    private daemonService: DaemonService,
+    private daemonData: DaemonDataService,
+    private LogService: LogsService
   ) {
     this.translate.setDefaultLang('en');
     console.log('APP_CONFIG', APP_CONFIG);

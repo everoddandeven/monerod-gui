@@ -113,11 +113,11 @@ function getMonerodVersion(monerodFilePath: string): void {
   const monerodProcess = spawn(getMonerodPath(), [ '--version' ]);
 
   monerodProcess.stdout.on('data', (data) => {
-    win?.webContents.send('on-monerod-version', `${data}`);
+    win?.webContents.send('monero-version', `${data}`);
   })
 
   monerodProcess.stderr.on('data', (data) => {
-    win?.webContents.send('on-monerod-version-error', `${data}`);
+    win?.webContents.send('monero-version-error', `${data}`);
   })
 }
 
@@ -290,14 +290,6 @@ const verifyFileHash = (filePath: string): Promise<string> => {
   });
 };
 
-// Funzione per estrarre tar.bz2
-const extractTarBz2Old = (filePath: string, destination: string): Promise<void> => {
-  return tar.x({
-    file: filePath,
-    cwd: destination,
-  });
-};
-
 const extractTarBz2 = (filePath: string, destination: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     // Crea il file decomprimendo il .bz2 in uno .tar temporaneo
@@ -354,11 +346,10 @@ try {
     startMoneroDaemon(configFilePath);
   })
 
-  ipcMain.on('get-monerod-version', (event, configFilePath: string) => {
+  ipcMain.handle('get-monero-version', (event, configFilePath: string) => {
     getMonerodVersion(configFilePath);
   });
 
-  
   // Gestione IPC
   ipcMain.handle('download-monero', async (event, downloadUrl: string, destination: string) => {
     try {

@@ -56,7 +56,8 @@ export class VersionComponent implements AfterViewInit {
   }
 
   public async load(): Promise<void> {
-    const version = await this.daemonService.getVersion(this.electronService.isElectron);
+    const isElectron = this.electronService.isElectron || (window as any).electronAPI != null;
+    const version = await this.daemonService.getVersion(isElectron);
     const latestVersion = await this.daemonService.getLatestVersion();
 
     this.currentVersion = version;
