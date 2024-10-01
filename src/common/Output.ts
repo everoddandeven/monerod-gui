@@ -13,4 +13,8 @@ export class Output {
             'index': this.index
         }
     }
+
+    public static parse(out: any): Output {
+      return new Output(out.amount, out.index);
+    }
 }

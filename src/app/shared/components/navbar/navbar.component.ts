@@ -43,4 +43,30 @@ export class NavbarComponent {
     });
 
   }
+
+  public async startDaemon(): Promise<void> {
+    try {
+      await this.daemonService.startDaemon();
+    } catch(error) {
+      console.error(error);
+    }
+  }
+
+  public async stopDaemon(): Promise<void> {
+    try {
+      await this.daemonService.stopDaemon();
+    } catch(error) {
+      console.error(error);
+    }
+  }
+
+  public async restartDaemon(): Promise<void> {
+    await this.stopDaemon();
+
+    await this.startDaemon();
+  }
+
+  public async quit(): Promise<void> {
+
+  }
 }

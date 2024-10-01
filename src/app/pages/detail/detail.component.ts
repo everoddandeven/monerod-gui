@@ -51,6 +51,7 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   public cards: Card[];
+  public firstLoading: boolean = true;
 
   constructor(
     private router: Router,private daemonService: DaemonService, 
@@ -234,7 +235,7 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.daemonRunning && !this.daemonService.starting) {
       return [];
     }
-    if (this.isLoading || this.daemonService.starting) {
+    if (this.firstLoading || this.daemonService.starting) {
       return this.createLoadingCards();
     }
     return [
@@ -326,6 +327,8 @@ export class DetailComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     
     this.isLoading = false;
+    this.firstLoading = false;
+
   }
 
   public async isBlockchainPruned(): Promise<boolean> {

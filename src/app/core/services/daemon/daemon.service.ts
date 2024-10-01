@@ -709,6 +709,14 @@ export class DaemonService {
       console.warn("Daemon not running");
       return;
     }
+    if (this.stopping) {
+      console.warn("Daemon already stopping");
+      return;
+    }
+    if (this.starting) {
+      console.warn("Daemon is starting");
+      return;
+    }
     this.stopping = true;
     this.onDaemonStopStart.emit();
 

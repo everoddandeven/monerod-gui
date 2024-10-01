@@ -33,7 +33,7 @@ function createWindow(): BrowserWindow {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
-      allowRunningInsecureContent: true,
+      allowRunningInsecureContent: (serve),
       contextIsolation: true,
       devTools: true
     },

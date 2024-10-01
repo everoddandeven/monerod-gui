@@ -25,22 +25,22 @@
 
   <ul class="navbar-nav flex-row">
     <li *ngIf="!running && !stopping && !starting" class="nav-item text-nowrap">
-      <button class="nav-link px-3 text-white" type="button" data-bs-toggle="collapse" aria-expanded="false" aria-label="Start daemon">
+      <button class="nav-link px-3 text-white" type="button" data-bs-toggle="collapse" aria-expanded="false" aria-label="Start daemon" (click)="startDaemon()">
         <i class="bi bi-play-fill"></i>
       </button>
     </li>
     <li *ngIf="running && !stopping && !starting" class="nav-item text-nowrap">
-      <button class="nav-link px-3 text-white" type="button" data-bs-toggle="collapse" aria-expanded="false" aria-label="Stop daemon">
+      <button class="nav-link px-3 text-white" type="button" data-bs-toggle="collapse" aria-expanded="false" aria-label="Stop daemon" (click)="stopDaemon()">
         <i class="bi bi-stop-fill"></i>
       </button>
     </li>
     <li *ngIf="running && !stopping && !starting" class="nav-item text-nowrap">
-      <button class="nav-link px-3 text-white" type="button" data-bs-toggle="collapse" aria-expanded="false" aria-label="Restart daemon">
+      <button class="nav-link px-3 text-white" type="button" data-bs-toggle="collapse" aria-expanded="false" aria-label="Restart daemon" (click)="restartDaemon()">
         <i class="bi bi-arrow-clockwise"></i>
       </button>
     </li>
     <li class="nav-item text-nowrap">
-      <button class="nav-link px-3 text-white" type="button" data-bs-toggle="offcanvas" aria-label="Quit" [disabled]="stopping || starting">
+      <button class="nav-link px-3 text-white" type="button" data-bs-toggle="offcanvas" aria-label="Quit" [disabled]="stopping || starting" (click)="quit()">
         <i class="bi bi-power"></i>
       </button>
     </li>
