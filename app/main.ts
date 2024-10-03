@@ -122,8 +122,14 @@ function getMonerodVersion(monerodFilePath: string): void {
 }
 
 function startMoneroDaemon(commandOptions: string[]): ChildProcessWithoutNullStreams {
-  const monerodPath = getMonerodPath();
-  
+  //const monerodPath = getMonerodPath();
+  const monerodPath = commandOptions.shift();
+
+  if (!monerodPath) {
+    win?.webContents.send('monero-sterr', `Invalid monerod path provided: ${monerodPath}`);
+    throw Error("Invalid monerod path provided");
+  }
+
   console.log("Starting monerod daemon with options: " + commandOptions.join(" "));
 
   // Avvia il processo usando spawn

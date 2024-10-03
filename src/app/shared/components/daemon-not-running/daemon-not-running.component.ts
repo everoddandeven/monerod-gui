@@ -9,7 +9,8 @@ import { DaemonService } from '../../../core/services/daemon/daemon.service';
 export class DaemonNotRunningComponent {
 
   public daemonRunning: boolean = false;
-  
+  public daemonConfigured: boolean = false;
+
   public get startingDaemon(): boolean {
     return this.daemonService.starting;
   }
@@ -24,6 +25,9 @@ export class DaemonNotRunningComponent {
     });
     this.daemonService.isRunning().then((running: boolean) => {
       this.ngZone.run(() => this.daemonRunning = running);
+    });
+    this.daemonService.getSettings().then((settings) => {
+      this.daemonConfigured = settings.monerodPath != '';
     })
   }
 

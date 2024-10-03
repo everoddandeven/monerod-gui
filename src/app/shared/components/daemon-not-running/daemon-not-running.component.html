@@ -1,11 +1,13 @@
 <div *ngIf="!daemonRunning" class="h-100 p-5 text-bg-dark rounded-3 m-4 text-center">
-    <h2 *ngIf="!startingDaemon"><i class="bi bi-exclamation-diamond m-4"></i> Daemon not running</h2>
-    <p *ngIf="!startingDaemon">Start monero daemon</p>
+    <h2 *ngIf="!startingDaemon && daemonConfigured"><i class="bi bi-exclamation-diamond m-4"></i> Daemon not running</h2>
+    <h2 *ngIf="!startingDaemon && !daemonConfigured"><i class="bi bi-exclamation-diamond m-4"></i> Daemon not configured</h2>
+    <p *ngIf="!startingDaemon && daemonConfigured">Start monero daemon</p>
+    <p *ngIf="!startingDaemon && !daemonConfigured">Configure monero daemon</p>
 
     <h2 *ngIf="startingDaemon"><i class="bi bi-play-fill m-4"></i> Daemon is starting</h2>
     <p *ngIf="startingDaemon">Starting monero daemon</p>
 
-    <button *ngIf="!startingDaemon" class="btn btn-outline-light" type="button" (click)="startDaemon()"><i class="bi bi-play-fill"></i> Start</button>
+    <button *ngIf="!startingDaemon && daemonConfigured" class="btn btn-outline-light" type="button" (click)="startDaemon()"><i class="bi bi-play-fill"></i> Start</button>
     <button *ngIf="startingDaemon" class="btn btn-outline-light" type="button" disabled>
       <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
       Starting monerod

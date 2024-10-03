@@ -98,6 +98,8 @@ export class DaemonService {
   public readonly onDaemonStopStart: EventEmitter<void> = new EventEmitter<void>();
   public readonly onDaemonStopEnd: EventEmitter<void> = new EventEmitter<void>();
 
+  private isRunningPromise?: Promise<boolean>;
+
   private readonly headers: { [key: string]: string } = {
     "Access-Control-Allow-Headers": "*", // this will allow all CORS requests
     "Access-Control-Allow-Methods": 'POST,GET' // this states the allowed methods
@@ -237,13 +239,17 @@ export class DaemonService {
       return response;
     }
     catch (error) {
-      if (error instanceof HttpErrorResponse && error.status == 0) {
-        const wasRunning = this.daemonRunning;
-        this.daemonRunning = false;
-
-        if (wasRunning) {
-          this.onDaemonStatusChanged.emit(false);
+      if (error instanceof HttpErrorResponse) {
+        if (error.status == 0) {
+          const wasRunning = this.daemonRunning;
+          this.daemonRunning = false;
+  
+          if (wasRunning) {
+            this.onDaemonStatusChanged.emit(false);
+          }
         }
+
+        throw new Error(error.message);
       }
 
       throw error;
@@ -282,26 +288,37 @@ export class DaemonService {
 
   }
 
-  public async isRunning(force: boolean = false): Promise<boolean> {
+  private async checkDaemonIsRunning(): Promise<boolean> {
     try {
-      if (!force && this.daemonRunning != undefined) {
-        return this.daemonRunning;
-      }
-
       await this.callRpc(new EmptyRpcRequest());
     }
     catch(error) {
       if (error instanceof MethodNotFoundError) {
-        this.daemonRunning = true;
-        return this.daemonRunning;
+        return true;
       }
-      
+
       console.error(error);
     }
-    
-    this.daemonRunning = false;
-    return this.daemonRunning;
 
+    return false;
+  }
+
+  public async isRunning(force: boolean = false): Promise<boolean> {
+    if (this.isRunningPromise) {
+      return await this.isRunningPromise;
+    }
+    
+    if (!force && this.daemonRunning != undefined) {
+      return this.daemonRunning;
+    }
+
+    this.isRunningPromise = this.checkDaemonIsRunning();
+
+    this.daemonRunning = await this.isRunningPromise;
+    
+    this.isRunningPromise = undefined;
+
+    return this.daemonRunning;
   }
 
   public async getBlock(heightOrHash: number | string, fillPowHash: boolean = false): Promise<Block> {
@@ -677,6 +694,10 @@ export class DaemonService {
 
   public async isKeyImageSpent(...keyImages: string[]): Promise<number[]> {
     const response = await this.callRpc(new IsKeyImageSpentRequest(keyImages));
+
+    if (response.status != 'OK') {
+      throw new Error(response.status);
+    }
 
     return response.spent_status;
   }

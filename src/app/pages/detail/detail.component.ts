@@ -34,7 +34,13 @@ export class DetailComponent implements AfterViewInit {
   }
 
   private get targetHeight(): number {
-    return this.daemonData.syncInfo ? this.daemonData.syncInfo.targetHeight : 0;
+    const value = this.daemonData.syncInfo ? this.daemonData.syncInfo.targetHeight : 0;
+
+    if (value == 0 && this.height > 0) {
+      return this.height;
+    }
+
+    return value;
   }
 
   private get nextNeededPruningSeed(): number {
@@ -90,7 +96,11 @@ export class DetailComponent implements AfterViewInit {
   }
 
   private get syncProgress(): string {
-    return `${(this.height*100/this.targetHeight).toFixed(2)} %`;
+    const targetHeight = this.targetHeight;
+    const height = this.height;
+    console.log(`Sync progress, height ${height},targetHeight ${targetHeight}`)
+
+    return `${(height*100/targetHeight).toFixed(2)} %`;
   }
 
   //#endregion 

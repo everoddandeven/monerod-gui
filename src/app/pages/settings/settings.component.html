@@ -1,20 +1,48 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
   <h1 class="h2">Settings</h1>
   <div class="btn-toolbar mb-2 mb-md-0">
-    <ul class="nav nav-pills m-3" id="pills-tab" role="tablist">
-      @for(navbarLink of navbarLinks; track navbarLink.name) {
-        <li class="nav-item mr-2" role="presentation">
-            <button [class]="navbarLink.selected ? 'nav-link active btn-sm' : 'nav-link btn-sm'" [id]="navbarLink.id" data-bs-toggle="pill" [attr.data-bs-target]="navbarLink.target" type="button" role="tab" [attr.aria-controls]="navbarLink.controls" [attr.aria-selected]="navbarLink.selected" [disabled]="navbarLink.disabled">{{navbarLink.name}}</button>
-        </li>
-      }
-    </ul>
+    <div class="btn-group me-2">
+      <ul class="nav nav-pills m-3" id="pills-tab" role="tablist">
+        @for(navbarLink of navbarLinks; track navbarLink.name) {
+          <li class="nav-item mr-2" role="presentation">
+              <button [class]="navbarLink.selected ? 'nav-link active btn-sm' : 'nav-link btn-sm'" [id]="navbarLink.id" data-bs-toggle="pill" [attr.data-bs-target]="navbarLink.target" type="button" role="tab" [attr.aria-controls]="navbarLink.controls" [attr.aria-selected]="navbarLink.selected" [disabled]="navbarLink.disabled">{{navbarLink.name}}</button>
+          </li>
+        }
+      </ul>
+    </div>
   </div>
 </div>
 
-
-
 <div *ngIf="!loading" class="tab-content" id="pills-settings-tabContent">
-  <div class="tab-pane fade show active" id="pills-rpc" role="tabpanel" aria-labelledby="pills-rpc-tab" tabindex="0">
+  
+  <div class="tab-pane fade show active" id="pills-general" role="tabpanel" aria-labelledby="pills-general-tab" tabindex="0">
+    <div class="row g-5 p-2">
+      <div class="col-md-7 col-lg-10">
+        <h4 class="mb-3">Node</h4>
+
+        <div class="row gy-3">
+          <div class="col-md-12">
+            <label for="general-monerod-path" class="form-label">Monerod path</label>
+            <input type="file" class="form-control" id="general-monerod-path" [(ngModel)]="currentSettings.monerodPath" [ngModelOptions]="{standalone: true}" (change)="onMonerodPathChange()" placeholder="AAA">
+            <small class="text-body-secondary">Path to monerod executable</small>
+          </div>
+        </div>
+
+        <br>
+
+        <div class="row gy-3">
+          <div class="col-md-12">
+            <label for="general-xmrig-path" class="form-label">XMRig path</label>
+            <input type="file" class="form-control" id="general-xmrig-path" [(ngModel)]="currentSettings.monerodPath" [ngModelOptions]="{standalone: true}" (change)="onMonerodPathChange()" placeholder="AAA">
+            <small class="text-body-secondary">Path to XMRig executable</small>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id="pills-rpc" role="tabpanel" aria-labelledby="pills-rpc-tab" tabindex="0">
     <div class="row g-5 m-2">
       <div class="col-md-7 col-lg-10">
         <h4 class="mb-3">General</h4>

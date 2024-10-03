@@ -2,7 +2,7 @@ import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
-import { Output } from '../../../common';
+import { HistogramEntry, Output, OutputDistribution } from '../../../common';
 
 @Component({
   selector: 'app-outputs',
@@ -17,10 +17,62 @@ export class OutputsComponent implements AfterViewInit {
   public getOutsJsonString: string = '';
   public getOutsGetTxId: boolean = false;
 
-  public keyImages: string = '';
+  public keyImagesJsonString: string = '';
   public isKeyImageSpentError: string = '';
-  public isKeyImageSpentResult?: boolean;
+  public isKeyImageSpentResult?: { keyImage: string, spentStatus: string }[];
   public gettingKeyImages: boolean = false;
+
+  public get validKeyImages(): boolean {
+    try {
+      const keyImages: string[] = JSON.parse(this.keyImagesJsonString);
+
+      if (!Array.isArray(keyImages)) {
+        return false;
+      }
+
+      keyImages.forEach((keyImage: string) => {
+        if (typeof keyImage != 'string') {
+          throw new Error();
+        }
+      });
+
+      return true;
+    } catch(error) {
+      return false;
+    }
+  }
+
+  public get keyImages(): string[] {
+    if (!this.validKeyImages) {
+      return [];
+    }
+
+    return JSON.parse(this.keyImagesJsonString);
+  }
+
+  public getOutHistogramAmountsJsonString: string = '';
+  public getOutHistogramMinCount: number = 0;
+  public getOutHistogramMaxCount: number = 0;
+  public getOutHistogramUnlocked: boolean = false;
+  public getOutHistogramRecentCutoff: number = 0;
+  public getOutHistogramResult?: HistogramEntry[];
+  public getOutHistogramError: string = '';
+  public gettingOutHistogram: boolean = false;
+
+  public getOutDistributionAmountsJsonString: string = '';
+  public getOutDistributionFromHeight: number = 0;
+  public getOutDistributionToHeight: number = 0;
+  public getOutDistributionCumulative: boolean = false;
+  public getOutDistributionResult?: OutputDistribution[];
+  public getOutDistributionError: string = '';
+
+  public get getOutDistributionAmounts(): number[] {
+    if (!this.validOutDistributionAmounts) {
+      return [];
+    }
+
+    return JSON.parse(this.getOutDistributionAmountsJsonString);
+  }
 
   constructor(private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
     this.navbarLinks = [
@@ -67,7 +119,7 @@ export class OutputsComponent implements AfterViewInit {
     }
   }
 
-  public validOuts(): boolean {
+  public get validOuts(): boolean {
     try {
       const _outs: any[] = JSON.parse(this.getOutsJsonString);
 
@@ -93,11 +145,80 @@ export class OutputsComponent implements AfterViewInit {
 
   }
 
-  public async isKeyImageSpent(): Promise<void> {
+  public get validOutDistributionAmounts(): boolean {
+    try {
+      const amounts: number[] = JSON.parse(this.getOutDistributionAmountsJsonString);
+
+      if(!Array.isArray(amounts)) {
+        return false;
+      }
+
+      amounts.forEach((amount) => {
+        if (typeof amount != 'number' || amount <= 0) throw new Error("");
+      })
+
+      return true;
+    }
+    catch(error) {
+      return false;
+    }
+  }
+
+  public async getOutDistribution(): Promise<void> {
+    try 
+    {
+      const amounts = this.getOutDistributionAmounts;
+      const cumulative = this.getOutDistributionCumulative;
+      const fromHeight = this.getOutDistributionFromHeight;
+      const toHeight = this.getOutDistributionToHeight;
+
+      this.getOutDistributionResult = await this.daemonService.getOutputDistribution(amounts, cumulative, fromHeight, toHeight);
+      this.getOutDistributionError = '';
+    }
+    catch(error) {
+      this.getOutDistributionError = `${error}`;
+    }
+  }
+
+  public async getOutHistogram(): Promise<void> {
     
   }
 
+  public async isKeyImageSpent(): Promise<void> {
+    this.gettingKeyImages = true;
+    try {
+      const keyImages: string[] = this.keyImages;
+
+      const spentList: number[] = await this.daemonService.isKeyImageSpent(...keyImages);
+
+      if (keyImages.length != spentList.length) {
+        throw new Error("Invalid spent list size response");
+      }
+
+      this.isKeyImageSpentResult = [];
+      for(let i = 0; i < keyImages.length; i++) {
+        const ki = keyImages[i];
+        const spentStatus = spentList[i];
+
+        this.isKeyImageSpentResult.push({
+          keyImage: ki,
+          spentStatus: spentStatus == 0 ? 'unspent' : spentStatus == 1 ? 'spent in blockchain' : spentStatus == 2 ? 'spent in tx pool' : 'unknown'
+        })
+
+        const $table = $('#keyImagesTable');
+        $table.bootstrapTable({});
+        $table.bootstrapTable('load', this.isKeyImageSpentResult);
+        this.isKeyImageSpentError = '';
+      }
+
+    } catch(error) {
+      this.isKeyImageSpentError = `${error}`;
+      this.isKeyImageSpentResult = undefined;
+    }
+
+    this.gettingKeyImages = false;
+  }
+
   public async load() {
-    await this.getOuts();
   }
 }

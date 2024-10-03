@@ -39,13 +39,18 @@ export class BlockchainComponent implements AfterViewInit {
   public saveBlockchainError: string = '';
   public blockchainSaved: boolean = false;
 
+  public pruningBlockchain: boolean = false;
+  public pruneBlockchainError: string = '';
+  public blockchainPruned: boolean = false;
+
   constructor(private daemonService: DaemonService, private ngZone: NgZone) {
     this.navbarLinks = [
-      new NavbarLink('pills-last-block-header-tab', '#pills-last-block-header', 'pills-last-block-header', true, 'Last Block Header', true),
-      new NavbarLink('pills-get-block-tab', '#pills-get-block', 'pills-get-block', false, 'Get Block', true),
-      new NavbarLink('pills-get-block-header-tab', '#pills-get-block-header', 'pills-get-block-header', false, 'Get Block Header', true),
-      new NavbarLink('pills-pop-blocks-tab', '#pills-pop-blocks', 'pills-pop-blocks', false, 'Pop Blocks', true),
-      new NavbarLink('pills-save-bc-tab', '#pills-save-bc', 'pills-save-bc', false, 'Save Blockchain', true)
+      new NavbarLink('pills-last-block-header-tab', '#pills-last-block-header', 'pills-last-block-header', true, 'Last Block Header'),
+      new NavbarLink('pills-get-block-tab', '#pills-get-block', 'pills-get-block', false, 'Get Block'),
+      new NavbarLink('pills-get-block-header-tab', '#pills-get-block-header', 'pills-get-block-header', false, 'Get Block Header'),
+      new NavbarLink('pills-pop-blocks-tab', '#pills-pop-blocks', 'pills-pop-blocks', false, 'Pop Blocks'),
+      new NavbarLink('pills-prune-blockchain-tab', '#pills-prune-blockchain', 'pills-prune-blockchain', false, 'Prune'),
+      new NavbarLink('pills-save-bc-tab', '#pills-save-bc', 'pills-save-bc', false, 'Save')
     ];
 
     this.daemonService.onDaemonStatusChanged.subscribe((running) => {
@@ -147,5 +152,19 @@ export class BlockchainComponent implements AfterViewInit {
     }
 
     this.savingBlockchain = false;
+  }
+
+  public async pruneBlockchain(): Promise<void> {
+    this.pruningBlockchain = true;
+
+    try {
+      await this.daemonService.pruneBlockchain(false);
+      this.blockchainPruned = true;
+    } catch(error) {
+      this.pruneBlockchainError = `${error}`;
+      this.blockchainPruned = false;
+    }
+
+    this.pruningBlockchain = false;
   }
 }

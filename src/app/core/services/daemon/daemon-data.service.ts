@@ -1,6 +1,6 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { DaemonService } from './daemon.service';
-import { BlockCount, BlockHeader, DaemonInfo, SyncInfo } from '../../../../common';
+import { BlockCount, BlockHeader, Chain, DaemonInfo, SyncInfo } from '../../../../common';
 
 @Injectable({
   providedIn: 'root'
@@ -30,6 +30,9 @@ export class DaemonDataService {
 
   private _lastBlockHeader?: BlockHeader;
   private _gettingLastBlockHeader: boolean = false;
+
+  private _altChains: Chain[] = [];
+  private _gettingAltChains: boolean = false;
 
   public readonly syncStart: EventEmitter<void> = new EventEmitter<void>();
   public readonly syncEnd: EventEmitter<void> = new EventEmitter<void>();
@@ -115,6 +118,14 @@ export class DaemonDataService {
     return this._gettingLastBlockHeader;
   }
 
+  public get AltChains(): Chain[] {
+    return this._altChains;
+  }
+
+  public get gettingAltChains(): boolean {
+    return this._gettingAltChains;
+  }
+
   public setRefreshTimeout(ms: number = 5000): void {
     this.refreshTimeoutMs = ms;
   }
@@ -144,6 +155,10 @@ export class DaemonDataService {
     return Date.now() - this._lastRefresh <= this.refreshTimeoutMs;
   }
 
+  private async getInfo(): Promise<void> {
+
+  }
+
   private async refresh(): Promise<void> {
     if (this.refreshing || this.tooEarlyForRefresh) {
       return;
@@ -156,6 +171,11 @@ export class DaemonDataService {
       const firstRefresh = this._firstRefresh;
       this._daemonRunning = await this.daemonService.isRunning();
       this._firstRefresh = false;
+
+      if (!this._daemonRunning) {
+        this.syncEnd.emit();
+        return;
+      }
 
       this._gettingDaemonInfo = true;
       this._daemonInfo = await this.daemonService.getInfo();
@@ -179,6 +199,10 @@ export class DaemonDataService {
       if (firstRefresh) this._isBlockchainPruned = (await this.daemonService.pruneBlockchain(true)).pruned;
       this._gettingIsBlockchainPruned = false;
 
+      this._gettingAltChains = true;
+      this._altChains = await this.daemonService.getAlternateChains();
+      this._gettingAltChains = false;
+
       this._lastRefresh = Date.now();
     } catch(error) {
       console.error(error);
@@ -187,6 +211,7 @@ export class DaemonDataService {
       this._gettingBlockCount = false;
       this._gettingLastBlockHeader = false;
       this._gettingIsBlockchainPruned = false;
+      this._gettingAltChains = false;
 
       this.syncError.emit(<Error>error);
 

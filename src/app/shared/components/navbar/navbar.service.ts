@@ -18,6 +18,12 @@ export class NavbarService {
       this.daemonRunning = running;
       if (!running) this.disableLinks();
       if (running) this.enableLinks();
+    });
+
+    this.daemonService.isRunning().then((running: boolean) => {
+      this.daemonRunning = running;
+      if (!running) this.disableLinks();
+      if (running) this.enableLinks();
     })
    }
 
@@ -44,7 +50,10 @@ export class NavbarService {
   }
 
   public enableLinks(): void {
-    this._navbarLinks.forEach((link) => link.disabled = false);
+    this._navbarLinks.forEach((link, index: number) => {
+      link.disabled = false
+      link.selected = index == 0;
+    });
   }
 
 }
