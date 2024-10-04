@@ -31,9 +31,16 @@ export class TransactionsComponent implements AfterViewInit {
 
   public daemonRunning: boolean = false;
 
+  public rawTxJsonString: string = '';
+  public sendRawTxDoNotRelay: boolean = false;
+  public sendRawTxSuccess: boolean = false;
+  public sendRawTxError: string = '';
+  public sendingRawTx: boolean = false;
+
   constructor(private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
     this.navbarLinks = [
       new NavbarLink('pills-relay-tx-tab', '#pills-relay-tx', 'pills-relay-tx', true, 'Relay Tx'),
+      new NavbarLink('pills-send-raw-tx-tab', '#pills-send-raw-tx', 'pills-send-raw-tx', false, 'Send Raw Tx'),
       new NavbarLink('pills-tx-backlog-tab', '#pills-tx-backlog', 'pills-tx-backlog', false, 'Tx Backlog'),
       new NavbarLink('pills-coinbase-tx-sum-tab', '#pills-coinbase-tx-sum', 'pills-coinbase-tx-sum', false, 'Coinbase Tx Sum'),
       new NavbarLink('pills-flush-tx-pool-tab', '#pills-flush-tx-pool', 'pills-flush-tx-pool', false, 'Flush Tx Pool'),
@@ -151,5 +158,42 @@ export class TransactionsComponent implements AfterViewInit {
       this.getCoinbaseTxSumSuccess = false;
       this.getCoinbaseTxSumError = `${error}`;
     }
+  }
+
+  public async sendRawTx(): Promise<void> {
+    this.sendingRawTx = true;
+
+    try {
+      const info = await this.daemonService.sendRawTransaction(this.rawTxJsonString, this.sendRawTxDoNotRelay);
+      
+      if (info.doubleSpend) {
+        throw new Error('Transaction is double spend');
+      }
+      else if (info.feeTooLow) {
+        throw new Error('Fee is too low');
+      }
+      else if (info.invalidInput) {
+        throw new Error('Input is invalid');
+      }
+      else if (info.invalidOutput) {
+        throw new Error('Output is invalid');
+      }
+      else if (info.lowMixin) {
+        throw new Error('Mixin count is too low');
+      }
+      else if (info.overspend) {
+        throw new Error('Transaction uses more money than available')
+      }
+      else if (info.tooBig) {
+        throw new Error('Transaction size is too big');
+      }
+      this.sendRawTxSuccess = true;
+      this.sendRawTxError = '';
+    }
+    catch(error) {
+      this.sendRawTxError = `${error}`;
+    }
+
+    this.sendingRawTx = false;
   }
 }

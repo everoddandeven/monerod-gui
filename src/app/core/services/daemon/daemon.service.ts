@@ -38,7 +38,10 @@ import {
   IsKeyImageSpentRequest,
   GetAltBlockHashesRequest,
   SaveBcRequest,
-  SetBootstrapDaemonRequest
+  SetBootstrapDaemonRequest,
+  SetLogLevelRequest,
+  SetLogHashRateRequest,
+  SetLogCategoriesRequest
 } from '../../../../common/request';
 import { BlockTemplate } from '../../../../common/BlockTemplate';
 import { GeneratedBlocks } from '../../../../common/GeneratedBlocks';
@@ -705,6 +708,10 @@ export class DaemonService {
   public async sendRawTransaction(txAsHex: string, doNotRelay: boolean = false): Promise<TxInfo> {
     const response = await this.callRpc(new SendRawTransactionRequest(txAsHex, doNotRelay));
 
+    if (typeof response.status == 'string' && response.status != 'OK') {
+      throw new Error(response.reason);
+    }
+
     return TxInfo.parse(response);
   }
 
@@ -834,6 +841,30 @@ export class DaemonService {
 
   public async downloadUpdate(path: string = ''): Promise<UpdateInfo> {
     return await this.update('download', path);
+  }
+
+  public async setLogLevel(level: number): Promise<void> {
+    const response = await this.callRpc(new SetLogLevelRequest(level));
+
+    if (response.status != 'OK') {
+      throw new Error(response.status);
+    }
+  }
+
+  public async setLogCategories(cateogories: string): Promise<void> {
+    const response = await this.callRpc(new SetLogCategoriesRequest(cateogories));
+
+    if (response.status != 'OK') {
+      throw new Error(response.status);
+    }
+  }
+
+  public async setLogHashRate(visible: boolean): Promise<void> {
+    const response = await this.callRpc(new SetLogHashRateRequest(visible));
+
+    if (response.status != 'OK') {
+      throw new Error(response.status);
+    }
   }
 
   public getGuiVersion(): string {

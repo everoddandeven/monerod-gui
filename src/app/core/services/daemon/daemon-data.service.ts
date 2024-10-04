@@ -1,6 +1,6 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { DaemonService } from './daemon.service';
-import { BlockCount, BlockHeader, Chain, DaemonInfo, SyncInfo } from '../../../../common';
+import { BlockCount, BlockHeader, Chain, DaemonInfo, NetStats, SyncInfo } from '../../../../common';
 
 @Injectable({
   providedIn: 'root'
@@ -33,6 +33,9 @@ export class DaemonDataService {
 
   private _altChains: Chain[] = [];
   private _gettingAltChains: boolean = false;
+
+  private _netStats?: NetStats;
+  private _gettingNetStats: boolean = false;
 
   public readonly syncStart: EventEmitter<void> = new EventEmitter<void>();
   public readonly syncEnd: EventEmitter<void> = new EventEmitter<void>();
@@ -126,6 +129,14 @@ export class DaemonDataService {
     return this._gettingAltChains;
   }
 
+  public get netStats(): NetStats | undefined {
+    return this.netStats;
+  }
+
+  public get gettingNetStats(): boolean {
+    return this._gettingNetStats;
+  }
+
   public setRefreshTimeout(ms: number = 5000): void {
     this.refreshTimeoutMs = ms;
   }
@@ -203,6 +214,10 @@ export class DaemonDataService {
       this._altChains = await this.daemonService.getAlternateChains();
       this._gettingAltChains = false;
 
+      this._gettingNetStats = true;
+      this._netStats = await this.daemonService.getNetStats();
+      this._gettingNetStats = false;
+
       this._lastRefresh = Date.now();
     } catch(error) {
       console.error(error);
@@ -212,6 +227,7 @@ export class DaemonDataService {
       this._gettingLastBlockHeader = false;
       this._gettingIsBlockchainPruned = false;
       this._gettingAltChains = false;
+      this._gettingNetStats = false;
 
       this.syncError.emit(<Error>error);
 

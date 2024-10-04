@@ -54,6 +54,9 @@ export { IsKeyImageSpentRequest } from "./IsKeyImageSpentRequest";
 export { GetAltBlockHashesRequest } from "./GetAltBlockHashesRequest";
 export { SaveBcRequest } from "./SaveBcRequest";
 export { SetBootstrapDaemonRequest } from "./SetBootstrapDaemonRequest";
+export { SetLogLevelRequest } from "./SetLogLevelRequest";
+export { SetLogHashRateRequest } from "./SetLogHashRateRequest";
+export { SetLogCategoriesRequest } from "./SetLogCategoriesRequest";
 
 /**
  * Restricted requests

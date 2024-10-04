@@ -1,6 +1,8 @@
 import { AfterViewInit, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
 import { LogsService } from './logs.service';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
+import { NavbarLink } from '../../shared/components/navbar/navbar.model';
+import { DaemonService } from '../../core/services';
 
 @Component({
   selector: 'app-logs',
@@ -9,9 +11,31 @@ import { NavbarService } from '../../shared/components/navbar/navbar.service';
 })
 export class LogsComponent implements AfterViewInit {
   @ViewChild('logTerminal', { read: ElementRef }) public logTerminal?: ElementRef<any>;
+  public readonly navbarLinks: NavbarLink[];
+  
+  public setLogLevelLevel: number = 0;
+  public settingLogLevel: boolean = false;
+  public setLogLevelError: string = '';
+  public setLogLevelSuccess: boolean = false;
 
-  constructor(private navbarService: NavbarService, private logsService: LogsService, private ngZone: NgZone) {
+  public setLogCategoriesCategories: string = '';
+  public settingLogCategories: boolean = false;
+  public setLogCategoriesError: string = '';
+  public setLogCategoriesSuccess: boolean = false;
+
+  public setLogHashRateEnabled: boolean = false;
+  public settingLogHashRate: boolean = false;
+  public setLogHashRateError: string = '';
+  public setLogHashRateSuccess: boolean = false;
+
+  constructor(private navbarService: NavbarService, private logsService: LogsService, private daemonService: DaemonService, private ngZone: NgZone) {
     this.logsService.onLog.subscribe((message: string) => this.onLog());
+    this.navbarLinks = [
+      new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', true, 'Overview'),
+      new NavbarLink('pills-set-log-level-tab', '#pills-set-log-level', 'pills-set-log-level', false, 'Set Log Level'),
+      new NavbarLink('pills-set-log-categories-tab', '#pills-set-log-categories', 'pills-set-log-categories', false, 'Set Log Categories'),
+      new NavbarLink('pills-set-log-hash-rate-tab', '#pills-set-log-hash-rate', 'pills-set-log-hash-rate', false, 'Set Log Hash Rate')
+    ];
   }
 
   public get lines(): string[] {
@@ -42,10 +66,45 @@ export class LogsComponent implements AfterViewInit {
     return index;  // usa l'indice per tracciare gli elementi
   }
 
-  ngAfterViewInit(): void {
-      this.navbarService.removeLinks();
-      
-      setTimeout(() => {
-        this.scrollToBottom();
-      }, 500);  }
+  public ngAfterViewInit(): void {
+    this.navbarService.removeLinks();
+    
+    setTimeout(() => {
+      this.scrollToBottom();
+    }, 500);  
+  }
+
+  public async setLogLevel(): Promise<void> {
+    this.settingLogLevel = true;
+
+    try {
+      await this.daemonService.setLogLevel(this.setLogLevelLevel);
+
+      this.setLogLevelError = '';
+      this.setLogLevelSuccess = true;
+    } catch (error) {
+      this.setLogLevelSuccess = false;
+      this.setLogLevelError = `${error}`;
+
+      console.error(error);
+    }
+
+    this.settingLogLevel = false;
+  }
+
+  public async setLogHashRate(): Promise<void> {
+    this.settingLogHashRate = true;
+
+    try {
+      await this.daemonService.setLogHashRate(this.setLogHashRateEnabled);
+      this.setLogHashRateError = '';
+      this.setLogHashRateSuccess = true;
+    } catch(error) {
+      console.error(error);
+      this.setLogHashRateError = `${error}`;
+      this.setLogHashRateSuccess = false;
+    }
+
+    this.settingLogHashRate = false;
+  }
 }

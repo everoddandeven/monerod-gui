@@ -27,6 +27,7 @@ import { SettingsModule } from './pages/settings/settings.module';
 import { LogsModule } from './pages/logs/logs.module';
 import { VersionModule } from './pages/version/version.module';
 import { HardForkInfoModule } from './pages/hard-fork-info/hard-fork-info.module';
+import { NetworkModule } from './pages/network/network.module';
 
 // AoT requires an exported function for factories
 const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -50,6 +51,7 @@ const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new Transl
     SettingsModule,
     HardForkInfoModule,
     VersionModule,
+    NetworkModule,
     TranslateModule,
     AppRoutingModule,
     TranslateModule.forRoot({
