@@ -67,7 +67,667 @@
   </div>
 
   <div class="tab-pane fade" id="pills-set-log-categories" role="tabpanel" aria-labelledby="pills-set-log-categories-tab" tabindex="0">
+    <div *ngIf="setLogLevelError != ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+      <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+      <div>
+        {{setLogCategoriesError}}
+      </div>
+    </div>
 
+    <div *ngIf="setLogCategoriesSuccess" class="alert alert-success d-flex align-items-center justify-content-center text-center" role="alert">
+      <h4><i class="bi bi-check-circle m-2"></i></h4>&nbsp;&nbsp;
+      <div>
+        Successfully set log categories
+      </div>
+    </div>
+
+    <div class="row g-5 p-2">
+      <div class="col-md-7 col-lg-10">
+        <h4 class="mb-3">Set the daemon log categories</h4>
+        <div class="row gy-3">
+
+          <div class="col-md-4">
+            <label for="set-log-categories-default" class="form-label">Default</label>
+            <select class="form-select" id="set-log-categories-default" [(ngModel)]="setLogCategoriesCategories.default" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.default == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.default == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.default == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.default == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.default == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.default == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.default == 'TRACE'">Trace</option>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label for="set-log-categories-all" class="form-label">All</label>
+            <select class="form-select" id="set-log-categories-all" [(ngModel)]="setLogCategoriesCategories.all" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.all == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.all == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.all == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.all == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.all == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.all == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.all == 'TRACE'">Trace</option>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label for="set-log-categories-bcutil" class="form-label">Bcutil</label>
+            <select class="form-select" id="set-log-categories-bcutil" [(ngModel)]="setLogCategoriesCategories.bcutil" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.bcutil == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.bcutil == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.bcutil == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.bcutil == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.bcutil == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.bcutil == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.bcutil == 'TRACE'">Trace</option>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label for="set-log-categories-checkpoints" class="form-label">Checkpoints</label>
+            <select class="form-select" id="set-log-categories-checkpoints" [(ngModel)]="setLogCategoriesCategories.checkpoints" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.checkpoints == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.checkpoints == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.checkpoints == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.checkpoints == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.checkpoints == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.checkpoints == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.checkpoints == 'TRACE'">Trace</option>
+            </select>
+          </div>
+
+  
+          <div class="col-md-4">
+            <label for="set-log-categories-i18n" class="form-label">i18n</label>
+            <select class="form-select" id="set-log-categories-i18n" [(ngModel)]="setLogCategoriesCategories.i18n" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.i18n == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.i18n == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.i18n == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.i18n == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.i18n == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.i18n == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.i18n == 'TRACE'">Trace</option>
+            </select>
+          </div>        
+
+  
+          <div class="col-md-4">
+            <label for="set-log-categories-perf" class="form-label">Perf</label>
+            <select class="form-select" id="set-log-categories-perf" [(ngModel)]="setLogCategoriesCategories.perf" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.perf == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.perf == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.perf == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.perf == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.perf == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.perf == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.perf == 'TRACE'">Trace</option>
+            </select>
+          </div>        
+
+  
+          <div class="col-md-4">
+            <label for="set-log-categories-stacktrace" class="form-label">Stacktrace</label>
+            <select class="form-select" id="set-log-categories-stacktrace" [(ngModel)]="setLogCategoriesCategories.stacktrace" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.stacktrace == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.stacktrace == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.stacktrace == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.stacktrace == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.stacktrace == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.stacktrace == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.stacktrace == 'TRACE'">Trace</option>
+            </select>
+          </div>        
+
+  
+          <div class="col-md-4">
+            <label for="set-log-categories-account" class="form-label">Account</label>
+            <select class="form-select" id="set-log-categories-account" [(ngModel)]="setLogCategoriesCategories.account" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.account == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.account == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.account == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.account == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.account == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.account == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.account == 'TRACE'">Trace</option>
+            </select>
+          </div>        
+
+  
+          <div class="col-md-4">
+            <label for="set-log-categories-difficulty" class="form-label">Difficulty</label>
+            <select class="form-select" id="set-log-categories-difficulty" [(ngModel)]="setLogCategoriesCategories.difficulty" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.difficulty == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.difficulty == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.difficulty == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.difficulty == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.difficulty == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.difficulty == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.difficulty == 'TRACE'">Trace</option>
+            </select>
+          </div>        
+
+  
+          <div class="col-md-4">
+            <label for="set-log-categories-hardfork" class="form-label">Hard Fork</label>
+            <select class="form-select" id="set-log-categories-hardfork" [(ngModel)]="setLogCategoriesCategories.hardfork" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.hardfork == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.hardfork == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.hardfork == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.hardfork == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.hardfork == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.hardfork == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.hardfork == 'TRACE'">Trace</option>
+            </select>
+          </div>
+  
+          <div class="col-md-4">
+            <label for="set-log-categories-miner" class="form-label">Miner</label>
+            <select class="form-select" id="set-log-categories-miner" [(ngModel)]="setLogCategoriesCategories.miner" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.miner == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.miner == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.miner == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.miner == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.miner == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.miner == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.miner == 'TRACE'">Trace</option>
+            </select>
+          </div>
+
+  
+          <div class="col-md-4">
+            <label for="set-log-categories-txpool" class="form-label">Txpool</label>
+            <select class="form-select" id="set-log-categories-txpool" [(ngModel)]="setLogCategoriesCategories.txpool" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.txpool == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.txpool == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.txpool == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.txpool == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.txpool == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.txpool == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.txpool == 'TRACE'">Trace</option>
+            </select>
+          </div>
+
+
+  
+          <div class="col-md-4">
+            <label for="set-log-categories-device-ledger" class="form-label">Device Ledger</label>
+            <select class="form-select" id="set-log-categories-device-ledger" [(ngModel)]="setLogCategoriesCategories.deviceLedger" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.deviceLedger == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.deviceLedger == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.deviceLedger == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.deviceLedger == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.deviceLedger == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.deviceLedger == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.deviceLedger == 'TRACE'">Trace</option>
+            </select>
+          </div>
+
+
+  
+          <div class="col-md-4">
+            <label for="set-log-categories-tests-core" class="form-label">Tests Core</label>
+            <select class="form-select" id="set-log-categories-tests-core" [(ngModel)]="setLogCategoriesCategories.testsCore" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.testsCore == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.testsCore == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.testsCore == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.testsCore == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.testsCore == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.testsCore == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.testsCore == 'TRACE'">Trace</option>
+            </select>
+          </div>
+
+
+  
+          <div class="col-md-4">
+            <label for="set-log-categories-multisig" class="form-label">Multisig</label>
+            <select class="form-select" id="set-log-categories-tests-core" [(ngModel)]="setLogCategoriesCategories.multisig" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.multisig == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.multisig == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.multisig == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.multisig == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.multisig == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.multisig == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.multisig == 'TRACE'">Trace</option>
+            </select>
+          </div>
+
+
+
+  
+          <div class="col-md-4">
+            <label for="set-log-categories-bulletproofs" class="form-label">Bulletproofs</label>
+            <select class="form-select" id="set-log-categories-bulletproofs" [(ngModel)]="setLogCategoriesCategories.bulletproofs" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.bulletproofs == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.bulletproofs == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.bulletproofs == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.bulletproofs == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.bulletproofs == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.bulletproofs == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.bulletproofs == 'TRACE'">Trace</option>
+            </select>
+          </div>
+
+
+  
+          <div class="col-md-4">
+            <label for="set-log-categories-ringct" class="form-label">Ringct</label>
+            <select class="form-select" id="set-log-categories-ringct" [(ngModel)]="setLogCategoriesCategories.ringct" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.ringct == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.ringct == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.ringct == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.ringct == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.ringct == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.ringct == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.ringct == 'TRACE'">Trace</option>
+            </select>
+          </div>
+
+
+
+  
+          <div class="col-md-4">
+            <label for="set-log-categories-logging" class="form-label">Logging</label>
+            <select class="form-select" id="set-log-categories-logging" [(ngModel)]="setLogCategoriesCategories.logging" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.logging == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.logging == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.logging == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.logging == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.logging == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.logging == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.logging == 'TRACE'">Trace</option>
+            </select>
+          </div>
+
+
+  
+          <div class="col-md-4">
+            <label for="set-log-categories-global" class="form-label">Global</label>
+            <select class="form-select" id="set-log-categories-global" [(ngModel)]="setLogCategoriesCategories.global" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.global == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.global == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.global == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.global == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.global == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.global == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.global == 'TRACE'">Trace</option>
+            </select>
+          </div>
+
+
+  
+          <div class="col-md-4">
+            <label for="set-log-categories-verify" class="form-label">Verify</label>
+            <select class="form-select" id="set-log-categories-verify" [(ngModel)]="setLogCategoriesCategories.verify" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.verify == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.verify == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.verify == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.verify == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.verify == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.verify == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.verify == 'TRACE'">Trace</option>
+            </select>
+          </div>
+
+  
+          <div class="col-md-4">
+            <label for="set-log-categories-msgwriter" class="form-label">Msgwriter</label>
+            <select class="form-select" id="set-log-categories-msgwriter" [(ngModel)]="setLogCategoriesCategories.msgwriter" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.msgwriter == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.msgwriter == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.msgwriter == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.msgwriter == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.msgwriter == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.msgwriter == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.msgwriter == 'TRACE'">Trace</option>
+            </select>
+          </div>
+        </div>
+
+ 
+        <hr class="my-4">
+        <h4 class="mb-3">Daemon</h4>       
+
+        <div class="row gy-3">
+                  
+          <div class="col-md-4">
+            <label for="set-log-categories-daemon" class="form-label">Daemon</label>
+            <select class="form-select" id="set-log-categories-daemon" [(ngModel)]="setLogCategoriesCategories.daemon" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.daemon == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.daemon == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.daemon == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.daemon == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.daemon == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.daemon == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.daemon == 'TRACE'">Trace</option>
+            </select>
+          </div>
+                  
+          <div class="col-md-4">
+            <label for="set-log-categories-net-blockchain-daemon-rpc" class="form-label">Daemon RPC</label>
+            <select class="form-select" id="set-log-categories-blockchain-daemon-rpc" [(ngModel)]="setLogCategoriesCategories.daemonRpc" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.daemonRpc == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.daemonRpc == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.daemonRpc == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.daemonRpc == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.daemonRpc == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.daemonRpc == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.daemonRpc == 'TRACE'">Trace</option>
+            </select>
+          </div>
+
+        </div>
+ 
+        <hr class="my-4">
+        <h4 class="mb-3">Cn</h4>       
+
+        <div class="row gy-3">
+                  
+          <div class="col-md-4">
+            <label for="set-log-categories-cn" class="form-label">Cn</label>
+            <select class="form-select" id="set-log-categories-cn" [(ngModel)]="setLogCategoriesCategories.cn" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.cn == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.cn == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.cn == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.cn == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.cn == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.cn == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.cn == 'TRACE'">Trace</option>
+            </select>
+          </div>
+                  
+          <div class="col-md-4">
+            <label for="set-log-categories-net-blockchain-cn-clock-queue" class="form-label">Cn Block Queue</label>
+            <select class="form-select" id="set-log-categories-blockchain-cn-clock-queue" [(ngModel)]="setLogCategoriesCategories.cnBlockQueue" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.cnBlockQueue == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.cnBlockQueue == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.cnBlockQueue == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.cnBlockQueue == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.cnBlockQueue == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.cnBlockQueue == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.cnBlockQueue == 'TRACE'">Trace</option>
+            </select>
+          </div>
+
+        </div>
+
+
+        <hr class="my-4">
+        <h4 class="mb-3">Net</h4>
+
+        <div class="row gy-3">
+                  
+          <div class="col-md-4">
+            <label for="set-log-categories-net" class="form-label">Net</label>
+            <select class="form-select" id="set-log-categories-net" [(ngModel)]="setLogCategoriesCategories.net" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.net == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.net == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.net == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.net == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.net == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.net == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.net == 'TRACE'">Trace</option>
+            </select>
+          </div>
+                  
+          <div class="col-md-4">
+            <label for="set-log-categories-net-http" class="form-label">NetHttp</label>
+            <select class="form-select" id="set-log-categories-net-http" [(ngModel)]="setLogCategoriesCategories.netHttp" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.netHttp == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.netHttp == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.netHttp == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.netHttp == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.netHttp == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.netHttp == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.netHttp == 'TRACE'">Trace</option>
+            </select>
+          </div>
+                  
+          <div class="col-md-4">
+            <label for="set-log-categories-net-p2p" class="form-label">NetP2P</label>
+            <select class="form-select" id="set-log-categories-net-p2p" [(ngModel)]="setLogCategoriesCategories.netP2p" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.netP2p == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.netP2p == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.netP2p == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.netP2p == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.netP2p == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.netP2p == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.netP2p == 'TRACE'">Trace</option>
+            </select>
+          </div>
+    
+          <div class="col-md-4">
+            <label for="set-log-categories-net-throttle" class="form-label">NetThrottle</label>
+            <select class="form-select" id="set-log-categories-net-throttle" [(ngModel)]="setLogCategoriesCategories.netThrottle" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.netThrottle == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.netThrottle == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.netThrottle == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.netThrottle == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.netThrottle == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.netThrottle == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.netThrottle == 'TRACE'">Trace</option>
+            </select>
+          </div>
+                  
+          <div class="col-md-4">
+            <label for="set-log-categories-net-dns" class="form-label">NetDNS</label>
+            <select class="form-select" id="set-log-categories-net-dns" [(ngModel)]="setLogCategoriesCategories.netDns" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.netDns == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.netDns == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.netDns == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.netDns == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.netDns == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.netDns == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.netDns == 'TRACE'">Trace</option>
+            </select>
+          </div>
+                  
+          <div class="col-md-4">
+            <label for="set-log-categories-net-dl" class="form-label">NetDl</label>
+            <select class="form-select" id="set-log-categories-net-dl" [(ngModel)]="setLogCategoriesCategories.netDl" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.netDl == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.netDl == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.netDl == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.netDl == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.netDl == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.netDl == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.netDl == 'TRACE'">Trace</option>
+            </select>
+          </div>
+                            
+          <div class="col-md-4">
+            <label for="set-log-categories-net-cn" class="form-label">NetCn</label>
+            <select class="form-select" id="set-log-categories-net-cn" [(ngModel)]="setLogCategoriesCategories.netCn" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.netCn == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.netCn == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.netCn == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.netCn == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.netCn == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.netCn == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.netCn == 'TRACE'">Trace</option>
+            </select>
+          </div>
+      
+        </div>
+
+ 
+        <hr class="my-4">
+        <h4 class="mb-3">Blockchain</h4>       
+
+        <div class="row gy-3">
+                  
+          <div class="col-md-4">
+            <label for="set-log-categories-net-blockchain" class="form-label">Blockchain</label>
+            <select class="form-select" id="set-log-categories-blockchain" [(ngModel)]="setLogCategoriesCategories.blockchain" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.blockchain == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.blockchain == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.blockchain == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.blockchain == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.blockchain == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.blockchain == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.blockchain == 'TRACE'">Trace</option>
+            </select>
+          </div>
+                  
+          <div class="col-md-4">
+            <label for="set-log-categories-net-blockchain-db" class="form-label">Blockchain DB</label>
+            <select class="form-select" id="set-log-categories-blockchain-db" [(ngModel)]="setLogCategoriesCategories.blockchainDb" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.blockchainDb == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.blockchainDb == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.blockchainDb == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.blockchainDb == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.blockchainDb == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.blockchainDb == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.blockchainDb == 'TRACE'">Trace</option>
+            </select>
+          </div>
+                  
+          <div class="col-md-4">
+            <label for="set-log-categories-net-blockchain-db-lmdb" class="form-label">Blockchain DB LMDB</label>
+            <select class="form-select" id="set-log-categories-blockchain-db-lmdb" [(ngModel)]="setLogCategoriesCategories.blockchainDbLmdb" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.blockchainDbLmdb == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.blockchainDbLmdb == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.blockchainDbLmdb == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.blockchainDbLmdb == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.blockchainDbLmdb == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.blockchainDbLmdb == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.blockchainDbLmdb == 'TRACE'">Trace</option>
+            </select>
+          </div>
+
+        </div>
+
+        <hr class="my-4">
+        <h4 class="mb-3">Wallet</h4>       
+
+        <div class="row gy-3">
+                  
+          <div class="col-md-4">
+            <label for="set-log-categories-wallet-gen-multisig" class="form-label">Wallet Gen Multisig</label>
+            <select class="form-select" id="set-log-categories-wallet-gen-multisig" [(ngModel)]="setLogCategoriesCategories.walletGenMultisig" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.walletGenMultisig == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.walletGenMultisig == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.walletGenMultisig == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.walletGenMultisig == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.walletGenMultisig == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.walletGenMultisig == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.walletGenMultisig == 'TRACE'">Trace</option>
+            </select>
+          </div>
+                  
+          <div class="col-md-4">
+            <label for="set-log-categories-wallet-simple-wallet" class="form-label">Wallet Simple Wallet</label>
+            <select class="form-select" id="set-log-categories-wallet-simple-wallet" [(ngModel)]="setLogCategoriesCategories.walletSimpleWallet" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.walletSimpleWallet == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.walletSimpleWallet == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.walletSimpleWallet == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.walletSimpleWallet == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.walletSimpleWallet == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.walletSimpleWallet == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.walletSimpleWallet == 'TRACE'">Trace</option>
+            </select>
+          </div>
+                  
+          <div class="col-md-4">
+            <label for="set-log-categories-wallet-api" class="form-label">Wallet API</label>
+            <select class="form-select" id="set-log-categories-wallet-api" [(ngModel)]="setLogCategoriesCategories.walletAPI" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.walletAPI == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.walletAPI == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.walletAPI == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.walletAPI == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.walletAPI == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.walletAPI == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.walletAPI == 'TRACE'">Trace</option>
+            </select>
+          </div>
+                  
+          <div class="col-md-4">
+            <label for="set-log-categories-wallet-ring-db" class="form-label">Wallet Ring DB</label>
+            <select class="form-select" id="set-log-categories-wallet-ring-db" [(ngModel)]="setLogCategoriesCategories.walletRingDb" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.walletRingDb == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.walletRingDb == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.walletRingDb == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.walletRingDb == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.walletRingDb == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.walletRingDb == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.walletRingDb == 'TRACE'">Trace</option>
+            </select>
+          </div>
+
+                  
+          <div class="col-md-4">
+            <label for="set-log-categories-wallet-wallet2" class="form-label">Wallet Wallet2</label>
+            <select class="form-select" id="set-log-categories-wallet-wallet2" [(ngModel)]="setLogCategoriesCategories.walletWallet2" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.walletWallet2 == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.walletWallet2 == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.walletWallet2 == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.walletWallet2 == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.walletWallet2 == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.walletWallet2 == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.walletWallet2 == 'TRACE'">Trace</option>
+            </select>
+          </div>
+                  
+          <div class="col-md-4">
+            <label for="set-log-categories-wallet-rpc" class="form-label">Wallet RPC</label>
+            <select class="form-select" id="set-log-categories-wallet-rpc" [(ngModel)]="setLogCategoriesCategories.walletRpc" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.walletRpc == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.walletRpc == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.walletRpc == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.walletRpc == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.walletRpc == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.walletRpc == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.walletRpc == 'TRACE'">Trace</option>
+            </select>
+          </div>
+
+        </div>
+
+
+ 
+        <hr class="my-4">
+        <h4 class="mb-3">Debug Tools</h4>       
+
+        <div class="row gy-3">
+                  
+          <div class="col-md-4">
+            <label for="set-log-categories-debug-tools-deserialize" class="form-label">Debug Tools Deserialize</label>
+            <select class="form-select" id="set-log-categories-debug-tools-deserialize" [(ngModel)]="setLogCategoriesCategories.debugToolsDeserialize" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.debugToolsDeserialize == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.debugToolsDeserialize == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.debugToolsDeserialize == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.debugToolsDeserialize == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.debugToolsDeserialize == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.debugToolsDeserialize == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.debugToolsDeserialize == 'TRACE'">Trace</option>
+            </select>
+          </div>
+                  
+          <div class="col-md-4">
+            <label for="set-log-categories-debug-tools-object-sizes" class="form-label">Debug Tools Object Sizes</label>
+            <select class="form-select" id="set-log-categories-debug-tools-object-sizes" [(ngModel)]="setLogCategoriesCategories.debugToolsObjectSizes" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="''" [selected]="setLogCategoriesCategories.debugToolsObjectSizes == ''">Disabled</option>
+              <option [ngValue]="'FATAL'" [selected]="setLogCategoriesCategories.debugToolsObjectSizes == 'FATAL'">Fatal</option>
+              <option [ngValue]="'ERROR'" [selected]="setLogCategoriesCategories.debugToolsObjectSizes == 'ERROR'">Error</option>
+              <option [ngValue]="'WARNING'" [selected]="setLogCategoriesCategories.debugToolsObjectSizes == 'WARNING'">Warning</option>
+              <option [ngValue]="'INFO'" [selected]="setLogCategoriesCategories.debugToolsObjectSizes == 'INFO'">Info</option>
+              <option [ngValue]="'DEBUG'" [selected]="setLogCategoriesCategories.debugToolsObjectSizes == 'DEBUG'">Debug</option>
+              <option [ngValue]="'TRACE'" [selected]="setLogCategoriesCategories.debugToolsObjectSizes == 'TRACE'">Trace</option>
+            </select>
+          </div>
+
+        </div>
+ 
+      </div>
+    </div>
+    
+    <hr class="my-4">
+
+    <button *ngIf="!settingLogCategories" class="w-100 btn btn-primary btn-lg" type="button" (click)="setLogCategories()">Set Log Categories</button>
+    <button *ngIf="settingLogCategories" class="w-100 btn btn-primary btn-lg" type="button" disabled>Setting Log Categories ...</button>
+  
   </div>
 
   <div class="tab-pane fade" id="pills-set-log-hash-rate" role="tabpanel" aria-labelledby="pills-set-log-hash-rate-tab" tabindex="0">

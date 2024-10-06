@@ -1,6 +1,7 @@
 import { EventEmitter, Injectable, NgZone } from '@angular/core';
 import { ipcRenderer, webFrame } from 'electron';
 import { ElectronService } from '../../core/services';
+import { LogCategories } from '../../../common';
 
 @Injectable({
   providedIn: 'root'
@@ -8,6 +9,7 @@ import { ElectronService } from '../../core/services';
 export class LogsService {
   public readonly onLog: EventEmitter<string> = new EventEmitter<string>();
   public readonly lines: string[] = [];
+  public readonly categories: LogCategories = new LogCategories();
   private readonly ansiRegex: RegExp = /\u001b\[[0-9;]*m/g;
 
   constructor(private electronService: ElectronService, private ngZone: NgZone) {

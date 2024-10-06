@@ -3,6 +3,7 @@ import { LogsService } from './logs.service';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services';
+import { LogCategories } from '../../../common';
 
 @Component({
   selector: 'app-logs',
@@ -18,7 +19,12 @@ export class LogsComponent implements AfterViewInit {
   public setLogLevelError: string = '';
   public setLogLevelSuccess: boolean = false;
 
-  public setLogCategoriesCategories: string = '';
+  //public readonly setLogCategoriesCategories: LogCategories = new LogCategories();
+  
+  public get setLogCategoriesCategories(): LogCategories {
+    return this.logsService.categories;
+  }
+  
   public settingLogCategories: boolean = false;
   public setLogCategoriesError: string = '';
   public setLogCategoriesSuccess: boolean = false;
@@ -107,4 +113,25 @@ export class LogsComponent implements AfterViewInit {
 
     this.settingLogHashRate = false;
   }
+
+  public async setLogCategories(): Promise<void> {
+    this.settingLogCategories = true;
+
+    try
+    {
+      const categories = this.setLogCategoriesCategories.toString();
+
+      await this.daemonService.setLogCategories(categories);
+      
+      this.setLogCategoriesError = ``;
+      this.setLogCategoriesSuccess = true;
+    }
+    catch(error) {
+      this.setLogCategoriesError = `${error}`;
+      this.setLogCategoriesSuccess = false;
+    }
+
+    this.settingLogCategories = false;
+  }
 }
+

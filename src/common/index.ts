@@ -32,6 +32,7 @@ export { SyncInfo } from './SyncInfo';
 export { TxBacklogEntry } from './TxBacklogEntry';
 export { TxInfo } from './TxInfo';
 export { UpdateInfo } from './UpdateInfo';
+export { LogCategoryLevel, LogCategories } from './LogCategories';
 
 export * from './error';
 export * from './request';
