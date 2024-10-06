@@ -7,7 +7,7 @@ import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { MineableTxBacklog } from '../../../common/MineableTxBacklog';
 import { Chain } from '../../../common/Chain';
 import { CoreIsBusyError } from '../../../common/error';
-import { BlockTemplate, GeneratedBlocks, MiningStatus } from '../../../common';
+import { AuxPoW, BlockTemplate, GeneratedBlocks, MiningStatus } from '../../../common';
 
 @Component({
   selector: 'app-mining',
@@ -79,6 +79,13 @@ export class MiningComponent implements AfterViewInit {
   public stoppingMining: boolean = false;
   public stopMiningError: string = '';
   public stopMiningSuccess: boolean = false;
+
+  public addAuxPowAuxPowJsonString: string = '';
+  public addAuxPowBlockTemplateBlob: string = '';
+  public auxPowArray: AuxPoW[] = [];
+  public addingAuxPow: boolean = false;
+  public addAuxPowSuccess: boolean = false;
+  public addAuxPowError: string = '';
 
   public get validStartMiningMinerAddress(): boolean {
     return this.startMiningMinerAddress != '';
@@ -339,6 +346,10 @@ export class MiningComponent implements AfterViewInit {
     }
 
     this.stoppingMining = false;
+  }
+
+  public async addAuxPow(): Promise<void> {
+
   }
 
 }
