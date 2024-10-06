@@ -11,7 +11,7 @@
   </div>
 </div>
 
-<div *ngIf="daemonRunning" class="tab-content" id="pills-tabContent">
+<div *ngIf="daemonRunning && !daemonStopping" class="tab-content" id="pills-tabContent">
   <div class="tab-pane fade show active" id="pills-mining-status" role="tabpanel" aria-labelledby="pills-mining-status-tab" tabindex="0">
     <div *ngIf="miningStatusLoading">
       <!-- Placeholder per il caricamento -->
@@ -31,7 +31,7 @@
       </div>
     </div>
 
-    <div *ngIf="miningStatus" class="card">
+    <div *ngIf="miningStatus && miningStatus.active" class="card">
       <div class="card-header bg-primary text-white">
         <h4>Mining Status</h4>
       </div>
@@ -78,6 +78,48 @@
       </div>
     </div>
 
+    <div *ngIf="miningStatus && !miningStatus.active" class="row g-5 p-2">
+      <div class="cold-md-7 col-lg-12">
+        <div class="row gy-3">
+          
+          <div class="col-sm-12">
+            <label for="start-mining-miner-address" class="form-label">Miner Address</label>
+            <input type="text" class="form-control" id="start-mining-miner-address" placeholder="" [(ngModel)]="startMiningMinerAddress" [ngModelOptions]="{standalone: true}">
+            <small class="text-body-secondary">Account address to mine to</small>
+          </div>
+
+          <div class="form-check form-switch col-md-6">
+            <label for="start-mining-do-background-mining" class="form-check-label">Do Background Mining</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="start-mining-do-background-mining" [checked]="startMiningDoBackgroundMining" [(ngModel)]="startMiningDoBackgroundMining" [ngModelOptions]="{standalone: true}">
+            <br>
+            <small class="text-body-secondary">States if the mining should run in background (true) or foreground (false)</small>
+          </div>
+          
+          <div class="form-check form-switch col-md-6">
+            <label for="start-mining-ignore-battery" class="form-check-label">Ignore Battery</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="start-mining-ignore-battery" [checked]="startMiningIgnoreBattery" [(ngModel)]="startMiningIgnoreBattery" [ngModelOptions]="{standalone: true}">
+            <br>
+            <small class="text-body-secondary">States if battery state (on laptop) should be ignored (true) or not (false)</small>
+          </div>
+
+          <div class="col-sm-3">
+            <label for="start-mining-threads-count" class="form-label">Threads Count</label>
+            <input type="number" class="form-control" id="start-mining-threads-count" placeholder="" [(ngModel)]="startMiningThreadsCount" [ngModelOptions]="{standalone: true}">
+            <small class="text-body-secondary">Number of mining thread to run</small>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <hr class="my-4">
+
+    <button *ngIf="!startingMining && (!miningStatus || !miningStatus.active)" class="w-100 btn btn-primary btn-lg" type="button" (click)="startMining()" [disabled]="!validStartMiningMinerAddress">Start Mining</button>
+    <button *ngIf="startingMining && (!miningStatus || !miningStatus.active)" class="w-100 btn btn-primary btn-lg" type="button" disabled>Starting Mining ...</button>
+
+    <button *ngIf="!stoppingMining && miningStatus && miningStatus.active" class="w-100 btn btn-primary btn-lg" type="button" (click)="stopMining()">Stop Mining</button>
+    <button *ngIf="stoppingMining && miningStatus && miningStatus.active" class="w-100 btn btn-primary btn-lg" type="button" disabled>Stopping Mining ...</button>
+    
   </div>
 
   <div class="tab-pane fade" id="pills-miner-data" role="tabpanel" aria-labelledby="pills-miner-data-tab" tabindex="0">

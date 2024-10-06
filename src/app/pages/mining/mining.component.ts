@@ -64,6 +64,25 @@ export class MiningComponent implements AfterViewInit {
   //private txBacklog: MineableTxBacklog[]
   public cards: Card[];
   public daemonRunning: boolean;
+  public get daemonStopping(): boolean {
+    return this.daemonService.stopping;
+  }
+
+  public startMiningDoBackgroundMining: boolean = false;
+  public startMiningIgnoreBattery: boolean = false;
+  public startMiningMinerAddress: string = '';
+  public startMiningThreadsCount: number = 0;
+  public startingMining: boolean = false;
+  public startMiningSuccess: boolean = false;
+  public startMiningError: string = '';
+
+  public stoppingMining: boolean = false;
+  public stopMiningError: string = '';
+  public stopMiningSuccess: boolean = false;
+
+  public get validStartMiningMinerAddress(): boolean {
+    return this.startMiningMinerAddress != '';
+  }
 
   constructor(private router: Router, private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
 
@@ -109,7 +128,7 @@ export class MiningComponent implements AfterViewInit {
     });
   }
 
-  ngAfterViewInit(): void {
+  public ngAfterViewInit(): void {
     console.log('DetailComponent AFTER VIEW INIT');
     this.navbarService.setLinks(this.navbarLinks);
 
@@ -287,6 +306,39 @@ export class MiningComponent implements AfterViewInit {
     }
 
     this.generatingBlocks = false;
+  }
+
+  public async startMining(): Promise<void> {
+    this.startingMining = true;
+    try {
+      await this.daemonService.startMining(this.startMiningDoBackgroundMining, this.startMiningIgnoreBattery, this.startMiningMinerAddress, this.startMiningThreadsCount)
+      this.startMiningError = '';
+      this.startMiningSuccess = true;
+    }
+    catch(error) {
+      this.startMiningSuccess = false;
+      this.startMiningError = `${error}`;
+    }
+
+    this.startingMining = false;
+  }
+
+  public async stopMining(): Promise<void> {
+    this.stoppingMining = true;
+
+    try {
+      await this.daemonService.stopMining();
+
+      this.stopMiningSuccess = true;
+      this.stopMiningError = '';
+    }
+    catch(error) {
+      console.error(error);
+      this.stopMiningSuccess = false;
+      this.stopMiningError = `${error};`
+    }
+
+    this.stoppingMining = false;
   }
 
 }

@@ -1,6 +1,6 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { DaemonService } from './daemon.service';
-import { BlockCount, BlockHeader, Chain, DaemonInfo, NetStats, SyncInfo } from '../../../../common';
+import { BlockCount, BlockHeader, Chain, DaemonInfo, MinerData, MiningStatus, NetStats, SyncInfo } from '../../../../common';
 
 @Injectable({
   providedIn: 'root'
@@ -36,6 +36,12 @@ export class DaemonDataService {
 
   private _netStats?: NetStats;
   private _gettingNetStats: boolean = false;
+
+  private _miningStatus?: MiningStatus;
+  private _gettingMiningStatus: boolean = false;
+
+  private _minerData?: MinerData;
+  private _gettingMinerData: boolean = false;
 
   public readonly syncStart: EventEmitter<void> = new EventEmitter<void>();
   public readonly syncEnd: EventEmitter<void> = new EventEmitter<void>();
@@ -137,6 +143,18 @@ export class DaemonDataService {
     return this._gettingNetStats;
   }
 
+  public get miningStatus(): MiningStatus | undefined {
+    return this._miningStatus;
+  }
+
+  public get gettingMiningStatus(): boolean {
+    return this._gettingMiningStatus;
+  }
+
+  public get gettingMinerData(): boolean {
+    return this._gettingMinerData;
+  }
+
   public setRefreshTimeout(ms: number = 5000): void {
     this.refreshTimeoutMs = ms;
   }
@@ -167,6 +185,46 @@ export class DaemonDataService {
   }
 
   private async getInfo(): Promise<void> {
+
+  }
+
+  private async refreshMiningStatus(): Promise<void> {
+    this._gettingMiningStatus = true;
+
+    try {
+      this._miningStatus = await this.daemonService.miningStatus();
+    }
+    catch(error) {
+      console.error(error);
+    }
+
+    this._gettingMiningStatus = false;
+  }
+
+  private async refreshMinerData(): Promise<void> {
+    this._gettingMinerData = true;
+
+    try {
+      this._minerData = await this.daemonService.getMinerData();
+    }
+    catch (error) {
+      console.error(error);
+    }
+
+    this._gettingMinerData = false;
+  }
+
+  private async refreshAltChains(): Promise<void> {
+    this._gettingAltChains = true;
+
+    try {
+      this._altChains = await this.daemonService.getAlternateChains();
+    }
+    catch (error) {
+      console.error(error);
+    }
+
+    this._gettingAltChains = false;
 
   }
 
@@ -210,13 +268,15 @@ export class DaemonDataService {
       if (firstRefresh) this._isBlockchainPruned = (await this.daemonService.pruneBlockchain(true)).pruned;
       this._gettingIsBlockchainPruned = false;
 
-      this._gettingAltChains = true;
-      this._altChains = await this.daemonService.getAlternateChains();
-      this._gettingAltChains = false;
+      await this.refreshAltChains();
 
       this._gettingNetStats = true;
       this._netStats = await this.daemonService.getNetStats();
       this._gettingNetStats = false;
+
+      await this.refreshMiningStatus();
+
+      await this.refreshMinerData();
 
       this._lastRefresh = Date.now();
     } catch(error) {
