@@ -19,5 +19,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   onMoneroVersionError: (callback) => {
     ipcRenderer.on('monero-version-error', callback);
+  },
+  downloadMonerod: (downloadUrl, destination) => {
+    ipcRenderer.invoke('download-monerod', downloadUrl, destination);
+  },
+  onDownloadProgress: (callback) => {
+    ipcRenderer.on('download-progress', callback);
   }
 });

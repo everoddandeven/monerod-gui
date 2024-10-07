@@ -8,6 +8,7 @@ import { MineableTxBacklog } from '../../../common/MineableTxBacklog';
 import { Chain } from '../../../common/Chain';
 import { CoreIsBusyError } from '../../../common/error';
 import { AuxPoW, BlockTemplate, GeneratedBlocks, MiningStatus } from '../../../common';
+import { DaemonDataService } from '../../core/services';
 
 @Component({
   selector: 'app-mining',
@@ -17,10 +18,22 @@ import { AuxPoW, BlockTemplate, GeneratedBlocks, MiningStatus } from '../../../c
 export class MiningComponent implements AfterViewInit {
 
   public readonly navbarLinks: NavbarLink[];
-  public coreBusy: boolean;
-  private minerData?: MinerData;
-  public miningStatus?: MiningStatus;
-  public  miningStatusLoading?: boolean = false;
+  public get coreBusy(): boolean {
+    return this.daemonData.minerDataCoreBusyError;
+  }
+
+  public get miningStatus(): MiningStatus | undefined {
+    return this.daemonData.miningStatus;
+  }
+
+  public get minerData(): MinerData | undefined {
+    return this.daemonData.minerData;
+  }
+
+  public get miningStatusLoading(): boolean
+  {
+    return this.startMiningSuccess && !this.miningStatus;
+  }
 
   public gettingBlockTemplate: boolean = false;
   public getBlockTemplateAddress: string = '';
@@ -53,17 +66,43 @@ export class MiningComponent implements AfterViewInit {
   public generateBlockPrevBlock: string = '';
   public generateStartingNonce: number = 0;
 
-  private majorVersion: number;
-  private height: number;
-  private prevId: string;
-  private seedHash: string;
-  private difficulty: number;
-  private medianWeight: number;
-  private alreadyGeneratedCoins: number;
-  private alternateChains: Chain[];
+  public get majorVersion(): number {
+    return this.minerData ? this.minerData.majorVersion : 0;
+  }
+
+  public get height(): number {
+    return this.minerData ? this.minerData.height : 0;
+  }
+
+  public get prevId(): string {
+    return this.minerData ? this.minerData.prevId : '';
+  }
+
+  private get seedHash(): string {
+    return this.minerData ? this.minerData.seedHash : '';
+  }
+
+  private get difficulty(): number {
+    return this.minerData ? this.minerData.difficulty : 0;
+  }
+
+  private get medianWeight(): number {
+    return this.minerData ? this.minerData.medianWeight : 0;
+  }
+
+  private get alreadyGeneratedCoins(): number {
+    return this.minerData ? this.minerData.alreadyGeneratedCoins : 0;
+  }
+
+  private get alternateChains(): Chain[] {
+    return this.daemonData.altChains;
+  }
+
   //private txBacklog: MineableTxBacklog[]
   public cards: Card[];
-  public daemonRunning: boolean;
+  public get daemonRunning(): boolean {
+    return this.daemonData.running;
+  }
   public get daemonStopping(): boolean {
     return this.daemonService.stopping;
   }
@@ -91,18 +130,8 @@ export class MiningComponent implements AfterViewInit {
     return this.startMiningMinerAddress != '';
   }
 
-  constructor(private router: Router, private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
-
-    this.majorVersion = 0;
-    this.height = 0;
-    this.prevId = '';
-    this.seedHash = '';
-    this.difficulty = 0;
-    this.medianWeight = 0;
-    this.alreadyGeneratedCoins = 0;
-    this.alternateChains = [];
+  constructor(private router: Router, private daemonService: DaemonService, private daemonData: DaemonDataService, private navbarService: NavbarService, private ngZone: NgZone) {
     this.cards = [];
-    this.coreBusy = false;
 
     this.navbarLinks = [
       new NavbarLink('pills-mining-status-tab', '#pills-mining-status', 'mining-status', true, 'Status'),
@@ -122,17 +151,9 @@ export class MiningComponent implements AfterViewInit {
       }
     });
     
-    this.daemonRunning = true;
-    this.daemonService.onDaemonStatusChanged.subscribe((running) => {
-      this.ngZone.run(() => {
-        this.daemonRunning = running;
-      });
-    });
-    this.daemonService.isRunning().then((value: boolean) => {
-      this.ngZone.run(() => {
-        this.daemonRunning = value;
-      });
-    });
+    this.daemonData.syncEnd.subscribe(() => {
+      this.refresh();
+    })
   }
 
   public ngAfterViewInit(): void {
@@ -145,26 +166,15 @@ export class MiningComponent implements AfterViewInit {
       $table.bootstrapTable('refreshOptions', {
         classes: 'table table-bordered table-hover table-dark table-striped'
       });      
-      this.load();
+      this.refresh();
 
     }, 500);
   }
 
   private onNavigationEnd(): void {
-    this.load().then(() => {
+    this.refresh().then(() => {
       this.cards = this.createCards();
     });
-  }
-
-  private async getMiningStatus(): Promise<void> {
-    this.miningStatusLoading = true;
-    try {
-      this.miningStatus = await this.daemonService.miningStatus();
-    } catch(error) {
-      console.error(error);
-      this.miningStatus = undefined;
-    }
-    this.miningStatusLoading = false;
   }
 
   public async getBlockTemplate(): Promise<void> {
@@ -221,40 +231,15 @@ export class MiningComponent implements AfterViewInit {
     }
   }
 
-  private async load(): Promise<void> {
-    await this.getMiningStatus();
+  private async refresh(): Promise<void> {
 
     try {
-      const running = await this.daemonService.isRunning();
-      
-      if (!running) {
-        this.coreBusy = false;
-        throw new Error("Daemon not running");
-      }
-
-      this.minerData = await this.daemonService.getMinerData();
-      this.majorVersion = this.minerData.majorVersion;
-      this.height = this.minerData.height;
-      this.prevId = this.minerData.prevId;
-      this.seedHash = this.minerData.seedHash;
-      this.difficulty = this.minerData.difficulty;
-      this.medianWeight = this.minerData.medianWeight;
-      this.alreadyGeneratedCoins = this.minerData.alreadyGeneratedCoins;
-
-      this.alternateChains = await this.daemonService.getAlternateChains();
-
       const $table = $('#chainsTable');
       $table.bootstrapTable('load', this.getChains());
-      this.coreBusy = false;
-      this.navbarService.enableLinks();
+      this.cards = this.createCards();
     }
     catch(error) {
-      if (error instanceof CoreIsBusyError) {
-        this.coreBusy = true;
-      }
-      else {
-        this.navbarService.disableLinks();
-      }
+      this.navbarService.disableLinks();
     }
     
   }
@@ -327,6 +312,8 @@ export class MiningComponent implements AfterViewInit {
       this.startMiningError = `${error}`;
     }
 
+    this.stopMiningError = '';
+    this.stopMiningSuccess = false;
     this.startingMining = false;
   }
 
@@ -345,6 +332,8 @@ export class MiningComponent implements AfterViewInit {
       this.stopMiningError = `${error};`
     }
 
+    this.startMiningError = '';
+    this.startMiningSuccess = false;
     this.stoppingMining = false;
   }
 

@@ -40,6 +40,8 @@ function createWindow(): BrowserWindow {
     icon: path.join(__dirname, 'assets/icons/favicon.ico')
   });
 
+  win.webContents.openDevTools();
+
   if (serve) {
     const debug = require('electron-debug');
     debug();
@@ -357,7 +359,7 @@ try {
   });
 
   // Gestione IPC
-  ipcMain.handle('download-monero', async (event, downloadUrl: string, destination: string) => {
+  ipcMain.handle('download-monerod', async (event, downloadUrl: string, destination: string) => {
     try {
       //const fileName = path.basename(downloadUrl);
       //const filePath = path.join(destination, fileName);

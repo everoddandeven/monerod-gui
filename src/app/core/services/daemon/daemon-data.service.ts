@@ -1,6 +1,6 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { DaemonService } from './daemon.service';
-import { BlockCount, BlockHeader, Chain, DaemonInfo, MinerData, MiningStatus, NetStats, NetStatsHistory, SyncInfo } from '../../../../common';
+import { BlockCount, BlockHeader, Chain, CoreIsBusyError, DaemonInfo, MinerData, MiningStatus, NetStats, NetStatsHistory, SyncInfo } from '../../../../common';
 
 @Injectable({
   providedIn: 'root'
@@ -42,6 +42,7 @@ export class DaemonDataService {
   private _gettingMiningStatus: boolean = false;
 
   private _minerData?: MinerData;
+  private _minerDataCoreBusyError: boolean = false;
   private _gettingMinerData: boolean = false;
 
   public readonly syncStart: EventEmitter<void> = new EventEmitter<void>();
@@ -131,7 +132,7 @@ export class DaemonDataService {
     return this._gettingLastBlockHeader;
   }
 
-  public get AltChains(): Chain[] {
+  public get altChains(): Chain[] {
     return this._altChains;
   }
 
@@ -157,6 +158,14 @@ export class DaemonDataService {
 
   public get gettingMiningStatus(): boolean {
     return this._gettingMiningStatus;
+  }
+
+  public get minerData(): MinerData | undefined {
+    return this._minerData;
+  }
+
+  public get minerDataCoreBusyError(): boolean {
+    return this._minerDataCoreBusyError;
   }
 
   public get gettingMinerData(): boolean {
@@ -186,6 +195,7 @@ export class DaemonDataService {
 
     this.refreshInterval = undefined;
     this._refreshing = false;
+    this._daemonRunning = false;
   }
 
   private get tooEarlyForRefresh(): boolean {
@@ -214,9 +224,17 @@ export class DaemonDataService {
 
     try {
       this._minerData = await this.daemonService.getMinerData();
+      this._minerDataCoreBusyError = false;
     }
     catch (error) {
       console.error(error);
+
+      if (error instanceof CoreIsBusyError) {
+        this._minerDataCoreBusyError = true;
+      }
+      else {
+        this._minerDataCoreBusyError = false;
+      }
     }
 
     this._gettingMinerData = false;
@@ -273,7 +291,14 @@ export class DaemonDataService {
       this._gettingLastBlockHeader = false;
 
       this._gettingIsBlockchainPruned = true;
-      if (firstRefresh) this._isBlockchainPruned = (await this.daemonService.pruneBlockchain(true)).pruned;
+      //if (firstRefresh) this._isBlockchainPruned = (await this.daemonService.pruneBlockchain(true)).pruned;
+      const settings = await this.daemonService.getSettings();
+      this._isBlockchainPruned = settings.pruneBlockchain;
+      if (firstRefresh) {
+        this.daemonService.pruneBlockchain(true).then((info) => {
+          this._isBlockchainPruned = info.pruned;
+        });
+      }
       this._gettingIsBlockchainPruned = false;
 
       await this.refreshAltChains();
