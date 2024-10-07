@@ -33,6 +33,7 @@ export { TxBacklogEntry } from './TxBacklogEntry';
 export { TxInfo } from './TxInfo';
 export { UpdateInfo } from './UpdateInfo';
 export { LogCategoryLevel, LogCategories } from './LogCategories';
+export { NetStatsHistory, NetStatsHistoryEntry } from './NetStatsHistory';
 
 export * from './error';
 export * from './request';

@@ -147,4 +147,24 @@ export class SettingsComponent implements AfterViewInit {
 
     this.originalSettings = this.currentSettings.clone();
   }
+
+  public chooseMonerodFile(): void {
+    const input = document.getElementById('general-monerod-path');
+
+    if (!input) {
+      return;
+    }
+
+    input.click();
+  }
+
+  public chooseXmrigFile(): void {
+    const input = document.getElementById('general-xmrig-path');
+
+    if (!input) {
+      return;
+    }
+
+    input.click();
+  }
 }

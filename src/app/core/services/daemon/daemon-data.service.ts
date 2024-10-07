@@ -1,6 +1,6 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { DaemonService } from './daemon.service';
-import { BlockCount, BlockHeader, Chain, DaemonInfo, MinerData, MiningStatus, NetStats, SyncInfo } from '../../../../common';
+import { BlockCount, BlockHeader, Chain, DaemonInfo, MinerData, MiningStatus, NetStats, NetStatsHistory, SyncInfo } from '../../../../common';
 
 @Injectable({
   providedIn: 'root'
@@ -35,6 +35,7 @@ export class DaemonDataService {
   private _gettingAltChains: boolean = false;
 
   private _netStats?: NetStats;
+  private _netStatsHistory: NetStatsHistory = new NetStatsHistory();
   private _gettingNetStats: boolean = false;
 
   private _miningStatus?: MiningStatus;
@@ -49,6 +50,9 @@ export class DaemonDataService {
 
   public readonly syncInfoRefreshStart: EventEmitter<void> = new EventEmitter<void>();
   public readonly syncInfoRefreshEnd: EventEmitter<void> = new EventEmitter<void>();
+
+  public readonly netStatsRefreshStart: EventEmitter<void> = new EventEmitter<void>();
+  public readonly netStatsRefreshEnd: EventEmitter<void> = new EventEmitter<void>();
 
   constructor(private daemonService: DaemonService) {
     this.startLoop();
@@ -137,6 +141,10 @@ export class DaemonDataService {
 
   public get netStats(): NetStats | undefined {
     return this.netStats;
+  }
+
+  public get netStatsHistory(): NetStatsHistory {
+    return this._netStatsHistory;
   }
 
   public get gettingNetStats(): boolean {
@@ -271,7 +279,10 @@ export class DaemonDataService {
       await this.refreshAltChains();
 
       this._gettingNetStats = true;
+      this.netStatsRefreshStart.emit();
       this._netStats = await this.daemonService.getNetStats();
+      this._netStatsHistory.add(this._netStats);
+      this.netStatsRefreshEnd.emit();
       this._gettingNetStats = false;
 
       await this.refreshMiningStatus();

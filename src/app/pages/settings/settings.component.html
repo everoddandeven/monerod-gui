@@ -21,23 +21,19 @@
         <h4 class="mb-3">Node</h4>
 
         <div class="row gy-3">
+          
           <div class="col-md-12">
-            <label for="general-monerod-path" class="form-label">Monerod path</label>
-            <input type="file" class="form-control" id="general-monerod-path" [(ngModel)]="currentSettings.monerodPath" [ngModelOptions]="{standalone: true}" (change)="onMonerodPathChange()" placeholder="AAA">
+            <label for="general-monerod-path-control" class="form-label">Monerod path</label>
+            <div class="input-group mb-3">
+              <input id="general-monerod-path-control" type="text" class="form-control form-control-sm" placeholder="" aria-label="Monerod path" aria-describedby="basic-addon2" [value]="currentSettings.monerodPath" readonly>
+              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseMonerodFile()">Choose file</button></span>            
+            </div>
+            <input type="file" class="form-control d-none" id="general-monerod-path" [(ngModel)]="currentSettings.monerodPath" [ngModelOptions]="{standalone: true}" (change)="onMonerodPathChange()" placeholder="AAA">
             <small class="text-body-secondary">Path to monerod executable</small>
           </div>
-        </div>
-
-        <br>
-
-        <div class="row gy-3">
-          <div class="col-md-12">
-            <label for="general-xmrig-path" class="form-label">XMRig path</label>
-            <input type="file" class="form-control" id="general-xmrig-path" [(ngModel)]="currentSettings.monerodPath" [ngModelOptions]="{standalone: true}" (change)="onMonerodPathChange()" placeholder="AAA">
-            <small class="text-body-secondary">Path to XMRig executable</small>
-          </div>
 
         </div>
+
       </div>
     </div>
   </div>

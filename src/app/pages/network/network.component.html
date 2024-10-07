@@ -12,6 +12,13 @@
 </div>
 
 <div *ngIf="daemonRunning" class="tab-content" id="pills-tabContent">
+  <div class="tab-pane fade show active" id="pills-net-stats" role="tabpanel" aria-labelledby="pills-net-stats-tab" tabindex="0">
+    <h2>Bytes In</h2>
+    <canvas class="my-4 w-100" id="netStatsBytesInChart" width="900" height="380"></canvas>
+
+    <h2>Bytes Out</h2>
+    <canvas class="my-4 w-100" id="netStatsBytesOutChart" width="900" height="380"></canvas>
+  </div>
 </div>
 
 <app-daemon-not-running></app-daemon-not-running>
