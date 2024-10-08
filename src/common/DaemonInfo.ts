@@ -40,6 +40,28 @@ export class DaemonInfo {
     public readonly whitePeerlistSize: number;
     public readonly wideCumulativeDifficulty: string;
     public readonly wideDifficulty: string;
+
+    public get hashRate(): number {
+      const target = this.target;
+
+      if (target <= 0) {
+        return 0;
+      }
+
+      return this.difficulty / this.target;
+    }
+
+    public get kiloHashRate(): number {
+      return this.hashRate / 1000;
+    }
+
+    public get megaHashRate(): number {
+      return this.kiloHashRate / 1000;
+    }
+
+    public get gigaHashRate(): number {
+      return this.hashRate / 1000;
+    }
     
     constructor(
         adjustedTime: number,

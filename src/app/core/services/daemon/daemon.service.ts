@@ -76,7 +76,6 @@ import { TxInfo } from '../../../../common/TxInfo';
 import { DaemonSettings } from '../../../../common/DaemonSettings';
 import { MethodNotFoundError } from '../../../../common/error/MethodNotFoundError';
 import { openDB, IDBPDatabase } from "idb"
-import { resolve } from 'path';
 
 @Injectable({
   providedIn: 'root'
@@ -801,8 +800,8 @@ export class DaemonService {
   public async getPublicNodes(whites: boolean = true, grays: boolean = false, includeBlocked: boolean = false): Promise<PublicNode[]> {
     const response = await this.callRpc(new GetPublicNodesRequest(whites, grays, includeBlocked));
 
-    const _whites: any[] | undefined = response.whites;
-    const _grays: any[] | undefined = response.grays;
+    const _whites: any[] | undefined = response.white;
+    const _grays: any[] | undefined = response.gray;
     const nodes: PublicNode[] = [];
 
     if (_whites) _whites.forEach((white) => nodes.push(PublicNode.parse(white, 'white')));

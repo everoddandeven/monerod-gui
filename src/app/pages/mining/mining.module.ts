@@ -10,7 +10,7 @@ import { MiningComponent } from './mining.component';
 @NgModule({
   declarations: [MiningComponent],
   imports: [
-    CommonModule, SharedModule,MiningRoutingModule, LoadComponent
+    CommonModule, SharedModule, MiningRoutingModule, LoadComponent
   ]
 })
 export class MiningModule { }

@@ -98,8 +98,15 @@ export class MiningComponent implements AfterViewInit {
     return this.daemonData.altChains;
   }
 
+  public get networkHashRate(): number {
+    const origValue = this.daemonData.info ? this.daemonData.info.gigaHashRate : 0;
+    
+    return parseFloat(origValue.toFixed(2));
+  }
+
   //private txBacklog: MineableTxBacklog[]
   public cards: Card[];
+
   public get daemonRunning(): boolean {
     return this.daemonData.running;
   }
@@ -136,6 +143,7 @@ export class MiningComponent implements AfterViewInit {
     this.navbarLinks = [
       new NavbarLink('pills-mining-status-tab', '#pills-mining-status', 'mining-status', true, 'Status'),
       new NavbarLink('pills-miner-data-tab', '#pills-miner-data', 'miner-data', false, 'Miner Data'),
+      new NavbarLink('pills-hashrate-tab', '#pills-hashrate', 'hashrate', false, 'Hashrate'),
       new NavbarLink('pills-alternate-chains-tab', '#pills-alternate-chains', 'alternate-chains', false, 'Alternate Chains'),
       new NavbarLink('pills-block-template-tab', '#pills-block-template', 'block-template', false, 'Block Template'),
       new NavbarLink('pills-generate-blocks-tab', '#pills-generate-blocks', 'generate-blocks', false, 'Generate Blocks'),

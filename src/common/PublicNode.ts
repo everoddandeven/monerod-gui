@@ -5,12 +5,17 @@ export class PublicNode {
     public readonly rpcPort: number;
     public readonly type: 'white' | 'gray';
 
+    public readonly lastSeenDateTime: string;
+
     constructor(type: 'white' | 'gray', host: string, lastSeen: number, rpcCreditsPerHash: number, rpcPort: number) {
         this.host = host;
         this.lastSeen = lastSeen;
         this.rpcCreditsPerHash = rpcCreditsPerHash;
         this.rpcPort = rpcPort;
         this.type = type;
+
+        const date = new Date(this.lastSeen * 1000);
+        this.lastSeenDateTime = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
     }
 
     public static parse(publicNode: any, nodeType: 'white' | 'gray'): PublicNode {

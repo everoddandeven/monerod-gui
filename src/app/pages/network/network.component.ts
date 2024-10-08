@@ -20,11 +20,14 @@ export class NetworkComponent implements AfterViewInit {
     return this.daemonData.running;
   }
 
+  public get daemonStopping(): boolean {
+    return this.daemonData.stopping;
+  }
+
   constructor(private navbarService: NavbarService, private daemonService: DaemonService, private daemonData: DaemonDataService) {
     this.navbarLinks = [
       new NavbarLink('pills-net-stats-tab', '#pills-net-stats', 'pills-net-stats', false, 'Statistics'),
-      new NavbarLink('pills-limits-tab', '#pills-limits', 'pills-limits', false, 'Limits'),
-      new NavbarLink('pills-public-nodes-tab', '#pills-public-nodes', 'pills-public-nodes', false, 'Public Nodes')
+      new NavbarLink('pills-limits-tab', '#pills-limits', 'pills-limits', false, 'Limits')
     ];
 
     this.daemonData.netStatsRefreshEnd.subscribe(() => {

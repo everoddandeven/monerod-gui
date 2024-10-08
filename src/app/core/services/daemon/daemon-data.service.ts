@@ -1,6 +1,6 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { DaemonService } from './daemon.service';
-import { BlockCount, BlockHeader, Chain, CoreIsBusyError, DaemonInfo, MinerData, MiningStatus, NetStats, NetStatsHistory, SyncInfo } from '../../../../common';
+import { BlockCount, BlockHeader, Chain, CoreIsBusyError, DaemonInfo, MinerData, MiningStatus, NetStats, NetStatsHistory, PublicNode, SyncInfo } from '../../../../common';
 
 @Injectable({
   providedIn: 'root'
@@ -45,6 +45,9 @@ export class DaemonDataService {
   private _minerDataCoreBusyError: boolean = false;
   private _gettingMinerData: boolean = false;
 
+  private _publicNodes: PublicNode[] = [];
+  private _gettingPublicNodes: boolean = false;
+
   public readonly syncStart: EventEmitter<void> = new EventEmitter<void>();
   public readonly syncEnd: EventEmitter<void> = new EventEmitter<void>();
   public readonly syncError: EventEmitter<Error> = new EventEmitter<Error>();
@@ -56,7 +59,6 @@ export class DaemonDataService {
   public readonly netStatsRefreshEnd: EventEmitter<void> = new EventEmitter<void>();
 
   constructor(private daemonService: DaemonService) {
-    this.startLoop();
 
     this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
       if (running) {
@@ -170,6 +172,14 @@ export class DaemonDataService {
 
   public get gettingMinerData(): boolean {
     return this._gettingMinerData;
+  }
+
+  public get publicNodes(): PublicNode[] {
+    return this._publicNodes;
+  }
+
+  public get gettingPublicNodes(): boolean {
+    return this._gettingPublicNodes;
   }
 
   public setRefreshTimeout(ms: number = 5000): void {
@@ -314,6 +324,12 @@ export class DaemonDataService {
 
       await this.refreshMinerData();
 
+      this._gettingPublicNodes = true;
+
+      this._publicNodes = await this.daemonService.getPublicNodes(true, true);
+
+      this._gettingPublicNodes = false;
+
       this._lastRefresh = Date.now();
     } catch(error) {
       console.error(error);
@@ -324,6 +340,7 @@ export class DaemonDataService {
       this._gettingIsBlockchainPruned = false;
       this._gettingAltChains = false;
       this._gettingNetStats = false;
+      this._gettingPublicNodes = false;
 
       this.syncError.emit(<Error>error);
 

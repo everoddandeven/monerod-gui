@@ -2,6 +2,8 @@ import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { Block, BlockHeader } from '../../../common';
+import { DaemonDataService } from '../../core/services';
+import { NavbarService } from '../../shared/components/navbar/navbar.service';
 
 @Component({
   selector: 'app-blockchain',
@@ -10,7 +12,15 @@ import { Block, BlockHeader } from '../../../common';
 })
 export class BlockchainComponent implements AfterViewInit {
   public readonly navbarLinks: NavbarLink[];
-  public daemonRunning: boolean = false;
+  
+  public get daemonRunning(): boolean {
+    return this.daemonData.running;
+  }
+
+  public get daemonStopping(): boolean {
+    return this.daemonData.stopping;
+  }
+
   public lastBlockHeader?: BlockHeader;
   public getLastBlockError: string = '';
   public block?: Block;
@@ -43,7 +53,7 @@ export class BlockchainComponent implements AfterViewInit {
   public pruneBlockchainError: string = '';
   public blockchainPruned: boolean = false;
 
-  constructor(private daemonService: DaemonService, private ngZone: NgZone) {
+  constructor(private daemonService: DaemonService, private daemonData: DaemonDataService, private navbarService: NavbarService, private ngZone: NgZone) {
     this.navbarLinks = [
       new NavbarLink('pills-last-block-header-tab', '#pills-last-block-header', 'pills-last-block-header', true, 'Last Block Header'),
       new NavbarLink('pills-get-block-tab', '#pills-get-block', 'pills-get-block', false, 'Get Block'),
@@ -52,23 +62,10 @@ export class BlockchainComponent implements AfterViewInit {
       new NavbarLink('pills-prune-blockchain-tab', '#pills-prune-blockchain', 'pills-prune-blockchain', false, 'Prune'),
       new NavbarLink('pills-save-bc-tab', '#pills-save-bc', 'pills-save-bc', false, 'Save')
     ];
-
-    this.daemonService.onDaemonStatusChanged.subscribe((running) => {
-      this.ngZone.run(() => {
-        this.daemonRunning = running;
-        this.navbarLinks.forEach((link) => link.disabled = !running);
-      });
-    });
-
-    this.daemonService.isRunning().then((value: boolean) => {
-      this.ngZone.run(() => {
-        this.daemonRunning = value;
-        this.navbarLinks.forEach((link) => link.disabled = !value);
-      });
-    });
   }
 
   ngAfterViewInit(): void {
+    this.navbarService
       this.load();
   }
 

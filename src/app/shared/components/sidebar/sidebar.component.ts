@@ -39,6 +39,7 @@ export class SidebarComponent implements OnChanges {
       new NavLink('Hard Fork Info', '/hardforkinfo', 'bi bi-signpost-split'),
       new NavLink('XMRig', '/xmrig', 'icon-xr text-primary'),
       new NavLink('Network', '/network', 'bi bi-hdd-network', 'bottom'),
+      new NavLink('Peers', '/peers', 'bi bi-people', 'bottom'),
       new NavLink('Bans', '/bans', 'bi bi-ban', 'bottom'),
       new NavLink('Logs', '/logs', 'bi bi-terminal', 'bottom'),
       new NavLink('Version', '/version', 'bi bi-git', 'bottom'),
