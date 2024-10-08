@@ -114,7 +114,7 @@ export class DetailComponent implements AfterViewInit {
     private ngZone: NgZone) {
 
     this.navbarLinks = [
-      new NavbarLink('pills-home-tab', '#pills-home', 'pills-home', true, 'Overview', true),
+      new NavbarLink('pills-home-tab', '#pills-home', 'pills-home', false, 'Overview', true),
       new NavbarLink('pills-profile-tab', '#pills-profile', 'pills-profile', false, 'Peers', true),
       new NavbarLink('pills-spans-tab', '#pills-spans', 'pills-spans', false, 'Spans', true)
     ];

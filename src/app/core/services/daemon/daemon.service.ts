@@ -767,6 +767,17 @@ export class DaemonService {
       throw new Error(`Could not stop daemon: ${response.status}`);
     }
 
+    const maxChecks: number = 100;
+
+    for(let i = 0; i < maxChecks; i++) {
+      if (!await this.isRunning(true)) {
+        return;
+      } 
+      await this.delay(5000);
+    }
+  
+    throw new Error('Could not stop daemon');
+
     /*
     if (this.electronService.isElectron) {
       return;

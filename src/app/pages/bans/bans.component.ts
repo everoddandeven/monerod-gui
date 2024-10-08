@@ -13,7 +13,7 @@ import { Ban } from '../../../common';
 })
 export class BansComponent implements AfterViewInit {
   public readonly navbarLinks: NavbarLink[] = [
-    new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', true, 'Overview', true),
+    new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', false, 'Overview', true),
     new NavbarLink('pills-set-bans-tab', '#pills-set-bans', 'pills-set-bans', false, 'Set Bans', true)
   ];
   

@@ -76,7 +76,7 @@ export class TransactionsComponent implements AfterViewInit, OnDestroy {
 
   constructor(private daemonData: DaemonDataService, private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
     this.navbarLinks = [
-      new NavbarLink('pills-tx-pool-tab', '#pills-tx-pool', 'pills-tx-pool', true, 'Pool'),
+      new NavbarLink('pills-tx-pool-tab', '#pills-tx-pool', 'pills-tx-pool', false, 'Pool'),
       new NavbarLink('pills-relay-tx-tab', '#pills-relay-tx', 'pills-relay-tx', false, 'Relay Tx'),
       new NavbarLink('pills-send-raw-tx-tab', '#pills-send-raw-tx', 'pills-send-raw-tx', false, 'Send Raw Tx'),
       new NavbarLink('pills-get-fee-estimate-tab', '#pills-get-fee-estimate', 'pills-get-fee-estimate', false, 'Get Fee Estimate'),

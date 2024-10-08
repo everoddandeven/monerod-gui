@@ -28,7 +28,7 @@
               <input id="general-monerod-path-control" type="text" class="form-control form-control-sm" placeholder="" aria-label="Monerod path" aria-describedby="basic-addon2" [value]="currentSettings.monerodPath" readonly>
               <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseMonerodFile()">Choose file</button></span>            
             </div>
-            <input type="file" class="form-control d-none" id="general-monerod-path" [(ngModel)]="currentSettings.monerodPath" [ngModelOptions]="{standalone: true}" (change)="onMonerodPathChange()" placeholder="AAA">
+            <input type="file" class="form-control d-none" id="general-monerod-path" (change)="onMonerodPathChange()">
             <small class="text-body-secondary">Path to monerod executable</small>
           </div>
 

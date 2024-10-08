@@ -8,7 +8,7 @@ export class NavbarLink {
     public name: string;
     public disabled: boolean;
 
-    constructor(id: string, target: string, controls: string, selected: boolean, name: string, disabled: boolean = false) {
+    constructor(id: string, target: string, controls: string, selected: boolean, name: string, disabled: boolean = true) {
         this.id = id;
         this.target = target;
         this.controls = controls;

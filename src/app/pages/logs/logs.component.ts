@@ -37,7 +37,7 @@ export class LogsComponent implements AfterViewInit {
   constructor(private navbarService: NavbarService, private logsService: LogsService, private daemonService: DaemonService, private ngZone: NgZone) {
     this.logsService.onLog.subscribe((message: string) => this.onLog());
     this.navbarLinks = [
-      new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', true, 'Overview'),
+      new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', false, 'Overview'),
       new NavbarLink('pills-set-log-level-tab', '#pills-set-log-level', 'pills-set-log-level', false, 'Set Log Level'),
       new NavbarLink('pills-set-log-categories-tab', '#pills-set-log-categories', 'pills-set-log-categories', false, 'Set Log Categories'),
       new NavbarLink('pills-set-log-hash-rate-tab', '#pills-set-log-hash-rate', 'pills-set-log-hash-rate', false, 'Set Log Hash Rate')
@@ -73,7 +73,7 @@ export class LogsComponent implements AfterViewInit {
   }
 
   public ngAfterViewInit(): void {
-    this.navbarService.removeLinks();
+    this.navbarService.setLinks(this.navbarLinks);
     
     setTimeout(() => {
       this.scrollToBottom();

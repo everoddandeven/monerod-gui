@@ -55,7 +55,7 @@ export class BlockchainComponent implements AfterViewInit {
 
   constructor(private daemonService: DaemonService, private daemonData: DaemonDataService, private navbarService: NavbarService, private ngZone: NgZone) {
     this.navbarLinks = [
-      new NavbarLink('pills-last-block-header-tab', '#pills-last-block-header', 'pills-last-block-header', true, 'Last Block Header'),
+      new NavbarLink('pills-last-block-header-tab', '#pills-last-block-header', 'pills-last-block-header', false, 'Last Block Header'),
       new NavbarLink('pills-get-block-tab', '#pills-get-block', 'pills-get-block', false, 'Get Block'),
       new NavbarLink('pills-get-block-header-tab', '#pills-get-block-header', 'pills-get-block-header', false, 'Get Block Header'),
       new NavbarLink('pills-pop-blocks-tab', '#pills-pop-blocks', 'pills-pop-blocks', false, 'Pop Blocks'),
@@ -65,8 +65,8 @@ export class BlockchainComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    this.navbarService
-      this.load();
+    this.navbarService.setLinks(this.navbarLinks);
+    this.load();
   }
 
   public async load(): Promise<void> {

@@ -77,7 +77,7 @@ export class DaemonDataService {
       else {
         this.stopLoop();
       }
-    })
+    });
   }
 
   public get initializing(): boolean {

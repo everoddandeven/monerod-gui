@@ -141,7 +141,7 @@ export class MiningComponent implements AfterViewInit {
     this.cards = [];
 
     this.navbarLinks = [
-      new NavbarLink('pills-mining-status-tab', '#pills-mining-status', 'mining-status', true, 'Status'),
+      new NavbarLink('pills-mining-status-tab', '#pills-mining-status', 'mining-status', false, 'Status'),
       new NavbarLink('pills-miner-data-tab', '#pills-miner-data', 'miner-data', false, 'Miner Data'),
       new NavbarLink('pills-hashrate-tab', '#pills-hashrate', 'hashrate', false, 'Hashrate'),
       new NavbarLink('pills-alternate-chains-tab', '#pills-alternate-chains', 'alternate-chains', false, 'Alternate Chains'),

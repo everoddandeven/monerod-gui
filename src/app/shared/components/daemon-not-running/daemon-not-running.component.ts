@@ -1,5 +1,6 @@
 import { Component, Input, NgZone } from '@angular/core';
 import { DaemonService } from '../../../core/services/daemon/daemon.service';
+import { DaemonDataService } from '../../../core/services';
 
 @Component({
   selector: 'app-daemon-not-running',
@@ -8,24 +9,21 @@ import { DaemonService } from '../../../core/services/daemon/daemon.service';
 })
 export class DaemonNotRunningComponent {
 
-  public daemonRunning: boolean = false;
-  public daemonConfigured: boolean = false;
+  public get daemonRunning(): boolean {
+    return this.daemonData.running;
+  }
+
+  public daemonConfigured: boolean = true;
 
   public get startingDaemon(): boolean {
     return this.daemonService.starting;
   }
 
-  private stoppingDaemon: boolean = false;
+  private get stoppingDaemon(): boolean{
+    return this.daemonData.stopping;
+  }
 
-
-  constructor(private daemonService: DaemonService, private ngZone: NgZone) {
-    this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
-      this.ngZone.run(() => this.daemonRunning = running);
-      this.daemonRunning = running;
-    });
-    this.daemonService.isRunning().then((running: boolean) => {
-      this.ngZone.run(() => this.daemonRunning = running);
-    });
+  constructor(private daemonData: DaemonDataService, private daemonService: DaemonService, private ngZone: NgZone) {
     this.daemonService.getSettings().then((settings) => {
       this.daemonConfigured = settings.monerodPath != '';
     })
@@ -41,16 +39,17 @@ export class DaemonNotRunningComponent {
       return;
     }
 
-    setTimeout(async () => {
-      try {
-        await this.daemonService.startDaemon();
-        this.daemonRunning = await this.daemonService.isRunning();
-      }
-      catch(error) {
-        console.error(error);
-        this.daemonRunning = false;
-      }
-    }, 500);
+    await new Promise<void>((resolve, reject) => {
+      setTimeout(async () => {
+        try {
+          await this.daemonService.startDaemon();
+          resolve();
+        }
+        catch(error) {
+          console.error(error);
+          reject(error);
+        }
+      }, 500)});
   }  
 
 }

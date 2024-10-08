@@ -3,6 +3,8 @@ import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { SimpleBootstrapCard } from '../../shared/utils';
+import { DaemonDataService } from '../../core/services';
+import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 
 @Component({
   selector: 'app-hard-fork-info',
@@ -19,11 +21,21 @@ export class HardForkInfoComponent implements AfterViewInit {
   private voting: number;
   private window: number;
 
-  public daemonRunning: boolean;
+  public get daemonRunning(): boolean {
+    return this.daemonData.running;
+  }
+
+  public get daemonStopping(): boolean {
+    return this.daemonService.stopping;
+  }
 
   public loading: boolean = false;
 
-  constructor(private router: Router, private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
+  public readonly navbarLinks: NavbarLink[] = [
+    new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', false, 'Overview'),
+  ];
+
+  constructor(private router: Router, private daemonData: DaemonDataService, private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
     this.cards = [];
     this.enabled = false;
     this.earliestHeight = 0;
@@ -32,7 +44,6 @@ export class HardForkInfoComponent implements AfterViewInit {
     this.votes = 0;
     this.voting = 0;
     this.window = 0;
-    this.daemonRunning = false;
 
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
@@ -40,21 +51,10 @@ export class HardForkInfoComponent implements AfterViewInit {
         this.onNavigationEnd();
       }
     });
-
-    this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
-      this.daemonRunning = running;
-    });
-
-    this.daemonService.isRunning().then((running: boolean) => {
-      this.ngZone.run(() => {
-        this.daemonRunning = running;
-      });
-    });
-
   }
 
   ngAfterViewInit(): void {
-      this.navbarService.removeLinks();
+      this.navbarService.setLinks(this.navbarLinks);
   }
 
   private onNavigationEnd(): void {
