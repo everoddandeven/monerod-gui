@@ -159,11 +159,53 @@
     <button class="w-100 btn btn-primary btn-lg" type="button" (click)="sendRawTx()">Send Raw Tx</button>
   </div>
 
+  <div class="tab-pane fade" id="pills-get-fee-estimate" role="tabpanel" aria-labelledby="pills-get-fee-estimate-tab" tabindex="0">
+    <h4 class="mb-3">Get an estimation on fees per byte</h4>
+        
+    <div *ngIf="getFeeEstimateError != ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+      <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+      <div>
+        {{getFeeEstimateError}}
+      </div>
+    </div>
+
+    <div *ngIf="getFeeEstimateSuccess" class="row d-flex justify-content-center">
+      @for(card of feeEstimateCards; track card.header) {
+        <div class="card text-bg-dark m-3 text-center" style="max-width: 18rem;">
+          <div class="card-header">{{card.header}}</div>
+          <div class="card-body">
+            <h5 class="card-title">{{card.content}}</h5>
+          </div>
+        </div>
+      }
+    </div>
+
+    <hr *ngIf="getFeeEstimateSuccess" class="my-4">
+
+    <div class="row g-5 p-2">
+      <div class="col-md-7 col-lg-12">
+        <form class="needs-validation" novalidate="">
+          <div class="row g-3">
+      
+            <div class="col-md-4">
+              <label for="grace-blocks" class="form-label">Grace Blocks</label>
+              <input type="number" min="0" class="form-control" id="grace-blocks" placeholder="" [(ngModel)]="graceBlocks" [ngModelOptions]="{standalone: true}">
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <hr class="my-4">
+    <button class="w-100 btn btn-primary btn-lg" type="button" (click)="getFeeEstimate()">Get Fee Estimate</button>
+
+  </div>
+
   <div class="tab-pane fade" id="pills-coinbase-tx-sum" role="tabpanel" aria-labelledby="pills-coinbase-tx-sum-tab" tabindex="0">
     <div class="row g-5 p-2">
         <div class="col-md-7 col-lg-12">
           
-          <div *ngIf="getCoinbaseTxSumError" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+          <div *ngIf="getCoinbaseTxSumError != ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
             <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
             <div>
               {{getCoinbaseTxSumError}}

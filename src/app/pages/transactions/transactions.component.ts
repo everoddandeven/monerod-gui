@@ -5,8 +5,7 @@ import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { TxBacklogEntry } from '../../../common/TxBacklogEntry';
 import { SimpleBootstrapCard } from '../../shared/utils';
 import { DaemonDataService } from '../../core/services';
-import { table } from 'console';
-import { SpentKeyImage, UnconfirmedTx } from '../../../common';
+import { FeeEstimate, SpentKeyImage, UnconfirmedTx } from '../../../common';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -28,6 +27,16 @@ export class TransactionsComponent implements AfterViewInit, OnDestroy {
 
   public coinbaseTxSumHeight: number = 0;
   public coinbaseTxSumCount: number = 0;
+  public cards: SimpleBootstrapCard[] = [];
+  public getCoinbaseTxSumSuccess: boolean = false;
+  public getCoinbaseTxSumError: string = '';
+
+  public feeEstimateCards: SimpleBootstrapCard[] = [];
+  public graceBlocks: number = 0;
+  public gettingFeeEstimate: boolean = false;
+  public getFeeEstimateResult?: FeeEstimate;
+  public getFeeEstimateError: string = '';
+  public getFeeEstimateSuccess: boolean = false;
 
   public get modifiedTxIds(): boolean {
     return this.txIdsJsonString != '';
@@ -70,6 +79,7 @@ export class TransactionsComponent implements AfterViewInit, OnDestroy {
       new NavbarLink('pills-tx-pool-tab', '#pills-tx-pool', 'pills-tx-pool', true, 'Pool'),
       new NavbarLink('pills-relay-tx-tab', '#pills-relay-tx', 'pills-relay-tx', false, 'Relay Tx'),
       new NavbarLink('pills-send-raw-tx-tab', '#pills-send-raw-tx', 'pills-send-raw-tx', false, 'Send Raw Tx'),
+      new NavbarLink('pills-get-fee-estimate-tab', '#pills-get-fee-estimate', 'pills-get-fee-estimate', false, 'Get Fee Estimate'),
       new NavbarLink('pills-tx-backlog-tab', '#pills-tx-backlog', 'pills-tx-backlog', false, 'Tx Backlog'),
       new NavbarLink('pills-coinbase-tx-sum-tab', '#pills-coinbase-tx-sum', 'pills-coinbase-tx-sum', false, 'Coinbase Tx Sum'),
       new NavbarLink('pills-flush-tx-pool-tab', '#pills-flush-tx-pool', 'pills-flush-tx-pool', false, 'Flush Tx Pool'),
@@ -199,9 +209,6 @@ export class TransactionsComponent implements AfterViewInit, OnDestroy {
 
   }
 
-  public cards: SimpleBootstrapCard[] = [];
-  public getCoinbaseTxSumSuccess: boolean = false;
-  public getCoinbaseTxSumError: string = '';
 
   public async onGetCoinbaseTxSum(): Promise<void> {
     try {
@@ -261,5 +268,32 @@ export class TransactionsComponent implements AfterViewInit, OnDestroy {
     }
 
     this.sendingRawTx = false;
+  }
+
+  public async getFeeEstimate(): Promise<void> {
+    this.gettingFeeEstimate = true;
+
+    try {
+      this.getFeeEstimateResult = await this.daemonService.getFeeEstimate(this.graceBlocks);
+      this.feeEstimateCards = [
+        new SimpleBootstrapCard('Fee Per Byte', `${this.getFeeEstimateResult.fee}`),
+        new SimpleBootstrapCard('Quantization Mask', `${this.getFeeEstimateResult.quantizationMask}`),
+        new SimpleBootstrapCard('Fee (slow)', `${this.getFeeEstimateResult.fees[0]}`),
+        new SimpleBootstrapCard('Fee (normal)', `${this.getFeeEstimateResult.fees[1]}`),
+        new SimpleBootstrapCard('Fee (fast)', `${this.getFeeEstimateResult.fees[2]}`),
+        new SimpleBootstrapCard('Fee (fastest)', `${this.getFeeEstimateResult.fees[3]}`)
+      ];
+      this.getFeeEstimateSuccess = true;
+      this.getFeeEstimateError = ``;
+
+    }
+    catch(error) {
+      console.error(error);
+      this.feeEstimateCards = [];
+      this.getFeeEstimateSuccess = false;
+      this.getFeeEstimateError = `${error}`;
+    }
+
+    this.gettingFeeEstimate = false;
   }
 }

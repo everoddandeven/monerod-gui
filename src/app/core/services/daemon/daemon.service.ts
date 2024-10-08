@@ -595,8 +595,8 @@ export class DaemonService {
     throw new Error("Daemon not running");
   }
 
-  public async getFeeEstimate(): Promise<FeeEstimate> {
-    const response = await this.callRpc(new GetFeeEstimateRequest());
+  public async getFeeEstimate(graceBlocks: number = 0): Promise<FeeEstimate> {
+    const response = await this.callRpc(new GetFeeEstimateRequest(graceBlocks));
 
     return FeeEstimate.parse(response.result);
   }
