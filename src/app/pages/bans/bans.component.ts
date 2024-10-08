@@ -1,8 +1,9 @@
 import { AfterViewInit, Component, NgZone } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
+import { DaemonDataService } from '../../core/services';
+import { Ban } from '../../../common';
 
 
 @Component({
@@ -15,61 +16,85 @@ export class BansComponent implements AfterViewInit {
     new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', true, 'Overview', true),
     new NavbarLink('pills-set-bans-tab', '#pills-set-bans', 'pills-set-bans', false, 'Set Bans', true)
   ];
-  public daemonRunning: boolean = false;
+  
+  public refreshingBansTable: boolean = false;
+  
+  public get daemonRunning(): boolean {
+    return this.daemonData.running;
+  }
+  
+  public get daemonStopping(): boolean {
+    return this.daemonData.stopping;
+  }
+  
   public get daemonChangingStatus(): boolean {
     return this.daemonService.stopping || this.daemonService.starting;
   }
 
-  constructor(private router: Router, private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
-    this.router.events.subscribe((event) => {
-      if (event instanceof NavigationEnd) {
-        if (event.url != '/bans') return;
-        this.onNavigationEnd();
+  public settingBans: boolean = false;
+  public setBansBansJsonString: string = '';
+  public setBansSuccess: boolean = false;
+  public setBansError: string = '';
+
+  public get validBans(): boolean {
+    try {
+      const bans: any[] = JSON.parse(this.setBansBansJsonString);
+
+      if (!Array.isArray(bans)) {
+        return false;
       }
-    })
 
-    this.daemonService.isRunning().then((running) => {
-      this.daemonRunning = running
-    });
-    
-    this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
-      this.daemonRunning = running;
+      bans.forEach((ban) => Ban.parse(ban));
 
-      if (running) this.load();
-    });
-
+      return true;
+    }
+    catch(error) {
+      return false;
+    }
   }
 
-  ngAfterViewInit(): void {
-    this.navbarService.removeLinks();
+  private get bans(): Ban[] {
+    if (!this.validBans) {
+      return [];
+    }
+    const bans: Ban[] = [];
+    const rawBans: any[] = [];
 
-    console.log('BansComponent AFTER VIEW INIT');
+    rawBans.forEach((rawBan) => bans.push(Ban.parse(rawBan)));
+
+    return bans;
+  }
+
+  constructor(private daemonData: DaemonDataService, private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
+  }
+
+  public ngAfterViewInit(): void {
+    this.navbarService.setLinks(this.navbarLinks);
 
     this.ngZone.run(() => {
-      //const $ = require('jquery');
-      //const bootstrapTable = require('bootstrap-table');
-      
       const $table = $('#bansTable');
-      $table.bootstrapTable({
-        
-      });
+      $table.bootstrapTable({});
       $table.bootstrapTable('refreshOptions', {
         classes: 'table table-bordered table-hover table-dark table-striped'
       });
       $table.bootstrapTable('showLoading');      
-      this.load();
+      this.refreshBansTable();
 
     });
   }
 
-  private onNavigationEnd(): void {
-    this.navbarService.removeLinks();
-  }
-
-  private async load(): Promise<void> {
+  public async refreshBansTable(): Promise<void> {
     const $table = $('#bansTable');
+    let _bans: Ban[] = [];
+    
+    try {
+      _bans = await this.daemonService.getBans();
+    }
+    catch (error) {
+      console.error(error);
+      _bans = [];
+    }
 
-    const _bans = await this.daemonService.getBans();
     const bans: any[] = [];
 
     _bans.forEach((ban) => bans.push({
@@ -82,8 +107,21 @@ export class BansComponent implements AfterViewInit {
 
   }
 
-  public async setBans() {
-    
+  public async setBans(): Promise<void> {
+    this.settingBans = true;
+
+    try {
+      await this.daemonService.setBans(...this.bans);
+      this.setBansError = '';
+      this.setBansSuccess = true;
+    }
+    catch (error) {
+      console.error(error);
+      this.setBansSuccess = false;
+      this.setBansError = `${error}`;
+    }
+
+    this.settingBans = false;
   }
 
 }

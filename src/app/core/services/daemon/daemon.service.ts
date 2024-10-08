@@ -41,7 +41,9 @@ import {
   SetBootstrapDaemonRequest,
   SetLogLevelRequest,
   SetLogHashRateRequest,
-  SetLogCategoriesRequest
+  SetLogCategoriesRequest,
+  GetTransactionPoolRequest,
+  GetPeerListRequest
 } from '../../../../common/request';
 import { BlockTemplate } from '../../../../common/BlockTemplate';
 import { GeneratedBlocks } from '../../../../common/GeneratedBlocks';
@@ -76,6 +78,7 @@ import { TxInfo } from '../../../../common/TxInfo';
 import { DaemonSettings } from '../../../../common/DaemonSettings';
 import { MethodNotFoundError } from '../../../../common/error/MethodNotFoundError';
 import { openDB, IDBPDatabase } from "idb"
+import { PeerInfo, TxPool } from '../../../../common';
 
 @Injectable({
   providedIn: 'root'
@@ -411,7 +414,12 @@ export class DaemonService {
 
   public async getConnections(): Promise<Connection[]> {
     const response = await this.callRpc(new GetConnectionsRequest());
-    const connections: any[] = response.connections;
+
+    if (!response.result || !response.result.connections) {
+      return [];
+    }
+
+    const connections: any[] = response.result.connections;
     const result: Connection[] = [];
 
     connections.forEach((connection: any) => result.push(Connection.parse(connection)))
@@ -797,6 +805,23 @@ export class DaemonService {
     return NetStats.parse(response);
   }
 
+  public async getPeerList(): Promise<PeerInfo[]> {
+    const response = await this.callRpc(new GetPeerListRequest());
+
+    if (response.status != 'OK') {
+      throw new Error(response.status);
+    }
+
+    const peerList: PeerInfo[] = [];
+    const whiteList: any[] | undefined = response.white_list
+    const grayList: any[] | undefined = response.gray_list;
+
+    if (whiteList) whiteList.forEach((white: any) => peerList.push(PeerInfo.parse(white, 'white')));
+    if (grayList) grayList.forEach((gray: any) => peerList.push(PeerInfo.parse(gray, 'gray')));
+
+    return peerList;
+  }
+
   public async getPublicNodes(whites: boolean = true, grays: boolean = false, includeBlocked: boolean = false): Promise<PublicNode[]> {
     const response = await this.callRpc(new GetPublicNodesRequest(whites, grays, includeBlocked));
 
@@ -808,6 +833,16 @@ export class DaemonService {
     if (_grays) _grays.forEach((gray) => nodes.push(PublicNode.parse(gray, 'gray')));
 
     return nodes;
+  }
+
+  public async getTransactionPool(): Promise<TxPool> {
+    const response = await this.callRpc(new GetTransactionPoolRequest());
+
+    if (response.status != 'OK') {
+      throw new Error(response.status);
+    }
+
+    return TxPool.parse(response);
   }
 
   public async getTransactionPoolHashes(): Promise<string[]> {

@@ -57,6 +57,8 @@ export { SetBootstrapDaemonRequest } from "./SetBootstrapDaemonRequest";
 export { SetLogLevelRequest } from "./SetLogLevelRequest";
 export { SetLogHashRateRequest } from "./SetLogHashRateRequest";
 export { SetLogCategoriesRequest } from "./SetLogCategoriesRequest";
+export { GetTransactionPoolRequest } from "./GetTransactionPoolRequest";
+export { GetPeerListRequest } from "./GetPeerListRequest";
 
 /**
  * Restricted requests

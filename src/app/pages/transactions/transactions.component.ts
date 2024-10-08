@@ -1,16 +1,20 @@
-import { AfterViewInit, Component, NgZone } from '@angular/core';
+import { AfterViewInit, Component, NgZone, OnDestroy } from '@angular/core';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { TxBacklogEntry } from '../../../common/TxBacklogEntry';
 import { SimpleBootstrapCard } from '../../shared/utils';
+import { DaemonDataService } from '../../core/services';
+import { table } from 'console';
+import { SpentKeyImage, UnconfirmedTx } from '../../../common';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-transactions',
   templateUrl: './transactions.component.html',
   styleUrl: './transactions.component.scss'
 })
-export class TransactionsComponent implements AfterViewInit {
+export class TransactionsComponent implements AfterViewInit, OnDestroy {
   public readonly navbarLinks: NavbarLink[];
 
   public canRelay: boolean;
@@ -29,7 +33,13 @@ export class TransactionsComponent implements AfterViewInit {
     return this.txIdsJsonString != '';
   }
 
-  public daemonRunning: boolean = false;
+  public get daemonRunning(): boolean {
+    return this.daemonData.running;
+  }
+
+  public get daemonStopping(): boolean {
+    return this.daemonData.stopping;
+  }
 
   public rawTxJsonString: string = '';
   public sendRawTxDoNotRelay: boolean = false;
@@ -37,9 +47,28 @@ export class TransactionsComponent implements AfterViewInit {
   public sendRawTxError: string = '';
   public sendingRawTx: boolean = false;
 
-  constructor(private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
+  private get unconfirmedTxs(): UnconfirmedTx[] {
+    if (!this.daemonData.transactionPool) {
+      return [];
+    }
+
+    return this.daemonData.transactionPool.transactions;
+  }
+
+  private get spentKeyImages(): SpentKeyImage[] {
+    if (!this.daemonData.transactionPool) {
+      return [];
+    }
+
+    return this.daemonData.transactionPool.spentKeyImages;
+  }
+
+  private subscriptions: Subscription[] = [];
+
+  constructor(private daemonData: DaemonDataService, private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
     this.navbarLinks = [
-      new NavbarLink('pills-relay-tx-tab', '#pills-relay-tx', 'pills-relay-tx', true, 'Relay Tx'),
+      new NavbarLink('pills-tx-pool-tab', '#pills-tx-pool', 'pills-tx-pool', true, 'Pool'),
+      new NavbarLink('pills-relay-tx-tab', '#pills-relay-tx', 'pills-relay-tx', false, 'Relay Tx'),
       new NavbarLink('pills-send-raw-tx-tab', '#pills-send-raw-tx', 'pills-send-raw-tx', false, 'Send Raw Tx'),
       new NavbarLink('pills-tx-backlog-tab', '#pills-tx-backlog', 'pills-tx-backlog', false, 'Tx Backlog'),
       new NavbarLink('pills-coinbase-tx-sum-tab', '#pills-coinbase-tx-sum', 'pills-coinbase-tx-sum', false, 'Coinbase Tx Sum'),
@@ -51,26 +80,63 @@ export class TransactionsComponent implements AfterViewInit {
     this.txPoolBacklog = [];
 
     this.canRelay = false;
-    this.daemonService.onDaemonStatusChanged.subscribe((running) => {
-      this.ngZone.run(() => {
-        this.daemonRunning = running;
-      });
-    });
-    this.daemonService.isRunning().then((value: boolean) => {
-      this.ngZone.run(() => {
-        this.daemonRunning = value;
-      });
-    });
   }
 
-  ngAfterViewInit(): void {
+  public ngAfterViewInit(): void {
+    this.ngZone.run(() => {
       this.navbarService.setLinks(this.navbarLinks);
+    
+      this.initTables();
+      this.subscriptions.push(this.daemonData.syncEnd.subscribe(() => {
+        this.refreshTables();
+      }));
+  
       this.load().then(() => {
         this.navbarService.enableLinks();
       }).catch((error) => {
         console.error(error);
         this.navbarService.disableLinks();
-      })
+      });
+    });
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriptions.forEach((sub) => {
+      sub.unsubscribe();
+    });
+
+    this.subscriptions = [];
+  }
+
+  private initTable(id: string): void {
+    const $table = $(`#${id}`);
+
+    $table.bootstrapTable({});
+    $table.bootstrapTable('refreshOptions', {
+      classes: 'table table-bordered table-hover table-dark table-striped'
+    });
+  }
+
+  private initTables(): void {
+    this.initTable('spentKeyImagesTable');
+    this.initTable('transactionsTable');
+  }
+
+  private loadTransactionsTable(): void {
+    const $table = $('#transactionsTable');
+
+    $table.bootstrapTable('load', this.unconfirmedTxs);
+  }
+
+  private loadSpentKeyImagesTable(): void {
+    const $table = $('#spentKeyImagesTable');
+
+    $table.bootstrapTable('load', this.spentKeyImages);
+  }
+
+  private refreshTables(): void {
+    this.loadSpentKeyImagesTable();
+    this.loadTransactionsTable();
   }
 
   private async load(): Promise<void> {

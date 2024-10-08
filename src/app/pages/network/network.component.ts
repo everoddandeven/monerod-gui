@@ -1,16 +1,17 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy } from '@angular/core';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { DaemonDataService, DaemonService } from '../../core/services';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { Chart, ChartData } from 'chart.js/auto'
 import { NetStatsHistoryEntry } from '../../../common';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-network',
   templateUrl: './network.component.html',
   styleUrl: './network.component.scss'
 })
-export class NetworkComponent implements AfterViewInit {
+export class NetworkComponent implements AfterViewInit, OnDestroy {
   public readonly navbarLinks: NavbarLink[];
 
   private netStatsBytesInChart?: Chart;
@@ -24,15 +25,29 @@ export class NetworkComponent implements AfterViewInit {
     return this.daemonData.stopping;
   }
 
+  public limiting: boolean = false;
+  public limitUp: number = 0;
+  public limitDown: number = 0;
+  public setLimitResult?: { limitUp: number, limitDown: number };
+  public setLimitSuccess: boolean = false;
+  public setLimitError: string = '';
+
+  private subscriptions: Subscription[] = [];
+
   constructor(private navbarService: NavbarService, private daemonService: DaemonService, private daemonData: DaemonDataService) {
     this.navbarLinks = [
       new NavbarLink('pills-net-stats-tab', '#pills-net-stats', 'pills-net-stats', false, 'Statistics'),
-      new NavbarLink('pills-limits-tab', '#pills-limits', 'pills-limits', false, 'Limits')
+      new NavbarLink('pills-connections-tab', '#pills-connections', 'connections', false, 'Connetions'),
+      new NavbarLink('pills-limits-tab', '#pills-limit', 'pills-limit', false, 'Limit')
     ];
 
-    this.daemonData.netStatsRefreshEnd.subscribe(() => {
+    this.subscriptions.push(this.daemonData.netStatsRefreshEnd.subscribe(() => {
       this.refreshNetStatsHistory();
-    });
+    }));
+
+    this.subscriptions.push(this.daemonData.syncEnd.subscribe(() => {
+      this.loadConnectionsTable();
+    }));
 
     this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
       if (!running) {
@@ -47,6 +62,29 @@ export class NetworkComponent implements AfterViewInit {
   public ngAfterViewInit(): void {
     this.navbarService.setLinks(this.navbarLinks);
     this.initNetStatsHistoryChart();
+    this.initConnectionsTable();
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriptions.forEach((sub) => {
+      sub.unsubscribe();
+    });
+
+    this.subscriptions = [];
+  }
+
+  private initConnectionsTable(): void {
+    const $table = $('#connectionsTable');
+    $table.bootstrapTable({});
+    $table.bootstrapTable('refreshOptions', {
+      classes: 'table table-bordered table-hover table-dark table-striped'
+    });
+  }
+
+  private loadConnectionsTable(): void {
+    const $table = $('#connectionsTable');
+
+    $table.bootstrapTable('load', this.daemonData.connections);
   }
 
   private buildChartBytesInData(): ChartData {
@@ -159,4 +197,22 @@ export class NetworkComponent implements AfterViewInit {
     }
 
   }
+
+  public async setLimit(): Promise<void> {
+    this.limiting = true;
+
+    try {
+      this.setLimitResult = await this.daemonService.setLimit(this.limitUp, this.limitDown);
+      this.setLimitSuccess = true;
+      this.setLimitError = '';
+    } 
+    catch (error) {
+      console.error(error);
+      this.setLimitResult = undefined;
+      this.setLimitSuccess = false;
+      this.setLimitError = `${error}`;
+    }
+
+    this.limiting = false;
+  } 
 }

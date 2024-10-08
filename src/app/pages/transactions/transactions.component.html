@@ -11,9 +11,63 @@
   </div>
 </div>
 
-<div *ngIf="daemonRunning" class="tab-content" id="pills-tabContent">
+<div *ngIf="daemonRunning && !daemonStopping" class="tab-content" id="pills-tabContent">
+
+  <div class="tab-pane fade show active" id="pills-tx-pool" role="tabpanel" aria-labelledby="pills-tx-pool-tab" tabindex="0">
+    <h4 class="mb-3">Information about valid transactions seen by the node but not yet mined into a block, as well as spent key image information for the txpool in the node's memory</h4>
+    <br>
+
+    <h6 class="mb-3">Transactions</h6>
+    <div class="m-3">
+      <table
+        id="transactionsTable"
+        data-toggle="transactionsTable"
+        data-toolbar="#toolbar"
+        data-height="460"
+        >
+        <thead>
+          <tr>
+            <th data-field="idHash">ID Hash</th>
+            <th data-field="relayed">Relayed</th>
+            <th data-field="blobSize">Blob Size</th>
+            <th data-field="doNotRelay">Do Not Relay</th>
+            <th data-field="doubleSpendSeen">Double Spend Seen</th>
+            <th data-field="fee">Fee</th>
+            <th data-field="keptByBlock">Kept By Block</th>
+            <th data-field="lastFailedHeight">Last Failed Height</th>
+            <th data-field="lastFailedIdHash">Last Failed Id Hash</th>
+            <th data-field="lastRelayedTime">Last Relayed Time</th>
+            <th data-field="maxUsedBlockHeight">Max Used Block Height</th>
+            <th data-field="maxUsedBlockIdHash">Max Used Block Id Hash</th>
+            <th data-field="receiveTime">Receive Time</th>
+            <th data-field="txBlob">Tx Blob</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+
+    <hr class="my-4">
+
+    <h6 class="mb-3">Spent Key Images</h6>
+    <div class="m-3">
+      <table
+        id="spentKeyImagesTable"
+        data-toggle="spentKeyImagesTable"
+        data-toolbar="#toolbar"
+        data-height="460"
+        >
+        <thead>
+          <tr>
+            <th data-field="idHash">ID Hash</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+
+  </div>
+
+  <div class="tab-pane fade" id="pills-relay-tx" role="tabpanel" aria-labelledby="pills-relay-tx-tab" tabindex="0">
   
-  <div class="tab-pane fade show active" id="pills-relay-tx" role="tabpanel" aria-labelledby="pills-relay-tx-tab" tabindex="0">
     <div class="row g-5 p-2">
         <div class="col-md-7 col-lg-12">
           <div *ngIf="relaySuccess" class="alert alert-success d-flex align-items-center justify-content-center text-center" role="alert">
@@ -56,6 +110,7 @@
         </div>
     </div>
     <button class="w-100 btn btn-primary btn-lg" type="button" [disabled]="!canRelay" [disabled]="!validTxIds()" (click)="onRelay()">Relay Tx</button>
+  
   </div>
   
   <div class="tab-pane fade" id="pills-send-raw-tx" role="tabpanel" aria-labelledby="pills-send-raw-tx-tab" tabindex="0">
@@ -95,12 +150,12 @@
                 <br>
                 <small class="text-body-secondary">Stop relaying transaction to other nodes</small>
               </div>
-            <hr class="my-4">
             </div>
 
           </form>
         </div>
     </div>
+    <hr class="my-4">
     <button class="w-100 btn btn-primary btn-lg" type="button" (click)="sendRawTx()">Send Raw Tx</button>
   </div>
 
@@ -152,7 +207,7 @@
   </div>
 
   <div class="tab-pane fade" id="pills-flush-tx-pool" role="tabpanel" aria-labelledby="pills-flush-tx-pool-tab" tabindex="0">
-    <div class="row g-5 m-2">
+    <div class="row g-5 p-2">
         <div class="col-md-7 col-lg-10">
           <h4 class="mb-3">Flush a list of transaction IDs</h4>
           <form class="needs-validation" novalidate="">
@@ -180,7 +235,7 @@
   </div>
 
   <div class="tab-pane fade" id="pills-flush-cache" role="tabpanel" aria-labelledby="pills-flush-cache-tab" tabindex="0">
-    <div class="row g-5 m-2">
+    <div class="row g-5 p-2">
         <div class="col-md-7 col-lg-10">
           <h4 class="mb-3">Flush a list of bad transaction IDs from cache</h4>
           <form class="needs-validation" novalidate="">
@@ -206,6 +261,7 @@
     </div>
     <button class="w-100 btn btn-primary btn-lg" type="button" [disabled]="!canRelay" (click)="onFlushFromCache()">Flush Bad Txs</button>
   </div>
+
 
 </div>
 

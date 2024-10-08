@@ -26,6 +26,7 @@ export { OutKey } from './OutKey';
 export { Output } from './Output';
 export { OutputDistribution } from './OutputDistribution';
 export { Peer } from './Peer';
+export { PeerInfo } from './PeerInfo';
 export { PublicNode } from './PublicNode';
 export { Span } from './Span';
 export { SyncInfo } from './SyncInfo';
@@ -34,6 +35,9 @@ export { TxInfo } from './TxInfo';
 export { UpdateInfo } from './UpdateInfo';
 export { LogCategoryLevel, LogCategories } from './LogCategories';
 export { NetStatsHistory, NetStatsHistoryEntry } from './NetStatsHistory';
+export { UnconfirmedTx } from './UnconfirmedTx';
+export { SpentKeyImage } from './SpentKeyImage';
+export { TxPool } from './TxPool';
 
 export * from './error';
 export * from './request';
