@@ -30,6 +30,7 @@ export class SidebarComponent implements OnChanges {
   }
 
   private createFullLinks(): NavLink[] {
+    //       new NavLink('XMRig', '/xmrig', 'icon-xr text-primary'),
     return this.navLinks = [
       new NavLink('Dashboard', '/detail', 'bi bi-speedometer2'),
       new NavLink('Blockchain', '/blockchain', 'bi bi-bounding-box'),
@@ -37,7 +38,6 @@ export class SidebarComponent implements OnChanges {
       new NavLink('Outputs', '/outputs', 'bi bi-circle-fill'),
       new NavLink('Mining', '/mining', 'bi bi-minecart-loaded'),
       new NavLink('Hard Fork Info', '/hardforkinfo', 'bi bi-signpost-split'),
-      new NavLink('XMRig', '/xmrig', 'icon-xr text-primary'),
       new NavLink('Network', '/network', 'bi bi-hdd-network', 'bottom'),
       new NavLink('Peers', '/peers', 'bi bi-people', 'bottom'),
       new NavLink('Bans', '/bans', 'bi bi-ban', 'bottom'),
