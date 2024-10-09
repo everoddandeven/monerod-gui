@@ -1,5 +1,6 @@
 // preload.js
 const { contextBridge, ipcRenderer } = require('electron');
+//const os = require('os');
 
 contextBridge.exposeInMainWorld('electronAPI', {
   startMonerod: (args) => {
@@ -31,5 +32,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   onSelectedFolder: (callback) => {
     ipcRenderer.on('selected-folder', callback);
+  },
+  isWifiConnected: () => {
+    ipcRenderer.invoke('is-wifi-connected');
+  },
+  onIsWifiConnectedResponse: (callback) => {
+    ipcRenderer.on('is-wifi-connected-result', callback);
+  },
+  getOsType: () => {
+    ipcRenderer.invoke('get-os-type');
+  },
+  gotOsType: (callback) => {
+    ipcRenderer.on('got-os-type', callback);
   }
 });

@@ -329,9 +329,12 @@ export class DaemonDataService {
       this._blockCount = await this.daemonService.getBlockCount();
       this._gettingBlockCount = false;
 
-      this._gettingLastBlockHeader = true;
-      this._lastBlockHeader = await this.daemonService.getLastBlockHeader(true);
-      this._gettingLastBlockHeader = false;
+      if (this._daemonInfo.synchronized) {
+        this._gettingLastBlockHeader = true;
+        this._lastBlockHeader = await this.daemonService.getLastBlockHeader(true);
+        this._gettingLastBlockHeader = false;
+      }
+
 
       this._gettingIsBlockchainPruned = true;
       //if (firstRefresh) this._isBlockchainPruned = (await this.daemonService.pruneBlockchain(true)).pruned;

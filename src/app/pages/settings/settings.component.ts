@@ -109,7 +109,7 @@ export class SettingsComponent implements AfterViewInit {
   }
 
   public OnSyncEnableChange(): void {
-    this.currentSettings.noSync != this.currentSettings.noSync;
+    this.currentSettings.noSync = !this.currentSettings.noSync;
   }
 
   public OnRelayFlufflyBlocksChange(): void {

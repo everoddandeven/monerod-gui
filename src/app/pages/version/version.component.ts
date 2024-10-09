@@ -120,7 +120,7 @@ export class VersionComponent implements AfterViewInit {
       const downloadUrl = 'https://downloads.getmonero.org/cli/linux64'; // Cambia in base al sistema
       const destination = settings.downloadUpgradePath; // Aggiorna con il percorso desiderato
   
-      const moneroFolder = await this.moneroInstaller.downloadMonero(downloadUrl, destination);
+      const moneroFolder = await this.moneroInstaller.downloadMonero(destination);
       
       settings.monerodPath = `${moneroFolder}/monerod`;
 

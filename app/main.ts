@@ -2,11 +2,11 @@ import {app, BrowserWindow, ipcMain, screen, dialog } from 'electron';
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
-
-
 import * as https from 'https';
 import { createHash } from 'crypto';
 import * as tar from 'tar';
+import * as os from 'os';
+
 //import bz2 from 'unbzip2-stream';
 //import * as bz2 from 'unbzip2-stream';
 const bz2 = require('unbzip2-stream');
@@ -66,6 +66,25 @@ function createWindow(): BrowserWindow {
   });
 
   return win;
+}
+
+function isWifiConnected() {
+  const networkInterfaces = os.networkInterfaces();
+  
+  for (const interfaceName in networkInterfaces) {
+    const networkInterface = networkInterfaces[interfaceName];
+
+    if (networkInterface) {
+      for (const network of networkInterface) {
+        if (network.family === 'IPv4' && !network.internal && network.mac !== '00:00:00:00:00:00') {
+          if (interfaceName.toLowerCase().includes('wifi') || interfaceName.toLowerCase().includes('wlan')) {
+            return true;
+          }
+        }
+      }
+    }
+  }
+  return false;
 }
 
 function getMonerodVersion(monerodFilePath: string): void {
@@ -331,6 +350,14 @@ try {
 
     win?.webContents.send('selected-folder', path ? `${path}` : '');
   });
+
+  ipcMain.handle('is-wifi-connected', async (event) => {
+    win?.webContents.send('is-wifi-connected-result', isWifiConnected());
+  });
+
+  ipcMain.handle('get-os-type', (event) => {
+    win?.webContents.send('got-os-type', { platform: os.platform(), arch: os.arch() });
+  })
 
 } catch (e) {
   // Catch Error

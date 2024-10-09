@@ -57,3 +57,11 @@ import * as $$ from 'jquery';
 import * as $ from 'jquery';
 import * as bootstrapTable from 'bootstrap-table';
 //import 'bootstrap-table';
+declare global {
+  interface Window {
+    electronAPI: {
+      getOsType: () => void;
+      gotOsType: (callback: (event: any, osType: { platform: string, arch: string }) => void) => void;
+    };
+  }
+}
