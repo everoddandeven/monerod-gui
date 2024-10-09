@@ -247,7 +247,7 @@
 
           <div *ngIf="!getBlockByHash" class="col-sm-3">
             <label for="get-block-height" class="form-label">Block height</label>
-            <input type="number" class="form-control" id="get-block-height" placeholder="" [(ngModel)]="getBlockHeight" [ngModelOptions]="{standalone: true}" [disabled]="getBlockByHash">
+            <input type="number" min="0" class="form-control" id="get-block-height" placeholder="" [(ngModel)]="getBlockHeight" [ngModelOptions]="{standalone: true}" [disabled]="getBlockByHash">
             <small class="text-body-secondary">Block height</small>
           </div>
         </div>
@@ -377,7 +377,7 @@
 
           <div *ngIf="!getBlockHeaderByHash" class="col-sm-3">
             <label for="get-block-header-height" class="form-label">Block header height</label>
-            <input type="number" class="form-control" id="get-block-header-height" placeholder="" [(ngModel)]="getBlockHeaderHeight" [ngModelOptions]="{standalone: true}" [disabled]="getBlockHeaderByHash">
+            <input type="number" min="0" class="form-control" id="get-block-header-height" placeholder="" [(ngModel)]="getBlockHeaderHeight" [ngModelOptions]="{standalone: true}" [disabled]="getBlockHeaderByHash">
             <small class="text-body-secondary">Block header height</small>
           </div>
         </div>
@@ -488,8 +488,6 @@
     <button *ngIf="savingBlockchain" class="w-100 btn btn-primary btn-lg" type="button" disabled>Saving Blockchain ...</button>
   
   </div>
-
-
 
 </div>
 <app-daemon-not-running></app-daemon-not-running>

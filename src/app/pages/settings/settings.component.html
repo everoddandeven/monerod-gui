@@ -94,7 +94,7 @@
 
           <div class="col-md-6">
             <label for="rpc-bind-port" class="form-label">Bind port</label>
-            <input type="number" class="form-control" id="rpc-bind-port" placeholder="18081" [(ngModel)]="currentSettings.rpcBindPort" [ngModelOptions]="{standalone: true}">
+            <input type="number" min="0" class="form-control" id="rpc-bind-port" placeholder="18081" [(ngModel)]="currentSettings.rpcBindPort" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">18081 for mainnet, 28081 for testnet, 38081 for stagenet</small>
           </div>
 
@@ -163,7 +163,7 @@
 
           <div class="col-md-6">
             <label for="zmq-rpc-bind-port" class="form-label">Bind port</label>
-            <input type="number" class="form-control" id="zmq-rpc-bind-port" placeholder="18082" [(ngModel)]="currentSettings.zmqRpcBindPort" [ngModelOptions]="{standalone: true}">
+            <input type="number" min="0" class="form-control" id="zmq-rpc-bind-port" placeholder="18082" [(ngModel)]="currentSettings.zmqRpcBindPort" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">18082 for mainnet, 28082 for testnet, 38082 for stagenet</small>
           </div>
 
@@ -188,13 +188,13 @@
 
           <div class="col-md-6">
             <label for="rpc-payment-difficulty" class="form-label">Difficulty</label>
-            <input type="number" class="form-control" id="rpc-payment-difficulty" placeholder="1000" [(ngModel)]="currentSettings.rpcPaymentDifficuly" [ngModelOptions]="{standalone: true}">
+            <input type="number" min="0" class="form-control" id="rpc-payment-difficulty" placeholder="1000" [(ngModel)]="currentSettings.rpcPaymentDifficuly" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Restrict RPC to clients sending micropayment at this difficulty</small>
           </div>
 
           <div class="col-md-6">
             <label for="rpc-payment-credits" class="form-label">Credits</label>
-            <input type="number" class="form-control" id="rpc-payment-credits" placeholder="100" [(ngModel)]="currentSettings.rpcPaymentCredits" [ngModelOptions]="{standalone: true}">
+            <input type="number" min="0" class="form-control" id="rpc-payment-credits" placeholder="100" [(ngModel)]="currentSettings.rpcPaymentCredits" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Restrict RPC to clients sending micropayment, yelds that many credits per payment</small>
           </div>
 
@@ -288,13 +288,13 @@
 
           <div class="col-md-6">
             <label for="p2p-bind-port" class="form-label">Bind port</label>
-            <input type="number" class="form-control" id="p2p-bind-port" placeholder="18080" [(ngModel)]="currentSettings.p2pBindPort" [ngModelOptions]="{standalone: true}">
+            <input type="number" min="0" class="form-control" id="p2p-bind-port" placeholder="18080" [(ngModel)]="currentSettings.p2pBindPort" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">18080 for mainnet, 28080 for testnet, 38080 for stagenet</small>
           </div>
 
           <div class="col-md-6">
             <label for="p2p-external-port" class="form-label">External port</label>
-            <input type="number" class="form-control" id="p2p-external-port" placeholder="18080" [(ngModel)]="currentSettings.p2pExternalPort" [ngModelOptions]="{standalone: true}">
+            <input type="number" min="0" class="form-control" id="p2p-external-port" placeholder="18080" [(ngModel)]="currentSettings.p2pExternalPort" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">External port for p2p network protocol (if port forwarding used with NAT)</small>
           </div>
 
@@ -311,7 +311,7 @@
 
           <div class="col-md-6">
             <label for="p2p-bind-port-ipv6" class="form-label">Bind IPv6 port</label>
-            <input type="number" class="form-control" id="p2p-bind-port-ipv6" placeholder="18080" [(ngModel)]="currentSettings.p2pBindPortIpv6" [ngModelOptions]="{standalone: true}">
+            <input type="number" min="0" class="form-control" id="p2p-bind-port-ipv6" placeholder="18080" [(ngModel)]="currentSettings.p2pBindPortIpv6" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">18080 for mainnet, 28080 for testnet, 38080 for stagenet</small>
           </div>
 
@@ -406,12 +406,12 @@
     
               <div class="col-md-4">
                   <label for="block-sync-size" class="form-label">Block sync size</label>
-                  <input type="number" class="form-control" id="block-sync-size" placeholder="" [(ngModel)]="currentSettings.blockSyncSize" [ngModelOptions]="{standalone: true}">
+                  <input type="number" min="0" class="form-control" id="block-sync-size" placeholder="" [(ngModel)]="currentSettings.blockSyncSize" [ngModelOptions]="{standalone: true}">
               </div>
       
               <div class="col-md-4">
                   <label for="block-download-max-size" class="form-label">Block download max size</label>
-                  <input type="number" class="form-control" id="block-download-max-size" placeholder="" [(ngModel)]="currentSettings.blockDownloadMaxSize" [ngModelOptions]="{standalone: true}">
+                  <input type="number" min="0" class="form-control" id="block-download-max-size" placeholder="" [(ngModel)]="currentSettings.blockDownloadMaxSize" [ngModelOptions]="{standalone: true}">
               </div>
     
               <div class="col-md-4">
@@ -470,19 +470,19 @@
     
               <div class="col-md-4">
                   <label for="bg-mining-min-idle-interval" class="form-label">Minimum idle interval</label>
-                  <input type="number" class="form-control" id="bg-mining-min-idle-interval" placeholder="" [(ngModel)]="currentSettings.bgMiningMinIdleInterval" [ngModelOptions]="{standalone: true}">
+                  <input type="number" min="0" class="form-control" id="bg-mining-min-idle-interval" placeholder="" [(ngModel)]="currentSettings.bgMiningMinIdleInterval" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">Specify min lookback interval in seconds for determining idle state</small>
               </div>
       
               <div class="col-md-4">
                   <label for="bg-mining-idle-threshold" class="form-label">Idle threshold</label>
-                  <input type="number" class="form-control" id="bg-mining-idle-threshold" placeholder="" [(ngModel)]="currentSettings.bgMiningIdleThreshold" [ngModelOptions]="{standalone: true}">
+                  <input type="number" min="0" class="form-control" id="bg-mining-idle-threshold" placeholder="" [(ngModel)]="currentSettings.bgMiningIdleThreshold" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">Specify minimum avg idle percentage over lookback interval</small>  
               </div>
     
               <div class="col-md-4">
                   <label for="bg-mining-miner-target" class="form-label">Miner target</label>
-                  <input type="number" class="form-control" id="bg-mining-miner-target" placeholder="" [(ngModel)]="currentSettings.bgMiningMinerTarget" [ngModelOptions]="{standalone: true}">
+                  <input type="number" min="0" class="form-control" id="bg-mining-miner-target" placeholder="" [(ngModel)]="currentSettings.bgMiningMinerTarget" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">Specify maximum percentage cpu use by miners</small>
               </div>
       
@@ -514,13 +514,13 @@
     
               <div class="col-md-4">
                   <label for="max-log-file-size" class="form-label">Max log file size</label>
-                  <input type="number" class="form-control" id="max-log-file-size" placeholder="104850000" [(ngModel)]="currentSettings.maxLogFileSize" [ngModelOptions]="{standalone: true}">
+                  <input type="number" min="0" class="form-control" id="max-log-file-size" placeholder="104850000" [(ngModel)]="currentSettings.maxLogFileSize" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">Specify maximum log file size [B]</small>
               </div>
       
               <div class="col-md-4">
                   <label for="max-log-files" class="form-label">Max log files</label>
-                  <input type="number" class="form-control" id="max-log-files" placeholder="50" [(ngModel)]="currentSettings.maxLogFiles" [ngModelOptions]="{standalone: true}">
+                  <input type="number" min="0" class="form-control" id="max-log-files" placeholder="50" [(ngModel)]="currentSettings.maxLogFiles" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">Specify maximum number of rotated log files to be saved (no limit by setting to 0)</small>  
               </div>  
           </div>

@@ -104,7 +104,7 @@
 
           <div class="col-sm-3">
             <label for="start-mining-threads-count" class="form-label">Threads Count</label>
-            <input type="number" class="form-control" id="start-mining-threads-count" placeholder="" [(ngModel)]="startMiningThreadsCount" [ngModelOptions]="{standalone: true}">
+            <input type="number" min="0" class="form-control" id="start-mining-threads-count" placeholder="" [(ngModel)]="startMiningThreadsCount" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Number of mining thread to run</small>
           </div>
 
@@ -205,7 +205,7 @@
 
           <div class="col-sm-3">
             <label for="get-block-header-reserve-size" class="form-label">Reserve size</label>
-            <input type="number" class="form-control" min="0" id="get-block-header-reserve-size" placeholder="" [(ngModel)]="getBlockTemplateReserveSize" [ngModelOptions]="{standalone: true}">
+            <input type="number" min="0" class="form-control" id="get-block-header-reserve-size" placeholder="" [(ngModel)]="getBlockTemplateReserveSize" [ngModelOptions]="{standalone: true}">
           </div>
         </div>
       </div>
@@ -237,13 +237,13 @@
           <h4 class="mb-3">Calculate PoW hash for a block candidate</h4>
           <div class="col-sm-6">
             <label for="calc-pow-major-version" class="form-label">Major version</label>
-            <input type="number" class="form-control" min="0" id="calc-pow-major-version" placeholder="" [(ngModel)]="calcPowMajorVersion" [ngModelOptions]="{standalone: true}">
+            <input type="number" min="0" class="form-control" min="0" id="calc-pow-major-version" placeholder="" [(ngModel)]="calcPowMajorVersion" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">The major version of the monero protocol at this block height</small>
           </div>
 
           <div class="col-sm-6">
             <label for="calc-pow-height" class="form-label">Height</label>
-            <input type="number" class="form-control" min="0" id="calc-pow-height" placeholder="" [(ngModel)]="calcPowHeight" [ngModelOptions]="{standalone: true}">
+            <input type="number" min="0" class="form-control" min="0" id="calc-pow-height" placeholder="" [(ngModel)]="calcPowHeight" [ngModelOptions]="{standalone: true}">
           </div>
 
           <div class="col-sm-12">
@@ -432,13 +432,13 @@
           <h4 class="mb-3">Generate a block and specify the address to receive the coinbase reward</h4>
           <div class="col-sm-6">
             <label for="generate-blocks-starting-nonce" class="form-label">Starting Nonce</label>
-            <input type="number" class="form-control" min="0" id="generate-blocks-starting-nonce" placeholder="" [(ngModel)]="generateStartingNonce" [ngModelOptions]="{standalone: true}">
+            <input type="number" min="0" class="form-control" min="0" id="generate-blocks-starting-nonce" placeholder="" [(ngModel)]="generateStartingNonce" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Increased by miner until it finds a matching result that solves a block</small>
           </div>
 
           <div class="col-sm-6">
             <label for="generate-blocks-amount-of-blocks" class="form-label">Amount of blocks</label>
-            <input type="number" class="form-control" min="0" id="generate-blocks-amount-of-blocks" placeholder="" [(ngModel)]="generateBlocksAmountOfBlocks" [ngModelOptions]="{standalone: true}">
+            <input type="number" min="0" class="form-control" min="0" id="generate-blocks-amount-of-blocks" placeholder="" [(ngModel)]="generateBlocksAmountOfBlocks" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Number of blocks to be generated</small>
           </div>
 
