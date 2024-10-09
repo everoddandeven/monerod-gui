@@ -10,17 +10,21 @@ import { DaemonDataService } from '../../../core/services';
 export class DaemonNotRunningComponent {
 
   public get daemonRunning(): boolean {
-    return this.daemonData.running;
+    return this.daemonData.running && !this.startingDaemon && !this.stoppingDaemon && !this.restartingDaemon;
   }
 
   public daemonConfigured: boolean = true;
 
   public get startingDaemon(): boolean {
-    return this.daemonService.starting;
+    return this.daemonService.starting && !this.restartingDaemon;
   }
 
-  private get stoppingDaemon(): boolean{
-    return this.daemonData.stopping;
+  public get stoppingDaemon(): boolean{
+    return this.daemonData.stopping && !this.restartingDaemon;
+  }
+
+  public get restartingDaemon(): boolean {
+    return this.daemonService.restarting;
   }
 
   constructor(private daemonData: DaemonDataService, private daemonService: DaemonService, private ngZone: NgZone) {
@@ -50,6 +54,20 @@ export class DaemonNotRunningComponent {
           reject(error);
         }
       }, 500)});
-  }  
+  }
+
+  public async restartDaemon(): Promise<void> {
+    await new Promise<void>((resolve, reject) => {
+      setTimeout(async () => {
+        try {
+          await this.daemonService.restartDaemon();
+          resolve();
+        }
+        catch(error) {
+          console.error(error);
+          reject(error);
+        }
+      }, 500)});
+  }
 
 }

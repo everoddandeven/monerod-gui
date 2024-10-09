@@ -99,6 +99,7 @@ export class DaemonService {
   //private url: string = "https://moneronode.org:18081";
   public stopping: boolean = false;
   public starting: boolean = false;
+  public restarting: boolean = false;
   public readonly onDaemonStatusChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
   public readonly onDaemonStopStart: EventEmitter<void> = new EventEmitter<void>();
   public readonly onDaemonStopEnd: EventEmitter<void> = new EventEmitter<void>();
@@ -148,10 +149,25 @@ export class DaemonService {
     });
   }
 
-  public async saveSettings(settings: DaemonSettings): Promise<void> {
+  public async saveSettings(settings: DaemonSettings, restartDaemon: boolean = true): Promise<void> {
     const db = await this.openDbPromise;
     await db.put(this.storeName, { id: 1, ...settings });
     this.settings = settings;
+
+    if (restartDaemon) {
+      const running = await this.isRunning();
+
+      if (!running) {
+        return;
+      }
+      
+      try {
+        await this.restartDaemon();
+      } 
+      catch(error) {
+        console.error(error);
+      }
+    }
   }
 
   public async getSettings(): Promise<DaemonSettings> {
@@ -291,6 +307,32 @@ export class DaemonService {
 
     this.starting = false;
 
+  }
+
+  public async restartDaemon(): Promise<void> {
+    this.restarting = true;
+    let err: any = undefined;
+    try {
+      const running = await this.isRunning();
+
+      if (!running) {
+        await this.startDaemon();
+      }
+      else {
+        await this.stopDaemon();
+        await this.startDaemon();
+      }
+    }
+    catch(error) {
+      console.error(error);
+      err = error;
+    }
+
+    this.restarting = false;
+
+    if (err) {
+      throw err;
+    }
   }
 
   private async checkDaemonIsRunning(): Promise<boolean> {
@@ -757,6 +799,7 @@ export class DaemonService {
       console.warn("Daemon is starting");
       return;
     }
+
     this.stopping = true;
     this.onDaemonStopStart.emit();
 
@@ -771,6 +814,7 @@ export class DaemonService {
 
     for(let i = 0; i < maxChecks; i++) {
       if (!await this.isRunning(true)) {
+        this.stopping = false;
         return;
       } 
       await this.delay(5000);

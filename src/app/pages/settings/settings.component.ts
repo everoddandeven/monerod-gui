@@ -1,6 +1,4 @@
 import { AfterViewInit, Component } from '@angular/core';
-import { NavbarService } from '../../shared/components/navbar/navbar.service';
-import { Router } from '@angular/router';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonSettings } from '../../../common/DaemonSettings';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
@@ -13,25 +11,27 @@ import { DaemonService } from '../../core/services/daemon/daemon.service';
 export class SettingsComponent implements AfterViewInit {
 
   public readonly navbarLinks: NavbarLink[];
+
   private originalSettings: DaemonSettings;
   public currentSettings: DaemonSettings;
 
+  public savingChanges: boolean = false;
   public rpcLoginUser: string;
   public rpcLoginPassword: string;
   public loading: boolean;
 
   public networkType: 'mainnet' | 'testnet' | 'stagenet' = 'mainnet';
 
-  constructor(private router: Router, private navbarService: NavbarService, private daemonService: DaemonService) {
+  constructor(private daemonService: DaemonService) {
     this.loading = true;
 
     this.navbarLinks = [
-      new NavbarLink('pills-general-tab', '#pills-general', 'pills-general', true, 'General'),
-      new NavbarLink('pills-rpc-tab', '#pills-rpc', 'pills-rpc', false, 'RPC'),
-      new NavbarLink('pills-p2p-tab', '#pills-p2p', 'pills-p2p', false, 'P2P'),
-      new NavbarLink('pills-blockchain-tab', '#pills-blockchain', 'pills-blockchain', false, 'Blockchain'),
-      new NavbarLink('pills-mining-tab', '#pills-mining', 'pills-mining', false, 'Mining'),
-      new NavbarLink('pills-logs-tab', '#pills-logs', 'pills-logs', false, 'Logs')
+      new NavbarLink('pills-general-tab', '#pills-general', 'pills-general', true, 'General', false),
+      new NavbarLink('pills-rpc-tab', '#pills-rpc', 'pills-rpc', false, 'RPC', false),
+      new NavbarLink('pills-p2p-tab', '#pills-p2p', 'pills-p2p', false, 'P2P', false),
+      new NavbarLink('pills-blockchain-tab', '#pills-blockchain', 'pills-blockchain', false, 'Blockchain', false),
+      new NavbarLink('pills-mining-tab', '#pills-mining', 'pills-mining', false, 'Mining', false),
+      new NavbarLink('pills-logs-tab', '#pills-logs', 'pills-logs', false, 'Logs', false)
     ];
     
     this.originalSettings = new DaemonSettings();
@@ -66,9 +66,12 @@ export class SettingsComponent implements AfterViewInit {
     return false;
   }
 
+  public get saveDisabled(): boolean {
+    return !this.modified || this.daemonService.restarting || this.daemonService.starting || this.daemonService.stopping;
+  }
+
   ngAfterViewInit(): void {
-      this.navbarService.setLinks(this.navbarLinks);
-      this.navbarService.enableLinks();
+
   }
 
   public OnOfflineChange() {
@@ -143,9 +146,18 @@ export class SettingsComponent implements AfterViewInit {
       return;
     }
 
-    await this.daemonService.saveSettings(this.currentSettings);
+    this.savingChanges = true;
 
-    this.originalSettings = this.currentSettings.clone();
+    try {
+      await this.daemonService.saveSettings(this.currentSettings);
+
+      this.originalSettings = this.currentSettings.clone();
+    }
+    catch(error) {
+      console.error(error);
+    }
+
+    this.savingChanges = false;
   }
 
   public chooseMonerodFile(): void {

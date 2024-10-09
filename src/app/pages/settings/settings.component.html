@@ -39,7 +39,7 @@
   </div>
 
   <div class="tab-pane fade" id="pills-rpc" role="tabpanel" aria-labelledby="pills-rpc-tab" tabindex="0">
-    <div class="row g-5 m-2">
+    <div class="row g-5 p-2">
       <div class="col-md-7 col-lg-10">
         <h4 class="mb-3">General</h4>
         <div class="row gy-3">
@@ -261,7 +261,7 @@
   </div>
 
   <div class="tab-pane fade" id="pills-p2p" role="tabpanel" aria-labelledby="pills-p2p-tab" tabindex="0">
-    <div class="row g-5 m-2">
+    <div class="row g-5 p-2">
       <div class="col-md-7 col-lg-10">
         <h4 class="mb-3">General</h4>
         <div class="row gy-3">
@@ -324,7 +324,7 @@
   </div>
 
   <div class="tab-pane fade" id="pills-blockchain" role="tabpanel" aria-labelledby="pills-blockchain-tab" tabindex="0">
-    <div class="row g-5 m-2">
+    <div class="row g-5 p-2">
       <div class="col-md-7 col-lg-10">
         <h4 class="mb-3">Bootstrap Daemon</h4>
         <form class="needs-validation" novalidate="">
@@ -403,6 +403,13 @@
                 <br>
                 <small class="text-body-secondary">Keep alternative blocks on restart</small>
               </div>
+
+              <div class="form-check form-switch col-md-12">
+                <label for="sync-on-wifi" class="form-check-label">Sync on Wi-Fi</label>
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="sync-on-wifi" [checked]="currentSettings.syncOnWifi" [(ngModel)]="currentSettings.syncOnWifi" [ngModelOptions]="{standalone: true}">
+                <br>
+                <small class="text-body-secondary">Sync when node is connected to Wi-Fi</small>
+              </div>
     
               <div class="col-md-4">
                   <label for="block-sync-size" class="form-label">Block sync size</label>
@@ -419,7 +426,26 @@
                   <input type="text" class="form-control" id="db-sync-mode" placeholder="fast:async:250000000bytes" [(ngModel)]="currentSettings.dbSyncMode" [ngModelOptions]="{standalone: true}">
               </div>
 
-              
+              <div class="form-check form-switch col-md-12">
+                <label for="sync-period-enabled" class="form-check-label">Sync Period Enabled</label>
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="sync-period-enabled" [checked]="currentSettings.syncPeriodEnabled" [(ngModel)]="currentSettings.syncPeriodEnabled" [ngModelOptions]="{standalone: true}" [disabled]="currentSettings.noSync">
+                <br>
+                <small class="text-body-secondary">Enable syncing in certain hours</small>
+              </div>
+
+              <div class="col-md-4">
+                <label for="sync-period-from" class="form-label">From</label>
+                <div class="cs-form">
+                  <input id="sync-period-from" type="time" class="form-control" value="10:05 AM" [disabled]="!currentSettings.syncPeriodEnabled" [(ngModel)]="currentSettings.syncPeriodFrom" [ngModelOptions]="{standalone: true}" />
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <label for="sync-period-to" class="form-label">To</label>
+                <div class="cs-form">
+                  <input id="sync-period-to" type="time" class="form-control" value="10:05 AM" [disabled]="!currentSettings.syncPeriodEnabled" [(ngModel)]="currentSettings.syncPeriodTo" [ngModelOptions]="{standalone: true}"/>
+                </div>
+              </div>
       
               <hr class="my-4">
       
@@ -447,7 +473,7 @@
   </div>
 
   <div class="tab-pane fade" id="pills-mining" role="tabpanel" aria-labelledby="pills-mining-tab" tabindex="0">
-    <div class="row g-5 m-2">
+    <div class="row g-5 p-2">
       <div class="col-md-7 col-lg-10">
         <form class="needs-validation" novalidate="">
     
@@ -494,7 +520,7 @@
   </div>
 
   <div class="tab-pane fade" id="pills-logs" role="tabpanel" aria-labelledby="pills-logs-tab" tabindex="0">
-    <div class="row g-5 m-2">
+    <div class="row g-5 p-2">
       <div class="col-md-7 col-lg-10">
         <form class="needs-validation" novalidate="">
     
@@ -532,6 +558,9 @@
 
   <hr class="my-4">
 
-  <button class="w-100 btn btn-primary btn-lg" type="submit" [disabled]="!modified" (click)="OnSave()">Save</button>
-
+  <button *ngIf="!savingChanges" class="w-100 btn btn-primary btn-lg" type="submit" [disabled]="saveDisabled" (click)="OnSave()">Save</button>
+  <button *ngIf="savingChanges" class="w-100 btn btn-primary btn-lg" type="button" disabled>
+    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+    Saving changes
+  </button>
 </div>

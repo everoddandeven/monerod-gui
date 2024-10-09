@@ -28,6 +28,10 @@ export class NavbarComponent {
     return this.daemonService.stopping;
   }
 
+  public get restarting(): boolean {
+    return this.daemonService.restarting;
+  }
+
   constructor(private navbarService: NavbarService, private daemonService: DaemonService, private ngZone: NgZone) {
     
     this.daemonService.isRunning().then((running: boolean) => {
@@ -61,9 +65,7 @@ export class NavbarComponent {
   }
 
   public async restartDaemon(): Promise<void> {
-    await this.stopDaemon();
-
-    await this.startDaemon();
+    await this.daemonService.restartDaemon();
   }
 
   public async quit(): Promise<void> {

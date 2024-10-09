@@ -15,7 +15,6 @@ export class DaemonDataService {
   private _lastRefreshHeight: number = -1;
 
   private _daemonRunning: boolean = false;
-  private _daemonRestarting: boolean = false;
 
   private _daemonInfo?: DaemonInfo;
   private _gettingDaemonInfo: boolean = false;
@@ -97,7 +96,7 @@ export class DaemonDataService {
   }
 
   public get restarting(): boolean {
-    return this._daemonRestarting;
+    return this.daemonService.restarting;
   }
 
   public get refreshing(): boolean {
