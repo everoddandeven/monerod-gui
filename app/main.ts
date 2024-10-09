@@ -1,4 +1,4 @@
-import {app, BrowserWindow, ipcMain, screen} from 'electron';
+import {app, BrowserWindow, ipcMain, screen, dialog } from 'electron';
 import { ChildProcess, ChildProcessWithoutNullStreams, exec, spawn } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -35,9 +35,10 @@ function createWindow(): BrowserWindow {
       nodeIntegration: false,
       allowRunningInsecureContent: (serve),
       contextIsolation: true,
-      devTools: true
+      devTools: true,
     },
-    icon: path.join(__dirname, 'assets/icons/favicon.ico')
+    autoHideMenuBar: true,
+    icon: path.join(__dirname, '../src/assets/icons/favicon.ico')
   });
 
   win.webContents.openDevTools();
@@ -70,45 +71,6 @@ function createWindow(): BrowserWindow {
   });
 
   return win;
-}
-
-function execMoneroDaemon(configFilePath: string): ChildProcess {
-  const monerodPath = path.resolve(__dirname, 'path/to/monerod'); // Percorso del binario di monerod
-  //const command = `"${monerodPath}" --config-file "${configFilePath}"`;
-  const command = `/home/sidney/Documenti/monero-x86_64-linux-gnu-v0.18.3.4/monerod --testnet --fast-block-sync 1 --prune-blockchain --sync-pruned-blocks --confirm-external-bind --max-concurrency 1 --log-level 1 --rpc-access-control-origins=*`;
-
-  const monerodProcess = exec(command, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Errore durante l'avvio di monerod: ${error.message}`);
-      return;
-    }
-
-    if (stderr) {
-      console.error(`stderr: ${stderr}`);
-      return;
-    }
-
-    console.log(`stdout: ${stdout}`);
-  });
-
-  // Gestisci l'output in tempo reale
-  if (monerodProcess.stdout == null) {
-    throw new Error("No stdout for monero process")
-  }
-  
-  if (monerodProcess.stderr == null) {
-    throw new Error("No stderr for monero process");
-  }
-
-  monerodProcess.stdout.on('data', (data) => {
-    console.log(`monerod stdout: ${data}`);
-  });
-
-  monerodProcess.stderr.on('data', (data) => {
-    console.error(`monerod stderr: ${data}`);
-  });
-
-  return monerodProcess;
 }
 
 function getMonerodVersion(monerodFilePath: string): void {
@@ -159,36 +121,6 @@ function startMoneroDaemon(commandOptions: string[]): ChildProcessWithoutNullStr
 
   return monerodProcess;
 }
-
-
-// Funzione per il download
-const downloadFileOld = (url: string, destination: string, onProgress: (progress: number) => void): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    const file = fs.createWriteStream(destination);
-    https.get(url, (response) => {
-      if (response.statusCode === 200) {
-        const totalBytes = parseInt(response.headers['content-length'] || '0', 10);
-        let downloadedBytes = 0;
-
-        response.on('data', (chunk) => {
-          downloadedBytes += chunk.length;
-          const progress = (downloadedBytes / totalBytes) * 100;
-          onProgress(progress); // Notifica il progresso
-        });
-
-        response.pipe(file);
-
-        file.on('finish', () => {
-          file.close(() => resolve());
-        });
-      } else {
-        reject(new Error(`Failed to download: ${response.statusCode}`));
-      }
-    }).on('error', (err) => {
-      fs.unlink(destination, () => reject(err));
-    });
-  });
-};
 
 const downloadFile = (url: string, destinationDir: string, onProgress: (progress: number) => void): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -245,8 +177,6 @@ const downloadFile = (url: string, destinationDir: string, onProgress: (progress
     request(url); // Inizia la richiesta
   });
 };
-
-
 
 // Funzione per scaricare e verificare l'hash
 const downloadAndVerifyHash = async (hashUrl: string, fileName: string, filePath: string): Promise<boolean> => {
@@ -366,28 +296,39 @@ try {
       const hashUrl = 'https://www.getmonero.org/downloads/hashes.txt';
 
       // Inizializza il progresso
-      event.sender.send('download-progress', { progress: 0, status: 'Starting download...' });
+      event.sender.send('download-progress', { progress: 0, status: 'Starting download' });
 
       // Scarica il file Monero
       const fileName = await downloadFile(downloadUrl, destination, (progress) => {
-        event.sender.send('download-progress', { progress, status: 'Downloading...' });
+        event.sender.send('download-progress', { progress, status: 'Downloading' });
       });
 
       // Scarica e verifica l'hash
-      event.sender.send('download-progress', { progress: 100, status: 'Verifying hash...' });
+      event.sender.send('download-progress', { progress: 100, status: 'Verifying hash' });
       await downloadAndVerifyHash(hashUrl, fileName, destination);
 
       // Estrai il file
-      event.sender.send('download-progress', { progress: 100, status: 'Extracting...' });
-      await extractTarBz2(`${destination}${fileName}`, destination);
+      const fPath = `${destination}/${fileName}`;
+      event.sender.send('download-progress', { progress: 100, status: 'Extracting' });
+      await extractTarBz2(fPath, destination);
 
-      event.sender.send('download-progress', { progress: 100, status: 'Download and extraction completed successfully.' });
+      event.sender.send('download-progress', { progress: 100, status: 'Download and extraction completed successfully' });
+      event.sender.send('download-progress', { progress: 200, status: fPath.replace('.tar.bz2', '') });
     } catch (error) {
       event.sender.send('download-progress', { progress: 0, status: `Error: ${error}` });
-      throw new Error(`Error: ${error}`);
+      //throw new Error(`Error: ${error}`);
     }
   });
   
+  ipcMain.handle('select-folder', async (event) => {
+    const result = await dialog.showOpenDialog({
+      properties: ['openDirectory'],  // Specifica che vogliamo solo cartelle
+    });
+
+    const path = result.canceled ? null : result.filePaths[0];
+
+    win?.webContents.send('selected-folder', path ? `${path}` : '');
+  });
 
 } catch (e) {
   // Catch Error

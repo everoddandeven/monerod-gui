@@ -6,6 +6,9 @@ export class DaemonSettings {
   public syncPeriodFrom: any = '00:00';
   public syncPeriodTo: any = '00:00';
 
+  public upgradeAutomatically: boolean = false;
+  public downloadUpgradePath: string = '';
+
   public logFile: string = '';
   public logLevel: number = 0;
   public maxLogFileSize: number = 104850000;

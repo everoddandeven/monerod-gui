@@ -25,5 +25,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   onDownloadProgress: (callback) => {
     ipcRenderer.on('download-progress', callback);
+  },
+  selectFolder: () => {
+    ipcRenderer.invoke('select-folder')
+  },
+  onSelectedFolder: (callback) => {
+    ipcRenderer.on('selected-folder', callback);
   }
 });

@@ -1,4 +1,4 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonSettings } from '../../../common/DaemonSettings';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
@@ -16,13 +16,15 @@ export class SettingsComponent implements AfterViewInit {
   public currentSettings: DaemonSettings;
 
   public savingChanges: boolean = false;
+  public savingChangesError = ``;
+  public savingChangesSuccess: boolean = false;
   public rpcLoginUser: string;
   public rpcLoginPassword: string;
   public loading: boolean;
 
   public networkType: 'mainnet' | 'testnet' | 'stagenet' = 'mainnet';
 
-  constructor(private daemonService: DaemonService) {
+  constructor(private daemonService: DaemonService, private ngZone: NgZone) {
     this.loading = true;
 
     this.navbarLinks = [
@@ -141,6 +143,15 @@ export class SettingsComponent implements AfterViewInit {
     }
   }
 
+  public onMonerodDownloadPathChange(): void {
+    if (document) {
+      const element = <HTMLInputElement>document.getElementById('general-download-monerod-path');
+      if (element.files) {
+        this.currentSettings.downloadUpgradePath = element.files[0].path;
+      }
+    }
+  }
+
   public async OnSave(): Promise<void> {
     if (!this.modified) {
       return;
@@ -149,12 +160,21 @@ export class SettingsComponent implements AfterViewInit {
     this.savingChanges = true;
 
     try {
+      if (this.currentSettings.upgradeAutomatically && this.currentSettings.downloadUpgradePath == '') {
+        throw new Error('You must set a download path for monerod updates when enabling automatic upgrade');
+      }
+      
       await this.daemonService.saveSettings(this.currentSettings);
 
       this.originalSettings = this.currentSettings.clone();
+
+      this.savingChangesError = ``;
+      this.savingChangesSuccess = true;
     }
     catch(error) {
       console.error(error);
+      this.savingChangesError = `${error}`;
+      this.savingChangesSuccess = false;
     }
 
     this.savingChanges = false;
@@ -168,6 +188,33 @@ export class SettingsComponent implements AfterViewInit {
     }
 
     input.click();
+    
+  }
+
+  public chooseMoneroDownloadPath(): void {
+    /*
+    const input = document.getElementById('general-download-monerod-path');
+
+    if (!input) {
+      return;
+    }
+
+    input.click();
+    */
+    const wdw = (window as any);
+
+    if (wdw.electronAPI && wdw.electronAPI.selectFolder && wdw.electronAPI.onSelectedFolder) {
+      wdw.electronAPI.onSelectedFolder((event: any, folder: string) => {
+        if (folder == '') {
+          return;
+        }
+        this.ngZone.run(() => {
+          this.currentSettings.downloadUpgradePath = folder;
+        })
+      });
+
+      wdw.electronAPI.selectFolder();
+    }
   }
 
   public chooseXmrigFile(): void {
