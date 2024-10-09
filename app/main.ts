@@ -1,5 +1,5 @@
 import {app, BrowserWindow, ipcMain, screen, dialog } from 'electron';
-import { ChildProcess, ChildProcessWithoutNullStreams, exec, spawn } from 'child_process';
+import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -10,15 +10,10 @@ import * as tar from 'tar';
 //import bz2 from 'unbzip2-stream';
 //import * as bz2 from 'unbzip2-stream';
 const bz2 = require('unbzip2-stream');
-const monerodFilePath: string = "/home/sidney/Documenti/monero-x86_64-linux-gnu-v0.18.3.4/monerod";
 
 let win: BrowserWindow | null = null;
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
-
-function getMonerodPath(): string {
-  return path.resolve(__dirname, monerodFilePath);
-}
 
 function createWindow(): BrowserWindow {
 
@@ -74,7 +69,7 @@ function createWindow(): BrowserWindow {
 }
 
 function getMonerodVersion(monerodFilePath: string): void {
-  const monerodProcess = spawn(getMonerodPath(), [ '--version' ]);
+  const monerodProcess = spawn(monerodFilePath, [ '--version' ]);
 
   monerodProcess.stdout.on('data', (data) => {
     win?.webContents.send('monero-version', `${data}`);
@@ -86,7 +81,6 @@ function getMonerodVersion(monerodFilePath: string): void {
 }
 
 function startMoneroDaemon(commandOptions: string[]): ChildProcessWithoutNullStreams {
-  //const monerodPath = getMonerodPath();
   const monerodPath = commandOptions.shift();
 
   if (!monerodPath) {
@@ -228,7 +222,7 @@ const verifyFileHash = (filePath: string): Promise<string> => {
   });
 };
 
-const extractTarBz2 = (filePath: string, destination: string): Promise<void> => {
+const extractTarBz2 = (filePath: string, destination: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     // Crea il file decomprimendo il .bz2 in uno .tar temporaneo
     const tarPath = path.join(destination, 'temp.tar');
@@ -239,14 +233,22 @@ const extractTarBz2 = (filePath: string, destination: string): Promise<void> => 
 
     decompressedStream.pipe(writeStream);
 
+    let extractedDir: string = '';
+
     writeStream.on('finish', () => {
       // Una volta che il file .tar è stato creato, estrailo
-      tar.extract({ cwd: destination, file: tarPath })
+      tar.extract({ cwd: destination, file: tarPath, onReadEntry: (entry: tar.ReadEntry) => {
+        if (extractedDir == '') {
+          const topLevelDir = entry.path.split('/')[0];
+          extractedDir = topLevelDir; // Salva la prima directory
+        }
+      } })
         .then(() => {
           // Elimina il file .tar temporaneo dopo l'estrazione
           fs.unlink(tarPath, (err) => {
             if (err) reject(err);
-            else resolve();
+            else if (extractedDir == '') reject('Extraction failed')
+            else resolve(extractedDir);
           });
         })
         .catch(reject);
@@ -310,10 +312,10 @@ try {
       // Estrai il file
       const fPath = `${destination}/${fileName}`;
       event.sender.send('download-progress', { progress: 100, status: 'Extracting' });
-      await extractTarBz2(fPath, destination);
+      const extractedDir = await extractTarBz2(fPath, destination);
 
       event.sender.send('download-progress', { progress: 100, status: 'Download and extraction completed successfully' });
-      event.sender.send('download-progress', { progress: 200, status: fPath.replace('.tar.bz2', '') });
+      event.sender.send('download-progress', { progress: 200, status: `${destination}/${extractedDir}` });
     } catch (error) {
       event.sender.send('download-progress', { progress: 0, status: `Error: ${error}` });
       //throw new Error(`Error: ${error}`);

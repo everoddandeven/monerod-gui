@@ -607,8 +607,12 @@ export class DaemonService {
       return DaemonVersion.parse(response.result);
     }
     else if (dontUseRpc) {
-      const monerodPath: string = ''; // TO DO get local monerod path
+      const monerodPath: string = (await this.getSettings()).monerodPath;
       const wdw = (window as any);
+
+      if (monerodPath == '') {
+        throw new Error("Daemon not configured");
+      }
 
       return new Promise<DaemonVersion>((resolve, reject) => {
         if (this.electronService.isElectron) {
@@ -629,7 +633,7 @@ export class DaemonService {
           wdw.electronAPI.onMoneroVersionError((event: any, error: string) => {
             reject(error);
           });
-          wdw.electronAPI.getMoneroVersion();
+          wdw.electronAPI.getMoneroVersion(monerodPath);
         }
       });
     }

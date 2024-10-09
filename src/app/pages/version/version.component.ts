@@ -17,8 +17,6 @@ export class VersionComponent implements AfterViewInit {
   public currentVersion?: DaemonVersion;
   public latestVersion?: DaemonVersion;
 
-  public downloadPath: string = '/home/sidney/monerod/';
-
   public get buttonDisabled(): boolean {
     const title = this.buttonTitle;
     

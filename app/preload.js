@@ -11,8 +11,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onMoneroClose: (callback) => {
     ipcRenderer.on('monero-close', callback);
   },
-  getMoneroVersion: () => {
-    ipcRenderer.invoke('get-monero-version');
+  getMoneroVersion: (monerodPath) => {
+    ipcRenderer.invoke('get-monero-version', monerodPath);
   },
   onMoneroVersion: (callback) => {
     ipcRenderer.on('monero-version', callback);

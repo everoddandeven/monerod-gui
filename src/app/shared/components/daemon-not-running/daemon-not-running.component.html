@@ -36,5 +36,6 @@
 
     &nbsp;
     <button *ngIf="!startingDaemon && !stoppingDaemon && !restartingDaemon && !upgrading" routerLink="/settings" class="btn btn-outline-light" type="button"><i class="bi bi-gear"></i> Configure</button>
-    <button *ngIf="!startingDaemon && !stoppingDaemon && !restartingDaemon && !upgrading" routerLink="/version" class="btn btn-outline-light" type="button"><i class="bi bi-arrow-down-circle"></i> Install</button>
+    &nbsp;
+    <button *ngIf="!startingDaemon && !stoppingDaemon && !restartingDaemon && !upgrading && !daemonConfigured" routerLink="/version" class="btn btn-outline-light" type="button"><i class="bi bi-arrow-down-circle"></i> Install</button>
   </div>
