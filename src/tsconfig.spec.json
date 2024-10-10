@@ -6,7 +6,8 @@
     "types": [
       "jest",
       "node",
-      "jquery"
+      "jquery",
+      "bootstrap-table"
     ]
   },
   "files": [

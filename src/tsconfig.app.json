@@ -5,7 +5,8 @@
     "baseUrl": "",
     "types": [
       "node",
-      "jquery"
+      "jquery",
+      "bootstrap-table"
     ]
   },
   "files": [
