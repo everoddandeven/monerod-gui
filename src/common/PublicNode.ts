@@ -19,10 +19,10 @@ export class PublicNode {
     }
 
     public static parse(publicNode: any, nodeType: 'white' | 'gray'): PublicNode {
-        const host = publicNode.host;
-        const lastSeen = publicNode.last_seen;
-        const rpcCreditsPerHash = publicNode.rpc_credits_per_hash;
-        const rpcPort = publicNode.rpc_port;
+        const host: string = publicNode.host;
+        const lastSeen: number = publicNode.last_seen;
+        const rpcCreditsPerHash: number = publicNode.rpc_credits_per_hash;
+        const rpcPort: number = publicNode.rpc_port;
 
         return new PublicNode(nodeType, host, lastSeen, rpcCreditsPerHash, rpcPort);
     }

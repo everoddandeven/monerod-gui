@@ -1,8 +1,8 @@
 import { RPCRequest } from "./RPCRequest"
 
 export class SetLimitRequest extends RPCRequest {
-    public override readonly method: 'set_limit' = 'set_limit';
-    public override readonly restricted: true = true;
+    public override readonly method: string = 'set_limit';
+    public override readonly restricted: boolean = true;
 
     public readonly limitDown: number;
     public readonly limitUp: number;

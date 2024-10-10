@@ -15,6 +15,9 @@ export class Output {
     }
 
     public static parse(out: any): Output {
-      return new Output(out.amount, out.index);
+      const amount: number = out.amount;
+      const index: number = out.index;
+
+      return new Output(amount, index);
     }
 }

@@ -16,12 +16,12 @@ export class MinerTx {
     }
 
     public static parse(minerTx: any): MinerTx {
-        const version = minerTx.version;
-        const unlockTime = minerTx.unlock_time;
+        const version: number = minerTx.version;
+        const unlockTime: number = minerTx.unlock_time;
         const _vin: any[] | undefined = minerTx.vin;
         const _vout: any[] | undefined = minerTx.vout;
-        const extra = minerTx.extra;
-        let rctSignatures;
+        const extra: number[] = minerTx.extra;
+        let rctSignatures: RctSignatures | undefined = undefined;
 
         if (minerTx.rct_signatures) {
           rctSignatures = RctSignatures.parse(minerTx.rct_signatures);
@@ -58,7 +58,7 @@ export class TxInputGen {
     }
 
     public static parse(gen: any): TxInputGen {
-        const height = gen.height;
+        const height: number = gen.height;
 
         return new TxInputGen(height);
     }
@@ -74,8 +74,8 @@ export class TxOutput {
     }
 
     public static parse(out: any): TxOutput {
-        const amount = out.amount;
-        const target = TxOutputTarget.parse(out.target);
+        const amount: number = out.amount;
+        const target: TxOutputTarget = TxOutputTarget.parse(out.target);
 
         return new TxOutput(amount, target);
     }
@@ -90,7 +90,7 @@ export class RctSignatures {
     }
 
     public static parse(rctSignatures: any): RctSignatures {
-        const type = rctSignatures.type;
+        const type: number = rctSignatures.type;
 
         return new RctSignatures(type);
     }
@@ -107,8 +107,8 @@ export class TxOutputTarget {
     }
 
     public static parse(target: any): TxOutputTarget {
-      const viewKey = target.view_key ? target.view_key : '';
-      const viewTag = target.view_tag ? target.view_tag : '';
+      const viewKey: string = target.view_key ? target.view_key : '';
+      const viewTag: string = target.view_tag ? target.view_tag : '';
 
       return new TxOutputTarget(viewKey, viewTag);
     }

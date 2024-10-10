@@ -12,11 +12,11 @@ export class OutputDistribution {
     }
 
     public static parse(outDistribution: any): OutputDistribution {
-        const amount = outDistribution.amount;
-        const base = outDistribution.base;
-        const startHeight = outDistribution.start_height;
-        const distribution = outDistribution.distribution;
+        const amount: number = outDistribution.amount;
+        const base: number = outDistribution.base;
+        const startHeight: number = outDistribution.start_height;
+        const distribution: number[] = outDistribution.distribution;
 
-        return new OutputDistribution(amount, base, startHeight, distribution);
+        return new OutputDistribution(amount, base, distribution, startHeight);
     }
 }

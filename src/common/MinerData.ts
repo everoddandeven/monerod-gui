@@ -22,14 +22,21 @@ export class MinerData {
     }
 
     public static parse(minerData: any): MinerData {
-        const majorVersion = minerData.major_version;
-        const height = minerData.height;
-        const prevId = minerData.prev_id;
-        const seedHash = minerData.seed_hash;
-        const difficulty = minerData.difficulty;
-        const medianWeight = minerData.median_weight;
-        const alreadyGeneratedCoins = minerData.already_generated_coins;
-        const txBacklog = minerData.tx_backlog;
+        const majorVersion: number = minerData.major_version;
+        const height: number = minerData.height;
+        const prevId: string = minerData.prev_id;
+        const seedHash: string = minerData.seed_hash;
+        const difficulty: number = minerData.difficulty;
+        const medianWeight: number = minerData.median_weight;
+        const alreadyGeneratedCoins: number = minerData.already_generated_coins;
+        const _txBacklog: any[] | undefined = minerData.tx_backlog;
+        const txBacklog: MineableTxBacklog[] = [];
+
+        if (_txBacklog) {
+          _txBacklog.forEach((txb: any) => {
+            txBacklog.push(MineableTxBacklog.parse(txb));
+          });
+        }
 
         return new MinerData(majorVersion, height, prevId, seedHash, difficulty, medianWeight, alreadyGeneratedCoins, txBacklog);
     }

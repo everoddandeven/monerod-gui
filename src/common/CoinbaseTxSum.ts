@@ -18,13 +18,13 @@ export class CoinbaseTxSum {
     }
 
     public static parse(coinbaseTxSum: any): CoinbaseTxSum {
-        const emissionAmount = coinbaseTxSum.emission_amount;
-        const emissionAmountTop64 = coinbaseTxSum.emission_amount_top64;
-        const feeAmount = coinbaseTxSum.fee_amount;
-        const feeAmountTop64 = coinbaseTxSum.fee_amount_top64;
-        const topHash = coinbaseTxSum.top_hash;
-        const wideEmissionAmount = coinbaseTxSum.wide_emission_amount;
-        const wideFeeAmount = coinbaseTxSum.wide_fee_amount;
+        const emissionAmount: number = coinbaseTxSum.emission_amount;
+        const emissionAmountTop64: number = coinbaseTxSum.emission_amount_top64;
+        const feeAmount: number = coinbaseTxSum.fee_amount;
+        const feeAmountTop64: number = coinbaseTxSum.fee_amount_top64;
+        const topHash: string = coinbaseTxSum.top_hash;
+        const wideEmissionAmount: string = coinbaseTxSum.wide_emission_amount;
+        const wideFeeAmount: string = coinbaseTxSum.wide_fee_amount;
 
         return new CoinbaseTxSum(emissionAmount, emissionAmountTop64, feeAmount, feeAmountTop64, topHash, wideEmissionAmount, wideFeeAmount);
     }

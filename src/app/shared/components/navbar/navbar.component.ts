@@ -38,6 +38,9 @@ export class NavbarComponent {
       this.ngZone.run(() => {
         this._running = running;
       });
+    }).catch((error) => {
+      console.error(error);
+      this._running = false;
     });
 
     this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {

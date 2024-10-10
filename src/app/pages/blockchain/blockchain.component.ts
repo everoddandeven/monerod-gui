@@ -66,7 +66,9 @@ export class BlockchainComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.navbarService.setLinks(this.navbarLinks);
-    this.load();
+    this.load().then().catch((error: any) => {
+      console.error(error);
+    });
   }
 
   public async load(): Promise<void> {
@@ -79,7 +81,7 @@ export class BlockchainComponent implements AfterViewInit {
       this.lastBlockHeader = await this.daemonService.getLastBlockHeader(true);
       this.getLastBlockError = '';
     }
-    catch(error) {
+    catch(error: any) {
       console.error(error);
       this.getLastBlockError = `${error}`;
     }
@@ -92,7 +94,7 @@ export class BlockchainComponent implements AfterViewInit {
       this.block = await this.daemonService.getBlock(this.getBlockByHash ? this.getBlockHash : this.getBlockHeight, this.fillPoWHash);
       this.getBlockError = '';
     }
-    catch(error) {
+    catch(error: any) {
       console.error(error);
       this.getBlockError = `${error}`;
     }
@@ -113,7 +115,7 @@ export class BlockchainComponent implements AfterViewInit {
       }
       
       this.getBlockHeaderError = '';
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       this.getBlockHeaderError = `${error}`;
     }
@@ -127,7 +129,7 @@ export class BlockchainComponent implements AfterViewInit {
       this.popBlocksResult = await this.daemonService.popBlocks(this.popBlocksNBlocks);
       this.popBlocksError = '';
     }
-    catch(error) {
+    catch(error: any) {
       console.error(error);
       this.popBlocksResult = undefined;
       this.popBlocksError = `${error}`;
@@ -142,7 +144,7 @@ export class BlockchainComponent implements AfterViewInit {
       await this.daemonService.saveBc();
       this.blockchainSaved = true;
     }
-    catch(error) {
+    catch(error: any) {
       console.error(error);
       this.blockchainSaved = false;
       this.saveBlockchainError = `${error}`;
@@ -157,7 +159,7 @@ export class BlockchainComponent implements AfterViewInit {
     try {
       await this.daemonService.pruneBlockchain(false);
       this.blockchainPruned = true;
-    } catch(error) {
+    } catch(error: any) {
       this.pruneBlockchainError = `${error}`;
       this.blockchainPruned = false;
     }

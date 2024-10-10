@@ -15,6 +15,13 @@ export class AuxPoW {
     }
 
     public static parse(auxPoW: any): AuxPoW {
-        return new AuxPoW(auxPoW.id, auxPoW.hash);
+      const id: string = auxPoW.id;
+      const hash: string = auxPoW.hash;
+
+      if (typeof id != 'string' || typeof hash != 'string') {
+        throw new Error("Could not parse aux pow object");
+      }
+
+      return new AuxPoW(id, hash);
     }
 }

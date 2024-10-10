@@ -1,8 +1,8 @@
 import { RPCRequest } from "./RPCRequest";
 
 export class SetBootstrapDaemonRequest extends RPCRequest {
-    public override readonly method: 'set_bootstrap_daemon' = 'set_bootstrap_daemon';
-    public override readonly restricted: true = true;
+    public override readonly method: string = 'set_bootstrap_daemon';
+    public override readonly restricted: boolean = true;
 
     public readonly address: string;
     public readonly username: string;

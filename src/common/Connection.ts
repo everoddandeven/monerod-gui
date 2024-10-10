@@ -74,28 +74,28 @@ export class Connection {
     }
 
     public static parse(connection: any): Connection {
-        const address = connection.address;
-        const avgDownload = connection.avg_download;
-        const avgUpload = connection.avg_upload;
-        const connectionId = connection.connection_id;
-        const currentDownload = connection.current_download;
-        const currentUpload = connection.current_upload;
-        const height = connection.height;
-        const host = connection.host;
-        const incoming = connection.incoming;
-        const ip = connection.ip;
-        const liveTime = connection.live_time;
-        const localIp = connection.local_ip;
-        const localhost = connection.localhost;
-        const peerId = connection.peer_id;
-        const port = connection.port;
-        const pruningSeed = connection.pruning_seed;
-        const recvCount = connection.recv_count;
-        const recvIdleTime = connection.recv_idle_time;
-        const sendCount = connection.send_count;
-        const sendIdleTime = connection.send_idle_time;
-        const state = connection.state;
-        const supportFlags = connection.support_flags;
+        const address: string = connection.address;
+        const avgDownload: number = connection.avg_download;
+        const avgUpload: number = connection.avg_upload;
+        const connectionId: string = connection.connection_id;
+        const currentDownload: number = connection.current_download;
+        const currentUpload: number = connection.current_upload;
+        const height: number = connection.height;
+        const host: number = connection.host;
+        const incoming: boolean = connection.incoming;
+        const ip: string = connection.ip;
+        const liveTime: number = connection.live_time;
+        const localIp: boolean = connection.local_ip;
+        const localhost: boolean = connection.localhost;
+        const peerId: string = connection.peer_id;
+        const port: string = connection.port;
+        const pruningSeed: number = connection.pruning_seed;
+        const recvCount: number = connection.recv_count;
+        const recvIdleTime: number = connection.recv_idle_time;
+        const sendCount: number = connection.send_count;
+        const sendIdleTime: number = connection.send_idle_time;
+        const state: string = connection.state;
+        const supportFlags: number = connection.support_flags;
 
         return new Connection(address, avgDownload, avgUpload, connectionId, currentDownload, currentUpload, height, host, incoming, ip, liveTime, localIp, localhost, peerId, port, pruningSeed, recvCount, recvIdleTime, sendCount, sendIdleTime, state, supportFlags);
     }

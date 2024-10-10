@@ -13,7 +13,7 @@
 
 <div class="tab-content" id="pills-tabContent">
   <div class="tab-pane fade show active" id="pills-monero" role="tabpanel" aria-labelledby="pills-monero-tab" tabindex="0">
-    <div *ngIf="upgradeError != ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+    <div *ngIf="upgradeError !== ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
       <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
       <div>
         {{upgradeError}}

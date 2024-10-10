@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, NgZone } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonSettings } from '../../../common/DaemonSettings';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
@@ -8,7 +8,7 @@ import { DaemonService } from '../../core/services/daemon/daemon.service';
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss'
 })
-export class SettingsComponent implements AfterViewInit {
+export class SettingsComponent {
 
   public readonly navbarLinks: NavbarLink[];
 
@@ -48,7 +48,11 @@ export class SettingsComponent implements AfterViewInit {
       this.rpcLoginPassword = '';
     }
 
-    this.load();
+    this.load().then(() => {
+      console.debug("Settings loaded");
+    }).catch((error: any) => {
+      console.error(error);
+    });
   }
 
   private async load(): Promise<void> {
@@ -70,10 +74,6 @@ export class SettingsComponent implements AfterViewInit {
 
   public get saveDisabled(): boolean {
     return !this.modified || this.daemonService.restarting || this.daemonService.starting || this.daemonService.stopping;
-  }
-
-  ngAfterViewInit(): void {
-
   }
 
   public OnOfflineChange() {
@@ -171,7 +171,7 @@ export class SettingsComponent implements AfterViewInit {
       this.savingChangesError = ``;
       this.savingChangesSuccess = true;
     }
-    catch(error) {
+    catch(error: any) {
       console.error(error);
       this.savingChangesError = `${error}`;
       this.savingChangesSuccess = false;

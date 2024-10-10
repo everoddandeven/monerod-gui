@@ -206,7 +206,7 @@ export class NetworkComponent implements AfterViewInit, OnDestroy {
       this.setLimitSuccess = true;
       this.setLimitError = '';
     } 
-    catch (error) {
+    catch (error: any) {
       console.error(error);
       this.setLimitResult = undefined;
       this.setLimitSuccess = false;

@@ -118,11 +118,15 @@ export class DaemonService {
 
     if (this.electronService.isElectron) {
       this.electronService.ipcRenderer.on('monero-close', (event, code: number | null) => {
+        console.log(event);
+        console.log(code);
         this.onClose();
       });
     }
     else if (wdw.electronAPI && wdw.electronAPI.onMoneroClose) {
       wdw.electronAPI.onMoneroClose((event: any, code: number) => {
+        console.log(event);
+        console.log(code);
         this.onClose();
       });
     }
@@ -213,7 +217,7 @@ export class DaemonService {
     return settings;
   }
 
-  private raiseRpcError(error: { code: number, message: string }): void {
+  private raiseRpcError(error: RpcError): void {
 
     if (error.code == -9) {
       throw new CoreIsBusyError();
@@ -254,7 +258,7 @@ export class DaemonService {
       const response = await this.post(`${this.url}/${method}`, request.toDictionary());
 
       if (response.error) {
-        this.raiseRpcError(response.error);
+        this.raiseRpcError(<RpcError>response.error);
       }
 
       return response;
@@ -372,7 +376,7 @@ export class DaemonService {
     const response = await this.callRpc(new GetBlockRequest(heightOrHash, fillPowHash));
 
     if (response.error) {
-      this.raiseRpcError(response.error);
+      this.raiseRpcError(<RpcError>response.error);
     }
 
     return Block.parse(response.result);
@@ -386,6 +390,10 @@ export class DaemonService {
 
   public async getBlockHash(blockHeight: number): Promise<string> {
     const response = await this.callRpc(new GetBlockHashRequest(blockHeight));
+
+    if (typeof response.result != 'string') {
+      throw new Error("Could not parse block hash");
+    }
 
     return response.result;
   }
@@ -404,19 +412,19 @@ export class DaemonService {
         throw new CoreIsBusyError();
       }
 
-      throw new Error(response.result.status);
+      throw new Error(<string>response.result.status);
     }
   }
 
   public async generateBlocks(amountOfBlocks: number, walletAddress: string, prevBlock: string = '', startingNonce: number): Promise<GeneratedBlocks> {
     const response = await this.callRpc(new GenerateBlocksRequest(amountOfBlocks, walletAddress, prevBlock, startingNonce));
 
-    if(response.result && response.result.status != 'OK') {
+    if(response.result && typeof response.result.status == 'string' && response.result.status != 'OK') {
       if (response.result.status == 'BUSY') {
         throw new CoreIsBusyError();
       }
 
-      throw new Error(response.result.status);
+      throw new Error(<string>response.result.status);
     }
 
     return GeneratedBlocks.parse(response.result);
@@ -491,10 +499,6 @@ export class DaemonService {
 
   public async getBans(): Promise<Ban[]> {
     const response = await this.callRpc(new GetBansRequest());
-    
-    if (response.error) {
-      this.raiseRpcError(response.error);
-    }
 
     if (!response.result) {
       return [];
@@ -516,7 +520,10 @@ export class DaemonService {
       throw new Error(`Error code: ${result.response}`);
     }
 
-    return new Ban(address, 0, result.banned, result.seconds);
+    const banned: boolean = result.banned;
+    const seconds: number = result.seconds;
+
+    return new Ban(address, 0, banned, seconds);
   }
 
   public async flushTxPool(... txIds: string[]): Promise<void> {
@@ -530,8 +537,8 @@ export class DaemonService {
   public async getOuts(outputs: Output[], getTxId: boolean): Promise<OutKey[]> {
     const response = await this.callRpc(new GetOutsRequest(outputs, getTxId));
 
-    if (response.error) {
-      this.raiseRpcError(response.error);
+    if (typeof response.status == 'string' && response.status != 'OK') {
+      throw new Error(response.status);
     }
 
     const _outkeys: any[] | undefined = response.outs;
@@ -545,10 +552,6 @@ export class DaemonService {
   public async getOutputHistogram(amounts: number[], minCount: number, maxCount: number, unlocked: boolean, recentCutoff: number): Promise<HistogramEntry[]> {
     const response = await this.callRpc(new GetOutputHistogramRequest(amounts, minCount, maxCount, unlocked, recentCutoff));
 
-    if (response.error) {
-      this.raiseRpcError(response.error);
-    }
-
     const entries: any[] = response.result.histogram;
     const result: HistogramEntry[] = [];
 
@@ -559,10 +562,6 @@ export class DaemonService {
 
   public async getOutputDistribution(amounts: number[], cumulative: boolean, fromHeight: number, toHeight: number): Promise<OutputDistribution[]> {
     const response = await this.callRpc(new GetOutputDistributionRequest(amounts, cumulative, fromHeight, toHeight));
-
-    if (response.error) {
-      this.raiseRpcError(response.error);
-    }
 
     const entries: any[] = response.result.distributions;
     const distributions: OutputDistribution[] = [];
@@ -660,10 +659,6 @@ export class DaemonService {
   public async getCoinbaseTxSum(height: number, count: number): Promise<CoinbaseTxSum> {
     const response = await this.callRpc(new GetCoinbaseTxSumRequest(height, count));
 
-    if (response.error) {
-      this.raiseRpcError(response.error);
-    }
-
     return CoinbaseTxSum.parse(response.result);
   }
 
@@ -682,14 +677,14 @@ export class DaemonService {
       throw new Error(`Error code: ${response.status}`)
     }
 
-    if (!response.bakclog && !response.result) {
+    if (!response.backlog && !response.result) {
       return [];
     }
     
-    if (response.backlog) {
+    if (response.backlog && typeof response.backlog == 'string') {
       return TxBacklogEntry.fromBinary(response.backlog);
     }
-    else if (response.result.backlog) return TxBacklogEntry.fromBinary(response.result.backlog);
+    else if (response.result.backlog && typeof response.result.backlog == 'string') return TxBacklogEntry.fromBinary(<string>response.result.backlog);
     
     return [];
   }
@@ -702,6 +697,10 @@ export class DaemonService {
 
   public async calculatePoWHash(majorVersion: number, height: number, blockBlob: string, seedHash: string): Promise<string> {
     const response = await this.callRpc(new CalculatePoWHashRequest(majorVersion, height, blockBlob, seedHash));
+
+    if (typeof response.result != 'string') {
+      throw new Error("Unexpected result type")
+    }
 
     return response.result;
   }
@@ -744,25 +743,48 @@ export class DaemonService {
 
   public async getAltBlockHashes(): Promise<string[]> {
     const response = await this.callRpc(new GetAltBlockHashesRequest());
+    const altBlockHashes: string[] = response.blks_hashes;
 
-    return response.blks_hashes;
+    if (!Array.isArray(altBlockHashes)) {
+      return [];
+    }
+
+    altBlockHashes.forEach((blockHash: string) => {
+      if(typeof blockHash != 'string') {
+        throw new Error("Could not parse alt block hashes");
+      }
+    })
+
+    return altBlockHashes;
   }
 
   public async isKeyImageSpent(...keyImages: string[]): Promise<number[]> {
     const response = await this.callRpc(new IsKeyImageSpentRequest(keyImages));
 
-    if (response.status != 'OK') {
+    if (typeof response.status == 'string' && response.status != 'OK') {
       throw new Error(response.status);
     }
 
-    return response.spent_status;
+    const spentStatus: number[] = response.spent_status;
+
+    if (!Array.isArray(spentStatus)) {
+      throw new Error("Could not parse spent list result");
+    }
+
+    return spentStatus;
   }
 
   public async sendRawTransaction(txAsHex: string, doNotRelay: boolean = false): Promise<TxInfo> {
     const response = await this.callRpc(new SendRawTransactionRequest(txAsHex, doNotRelay));
 
     if (typeof response.status == 'string' && response.status != 'OK') {
-      throw new Error(response.reason);
+      if (typeof response.reason == 'string')
+      {
+        throw new Error(response.reason);
+      }
+      else {
+        throw new Error(response.status);
+      }
     }
 
     return TxInfo.parse(response);
@@ -848,12 +870,20 @@ export class DaemonService {
 
   public async inPeers(inPeers: number): Promise<number> {
     const response = await this.callRpc(new InPeersRequest(inPeers));
-
+    
+    if (typeof response.in_peers != 'number') {
+      throw new Error("Could not parse in peers count");
+    }
+    
     return response.in_peers;
   }
 
   public async outPeers(outPeers: number): Promise<number> {
     const response = await this.callRpc(new OutPeersRequest(outPeers));
+
+    if (typeof response.out_peers != 'number') {
+      throw new Error("Could not parse out peers count");
+    }
 
     return response.out_peers;
   }
@@ -867,7 +897,7 @@ export class DaemonService {
   public async getPeerList(): Promise<PeerInfo[]> {
     const response = await this.callRpc(new GetPeerListRequest());
 
-    if (response.status != 'OK') {
+    if (typeof response.status == 'string' && response.status != 'OK') {
       throw new Error(response.status);
     }
 
@@ -897,7 +927,7 @@ export class DaemonService {
   public async getTransactionPool(): Promise<TxPool> {
     const response = await this.callRpc(new GetTransactionPoolRequest());
 
-    if (response.status != 'OK') {
+    if (typeof response.status == 'string' && response.status != 'OK') {
       throw new Error(response.status);
     }
 
@@ -906,18 +936,31 @@ export class DaemonService {
 
   public async getTransactionPoolHashes(): Promise<string[]> {
     const response = await this.callRpc(new GetTransactionPoolHashesRequest());
+    const txHashes: string[] = response.tx_hashes;
 
-    return response.tx_hashes;
+    if (!Array.isArray(txHashes)) {
+      throw new Error("Could not parse txHashses");
+    }
+
+    return txHashes;
   }
 
   public async getTransactionPoolHashesBinary(): Promise<string> {
     const response = await this.callRpc(new GetTransactionPoolHashesBinaryRequest());
+
+    if (typeof response.tx_hashes != 'string') {
+      throw new Error("Could not parse binary");
+    }
 
     return response.tx_hashes;
   }
 
   public async popBlocks(nBlocks: number): Promise<number> {
     const response = await this.callRpc(new PopBlocksRequest(nBlocks));
+
+    if (typeof response.height != 'number') {
+      throw new Error("");
+    }
 
     return response.height;
   }
@@ -939,7 +982,7 @@ export class DaemonService {
   public async setLogLevel(level: number): Promise<void> {
     const response = await this.callRpc(new SetLogLevelRequest(level));
 
-    if (response.status != 'OK') {
+    if (typeof response.status == 'string' && response.status != 'OK') {
       throw new Error(response.status);
     }
   }
@@ -947,7 +990,7 @@ export class DaemonService {
   public async setLogCategories(cateogories: string): Promise<void> {
     const response = await this.callRpc(new SetLogCategoriesRequest(cateogories));
 
-    if (response.status != 'OK') {
+    if (typeof response.status == 'string' && response.status != 'OK') {
       throw new Error(response.status);
     }
   }
@@ -955,7 +998,7 @@ export class DaemonService {
   public async setLogHashRate(visible: boolean): Promise<void> {
     const response = await this.callRpc(new SetLogHashRateRequest(visible));
 
-    if (response.status != 'OK') {
+    if (typeof response.status == 'string' && response.status != 'OK') {
       throw new Error(response.status);
     }
   }
@@ -966,3 +1009,4 @@ export class DaemonService {
 
 }
 
+export interface RpcError { code: number, message: string }

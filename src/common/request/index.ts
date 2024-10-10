@@ -59,6 +59,7 @@ export { SetLogHashRateRequest } from "./SetLogHashRateRequest";
 export { SetLogCategoriesRequest } from "./SetLogCategoriesRequest";
 export { GetTransactionPoolRequest } from "./GetTransactionPoolRequest";
 export { GetPeerListRequest } from "./GetPeerListRequest";
+export { GetTransactionsRequest } from "./GetTransactionsRequest";
 
 /**
  * Restricted requests

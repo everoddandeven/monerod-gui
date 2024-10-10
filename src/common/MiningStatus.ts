@@ -47,21 +47,36 @@ export class MiningStatus {
     }
 
     public static parse(miningStatus: any): MiningStatus {
-        return new MiningStatus(
-            miningStatus.active,
-            miningStatus.address,
-            miningStatus.bg_idle_threshold,
-            miningStatus.bg_min_idle_seconds,
-            miningStatus.bg_target,
-            miningStatus.block_reward,
-            miningStatus.block_target,
-            miningStatus.difficulty,
-            miningStatus.difficulty_top64,
-            miningStatus.is_background_mining_enabled,
-            miningStatus.pow_algorithm,
-            miningStatus.speed,
-            miningStatus.threads_count,
-            miningStatus.wide_difficulty
+      const active: boolean = miningStatus.active;
+      const address: string = miningStatus.address;
+      const bgIdleThreshold: number = miningStatus.bg_idle_threshold;
+      const bgMinIdleSeconds: number = miningStatus.bg_min_idle_seconds;
+      const bgTarget: number = miningStatus.bg_target;
+      const blockReward: number = miningStatus.block_reward;
+      const blockTarget: number = miningStatus.block_target;
+      const difficulty: number = miningStatus.difficulty;
+      const difficultyTop64: number = miningStatus.difficulty_top64;
+      const isBackgroundMiningEnabled: boolean = miningStatus.is_background_mining_enabled;
+      const powAlgorithm: string = miningStatus.pow_algorithm;
+      const speed: number = miningStatus.speed;
+      const threadsCount: number = miningStatus.threads_count;
+      const wideDifficulty: string = miningStatus.wide_difficulty;
+
+      return new MiningStatus(
+            active,
+            address,
+            bgIdleThreshold,
+            bgMinIdleSeconds,
+            bgTarget,
+            blockReward,
+            blockTarget,
+            difficulty,
+            difficultyTop64,
+            isBackgroundMiningEnabled,
+            powAlgorithm,
+            speed,
+            threadsCount,
+            wideDifficulty
         );
     }
 }

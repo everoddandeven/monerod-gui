@@ -12,10 +12,10 @@ export class HistogramEntry {
     }
 
     public static parse(entry: any) {
-        const amount = entry.amount;
-        const totalInstances = entry.total_instances;
-        const unlockedInstances = entry.unlocked_instances;
-        const recentInstances = entry.recent_instances;
+        const amount: number = entry.amount;
+        const totalInstances: number = entry.total_instances;
+        const unlockedInstances: number = entry.unlocked_instances;
+        const recentInstances: number = entry.recent_instances;
 
         return new HistogramEntry(amount, totalInstances, unlockedInstances, recentInstances);
     }

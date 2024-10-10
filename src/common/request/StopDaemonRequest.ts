@@ -1,8 +1,8 @@
 import { RPCRequest } from "./RPCRequest";
 
 export class StopDaemonRequest extends RPCRequest {
-    public override readonly method: 'stop_daemon' = 'stop_daemon';
-    public override readonly restricted: true = true;
+    public override readonly method: string = 'stop_daemon';
+    public override readonly restricted: boolean = true;
 
     constructor() {
         super();

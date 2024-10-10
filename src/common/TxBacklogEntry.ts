@@ -10,7 +10,7 @@ export class TxBacklogEntry {
     }
 
     public static fromBinary(binary: string): TxBacklogEntry[] {
-
-        throw new Error("TxBacklogEntry.fromBinary(): not implemented");
+      console.debug(binary);
+      throw new Error("TxBacklogEntry.fromBinary(): not implemented");
     }
 }

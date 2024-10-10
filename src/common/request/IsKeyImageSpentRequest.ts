@@ -1,8 +1,8 @@
 import { RPCRequest } from "./RPCRequest";
 
 export class IsKeyImageSpentRequest extends RPCRequest {
-    public override readonly method: 'is_key_image_spent' = 'is_key_image_spent';
-    public override readonly restricted: false = false;
+    public override readonly method: string = 'is_key_image_spent';
+    public override readonly restricted: boolean = false;
 
     public readonly keyImages: string[];
 

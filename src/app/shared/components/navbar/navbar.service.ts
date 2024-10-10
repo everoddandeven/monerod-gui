@@ -24,6 +24,9 @@ export class NavbarService {
       this.daemonRunning = running;
       if (!running) this.disableLinks();
       if (running) this.enableLinks();
+    }).catch((error: any) => {
+      console.error(error);
+      this.disableLinks();
     })
    }
 

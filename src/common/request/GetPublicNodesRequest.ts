@@ -1,7 +1,7 @@
 import { RPCRequest } from "./RPCRequest";
 
 export class GetPublicNodesRequest extends RPCRequest {
-    public override readonly method: 'get_public_nodes' = 'get_public_nodes';
+    public override readonly method: string = 'get_public_nodes';
     public override readonly restricted: boolean = false;
 
     public readonly whites: boolean;

@@ -15,11 +15,11 @@ export class OutKey {
     }
 
     public static parse(outkey: any): OutKey {
-        const height = outkey.height;
-        const key = outkey.key;
-        const mask = outkey.mask;
-        const txId = outkey.txid;
-        const unlocked = outkey.unlocked;
+        const height: number = outkey.height;
+        const key: string = outkey.key;
+        const mask: string = outkey.mask;
+        const txId: string = outkey.txid;
+        const unlocked: boolean = outkey.unlocked;
 
         return new OutKey(height, key, mask, txId, unlocked);
     }

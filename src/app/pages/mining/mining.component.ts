@@ -4,9 +4,7 @@ import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { MinerData } from '../../../common/MinerData';
 import { NavigationEnd, Router } from '@angular/router';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
-import { MineableTxBacklog } from '../../../common/MineableTxBacklog';
 import { Chain } from '../../../common/Chain';
-import { CoreIsBusyError } from '../../../common/error';
 import { AuxPoW, BlockTemplate, GeneratedBlocks, MiningStatus } from '../../../common';
 import { DaemonDataService } from '../../core/services';
 
@@ -180,9 +178,7 @@ export class MiningComponent implements AfterViewInit {
   }
 
   private onNavigationEnd(): void {
-    this.refresh().then(() => {
-      this.cards = this.createCards();
-    });
+    this.refresh();
   }
 
   public async getBlockTemplate(): Promise<void> {
@@ -191,7 +187,7 @@ export class MiningComponent implements AfterViewInit {
     try {
       this.blockTemplate = await this.daemonService.getBlockTemplate(this.getBlockTemplateAddress, this.getBlockTemplateReserveSize);
       this.getBlockTemplateError = '';
-    } catch(error) {
+    } catch(error: any) {
       this.getBlockTemplateError = `${error}`;
     }
 
@@ -211,7 +207,7 @@ export class MiningComponent implements AfterViewInit {
       this.submitBlockError = '';
       this.submitBlockSuccess = true;
     }
-    catch(error) {
+    catch(error: any) {
       console.error(error);
       this.submitBlockError = `${error}`;
     }
@@ -239,7 +235,7 @@ export class MiningComponent implements AfterViewInit {
     }
   }
 
-  private async refresh(): Promise<void> {
+  private refresh(): void {
 
     try {
       const $table = $('#chainsTable');
@@ -287,7 +283,7 @@ export class MiningComponent implements AfterViewInit {
 
     try {
       this.calculatedPowHash = await this.daemonService.calculatePoWHash(this.calcPowMajorVersion, this.calcPowHeight, this.calcPowBlobData, this.calcPowSeed)
-    } catch(error) {
+    } catch(error: any) {
       this.calcPowError = `${error}`;
     }
 
@@ -301,7 +297,7 @@ export class MiningComponent implements AfterViewInit {
       this.generatedBlocks = await this.daemonService.generateBlocks(this.generateBlocksAmountOfBlocks, this.generateBlocksAddress, this.generateBlockPrevBlock, this.generateStartingNonce);
       this.generateBlocksError = '';
     }
-    catch(error) {
+    catch(error: any) {
       this.generateBlocksError = `${error}`;
     }
 
@@ -315,7 +311,7 @@ export class MiningComponent implements AfterViewInit {
       this.startMiningError = '';
       this.startMiningSuccess = true;
     }
-    catch(error) {
+    catch(error: any) {
       this.startMiningSuccess = false;
       this.startMiningError = `${error}`;
     }
@@ -334,7 +330,7 @@ export class MiningComponent implements AfterViewInit {
       this.stopMiningSuccess = true;
       this.stopMiningError = '';
     }
-    catch(error) {
+    catch(error: any) {
       console.error(error);
       this.stopMiningSuccess = false;
       this.stopMiningError = `${error};`

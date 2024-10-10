@@ -13,9 +13,14 @@ export class Block {
     }
 
     public static parse(block: any): Block {
-        const blob = block.blob;
-        const blockHeader = BlockHeader.parse(block.block_header);
-        const details = BlockDetails.parse(block.json);
+        const blob: string= block.blob;
+        const blockHeader = BlockHeader.parse(<string>block.block_header);
+
+        if (typeof blob != 'string' || typeof block.json != 'string') {
+          throw new Error("Could not parse block object");
+        }
+
+        const details = BlockDetails.parse(<string>block.json);
 
         return new Block(blob, blockHeader, details);
     }

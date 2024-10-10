@@ -49,20 +49,20 @@ export class UnconfirmedTx {
   }
 
   public static parse(unconfirmedTx: any): UnconfirmedTx {
-    const blobSize = unconfirmedTx.blob_size;
-    const doNotRelay = unconfirmedTx.do_not_relay;
-    const doubleSpendSeen = unconfirmedTx.double_spend_seen;
-    const fee = unconfirmedTx.fee;
-    const idHash = unconfirmedTx.id_hash;
-    const keptByBlock = unconfirmedTx.kept_by_block;
-    const lastFailedHeight = unconfirmedTx.last_failed_height;
-    const lastFailedIdHash = unconfirmedTx.last_failed_id_hash;
-    const lastRelayedTime = unconfirmedTx.last_relayed_time;
-    const maxUsedBlockHeight = unconfirmedTx.max_used_block_height;
-    const maxUsedBlockIdHash = unconfirmedTx.max_used_block_id_hash;
-    const receiveTime = unconfirmedTx.receive_time;
-    const relayed = unconfirmedTx.relayed;
-    const txBlob = unconfirmedTx.tx_blob;
+    const blobSize: number = unconfirmedTx.blob_size;
+    const doNotRelay: boolean = unconfirmedTx.do_not_relay;
+    const doubleSpendSeen: boolean = unconfirmedTx.double_spend_seen;
+    const fee: number = unconfirmedTx.fee;
+    const idHash: string = unconfirmedTx.id_hash;
+    const keptByBlock: boolean = unconfirmedTx.kept_by_block;
+    const lastFailedHeight: number = unconfirmedTx.last_failed_height;
+    const lastFailedIdHash: string = unconfirmedTx.last_failed_id_hash;
+    const lastRelayedTime: number = unconfirmedTx.last_relayed_time;
+    const maxUsedBlockHeight: number = unconfirmedTx.max_used_block_height;
+    const maxUsedBlockIdHash: string = unconfirmedTx.max_used_block_id_hash;
+    const receiveTime: number = unconfirmedTx.receive_time;
+    const relayed: boolean = unconfirmedTx.relayed;
+    const txBlob: string = unconfirmedTx.tx_blob;
 
     return new UnconfirmedTx(
       blobSize, doNotRelay, doubleSpendSeen, fee, idHash, keptByBlock,

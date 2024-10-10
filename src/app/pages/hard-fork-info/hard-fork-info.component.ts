@@ -60,6 +60,8 @@ export class HardForkInfoComponent implements AfterViewInit {
   private onNavigationEnd(): void {
     this.load().then(() => {
       this.cards = this.createCards();
+    }).catch((error: any) => {
+      console.error(error);
     });
     
   }

@@ -3,7 +3,6 @@ import { DaemonDataService, DaemonService } from '../../core/services';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { Subscription } from 'rxjs';
-import { resolve } from 'path';
 
 @Component({
   selector: 'app-peers',
@@ -117,7 +116,7 @@ export class PeersComponent implements AfterViewInit, OnDestroy {
       this.limitInPeersResult = await this.daemonService.inPeers(this.limitInPeers);
       this.limitInPeersError = '';
       this.limitInPeersSuccess = true;
-    } catch(error) {
+    } catch(error: any) {
       console.error(error);
       this.limitInPeersSuccess = false;
       this.limitInPeersResult = 0;
@@ -134,7 +133,7 @@ export class PeersComponent implements AfterViewInit, OnDestroy {
       this.limitOutPeersResult = await this.daemonService.outPeers(this.limitOutPeers);
       this.limitOutPeersError = '';
       this.limitOutPeersSuccess = true;
-    } catch(error) {
+    } catch(error: any) {
       console.error(error);
       this.limitOutPeersSuccess = false;
       this.limitOutPeersResult = 0;

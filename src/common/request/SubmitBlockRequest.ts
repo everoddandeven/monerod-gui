@@ -11,7 +11,7 @@ export class SubmitBlockRequest extends JsonRPCRequest {
     }
 
     public override toDictionary(): { [key: string]: any; } {
-        let dict = super.toDictionary();
+        const dict = super.toDictionary();
 
         dict['params'] = this.blockBlobData;
 

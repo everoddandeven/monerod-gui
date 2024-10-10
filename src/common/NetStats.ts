@@ -12,10 +12,10 @@ export class NetStats {
     }
 
     public static parse(netStats: any): NetStats {
-        const startTime = netStats.start_time;
-        const totalPacketsIn = netStats.total_packets_in;
-        const totalBytesIn = netStats.total_bytes_in;
-        const totalBytesOut = netStats.total_bytes_out;
+        const startTime: number = netStats.start_time;
+        const totalPacketsIn: number = netStats.total_packets_in;
+        const totalBytesIn: number = netStats.total_bytes_in;
+        const totalBytesOut: number = netStats.total_bytes_out;
 
         return new NetStats(startTime, totalPacketsIn, totalBytesIn, totalBytesOut);
     }

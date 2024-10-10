@@ -1,4 +1,4 @@
-import { Component, Input, NgZone } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { DaemonService } from '../../../core/services/daemon/daemon.service';
 import { DaemonDataService, MoneroInstallerService } from '../../../core/services';
 
@@ -44,6 +44,9 @@ export class DaemonNotRunningComponent {
   constructor(private installer: MoneroInstallerService, private daemonData: DaemonDataService, private daemonService: DaemonService, private ngZone: NgZone) {
     this.daemonService.getSettings().then((settings) => {
       this.daemonConfigured = settings.monerodPath != '';
+    }).catch((error: any) => {
+      console.error(error);
+      this.daemonConfigured = false;
     })
   }
 
@@ -58,29 +61,23 @@ export class DaemonNotRunningComponent {
     }
 
     await new Promise<void>((resolve, reject) => {
-      setTimeout(async () => {
-        try {
-          await this.daemonService.startDaemon();
+      setTimeout(() => {
+        this.daemonService.startDaemon().then(() => {
           resolve();
-        }
-        catch(error) {
-          console.error(error);
+        }).catch((error: any) => {
           reject(error);
-        }
+        });
       }, 500)});
   }
 
   public async restartDaemon(): Promise<void> {
     await new Promise<void>((resolve, reject) => {
-      setTimeout(async () => {
-        try {
-          await this.daemonService.restartDaemon();
+      setTimeout(() => {
+        this.daemonService.restartDaemon().then(() => {
           resolve();
-        }
-        catch(error) {
-          console.error(error);
+        }).catch((error: any) => {
           reject(error);
-        }
+        });
       }, 500)});
   }
 

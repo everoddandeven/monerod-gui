@@ -37,7 +37,7 @@ export class GetBlockRequest extends JsonRPCRequest {
     public override toDictionary(): { [key: string]: any; } {
         const dict = super.toDictionary();
 
-        let params: { [key: string]: any } = { 'fill_pow_hash': this.fillPoWHash };
+        const params: { [key: string]: any } = { 'fill_pow_hash': this.fillPoWHash };
 
         if (this.byHeight) {
             params['height'] = this.height;

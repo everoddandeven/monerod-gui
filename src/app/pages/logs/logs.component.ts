@@ -35,7 +35,10 @@ export class LogsComponent implements AfterViewInit {
   public setLogHashRateSuccess: boolean = false;
 
   constructor(private navbarService: NavbarService, private logsService: LogsService, private daemonService: DaemonService, private ngZone: NgZone) {
-    this.logsService.onLog.subscribe((message: string) => this.onLog());
+    this.logsService.onLog.subscribe((message: string) => {
+      console.debug(message);
+      this.onLog()
+    });
     this.navbarLinks = [
       new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', false, 'Overview'),
       new NavbarLink('pills-set-log-level-tab', '#pills-set-log-level', 'pills-set-log-level', false, 'Set Log Level'),
@@ -69,6 +72,7 @@ export class LogsComponent implements AfterViewInit {
   }
 
   public trackByFn(index: number, item: string): number {
+    console.debug(`trackByFn(index: ${index}, ${item})`);
     return index;  // usa l'indice per tracciare gli elementi
   }
 
@@ -88,7 +92,7 @@ export class LogsComponent implements AfterViewInit {
 
       this.setLogLevelError = '';
       this.setLogLevelSuccess = true;
-    } catch (error) {
+    } catch (error: any) {
       this.setLogLevelSuccess = false;
       this.setLogLevelError = `${error}`;
 
@@ -105,7 +109,7 @@ export class LogsComponent implements AfterViewInit {
       await this.daemonService.setLogHashRate(this.setLogHashRateEnabled);
       this.setLogHashRateError = '';
       this.setLogHashRateSuccess = true;
-    } catch(error) {
+    } catch(error: any) {
       console.error(error);
       this.setLogHashRateError = `${error}`;
       this.setLogHashRateSuccess = false;
@@ -126,7 +130,7 @@ export class LogsComponent implements AfterViewInit {
       this.setLogCategoriesError = ``;
       this.setLogCategoriesSuccess = true;
     }
-    catch(error) {
+    catch(error: any) {
       this.setLogCategoriesError = `${error}`;
       this.setLogCategoriesSuccess = false;
     }

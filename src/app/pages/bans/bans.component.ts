@@ -71,15 +71,16 @@ export class BansComponent implements AfterViewInit {
   public ngAfterViewInit(): void {
     this.navbarService.setLinks(this.navbarLinks);
 
-    this.ngZone.run(() => {
+    this.ngZone.run(async () => {
       const $table = $('#bansTable');
       $table.bootstrapTable({});
       $table.bootstrapTable('refreshOptions', {
         classes: 'table table-bordered table-hover table-dark table-striped'
       });
       $table.bootstrapTable('showLoading');      
-      this.refreshBansTable();
-
+      await this.refreshBansTable();
+    }).then().catch((error: any) => {
+      console.error(error);
     });
   }
 
@@ -115,7 +116,7 @@ export class BansComponent implements AfterViewInit {
       this.setBansError = '';
       this.setBansSuccess = true;
     }
-    catch (error) {
+    catch (error: any) {
       console.error(error);
       this.setBansSuccess = false;
       this.setBansError = `${error}`;

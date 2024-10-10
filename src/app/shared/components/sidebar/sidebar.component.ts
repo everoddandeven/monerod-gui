@@ -1,6 +1,5 @@
-import { CommonModule, NgClass, NgFor } from '@angular/common';
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { ChildActivationEnd, ChildActivationStart, NavigationCancel, NavigationEnd, NavigationError, NavigationStart, RouteConfigLoadEnd, RouteConfigLoadStart, Router, RouterEvent, RouterModule, RoutesRecognized } from '@angular/router';
+import { Component, Input } from '@angular/core';
+import { Router } from '@angular/router';
 import { DaemonService } from '../../../core/services/daemon/daemon.service';
 
 @Component({
@@ -8,7 +7,7 @@ import { DaemonService } from '../../../core/services/daemon/daemon.service';
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
 })
-export class SidebarComponent implements OnChanges {
+export class SidebarComponent {
   @Input() public isDaemonRunning: boolean = false;
 
   public navLinks: NavLink[] = [];
@@ -54,11 +53,6 @@ export class SidebarComponent implements OnChanges {
 
   public isActive(navLink: NavLink): boolean {
     return navLink.path == this.router.url;
-  }
-
-  public ngOnChanges(changes: SimpleChanges): void {
-    this.navLinks = this.createFullLinks();
-
   }
 
 }

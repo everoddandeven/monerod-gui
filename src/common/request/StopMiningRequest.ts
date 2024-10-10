@@ -1,8 +1,8 @@
 import { RPCRequest } from "./RPCRequest";
 
 export class StopMiningRequest extends RPCRequest {
-    public override readonly method: 'stop_mining' = 'stop_mining';
-    public override readonly restricted: true = true;
+    public override readonly method: string = 'stop_mining';
+    public override readonly restricted: boolean = true;
 
     constructor() {
         super();

@@ -20,14 +20,14 @@ export class Chain {
     }
 
     public static parse(chain: any): Chain {
-        const blockHash = chain.block_hash;
-        const blockHashes = chain.block_hashes;
-        const difficulty = chain.difficulty;
-        const difficultyTop64 = chain.difficulty_top64;
-        const height = chain.height;
-        const length = chain.length;
-        const mainChainParentBlock = chain.main_chain_parent_block;
-        const wideDifficulty = chain.wide_difficulty;
+        const blockHash: string = chain.block_hash;
+        const blockHashes: string[] = chain.block_hashes;
+        const difficulty: number = chain.difficulty;
+        const difficultyTop64: number = chain.difficulty_top64;
+        const height: number = chain.height;
+        const length: number = chain.length;
+        const mainChainParentBlock: string = chain.main_chain_parent_block;
+        const wideDifficulty: string = chain.wide_difficulty;
 
         return new Chain(blockHash, blockHashes, difficulty, difficultyTop64, height, length, mainChainParentBlock, wideDifficulty);
     }

@@ -77,28 +77,29 @@ export class BlockHeader {
     }
 
     public static parse(blockHeader: any): BlockHeader {
-        const blockSize = blockHeader.block_size;
-        const blockWeight = blockHeader.block_weight;
-        const cumulativeDifficulty = blockHeader.cumulative_difficulty;
-        const cumulativeDifficultyTop64 = blockHeader.cumulative_difficulty_top64;
-        const depth = blockHeader.depth;
-        const difficulty = blockHeader.difficulty;
-        const difficultyTop64 = blockHeader.difficulty_top64;
-        const hash = blockHeader.hash;
-        const height = blockHeader.height;
-        const longTermWeight = blockHeader.long_term_weight;
-        const majorVersion = blockHeader.major_version;
-        const minerTxHash = blockHeader.miner_tx_hash;
-        const minorVersion = blockHeader.minor_version;
-        const nonce = blockHeader.nonce;
-        const numTxes = blockHeader.num_txes;
-        const orphanStatus = blockHeader.orphan_status;
-        const powHash = blockHeader.pow_hash;
-        const prevHash = blockHeader.prev_hash;
-        const reward = blockHeader.reward;
-        const timestamp = blockHeader.timestamp;
-        const wideCumulativeDifficulty = blockHeader.wide_cumulative_difficulty;
-        const wideDifficulty = blockHeader.wide_difficulty;
+        const blockSize: number = blockHeader.block_size;
+        const blockWeight: number = blockHeader.block_weight;
+        const cumulativeDifficulty: number = blockHeader.cumulative_difficulty;
+        const cumulativeDifficultyTop64: number = blockHeader.cumulative_difficulty_top64;
+        const depth: number = blockHeader.depth;
+        const difficulty: number = blockHeader.difficulty;
+        const difficultyTop64: number = blockHeader.difficulty_top64;
+        const hash: string = blockHeader.hash;
+        const height: number = blockHeader.height;
+        const longTermWeight: number = blockHeader.long_term_weight;
+        const majorVersion: number = blockHeader.major_version;
+        const minerTxHash: string = blockHeader.miner_tx_hash;
+        const minorVersion: number = blockHeader.minor_version;
+        const nonce: number = blockHeader.nonce;
+        const numTxes: number = blockHeader.num_txes;
+        const orphanStatus: boolean = blockHeader.orphan_status;
+        const powHash: string = blockHeader.pow_hash;
+        const prevHash: string = blockHeader.prev_hash;
+        const reward: number = blockHeader.reward;
+        const timestamp: number = blockHeader.timestamp;
+        const wideCumulativeDifficulty: string = blockHeader.wide_cumulative_difficulty;
+        const wideDifficulty: string = blockHeader.wide_difficulty;
+        
         return new BlockHeader(blockSize, blockWeight, cumulativeDifficulty, cumulativeDifficultyTop64, depth, difficulty, difficultyTop64, hash, height, longTermWeight, majorVersion, minerTxHash, minorVersion, nonce, numTxes, orphanStatus, powHash, prevHash, reward, timestamp, wideCumulativeDifficulty, wideDifficulty);
     } 
 }

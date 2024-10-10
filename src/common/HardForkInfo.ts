@@ -22,15 +22,15 @@ export class HardForkInfo {
     }
 
     public static parse(hardForkInfo: any): HardForkInfo {
-        const earliestHeight = hardForkInfo.earliest_height;
-        const enabled = hardForkInfo.enabled;
-        const state = hardForkInfo.state;
-        const threshold = hardForkInfo.threshold;
-        const topHash = hardForkInfo.top_hash;
-        const version = hardForkInfo.version;
-        const votes = hardForkInfo.votes;
-        const voting = hardForkInfo.voting;
-        const window = hardForkInfo.window;
+        const earliestHeight: number = hardForkInfo.earliest_height;
+        const enabled: boolean = hardForkInfo.enabled;
+        const state: number = hardForkInfo.state;
+        const threshold: number = hardForkInfo.threshold;
+        const topHash: string = hardForkInfo.top_hash;
+        const version: number = hardForkInfo.version;
+        const votes: number = hardForkInfo.votes;
+        const voting: number = hardForkInfo.voting;
+        const window: number = hardForkInfo.window;
         
         return new HardForkInfo(earliestHeight, enabled, state, threshold, topHash, version, votes, voting, window);
     }

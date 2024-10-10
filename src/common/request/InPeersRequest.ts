@@ -1,8 +1,8 @@
 import { RPCRequest } from "./RPCRequest";
 
 export class InPeersRequest extends RPCRequest {
-    public override readonly method: 'in_peers' = 'in_peers';
-    public override readonly restricted: false = false;
+    public override readonly method: string = 'in_peers';
+    public override readonly restricted: boolean = false;
 
     public readonly inPeers: number;
 

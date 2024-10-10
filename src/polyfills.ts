@@ -53,10 +53,8 @@ import 'zone.js';  // Included with Angular CLI.
  */
 
 import 'jquery';
-import * as $$ from 'jquery';
-import * as $ from 'jquery';
-import * as bootstrapTable from 'bootstrap-table';
-//import 'bootstrap-table';
+import 'bootstrap-table';
+
 declare global {
   interface Window {
     electronAPI: {

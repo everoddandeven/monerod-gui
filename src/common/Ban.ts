@@ -21,10 +21,14 @@ export class Ban {
     }
 
     public static parse(ban: any): Ban {
-        const host = ban.host;
-        const ip = ban.ip;
-        const seconds = ban.seconds;
-        
+        const host: string = ban.host;
+        const ip: number = ban.ip;
+        const seconds: number = ban.seconds;
+
+        if (typeof host != 'string' || typeof ip != 'number' || typeof seconds != 'number') {
+          throw new Error("Could not parse ban object");
+        }
+
         return new Ban(host, ip, true, seconds);
     }
 }

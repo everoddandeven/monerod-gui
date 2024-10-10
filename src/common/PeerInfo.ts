@@ -16,11 +16,11 @@ export class PeerInfo {
   }
 
   public static parse(peerInfo: any, type: 'white' | 'gray'): PeerInfo {
-    const host = peerInfo.host;
-    const id = peerInfo.id;
-    const ip = peerInfo.ip;
-    const lastSeen = peerInfo.last_seen;
-    const port = peerInfo.port;
+    const host: number = peerInfo.host;
+    const id: string = peerInfo.id;
+    const ip: number = peerInfo.ip;
+    const lastSeen: number = peerInfo.last_seen;
+    const port: number = peerInfo.port;
 
     return new PeerInfo(type, host, id, ip, lastSeen, port);
   }

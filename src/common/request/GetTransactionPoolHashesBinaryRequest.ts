@@ -1,7 +1,7 @@
 import { RPCBinaryRequest } from "./RPCBinaryRequest";
 
 export class GetTransactionPoolHashesBinaryRequest extends RPCBinaryRequest {
-    public override readonly method: 'get_transaction_pool_hashes.bin' = 'get_transaction_pool_hashes.bin';
+    public override readonly method: string = 'get_transaction_pool_hashes.bin';
     public override readonly restricted: boolean = false;
 
     constructor() {

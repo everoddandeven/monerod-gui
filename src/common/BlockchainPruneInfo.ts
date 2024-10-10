@@ -8,8 +8,8 @@ export class BlockchainPruneInfo {
     }
 
     public static parse(info: any): BlockchainPruneInfo {
-        const pruned = info.pruned;
-        const pruningSeed = info.pruning_seed;
+        const pruned: boolean = info.pruned;
+        const pruningSeed: number = info.pruning_seed;
 
         return new BlockchainPruneInfo(pruned, pruningSeed);
     }

@@ -43,15 +43,18 @@ export class AppComponent {
     this.load();
   }
 
-  private async load(): Promise<void> {
+  private load(): void {
     this.loading = true;
 
-    try {
-      this.daemonRunning = await this.daemonService.isRunning();
-    }
-    catch(error) {
+    this.daemonService.isRunning().then((running: boolean) => {
+      this.daemonRunning = running;
+      this.loading;
+    }).catch((error) => {
       console.error(error);
-    }
+      this.daemonRunning = false;
+    }).finally(() => {
+      this.loading = false;
+    });
 
     this.loading = false;
   }

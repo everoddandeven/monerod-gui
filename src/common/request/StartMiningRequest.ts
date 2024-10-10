@@ -1,8 +1,8 @@
 import { RPCRequest } from "./RPCRequest";
 
 export class StartMiningRequest extends RPCRequest {
-    public override readonly method: 'start_mining' = 'start_mining';
-    public override readonly restricted: true = true;
+    public override readonly method: string = 'start_mining';
+    public override readonly restricted: boolean = true;
     public readonly doBackgroundMining: boolean;
     public readonly ignoreBattery: boolean;
     public readonly minerAddress: string;

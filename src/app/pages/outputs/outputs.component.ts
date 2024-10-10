@@ -47,7 +47,7 @@ export class OutputsComponent implements AfterViewInit {
       return [];
     }
 
-    return JSON.parse(this.keyImagesJsonString);
+    return <string[]>JSON.parse(this.keyImagesJsonString);
   }
 
   public getOutHistogramAmountsJsonString: string = '';
@@ -71,7 +71,7 @@ export class OutputsComponent implements AfterViewInit {
       return [];
     }
 
-    return JSON.parse(this.getOutDistributionAmountsJsonString);
+    return <number[]>JSON.parse(this.getOutDistributionAmountsJsonString);
   }
 
   constructor(private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
@@ -84,12 +84,15 @@ export class OutputsComponent implements AfterViewInit {
 
     this.daemonService.isRunning().then((value) => {
       this.daemonRunning = value;
+    }).catch((error: any) => {
+      console.error(error);
+      this.daemonRunning = false;
     })
   }
 
-  ngAfterViewInit(): void {
+  public ngAfterViewInit(): void {
       this.navbarService.setLinks(this.navbarLinks);
-      this.ngZone.run(() => {
+      this.ngZone.run(async () => {
         //const $ = require('jquery');
         //const bootstrapTable = require('bootstrap-table');
         
@@ -101,7 +104,9 @@ export class OutputsComponent implements AfterViewInit {
           classes: 'table table-bordered table-hover table-dark table-striped'
         });
         $table.bootstrapTable('showLoading');      
-        this.load();
+        await this.load();
+      }).then().catch((error: any) => {
+        console.error(error);
       });
   }
 
@@ -175,7 +180,7 @@ export class OutputsComponent implements AfterViewInit {
       this.getOutDistributionResult = await this.daemonService.getOutputDistribution(amounts, cumulative, fromHeight, toHeight);
       this.getOutDistributionError = '';
     }
-    catch(error) {
+    catch(error: any) {
       this.getOutDistributionError = `${error}`;
     }
   }
@@ -211,7 +216,7 @@ export class OutputsComponent implements AfterViewInit {
         this.isKeyImageSpentError = '';
       }
 
-    } catch(error) {
+    } catch(error: any) {
       this.isKeyImageSpentError = `${error}`;
       this.isKeyImageSpentResult = undefined;
     }

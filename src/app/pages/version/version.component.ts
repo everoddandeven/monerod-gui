@@ -1,5 +1,4 @@
 import { AfterViewInit, Component } from '@angular/core';
-import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { SimpleBootstrapCard } from '../../shared/utils';
@@ -80,6 +79,7 @@ export class VersionComponent implements AfterViewInit {
         this.cards = this.createCards();
       })
       .catch((error: any) => {
+        console.error(error);
         this.currentVersion = undefined;
         this.latestVersion = undefined
         this.cards = this.createErrorCards();
@@ -117,7 +117,7 @@ export class VersionComponent implements AfterViewInit {
         throw new Error("Download path not configured");
       }
 
-      const downloadUrl = 'https://downloads.getmonero.org/cli/linux64'; // Cambia in base al sistema
+      //const downloadUrl = 'https://downloads.getmonero.org/cli/linux64'; // Cambia in base al sistema
       const destination = settings.downloadUpgradePath; // Aggiorna con il percorso desiderato
   
       const moneroFolder = await this.moneroInstaller.downloadMonero(destination);
@@ -129,7 +129,7 @@ export class VersionComponent implements AfterViewInit {
       this.upgradeError = '';
       this.upgradeSuccess = true;
     }
-    catch(error) {
+    catch(error: any) {
       console.error(error);
       this.upgradeSuccess = false;
       this.upgradeError = `${error}`;

@@ -16,12 +16,12 @@ export class UpdateInfo {
     }
 
     public static parse(info: any): UpdateInfo {
-        const autoUri = info.auto_uri;
-        const hash = info.hash;
-        const path = info.path;
-        const update = info.update;
-        const userUri = info.user_uri;
-        const version = info.version;
+        const autoUri: string = info.auto_uri;
+        const hash: string = info.hash;
+        const path: string = info.path;
+        const update: boolean = info.update;
+        const userUri: string = info.user_uri;
+        const version: string = info.version;
 
         return new UpdateInfo(autoUri, hash, path, update, userUri, version);
     }

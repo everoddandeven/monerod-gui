@@ -1,7 +1,7 @@
 import { RPCRequest } from "./RPCRequest";
 
 export class SetLogLevelRequest extends RPCRequest {
-  public override readonly method: 'set_log_level' = 'set_log_level';
+  public override readonly method: string = 'set_log_level';
   public override readonly restricted: boolean = true;
 
   public readonly level: number;

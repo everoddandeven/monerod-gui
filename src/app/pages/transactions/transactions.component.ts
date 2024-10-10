@@ -155,7 +155,7 @@ export class TransactionsComponent implements AfterViewInit, OnDestroy {
       console.log(this.txPoolBacklog)
     }
     catch (error) {
-      throw error;
+      console.error(error);
     }
   }
 
@@ -192,7 +192,7 @@ export class TransactionsComponent implements AfterViewInit, OnDestroy {
       this.relaySuccess = true;
       this.relayError = '';
     }
-    catch(error) {
+    catch(error: any) {
       console.error(error);
       this.relaySuccess = false;
       this.relayError = `${error}`;
@@ -226,7 +226,7 @@ export class TransactionsComponent implements AfterViewInit, OnDestroy {
       this.getCoinbaseTxSumSuccess = true;
       this.getCoinbaseTxSumError = '';
     }
-    catch(error) {
+    catch(error: any) {
       console.error(error);
       this.getCoinbaseTxSumSuccess = false;
       this.getCoinbaseTxSumError = `${error}`;
@@ -263,7 +263,7 @@ export class TransactionsComponent implements AfterViewInit, OnDestroy {
       this.sendRawTxSuccess = true;
       this.sendRawTxError = '';
     }
-    catch(error) {
+    catch(error: any) {
       this.sendRawTxError = `${error}`;
     }
 
@@ -287,7 +287,7 @@ export class TransactionsComponent implements AfterViewInit, OnDestroy {
       this.getFeeEstimateError = ``;
 
     }
-    catch(error) {
+    catch(error: any) {
       console.error(error);
       this.feeEstimateCards = [];
       this.getFeeEstimateSuccess = false;

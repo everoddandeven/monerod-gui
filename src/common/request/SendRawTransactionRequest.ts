@@ -1,8 +1,8 @@
 import { RPCRequest } from "./RPCRequest";
 
 export class SendRawTransactionRequest extends RPCRequest {
-    public override readonly method: 'send_raw_transaction' = 'send_raw_transaction';
-    public override readonly restricted: false = false;
+    public override readonly method: string = 'send_raw_transaction';
+    public override readonly restricted: boolean = false;
 
     public readonly txAsHex: string;
     public readonly doNotRelay: boolean;

@@ -153,14 +153,14 @@ export class DaemonSettings {
     }
 
     // Ottieni tutte le chiavi degli oggetti
-    const keys1 = Object.keys(obj1);
-    const keys2 = Object.keys(obj2);
+    const keys1 = Object.keys(<object>obj1);
+    const keys2 = Object.keys(<object>obj2);
 
     // Se hanno un numero diverso di chiavi, non sono uguali
     if (keys1.length !== keys2.length) return false;
 
     // Controlla che ogni chiave e valore sia equivalente
-    for (let key of keys1) {
+    for (const key of keys1) {
         // Se una chiave di obj1 non esiste in obj2, non sono uguali
         if (!keys2.includes(key)) return false;
 

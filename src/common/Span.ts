@@ -36,7 +36,7 @@ export class Span {
         const remoteAddress: string = span.remote_address;
         const size: number = span.size;
         const speed: number = span.speed;
-        const startBlockHeight = span.start_block_height;
+        const startBlockHeight: number = span.start_block_height;
 
         return new Span(connectionId, nBlocks, rate, remoteAddress, size, speed, startBlockHeight);
     }

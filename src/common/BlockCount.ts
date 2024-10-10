@@ -15,7 +15,7 @@ export class BlockCount {
             throw new Error("Cannot parse null value");
         }
 
-        const count: number = parseInt(blockCount.count);
+        const count: number = parseInt(<string>blockCount.count);
 
         if (typeof blockCount.status != "string") {
             throw new Error("Invalid block count status");

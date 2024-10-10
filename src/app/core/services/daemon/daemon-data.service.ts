@@ -225,7 +225,9 @@ export class DaemonDataService {
     }
     this._firstRefresh = true;
     this.refreshInterval = setInterval(() => {
-      this.refresh();
+      this.refresh().then().catch((error: any) => {
+        console.error(error);
+      });
     },this.refreshTimeoutMs);
   }
 
@@ -343,6 +345,8 @@ export class DaemonDataService {
       if (firstRefresh) {
         this.daemonService.pruneBlockchain(true).then((info) => {
           this._isBlockchainPruned = info.pruned;
+        }).catch((error) => {
+          console.error(error);
         });
       }
       this._gettingIsBlockchainPruned = false;

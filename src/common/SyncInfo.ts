@@ -19,10 +19,10 @@ export class SyncInfo {
     }
 
     public static parse(syncInfo: any): SyncInfo {
-        const height = syncInfo.height;
-        const targetHeight = syncInfo.target_height;
-        const nextNeededPruningSeed = syncInfo.next_needed_pruning_seed;
-        const overview = syncInfo.overview;
+        const height: number = syncInfo.height;
+        const targetHeight: number = syncInfo.target_height;
+        const nextNeededPruningSeed: number = syncInfo.next_needed_pruning_seed;
+        const overview: string = syncInfo.overview;
         const peers: Peer[] = [];
         const spans: Span[] = [];
         const rawPeers: any[] = syncInfo.peers;

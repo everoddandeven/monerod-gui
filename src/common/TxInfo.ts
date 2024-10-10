@@ -35,18 +35,29 @@ export class TxInfo {
     }
 
     public static parse(txInfo: any): TxInfo {
-        return new TxInfo(
-            txInfo.double_spend,
-            txInfo.fee_too_low,
-            txInfo.invalid_input,
-            txInfo.invalid_output,
-            txInfo.low_mixin,
-            txInfo.not_rct,
-            txInfo.not_relayed,
-            txInfo.overspend,
-            txInfo.reason,
-            txInfo.too_big
-        );
+      const doubleSpend: boolean = txInfo.double_spend;
+      const feeTooLow: boolean = txInfo.fee_too_low;
+      const invalidInput: boolean = txInfo.invalid_input;
+      const invalidOutput: boolean = txInfo.invalid_output;
+      const lowMixin: boolean = txInfo.low_mixin;
+      const notRct: boolean = txInfo.not_rct;
+      const notRelayed: boolean = txInfo.not_relayed;
+      const overspend: boolean = txInfo.overspend;
+      const reason: string = txInfo.reason;
+      const tooBig: boolean = txInfo.too_big;
+
+      return new TxInfo(
+          doubleSpend,
+          feeTooLow,
+          invalidInput,
+          invalidOutput,
+          lowMixin,
+          notRct,
+          notRelayed,
+          overspend,
+          reason,
+          tooBig
+      );
     }
 }
 

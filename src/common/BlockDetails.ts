@@ -21,13 +21,13 @@ export class BlockDetails {
 
     public static parse(details: string): BlockDetails {
         const blockDetails = JSON.parse(details);
-        const majorVersion = blockDetails.major_version;
-        const minorVersion = blockDetails.minor_version;
-        const timestamp = blockDetails.timestamp;
-        const prevId = blockDetails.prev_id;
-        const nonce = blockDetails.nonce;
+        const majorVersion: number = blockDetails.major_version;
+        const minorVersion: number = blockDetails.minor_version;
+        const timestamp: number = blockDetails.timestamp;
+        const prevId: string = blockDetails.prev_id;
+        const nonce: number = blockDetails.nonce;
         const minerTx = MinerTx.parse(blockDetails.miner_tx);
-        const txHashes = blockDetails.tx_hashes;
+        const txHashes: string[] = blockDetails.tx_hashes;
 
         return new BlockDetails(majorVersion, minorVersion, timestamp, prevId, nonce, minerTx, txHashes);
     }
