@@ -1,4 +1,4 @@
-[![Angular Logo](https://www.vectorlogo.zone/logos/angular/angular-icon.svg)](https://angular.io/) [![Electron Logo](https://www.vectorlogo.zone/logos/electronjs/electronjs-icon.svg)](https://electronjs.org/)
+# Monerod-GUI
 
 ![Maintained][maintained-badge]
 [![Make a pull request][prs-badge]][prs]
@@ -12,8 +12,6 @@
 [![Star on GitHub][github-star-badge]][github-star]
 
 # Introduction
-
-# Monerod-GUI
 
 **Monerod-GUI** is a desktop application that provides a graphical user interface (GUI) for installing, updating, and interacting with the Monero daemon (`monerod`). This tool simplifies the process of managing a full Monero node, enabling users to run, configure, and monitor `monerod` without needing to use the command line.
 
@@ -155,3 +153,12 @@ Please note that Hot reload is only available in Renderer process.
 [github-watch]: https://github.com/everoddandeven/monerod-gui/watchers
 [github-star-badge]: https://img.shields.io/github/stars/everoddandeven/monerod-gui.svg?style=social
 [github-star]: https://github.com/everoddandeven/monerod-gui/stargazers
+
+## Donating
+
+Please consider donating to support the development of this project.
+
+<p align="center">
+	<img src="donate.png" width="115" height="115"/><br>
+	<code>84Q1SdQgFWaEWRn5KcvSPCQUa3NF39EJ3HPCTaiM86RHLLftqgTZpkP24jXrK5YpeedWbQAjHcFcDLpFJfr9TypfAU7pPjA</code>
+</p>
