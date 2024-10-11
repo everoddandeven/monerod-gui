@@ -13,23 +13,45 @@
 
 # Introduction
 
-Bootstrap and package your project with Angular 17 and Electron 30 (Typescript + SASS + Hot Reload) for creating Desktop applications.
+# Monerod-GUI
 
-Currently runs with:
+**Monerod-GUI** is a desktop application that provides a graphical user interface (GUI) for installing, updating, and interacting with the Monero daemon (`monerod`). This tool simplifies the process of managing a full Monero node, enabling users to run, configure, and monitor `monerod` without needing to use the command line.
 
-- Angular v17.3.6
-- Electron v30.0.1
+## Features
 
-With this sample, you can:
+### 1. Simple Monerod Setup
+- Automatically downloads and installs the latest version of `monerod` based on your operating system (Windows, macOS, Linux).
+- Provides configuration options for running `monerod` with custom parameters (e.g., enabling testnet, fast block sync, blockchain pruning).
 
-- Run your app in a local development environment with Electron & Hot reload
-- Run your app in a production environment
-- Execute your tests with Jest and Playwright (E2E)
-- Package your app into an executable file for Linux, Windows & Mac
+### 2. Seamless Updates
+- Automatically checks for new `monerod` releases.
+- One-click updates to the latest version, keeping your node secure and up-to-date.
 
-/!\ Hot reload only pertains to the renderer process. The main electron process is not able to be hot reloaded, only restarted.
+### 3. Interactive Control Panel
+- Start, stop, and monitor the status of the Monero daemon from an intuitive control panel.
+- Configure important `monerod` settings like RPC access, logging level, concurrency, and more from the GUI.
 
-/!\ Angular CLI & Electron Builder needs Node 18.10 or later to work correctly.
+### 4. Real-Time Log Monitoring
+- Displays real-time `monerod` logs in a clean, readable format, helping users track sync progress, transactions, and errors.
+- Offers log filtering for easier monitoring of specific events or errors.
+
+### 5. Network and Connectivity Monitoring
+- Detects whether your current connection is over Wi-Fi and provides feedback on network stability.
+- Supports external bind confirmations and allows for easy configuration of RPC access control for enhanced security.
+
+### 6. Cross-Platform Support
+- Monerod-GUI automatically detects the operating system and selects the appropriate `monerod` version to download.
+- Available for Windows, macOS, and Linux.
+
+### 7. Customizable Installation
+- Users can choose the installation directory for `monerod`, allowing for greater flexibility in managing the software on different systems.
+
+### Usage
+
+1. On the first run, Monerod-GUI will detect your operating system and prompt you to download the appropriate version of `monerod`.
+2. Once installed, you can start the Monero daemon with one click and configure various settings like testnet mode, fast sync, and more.
+3. Monitor real-time logs to keep track of blockchain synchronization and transaction details.
+
 
 ## Getting Started
 
