@@ -1,11 +1,12 @@
 {
-  "name": "angular-electron",
-  "description": "Angular Electron sample",
+  "name": "monerod-gui",
+  "icon": "./assets/icons/favicon.ico",
+  "description": "Monero Daemon GUI",
   "author": {
-    "name": "Maxime GRIS",
-    "email": "maxime.gris@gmail.com"
+    "name": "everoddandeven",
+    "email": "everoddandeven@protonmail.com"
   },
-  "version": "14.0.1",
+  "version": "0.1.0",
   "main": "main.js",
   "private": true,
   "dependencies": {

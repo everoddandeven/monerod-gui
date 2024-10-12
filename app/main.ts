@@ -1,4 +1,4 @@
-import {app, BrowserWindow, ipcMain, screen, dialog } from 'electron';
+import { app, BrowserWindow, ipcMain, screen, dialog, Tray, Menu, MenuItemConstructorOptions } from 'electron';
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -12,12 +12,43 @@ import * as os from 'os';
 const bz2 = require('unbzip2-stream');
 
 let win: BrowserWindow | null = null;
+let isQuitting: boolean = false;
+
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
 
 function createWindow(): BrowserWindow {
 
   const size = screen.getPrimaryDisplay().workAreaSize;
+  const wdwIcon = path.join(__dirname, 'assets/icons/monero-symbol-on-white-480.png');
+
+  const trayMenuTemplate: MenuItemConstructorOptions[] = [
+    {
+      id: "stopDaemon",
+      label: "Stop",
+      toolTip: "Stop monero daemon",
+      click: () => {
+        console.log("Clicked stop daemon tray icon menu");
+      }
+    },
+    {
+      id: "quitDaemon",
+      label: "Quit",
+      toolTip: "Quit monero daemon",
+      click: () => {
+        isQuitting = true;
+        app.quit();
+        console.log("Quit monero daemon");
+      }
+    }
+  ];
+
+  const tray = new Tray(wdwIcon);
+  const trayMenu = Menu.buildFromTemplate(trayMenuTemplate);
+  
+  tray.setContextMenu(trayMenu);
+
+  console.log(`createWindow(): icon = ${wdwIcon}`);
 
   // Create the browser window.
   win = new BrowserWindow({
@@ -33,10 +64,11 @@ function createWindow(): BrowserWindow {
       devTools: true,
     },
     autoHideMenuBar: true,
-    icon: path.join(__dirname, '../src/assets/icons/favicon.ico')
+    icon: wdwIcon
   });
 
   win.webContents.openDevTools();
+  //win.setIcon()
 
   if (serve) {
     const debug = require('electron-debug');
@@ -56,6 +88,16 @@ function createWindow(): BrowserWindow {
     const url = new URL(path.join('file:', __dirname, pathIndex));
     win.loadURL(url.href);
   }
+
+  win.on('close', (event) => {
+    if (!isQuitting) {
+      event.preventDefault();
+      win?.hide();
+      //event.returnValue = false;
+    }
+
+    return false;
+  });
 
   // Emitted when the window is closed.
   win.on('closed', () => {
@@ -299,6 +341,10 @@ try {
     if (win === null) {
       createWindow();
     }
+  });
+
+  app.on('before-quit', () => {
+    isQuitting = true;
   });
 
   ipcMain.handle('start-monerod', (event, configFilePath: string[]) => {

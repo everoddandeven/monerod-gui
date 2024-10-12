@@ -1,11 +1,12 @@
 {
-  "name": "angular-electron",
-  "version": "14.0.1",
-  "description": "Angular 17 with Electron 30 (Typescript + SASS + Hot Reload)",
-  "homepage": "https://github.com/maximegris/angular-electron",
+  "name": "monerod-gui",
+  "version": "0.1.0",
+  "description": "Monero daemon GUI",
+  "icon": "./assets/icons/favicon.ico",
+  "homepage": "https://github.com/everoddandeven/monerod-gui",
   "author": {
-    "name": "Maxime GRIS",
-    "email": "maxime.gris@gmail.com"
+    "name": "everoddandeven",
+    "email": "everoddandeven@protonmail.com"
   },
   "keywords": [
     "angular",
