@@ -12,6 +12,7 @@ import * as os from 'os';
 const bz2 = require('unbzip2-stream');
 
 let win: BrowserWindow | null = null;
+let isHidden: boolean = false;
 let isQuitting: boolean = false;
 
 const args = process.argv.slice(1),
@@ -45,7 +46,8 @@ function createWindow(): BrowserWindow {
 
   const tray = new Tray(wdwIcon);
   const trayMenu = Menu.buildFromTemplate(trayMenuTemplate);
-  
+
+  tray.setToolTip('Monero Daemon');
   tray.setContextMenu(trayMenu);
 
   console.log(`createWindow(): icon = ${wdwIcon}`);
@@ -89,10 +91,26 @@ function createWindow(): BrowserWindow {
     win.loadURL(url.href);
   }
 
+  tray.on('click', (event) => {
+    if (isHidden) {
+      win?.show();
+      isHidden = false;
+    }
+    else
+    {
+      win?.hide();
+      isHidden = true;
+    }
+    
+    console.log("Clicked monero gui icon tray");
+    console.log(event);
+  });
+
   win.on('close', (event) => {
     if (!isQuitting) {
       event.preventDefault();
       win?.hide();
+      isHidden = true;
       //event.returnValue = false;
     }
 

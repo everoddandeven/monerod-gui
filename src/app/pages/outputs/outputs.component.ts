@@ -3,6 +3,7 @@ import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { HistogramEntry, Output, OutputDistribution } from '../../../common';
+import { DaemonDataService } from '../../core/services';
 
 @Component({
   selector: 'app-outputs',
@@ -12,10 +13,23 @@ import { HistogramEntry, Output, OutputDistribution } from '../../../common';
 export class OutputsComponent implements AfterViewInit {
   public readonly navbarLinks: NavbarLink[];
 
-  public daemonRunning: boolean = false;
+  public get daemonRunning(): boolean {
+    return this.daemonData.running;
+  }
+
+  public get daemonStopping(): boolean {
+    return this.daemonData.stopping;
+  }
+
+  public get daemonRestarting(): boolean {
+    return this.daemonService.restarting;
+  }
 
   public getOutsJsonString: string = '';
   public getOutsGetTxId: boolean = false;
+  public getOutsError: string = '';
+  public getOutsSuccess: boolean = false;
+  public gettingOuts: boolean = false;
 
   public keyImagesJsonString: string = '';
   public isKeyImageSpentError: string = '';
@@ -59,6 +73,15 @@ export class OutputsComponent implements AfterViewInit {
   public getOutHistogramError: string = '';
   public gettingOutHistogram: boolean = false;
 
+  public get getOutHistogramAmounts(): number[] {
+    if (!this.validOutHistogramAmounts) {
+      return [];
+    }
+
+    return <number[]>JSON.parse(this.getOutHistogramAmountsJsonString);
+  }
+
+  public gettingOutDistribution: boolean = false;
   public getOutDistributionAmountsJsonString: string = '';
   public getOutDistributionFromHeight: number = 0;
   public getOutDistributionToHeight: number = 0;
@@ -74,20 +97,13 @@ export class OutputsComponent implements AfterViewInit {
     return <number[]>JSON.parse(this.getOutDistributionAmountsJsonString);
   }
 
-  constructor(private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
+  constructor(private daemonData: DaemonDataService, private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
     this.navbarLinks = [
-      new NavbarLink('pills-outputs-overview-tab', '#pills-outputs-overview', 'outputs-overview', false, 'Overview'),
+      new NavbarLink('pills-outputs-get-outs-tab', '#pills-outputs-get-outs', 'outputs-get-outs', false, 'Get Outs'),
       new NavbarLink('pills-outputs-histogram-tab', '#pills-outputs-histogram', 'outputs-histogram', false, 'Histogram'),
       new NavbarLink('pills-outputs-distribution-tab', '#pills-outputs-distribution', 'outputs-distribution', false, 'Distribution'),
       new NavbarLink('pills-is-key-image-spent-tab', '#pills-is-key-image-spent', 'is-key-image-spent', false, 'Is Key Image Spent')
     ];
-
-    this.daemonService.isRunning().then((value) => {
-      this.daemonRunning = value;
-    }).catch((error: any) => {
-      console.error(error);
-      this.daemonRunning = false;
-    })
   }
 
   public ngAfterViewInit(): void {
@@ -95,15 +111,23 @@ export class OutputsComponent implements AfterViewInit {
       this.ngZone.run(async () => {
         //const $ = require('jquery');
         //const bootstrapTable = require('bootstrap-table');
-        
-        const $table = $('#outsTable');
-        $table.bootstrapTable({
-          
-        });
-        $table.bootstrapTable('refreshOptions', {
+        const options = {
           classes: 'table table-bordered table-hover table-dark table-striped'
-        });
-        $table.bootstrapTable('showLoading');      
+        };
+
+        const $table = $('#outsTable');
+        $table.bootstrapTable({});
+
+        const $distributionsTable = $('#outDistributionsTable');
+        $distributionsTable.bootstrapTable({});
+
+        const $histogramTable = $('#outHistrogramsTable');
+        $histogramTable.bootstrapTable({});
+
+        $table.bootstrapTable('refreshOptions', options);
+        $distributionsTable.bootstrapTable('refreshOptions', options);
+        $histogramTable.bootstrapTable('refreshOptions', options);
+
         await this.load();
       }).then().catch((error: any) => {
         console.error(error);
@@ -132,6 +156,10 @@ export class OutputsComponent implements AfterViewInit {
         return false;
       }
 
+      if (_outs.length == 0) {
+        return false;
+      }
+
       _outs.forEach((_out) => Output.parse(_out));
 
       return true;
@@ -141,13 +169,25 @@ export class OutputsComponent implements AfterViewInit {
   }
 
   public async getOuts() {
-    const $table = $('#outsTable');
-    $table.bootstrapTable({});
+    this.gettingOuts = true;
 
-    const outs = await this.daemonService.getOuts(this.getOutsOuts, this.getOutsGetTxId);
+    try {
+      const $table = $('#outsTable');
+      $table.bootstrapTable({});
+  
+      const outs = await this.daemonService.getOuts(this.getOutsOuts, this.getOutsGetTxId); 
+      $table.bootstrapTable('load', outs);
 
-    $table.bootstrapTable('load', outs)
+      this.getOutsError = '';
+      this.getOutsSuccess = true;
+    }
+    catch(error: any) {
+      console.error(error);
+      this.getOutsError = `${error}`;
+      this.getOutsSuccess = false;
+    }
 
+    this.gettingOuts = false;
   }
 
   public get validOutDistributionAmounts(): boolean {
@@ -169,7 +209,28 @@ export class OutputsComponent implements AfterViewInit {
     }
   }
 
+  public get validOutHistogramAmounts(): boolean {
+    try {
+      const amounts: number[] = JSON.parse(this.getOutHistogramAmountsJsonString);
+
+      if(!Array.isArray(amounts)) {
+        return false;
+      }
+
+      amounts.forEach((amount) => {
+        if (typeof amount != 'number' || amount <= 0) throw new Error("");
+      })
+
+      return true;
+    }
+    catch(error) {
+      return false;
+    }
+  }
+
   public async getOutDistribution(): Promise<void> {
+    this.gettingOutDistribution = true;
+
     try 
     {
       const amounts = this.getOutDistributionAmounts;
@@ -178,15 +239,42 @@ export class OutputsComponent implements AfterViewInit {
       const toHeight = this.getOutDistributionToHeight;
 
       this.getOutDistributionResult = await this.daemonService.getOutputDistribution(amounts, cumulative, fromHeight, toHeight);
+      this.loadOutDistributionTable();
       this.getOutDistributionError = '';
     }
     catch(error: any) {
       this.getOutDistributionError = `${error}`;
+      this.getOutDistributionResult = undefined;
     }
+
+    this.gettingOutDistribution = false;
+  }
+
+  private loadOutDistributionTable(): void {
+    const $table = $('#outDistributionsTable');
+    $table.bootstrapTable('load', this.getOutDistributionResult);
+  }
+
+  private loadOutHistogramTable(): void {
+    const $table = $('#outHistogramsTable');
+    $table.bootstrapTable('load', this.getOutHistogramResult);
   }
 
   public async getOutHistogram(): Promise<void> {
-    
+    this.gettingOutHistogram = true;
+
+    try {
+      this.getOutHistogramResult = await this.daemonService.getOutputHistogram(this.getOutHistogramAmounts, this.getOutHistogramMinCount, this.getOutHistogramMaxCount, this.getOutHistogramUnlocked, this.getOutHistogramRecentCutoff);
+      this.getOutHistogramError = '';
+      this.loadOutHistogramTable();
+    }
+    catch(error: any) {
+      console.error(error);
+      this.getOutHistogramError = `${error}`;
+      this.getOutHistogramResult = undefined;
+    }
+
+    this.gettingOutHistogram = false;
   }
 
   public async isKeyImageSpent(): Promise<void> {
