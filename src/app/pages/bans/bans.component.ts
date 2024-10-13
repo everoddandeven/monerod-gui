@@ -89,7 +89,14 @@ export class BansComponent implements AfterViewInit {
     let _bans: Ban[] = [];
     
     try {
-      _bans = await this.daemonService.getBans();
+      const running = await this.daemonService.isRunning();
+
+      if (running) {
+        _bans = await this.daemonService.getBans();
+      }
+      else {
+        _bans = [];
+      }
     }
     catch (error) {
       console.error(error);

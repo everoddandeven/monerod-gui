@@ -69,7 +69,7 @@ function createWindow(): BrowserWindow {
     icon: wdwIcon
   });
 
-  win.webContents.openDevTools();
+  //win.webContents.openDevTools();
   //win.setIcon()
 
   if (serve) {
@@ -363,6 +363,11 @@ try {
 
   app.on('before-quit', () => {
     isQuitting = true;
+  });
+
+  ipcMain.handle('quit', (event) => {
+    isQuitting = true;
+    app.quit();
   });
 
   ipcMain.handle('start-monerod', (event, configFilePath: string[]) => {

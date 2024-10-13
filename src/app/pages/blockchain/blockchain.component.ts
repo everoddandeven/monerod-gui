@@ -21,7 +21,10 @@ export class BlockchainComponent implements AfterViewInit {
     return this.daemonData.stopping;
   }
 
-  public lastBlockHeader?: BlockHeader;
+  public get lastBlockHeader(): BlockHeader | undefined {
+    return this.daemonData.lastBlockHeader;
+  }
+
   public getLastBlockError: string = '';
   public block?: Block;
   public getBlockByHash: boolean = false;
@@ -64,28 +67,8 @@ export class BlockchainComponent implements AfterViewInit {
     ];
   }
 
-  ngAfterViewInit(): void {
+  public ngAfterViewInit(): void {
     this.navbarService.setLinks(this.navbarLinks);
-    this.load().then().catch((error: any) => {
-      console.error(error);
-    });
-  }
-
-  public async load(): Promise<void> {
-    await this.getLastBlockHeader();
-  }
-
-  private async getLastBlockHeader(): Promise<void> {
-    this.gettingLastBlock = true;
-    try {
-      this.lastBlockHeader = await this.daemonService.getLastBlockHeader(true);
-      this.getLastBlockError = '';
-    }
-    catch(error: any) {
-      console.error(error);
-      this.getLastBlockError = `${error}`;
-    }
-    this.gettingLastBlock = false;
   }
 
   public async getBlock(): Promise<void> {

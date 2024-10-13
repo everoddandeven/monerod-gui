@@ -58,8 +58,10 @@ import 'bootstrap-table';
 declare global {
   interface Window {
     electronAPI: {
+      startMonerod: (args: string[]) => void;
       getOsType: () => void;
       gotOsType: (callback: (event: any, osType: { platform: string, arch: string }) => void) => void;
+      quit: () => void;
     };
   }
 }

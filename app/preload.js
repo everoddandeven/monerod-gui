@@ -44,5 +44,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   gotOsType: (callback) => {
     ipcRenderer.on('got-os-type', callback);
+  },
+  quit: () => {
+    ipcRenderer.invoke('quit');
   }
 });

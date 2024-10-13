@@ -72,6 +72,12 @@ export class NavbarComponent {
   }
 
   public async quit(): Promise<void> {
+    const running: boolean = await this.daemonService.isRunning();
 
+    if (running) {
+      await this.stopDaemon();
+    }
+
+    window.electronAPI.quit();
   }
 }

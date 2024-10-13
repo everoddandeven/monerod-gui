@@ -47,7 +47,9 @@ export class DaemonNotRunningComponent {
     }).catch((error: any) => {
       console.error(error);
       this.daemonConfigured = false;
-    })
+    });
+
+    this.daemonService.isRunning().then().catch((error: any) => console.error(error));
   }
 
   public async startDaemon(): Promise<void> {

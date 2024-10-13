@@ -17,7 +17,11 @@ export class TransactionsComponent implements AfterViewInit, OnDestroy {
   public readonly navbarLinks: NavbarLink[];
 
   public canRelay: boolean;
-  public txPoolBacklog: TxBacklogEntry[];
+  
+  public get txPoolBacklog(): TxBacklogEntry[] {
+    return this.daemonData.txPoolBacklog;
+  }
+
   public height: number;
   public count: number;
 
@@ -80,14 +84,13 @@ export class TransactionsComponent implements AfterViewInit, OnDestroy {
       new NavbarLink('pills-relay-tx-tab', '#pills-relay-tx', 'pills-relay-tx', false, 'Relay Tx'),
       new NavbarLink('pills-send-raw-tx-tab', '#pills-send-raw-tx', 'pills-send-raw-tx', false, 'Send Raw Tx'),
       new NavbarLink('pills-get-fee-estimate-tab', '#pills-get-fee-estimate', 'pills-get-fee-estimate', false, 'Get Fee Estimate'),
-      new NavbarLink('pills-tx-backlog-tab', '#pills-tx-backlog', 'pills-tx-backlog', false, 'Tx Backlog'),
+      new NavbarLink('pills-tx-pool-backlog-tab', '#pills-tx-pool-backlog', 'pills-tx-pool-backlog', false, 'Tx Pool Backlog'),
       new NavbarLink('pills-coinbase-tx-sum-tab', '#pills-coinbase-tx-sum', 'pills-coinbase-tx-sum', false, 'Coinbase Tx Sum'),
       new NavbarLink('pills-flush-tx-pool-tab', '#pills-flush-tx-pool', 'pills-flush-tx-pool', false, 'Flush Tx Pool'),
       new NavbarLink('pills-flush-cahe-tab', '#pills-flush-cache', 'pills-flush-cache', false, 'Flush Cache')
     ];
     this.height = 0;
     this.count = 0;
-    this.txPoolBacklog = [];
 
     this.canRelay = false;
   }
@@ -95,18 +98,11 @@ export class TransactionsComponent implements AfterViewInit, OnDestroy {
   public ngAfterViewInit(): void {
     this.ngZone.run(() => {
       this.navbarService.setLinks(this.navbarLinks);
-    
+      
       this.initTables();
       this.subscriptions.push(this.daemonData.syncEnd.subscribe(() => {
         this.refreshTables();
       }));
-  
-      this.load().then(() => {
-        this.navbarService.enableLinks();
-      }).catch((error) => {
-        console.error(error);
-        this.navbarService.disableLinks();
-      });
     });
   }
 
@@ -130,6 +126,7 @@ export class TransactionsComponent implements AfterViewInit, OnDestroy {
   private initTables(): void {
     this.initTable('spentKeyImagesTable');
     this.initTable('transactionsTable');
+    this.initTable('txPoolBacklogTable');
   }
 
   private loadTransactionsTable(): void {
@@ -144,19 +141,16 @@ export class TransactionsComponent implements AfterViewInit, OnDestroy {
     $table.bootstrapTable('load', this.spentKeyImages);
   }
 
+  private loadTxPoolBacklogTable(): void {
+    const $table = $('#txPoolBacklogTable');
+
+    $table.bootstrapTable('load', this.txPoolBacklog)
+  }
+
   private refreshTables(): void {
     this.loadSpentKeyImagesTable();
     this.loadTransactionsTable();
-  }
-
-  private async load(): Promise<void> {
-    try {
-      this.txPoolBacklog = await this.daemonService.getTxPoolBacklog();
-      console.log(this.txPoolBacklog)
-    }
-    catch (error) {
-      console.error(error);
-    }
+    this.loadTxPoolBacklogTable();
   }
 
   public validTxIds(): boolean {

@@ -1,6 +1,6 @@
-import { EventEmitter, Injectable } from '@angular/core';
+import { EventEmitter, Injectable, NgZone } from '@angular/core';
 import { DaemonService } from './daemon.service';
-import { BlockCount, BlockHeader, Chain, Connection, CoreIsBusyError, DaemonInfo, MinerData, MiningStatus, NetStats, NetStatsHistory, PeerInfo, PublicNode, SyncInfo, TxPool } from '../../../../common';
+import { BlockCount, BlockHeader, Chain, Connection, CoreIsBusyError, DaemonInfo, MinerData, MiningStatus, NetStats, NetStatsHistory, PeerInfo, PublicNode, SyncInfo, TxBacklogEntry, TxPool } from '../../../../common';
 
 @Injectable({
   providedIn: 'root'
@@ -57,6 +57,9 @@ export class DaemonDataService {
   private _peerList: PeerInfo[] = [];
   private _gettingPeerList: boolean = false;
 
+  private _txPoolBacklog: TxBacklogEntry[] = [];
+  private _gettingTxPoolBackLog: boolean = false;
+
   public readonly syncStart: EventEmitter<void> = new EventEmitter<void>();
   public readonly syncEnd: EventEmitter<void> = new EventEmitter<void>();
   public readonly syncError: EventEmitter<Error> = new EventEmitter<Error>();
@@ -67,15 +70,19 @@ export class DaemonDataService {
   public readonly netStatsRefreshStart: EventEmitter<void> = new EventEmitter<void>();
   public readonly netStatsRefreshEnd: EventEmitter<void> = new EventEmitter<void>();
 
-  constructor(private daemonService: DaemonService) {
+  constructor(private daemonService: DaemonService, private ngZone: NgZone) {
 
     this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
-      if (running) {
-        this.startLoop();
-      }
-      else {
-        this.stopLoop();
-      }
+      this.ngZone.run(() => {
+        if (running) {
+          this._daemonRunning = true;
+          this.startLoop();
+        }
+        else {
+          this.stopLoop();
+        }
+      });
+      
     });
   }
 
@@ -215,6 +222,14 @@ export class DaemonDataService {
     return this._gettingPeerList;
   }
 
+  public get txPoolBacklog(): TxBacklogEntry[] {
+    return this._txPoolBacklog;
+  }
+
+  public get gettingTxPoolBacklog(): boolean {
+    return this._gettingTxPoolBackLog;
+  }
+
   public setRefreshTimeout(ms: number = 5000): void {
     this.refreshTimeoutMs = ms;
   }
@@ -313,6 +328,7 @@ export class DaemonDataService {
       this._firstRefresh = false;
 
       if (!this._daemonRunning) {
+        this.stopLoop();
         this.syncEnd.emit();
         return;
       }

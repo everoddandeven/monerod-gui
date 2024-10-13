@@ -201,6 +201,27 @@
 
   </div>
 
+  <div class="tab-pane fade" id="pills-tx-pool-backlog" role="tabpanel" aria-labelledby="pills-tx-pool-backlog-tab" tabindex="0">
+    <h4 class="mb-3">All transactions pool backlog</h4>
+    <br>
+    
+    <table
+      id="txPoolBacklogTable"
+      data-toggle="txPoolBacklogTable"
+      data-toolbar="#toolbar"
+      data-paged="true"
+      data-height="460"
+      >
+      <thead>
+      <tr>
+          <th data-field="height">Blob Size</th>
+          <th data-field="key">Fee</th>
+          <th data-field="mask">Time In Pool</th>
+      </tr>
+      </thead>
+    </table>
+  </div>
+
   <div class="tab-pane fade" id="pills-coinbase-tx-sum" role="tabpanel" aria-labelledby="pills-coinbase-tx-sum-tab" tabindex="0">
     <div class="row g-5 p-2">
         <div class="col-md-7 col-lg-12">
