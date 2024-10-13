@@ -25,7 +25,7 @@ export class LogsService {
   }
 
   public cleanLog(message: string): string {
-    return message.replace(/\u001b\[[0-9;]*m/g, '').replace(/[\r\n]+/g, '\n').trim();
+    return message.replace(/\u001b\[[0-9;]*m/g, '').replace(/[\r\n]+/g, '\n').trim(); // eslint-disable-line
     //return message.replace(/[\r\n]+/g, '\n').trim();
   }
 
