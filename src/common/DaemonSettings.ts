@@ -184,7 +184,7 @@ export class DaemonSettings {
   public toCommandOptions(): string[] {
     const options: string[] = [];
     if (this.monerodPath != '') options.push(this.monerodPath);
-    
+
     if (this.mainnet) options.push(`--mainnet`);
     else if (this.testnet) options.push(`--testnet`);
     else if (this.stagenet) options.push(`--stagenet`);

@@ -79,6 +79,7 @@ import { DaemonSettings } from '../../../../common/DaemonSettings';
 import { MethodNotFoundError } from '../../../../common/error/MethodNotFoundError';
 import { openDB, IDBPDatabase } from "idb"
 import { PeerInfo, TxPool } from '../../../../common';
+import { MoneroInstallerService } from '../monero-installer/monero-installer.service';
 
 @Injectable({
   providedIn: 'root'
@@ -100,6 +101,9 @@ export class DaemonService {
   public stopping: boolean = false;
   public starting: boolean = false;
   public restarting: boolean = false;
+  public disablingSync: boolean = false;
+  public enablingSync: boolean = false;
+
   public readonly onDaemonStatusChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
   public readonly onDaemonStopStart: EventEmitter<void> = new EventEmitter<void>();
   public readonly onDaemonStopEnd: EventEmitter<void> = new EventEmitter<void>();
@@ -111,9 +115,10 @@ export class DaemonService {
     "Access-Control-Allow-Methods": 'POST,GET' // this states the allowed methods
   };
 
-  constructor(private httpClient: HttpClient, private electronService: ElectronService) {
+  constructor(private installer: MoneroInstallerService, private httpClient: HttpClient, private electronService: ElectronService) {
     this.openDbPromise = this.openDatabase();
-    this.settings = this.loadSettings();
+    this.settings = new DaemonSettings();
+
     const wdw = (window as any);
 
     if (this.electronService.isElectron) {
@@ -131,6 +136,85 @@ export class DaemonService {
       });
     }
   }
+
+  public async isWifiConnected(): Promise<boolean> {
+    try {
+      return new Promise<boolean>((resolve, reject) => {
+        try {
+          window.electronAPI.onIsWifiConnectedResponse((event: any, connected: boolean) => {
+            console.debug(event);
+            resolve(connected);
+          });
+
+          window.electronAPI.isWifiConnected();
+        }
+        catch(error: any) {
+          reject(error);
+        }
+      });
+    }
+    catch(error: any) {
+      console.error(error);
+    }
+
+    return false;
+  }
+
+  public async disableSync(): Promise<void> {
+    this.disablingSync = true;
+
+    try {
+      const running: boolean = await this.isRunning();
+
+      if (!running) {
+        throw new Error("Daemon not running");
+      }
+
+      if (this.settings.noSync) {
+        throw new Error("Daemon already not syncing");
+      }
+  
+      await this.stopDaemon();
+
+      this.settings.noSync = true;
+
+      await this.startDaemon(this.settings);
+    }
+    catch(error: any) {
+      console.error(error);
+    }
+
+    this.disablingSync = false;
+  }
+
+
+  public async enableSync(): Promise<void> {
+    this.enablingSync = true;
+
+    try {
+      const running: boolean = await this.isRunning();
+
+      if (!running) {
+        throw new Error("Daemon not running");
+      }
+
+      if (!this.settings.noSync) {
+        throw new Error("Daemon already not syncing");
+      }
+  
+      await this.stopDaemon();
+
+      this.settings.noSync = false;
+
+      await this.startDaemon(this.settings);
+    }
+    catch(error: any) {
+      console.error(error);
+    }
+
+    this.enablingSync = false;
+  }
+
 
   private onClose(): void {
     this.daemonRunning = false;
@@ -156,7 +240,6 @@ export class DaemonService {
   public async saveSettings(settings: DaemonSettings, restartDaemon: boolean = true): Promise<void> {
     const db = await this.openDbPromise;
     await db.put(this.storeName, { id: 1, ...settings });
-    this.settings = settings;
 
     if (restartDaemon) {
       const running = await this.isRunning();
@@ -178,14 +261,12 @@ export class DaemonService {
     const db = await this.openDbPromise;
     const result = await db.get(this.storeName, 1);
     if (result) {
-      this.settings = DaemonSettings.parse(result);
+      return DaemonSettings.parse(result);
     }
     else
     {
-      this.settings = new DaemonSettings();
+      return new DaemonSettings();
     }
-
-    return this.settings;
   }
 
   public async deleteSettings(): Promise<void> {
@@ -193,32 +274,7 @@ export class DaemonService {
     await db.delete(this.storeName, 1);
   }
 
-  private loadSettings(): DaemonSettings {
-      /*
-  const args = [
-    '--testnet',
-    '--fast-block-sync', '1',
-    '--prune-blockchain',
-    '--sync-pruned-blocks',
-    '--confirm-external-bind',
-    '--max-concurrency', '1',
-    '--log-level', '1',
-    '--rpc-access-control-origins=*'
-  ];
-  */
-    const settings = new DaemonSettings();
-    settings.testnet = true;
-    settings.fastBlockSync = true;
-    settings.pruneBlockchain = true;
-    settings.syncPrunedBlocks = true;
-    settings.confirmExternalBind = true;
-    settings.logLevel = 1;
-    settings.rpcAccessControlOrigins = "*";
-    return settings;
-  }
-
   private raiseRpcError(error: RpcError): void {
-
     if (error.code == -9) {
       throw new CoreIsBusyError();
     }
@@ -229,7 +285,6 @@ export class DaemonService {
     {
       throw new Error(error.message);
     }
-
   }
 
   private async delay(ms: number = 0): Promise<void> {
@@ -281,36 +336,65 @@ export class DaemonService {
     }
   }
 
-  public async startDaemon(): Promise<void> {
-    if (await this.isRunning()) {
-      console.warn("Daemon already running");
-      return;
-    }
+  public async startDaemon(customSettings?: DaemonSettings): Promise<void> {
+    await new Promise<void>(async (resolve, reject) => {
+      if (await this.isRunning()) {
+        console.warn("Daemon already running");
+        return;
+      }
+  
+      this.starting = true;
+  
+      console.log("Starting daemon");
 
-    this.starting = true;
+      this.settings = customSettings ? customSettings : await this.getSettings();
+        
+      if (!this.settings.noSync && !this.settings.syncOnWifi) {
+        const wifiConnected = await this.isWifiConnected();
 
-    console.log("Starting daemon");
-    const settings = await this.getSettings();
-    
-    if (this.electronService.ipcRenderer) this.electronService.ipcRenderer.send('start-monerod', settings.toCommandOptions());
-    else {
-      (window as any).electronAPI.startMonerod(settings.toCommandOptions());
-    }
+        if (wifiConnected) {
+          console.log("Disabling sync ...");
+  
+          this.settings.noSync = true;
+        }
+      }
+      else if (!this.settings.noSync && !this.settings.syncOnWifi) {
+        const wifiConnected = await this.isWifiConnected();
 
-    await this.delay(3000);
+        if (!wifiConnected) {
+          console.log("Enabling sync ...");
+  
+          this.settings.noSync = false;
+        }
+      }
 
-    if (await this.isRunning(true)) {
-      console.log("Daemon started");
-      this.onDaemonStatusChanged.emit(true);
-    }
-    else 
-    {
-      console.log("Daemon not started");
-      this.onDaemonStatusChanged.emit(false);
-    }
+      window.electronAPI.onMonerodStarted((event: any, started: boolean) => {
+        console.debug(event);
+        
+        if (started) {
+          console.log("Daemon started");
+          this.onDaemonStatusChanged.emit(true);
+          resolve();
+        }
+        else {
+          console.log("Daemon not started");
+          this.onDaemonStatusChanged.emit(false);
+          reject('Could not start daemon');
+        }
+
+      })
+
+      window.electronAPI.startMonerod(this.settings.toCommandOptions());
+
+    });
 
     this.starting = false;
 
+    const isRunning: boolean = await this.isRunning(true);
+
+    if (!isRunning) {
+      throw new Error("Daemon started but not running");
+    }
   }
 
   public async restartDaemon(): Promise<void> {
@@ -963,6 +1047,25 @@ export class DaemonService {
     }
 
     return response.height;
+  }
+
+  public async upgrade(): Promise<void> {
+    const settings = await this.getSettings();
+      if (settings.upgradeAutomatically) {
+        throw new Error('Monero Daemon will upgrade automatically');
+      }
+      if (settings.downloadUpgradePath == '') {
+        throw new Error("Download path not configured");
+      }
+
+      //const downloadUrl = 'https://downloads.getmonero.org/cli/linux64'; // Cambia in base al sistema
+      const destination = settings.downloadUpgradePath; // Aggiorna con il percorso desiderato
+  
+      const moneroFolder = await this.installer.downloadMonero(destination);
+      
+      settings.monerodPath = `${moneroFolder}/monerod`;
+
+      await this.saveSettings(settings);
   }
 
   public async update(command: 'check' | 'download', path: string = ''): Promise<UpdateInfo> {

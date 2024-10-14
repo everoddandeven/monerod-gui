@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain, screen, dialog, Tray, Menu, MenuItemConstructorOptions } from 'electron';
-import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
+import { ChildProcessWithoutNullStreams, exec, ExecException, spawn } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as https from 'https';
@@ -21,7 +21,13 @@ const args = process.argv.slice(1),
 function createWindow(): BrowserWindow {
 
   const size = screen.getPrimaryDisplay().workAreaSize;
-  const wdwIcon = path.join(__dirname, 'assets/icons/monero-symbol-on-white-480.png');
+  let dirname = __dirname;
+
+  if (dirname.endsWith('/app')) {
+    dirname = dirname.replace('/app', '/src')
+  }
+
+  const wdwIcon = path.join(dirname, 'assets/icons/monero-symbol-on-white-480.png');
 
   const trayMenuTemplate: MenuItemConstructorOptions[] = [
     {
@@ -128,14 +134,19 @@ function createWindow(): BrowserWindow {
   return win;
 }
 
-function isWifiConnected() {
+function isWifiConnectedOld() {
+  console.log("isWifiConnected()");
   const networkInterfaces = os.networkInterfaces();
   
+  console.log(`isWifiConnected(): network interfaces ${networkInterfaces}`);
+  console.log(networkInterfaces);
+
   for (const interfaceName in networkInterfaces) {
     const networkInterface = networkInterfaces[interfaceName];
 
     if (networkInterface) {
       for (const network of networkInterface) {
+        console.log(network);
         if (network.family === 'IPv4' && !network.internal && network.mac !== '00:00:00:00:00:00') {
           if (interfaceName.toLowerCase().includes('wifi') || interfaceName.toLowerCase().includes('wlan')) {
             return true;
@@ -145,6 +156,62 @@ function isWifiConnected() {
     }
   }
   return false;
+}
+
+function isConnectedToWiFi(): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    const platform = os.platform();  // Use os to get the platform
+
+    let command = '';
+    if (platform === 'win32') {
+      // Windows: Use 'netsh' command to check the Wi-Fi status
+      command = 'netsh wlan show interfaces';
+    } else if (platform === 'darwin') {
+      // macOS: Use 'airport' command to check the Wi-Fi status
+      command = "/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -I | grep 'state: running'";
+    } else if (platform === 'linux') {
+      // Linux: Use 'nmcli' to check for Wi-Fi connectivity
+      command = 'nmcli dev status';
+    } else {
+      resolve(false);  // Unsupported platform
+    }
+
+    // Execute the platform-specific command
+    if (command) {
+      exec(command, (error: ExecException | null, stdout: string, stderr: string) => {
+        if (error) {
+          console.error(error);
+          reject(stderr);
+          resolve(false);  // In case of error, assume not connected to Wi-Fi
+        } else {
+          // Check if the output indicates a connected status
+          if (stdout) {
+            const components: string[] = stdout.split("\n");
+            console.log(components);
+
+            components.forEach((component: string) => {
+              if (component.includes('wifi') && !component.includes('--')) {
+                resolve(true);
+              }
+            });
+
+            resolve(false);
+          } else {
+            resolve(false);
+          }
+        }
+      });
+    }
+  });
+}
+
+function isWifiConnected() {
+  isConnectedToWiFi().then((connected: boolean) => {
+    win?.webContents.send('is-wifi-connected-result', connected);
+  }).catch((error: any) => {
+    console.error(error);
+    win?.webContents.send('is-wifi-connected-result', false);
+  });
 }
 
 function getMonerodVersion(monerodFilePath: string): void {
@@ -159,6 +226,8 @@ function getMonerodVersion(monerodFilePath: string): void {
   })
 }
 
+let moneroFirstStdout: boolean = true;
+
 function startMoneroDaemon(commandOptions: string[]): ChildProcessWithoutNullStreams {
   const monerodPath = commandOptions.shift();
 
@@ -168,6 +237,8 @@ function startMoneroDaemon(commandOptions: string[]): ChildProcessWithoutNullStr
   }
 
   console.log("Starting monerod daemon with options: " + commandOptions.join(" "));
+  
+  moneroFirstStdout = true;
 
   // Avvia il processo usando spawn
   const monerodProcess = spawn(monerodPath, commandOptions);
@@ -175,19 +246,32 @@ function startMoneroDaemon(commandOptions: string[]): ChildProcessWithoutNullStr
   // Gestisci l'output di stdout in streaming
   monerodProcess.stdout.on('data', (data) => {
     //console.log(`monerod stdout: ${data}`);
+    const pattern = '**********************************************************************';
+
+    if (moneroFirstStdout && data.includes(pattern)) {
+      win?.webContents.send('monerod-started', true);
+      moneroFirstStdout = false;
+    }
+
     win?.webContents.send('monero-stdout', `${data}`);
     // Puoi anche inviare i log all'interfaccia utente tramite IPC
   });
 
   // Gestisci gli errori in stderr
   monerodProcess.stderr.on('data', (data) => {
-    //console.error(`monerod stderr: ${data}`);
+    console.error(`monerod error: ${data}`);
+
+    if (moneroFirstStdout) {
+      win?.webContents.send('monerod-started', false);
+      moneroFirstStdout = false;
+    }
+
     win?.webContents.send('monero-stderr', `${data}`);
   });
 
   // Gestisci la chiusura del processo
-  monerodProcess.on('close', (code) => {
-    console.log(`monerod chiuso con codice: ${code}`);
+  monerodProcess.on('close', (code: number) => {
+    console.log(`monerod exited with code: ${code}`);
     win?.webContents.send('monero-stdout', `monerod exited with code: ${code}`);
     win?.webContents.send('monero-close', code);
   });
@@ -421,7 +505,8 @@ try {
   });
 
   ipcMain.handle('is-wifi-connected', async (event) => {
-    win?.webContents.send('is-wifi-connected-result', isWifiConnected());
+    isWifiConnected();
+    //win?.webContents.send('is-wifi-connected-result', isWifiConnected());
   });
 
   ipcMain.handle('get-os-type', (event) => {

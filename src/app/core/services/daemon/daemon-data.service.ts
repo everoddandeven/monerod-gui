@@ -60,7 +60,7 @@ export class DaemonDataService {
   private _txPoolBacklog: TxBacklogEntry[] = [];
   private _gettingTxPoolBackLog: boolean = false;
 
-  public readonly syncStart: EventEmitter<void> = new EventEmitter<void>();
+  public readonly syncStart: EventEmitter<{ first: boolean }> = new EventEmitter<{ first: boolean }>();
   public readonly syncEnd: EventEmitter<void> = new EventEmitter<void>();
   public readonly syncError: EventEmitter<Error> = new EventEmitter<Error>();
 
@@ -91,7 +91,7 @@ export class DaemonDataService {
   }
 
   public get running(): boolean {
-    return this._daemonRunning;
+    return this._daemonRunning
   }
 
   public get starting(): boolean {
@@ -239,11 +239,17 @@ export class DaemonDataService {
       throw new Error("Loop already started");
     }
     this._firstRefresh = true;
-    this.refreshInterval = setInterval(() => {
-      this.refresh().then().catch((error: any) => {
-        console.error(error);
-      });
-    },this.refreshTimeoutMs);
+
+    this.refresh().then(() => {
+      this.refreshInterval = setInterval(() => {
+        this.refresh().then().catch((error: any) => {
+          console.error(error);
+        });
+      },this.refreshTimeoutMs);
+    }).catch((error: any) => {
+      console.error(error);
+      this._refreshing = false;
+    }); 
   }
 
   private stopLoop(): void {
@@ -320,7 +326,31 @@ export class DaemonDataService {
     }
 
     this._refreshing = true;
-    this.syncStart.emit();
+
+    const settings = await this.daemonService.getSettings();
+    
+    const updateInfo = await this.daemonService.checkUpdate()
+
+    if (updateInfo.update) {
+      await this.daemonService.upgrade();
+      return;
+    }
+    
+    const syncAlreadyDisabled = this.daemonService.settings.noSync;
+    const wifiConnected = await this.daemonService.isWifiConnected();
+
+    if (!settings.noSync && !syncAlreadyDisabled && !settings.syncOnWifi && wifiConnected) {
+      console.log("Disabling sync ...");
+
+      await this.daemonService.disableSync();
+    }
+    else if (!settings.noSync && syncAlreadyDisabled && !settings.syncOnWifi && !wifiConnected) {
+      console.log("Enabling sync ...");
+
+      await this.daemonService.enableSync();
+    }
+
+    this.syncStart.emit({ first: this._firstRefresh });
 
     try {
       const firstRefresh = this._firstRefresh;
@@ -336,6 +366,11 @@ export class DaemonDataService {
       this._gettingDaemonInfo = true;
       this._daemonInfo = await this.daemonService.getInfo();
       this._gettingDaemonInfo = false;
+
+      if (this.daemonService.settings.upgradeAutomatically && this._daemonInfo.updateAvailable) {
+        await this.daemonService.upgrade();
+        return;
+      }
 
       this._gettingSyncInfo = true;
       this.syncInfoRefreshStart.emit();

@@ -4,6 +4,7 @@ import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { SimpleBootstrapCard } from '../../shared/utils';
 import { DaemonVersion } from '../../../common/DaemonVersion';
 import { DaemonDataService, ElectronService, MoneroInstallerService } from '../../core/services';
+import { DaemonSettings } from '../../../common';
 
 @Component({
   selector: 'app-version',
@@ -15,6 +16,7 @@ export class VersionComponent implements AfterViewInit {
   public cards: SimpleBootstrapCard[];
   public currentVersion?: DaemonVersion;
   public latestVersion?: DaemonVersion;
+  public settings: DaemonSettings = new DaemonSettings();
 
   public get buttonDisabled(): boolean {
     const title = this.buttonTitle;
@@ -23,7 +25,7 @@ export class VersionComponent implements AfterViewInit {
       return false;
     }
 
-    const configured = this.daemonService.settings.monerodPath != '';
+    const configured = this.settings.monerodPath != '';
     const updateAvailable = this.daemonData.info ? this.daemonData.info.updateAvailable : false;
 
     if (title == 'Upgrade' && configured && updateAvailable) {
@@ -40,7 +42,7 @@ export class VersionComponent implements AfterViewInit {
       return 'Upgrade';
     }
 
-    const notConfigured = this.daemonService.settings.monerodPath == '';
+    const notConfigured = this.settings.monerodPath == '';
 
     if (notConfigured) {
       return 'Install';
@@ -87,6 +89,7 @@ export class VersionComponent implements AfterViewInit {
   }
 
   public async load(): Promise<void> {
+    this.settings = await this.daemonService.getSettings();
     const isElectron = this.electronService.isElectron || (window as any).electronAPI != null;
     const version = await this.daemonService.getVersion(isElectron);
     const latestVersion = await this.daemonService.getLatestVersion();
@@ -109,22 +112,7 @@ export class VersionComponent implements AfterViewInit {
 
     this.upgrading = true;
     try {    
-      const settings = await this.daemonService.getSettings();
-      if (settings.upgradeAutomatically) {
-        throw new Error('Monero Daemon will upgrade automatically');
-      }
-      if (settings.downloadUpgradePath == '') {
-        throw new Error("Download path not configured");
-      }
-
-      //const downloadUrl = 'https://downloads.getmonero.org/cli/linux64'; // Cambia in base al sistema
-      const destination = settings.downloadUpgradePath; // Aggiorna con il percorso desiderato
-  
-      const moneroFolder = await this.moneroInstaller.downloadMonero(destination);
-      
-      settings.monerodPath = `${moneroFolder}/monerod`;
-
-      await this.daemonService.saveSettings(settings);
+      await this.daemonService.upgrade();
 
       this.upgradeError = '';
       this.upgradeSuccess = true;

@@ -6,6 +6,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   startMonerod: (args) => {
     ipcRenderer.invoke('start-monerod', args);
   },
+  onMonerodStarted: (callback) => {
+    ipcRenderer.on('monerod-started', callback);
+  },
   onMoneroStdout: (callback) => {
     ipcRenderer.on('monero-stdout', callback);
   },

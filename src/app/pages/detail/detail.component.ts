@@ -1,15 +1,16 @@
-import { Component, AfterViewInit, NgZone } from '@angular/core';
+import { Component, AfterViewInit, NgZone, OnDestroy } from '@angular/core';
 import { Peer } from '../../../common/Peer';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { DaemonService, DaemonDataService } from '../../core/services';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-detail',
   templateUrl: './detail.component.html',
   styleUrls: ['./detail.component.scss']
 })
-export class DetailComponent implements AfterViewInit {
+export class DetailComponent implements AfterViewInit, OnDestroy {
 
   public get daemonRunning(): boolean {
     return this.daemonData.running;
@@ -107,6 +108,8 @@ export class DetailComponent implements AfterViewInit {
 
   public cards: Card[];
 
+  private subscriptions: Subscription[] = [];
+
   constructor(
     private daemonService: DaemonService, 
     private navbarService: NavbarService, 
@@ -121,7 +124,18 @@ export class DetailComponent implements AfterViewInit {
 
     this.cards = this.createCards();
 
-    this.daemonData.syncInfoRefreshEnd.subscribe(() => {
+    this.subscriptions.push(this.daemonData.syncStart.subscribe((info) => {
+      if(!info.first) {
+        return;
+      }
+      
+      this.ngZone.run(() => {
+        this.cards = this.createLoadingCards();
+      });
+
+    }));
+
+    this.subscriptions.push(this.daemonData.syncInfoRefreshEnd.subscribe(() => {
       const $table = $('#table');
       //$table.bootstrapTable({});
       $table.bootstrapTable('refreshOptions', {
@@ -135,10 +149,11 @@ export class DetailComponent implements AfterViewInit {
       }
 
       this.cards = this.createCards();
-    })
+    }));
+
    }
 
-  ngAfterViewInit(): void {
+  public ngAfterViewInit(): void {
     console.log('DetailComponent AFTER VIEW INIT');
     this.navbarService.setLinks(this.navbarLinks);
     this.ngZone.run(() => {
@@ -153,6 +168,11 @@ export class DetailComponent implements AfterViewInit {
       $table.bootstrapTable('showLoading');
 
     });    
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
+    this.subscriptions = [];
   }
 
   private createLoadingCards(): Card[] {
