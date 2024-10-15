@@ -57,7 +57,7 @@ function createWindow(): BrowserWindow {
   tray.setContextMenu(trayMenu);
 
   console.log(`createWindow(): icon = ${wdwIcon}`);
-
+  console.log(`app.isPackaged: ${app.isPackaged}`);
   // Create the browser window.
   win = new BrowserWindow({
     x: 0,
@@ -69,13 +69,13 @@ function createWindow(): BrowserWindow {
       nodeIntegration: false,
       allowRunningInsecureContent: (serve),
       contextIsolation: true,
-      devTools: true
+      devTools: !app.isPackaged
     },
     autoHideMenuBar: true,
     icon: wdwIcon
   });
 
-  win.webContents.openDevTools();
+  if (!app.isPackaged)win.webContents.openDevTools();
 
   if (serve) {
     const debug = require('electron-debug');
