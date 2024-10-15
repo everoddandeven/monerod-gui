@@ -80,6 +80,7 @@ import { MethodNotFoundError } from '../../../../common/error/MethodNotFoundErro
 import { openDB, IDBPDatabase } from "idb"
 import { PeerInfo, TxPool } from '../../../../common';
 import { MoneroInstallerService } from '../monero-installer/monero-installer.service';
+import { error } from 'console';
 
 @Injectable({
   providedIn: 'root'
@@ -337,64 +338,67 @@ export class DaemonService {
   }
 
   public async startDaemon(customSettings?: DaemonSettings): Promise<void> {
-    await new Promise<void>(async (resolve, reject) => {
-      if (await this.isRunning()) {
-        console.warn("Daemon already running");
-        return;
+    if (await this.isRunning()) {
+      console.warn("Daemon already running");
+      return;
+    }
+
+    this.starting = true;
+
+    console.log("Starting daemon");
+
+    this.settings = customSettings ? customSettings : await this.getSettings();
+      
+    if (!this.settings.noSync && !this.settings.syncOnWifi) {
+      const wifiConnected = await this.isWifiConnected();
+
+      if (wifiConnected) {
+        console.log("Disabling sync ...");
+
+        this.settings.noSync = true;
       }
-  
-      this.starting = true;
-  
-      console.log("Starting daemon");
+    }
+    else if (!this.settings.noSync && !this.settings.syncOnWifi) {
+      const wifiConnected = await this.isWifiConnected();
 
-      this.settings = customSettings ? customSettings : await this.getSettings();
-        
-      if (!this.settings.noSync && !this.settings.syncOnWifi) {
-        const wifiConnected = await this.isWifiConnected();
+      if (!wifiConnected) {
+        console.log("Enabling sync ...");
 
-        if (wifiConnected) {
-          console.log("Disabling sync ...");
-  
-          this.settings.noSync = true;
-        }
+        this.settings.noSync = false;
       }
-      else if (!this.settings.noSync && !this.settings.syncOnWifi) {
-        const wifiConnected = await this.isWifiConnected();
+    }
 
-        if (!wifiConnected) {
-          console.log("Enabling sync ...");
-  
-          this.settings.noSync = false;
-        }
-      }
-
+    const startPromise = new Promise<void>((resolve, reject) => {
       window.electronAPI.onMonerodStarted((event: any, started: boolean) => {
         console.debug(event);
         
         if (started) {
           console.log("Daemon started");
-          this.onDaemonStatusChanged.emit(true);
-          resolve();
+          this.isRunning(true).then((running: boolean) => {
+            this.onDaemonStatusChanged.emit(running);
+            this.starting = false;
+            resolve();
+          }).catch((error: any) => {
+            console.error(error);
+            this.onDaemonStatusChanged.emit(false);
+            this.starting = false;
+            reject(error);
+          });
+
+
         }
         else {
           console.log("Daemon not started");
           this.onDaemonStatusChanged.emit(false);
+          this.starting = false;
           reject('Could not start daemon');
         }
 
       })
-
-      window.electronAPI.startMonerod(this.settings.toCommandOptions());
-
     });
 
-    this.starting = false;
-
-    const isRunning: boolean = await this.isRunning(true);
-
-    if (!isRunning) {
-      throw new Error("Daemon started but not running");
-    }
+    window.electronAPI.startMonerod(this.settings.toCommandOptions());
+    await startPromise;
   }
 
   public async restartDaemon(): Promise<void> {
