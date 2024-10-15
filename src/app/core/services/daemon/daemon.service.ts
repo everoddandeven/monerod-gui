@@ -80,7 +80,6 @@ import { MethodNotFoundError } from '../../../../common/error/MethodNotFoundErro
 import { openDB, IDBPDatabase } from "idb"
 import { PeerInfo, TxPool } from '../../../../common';
 import { MoneroInstallerService } from '../monero-installer/monero-installer.service';
-import { error } from 'console';
 
 @Injectable({
   providedIn: 'root'
@@ -348,24 +347,16 @@ export class DaemonService {
     console.log("Starting daemon");
 
     this.settings = customSettings ? customSettings : await this.getSettings();
-      
-    if (!this.settings.noSync && !this.settings.syncOnWifi) {
-      const wifiConnected = await this.isWifiConnected();
+    
+    if (!this.settings.noSync && !this.settings.syncOnWifi && await this.isWifiConnected()) {
+      console.log("Disabling sync ...");
 
-      if (wifiConnected) {
-        console.log("Disabling sync ...");
-
-        this.settings.noSync = true;
-      }
+      this.settings.noSync = true;
     }
-    else if (!this.settings.noSync && !this.settings.syncOnWifi) {
-      const wifiConnected = await this.isWifiConnected();
+    else if (!this.settings.noSync && !this.settings.syncOnWifi && !await this.isWifiConnected()) {
+      console.log("Enabling sync ...");
 
-      if (!wifiConnected) {
-        console.log("Enabling sync ...");
-
-        this.settings.noSync = false;
-      }
+      this.settings.noSync = false;
     }
 
     const startPromise = new Promise<void>((resolve, reject) => {
