@@ -9,7 +9,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "angular-electron": {
+    "monerod-gui": {
       "root": "",
       "sourceRoot": "src",
       "projectType": "application",
@@ -121,27 +121,27 @@
         "serve": {
           "builder": "@angular-builders/custom-webpack:dev-server",
           "options": {
-            "browserTarget": "angular-electron:build"
+            "browserTarget": "monerod-gui:build"
           },
           "configurations": {
             "dev": {
-              "browserTarget": "angular-electron:build:dev"
+              "browserTarget": "monerod-gui:build:dev"
             },
             "production": {
-              "browserTarget": "angular-electron:build:production"
+              "browserTarget": "monerod-gui:build:production"
             },
             "web": {
-              "browserTarget": "angular-electron:build:web"
+              "browserTarget": "monerod-gui:build:web"
             },
             "web-production": {
-              "browserTarget": "angular-electron:build:web-production"
+              "browserTarget": "monerod-gui:build:web-production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "angular-electron:build"
+            "buildTarget": "monerod-gui:build"
           }
         },
         "test": {
@@ -163,7 +163,7 @@
         }
       }
     },
-    "angular-electron-e2e": {
+    "monerod-gui-e2e": {
       "root": "e2e",
       "projectType": "application",
       "architect": {
