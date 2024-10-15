@@ -396,7 +396,15 @@ export class DaemonService {
     });
 
     window.electronAPI.startMonerod(this.settings.toCommandOptions());
-    await startPromise;
+    
+    try {
+      await startPromise;
+    }
+    catch(error) {
+      console.error(error);
+    }
+    
+    window.electronAPI.unsubscribeOnMonerodStarted();
   }
 
   public async restartDaemon(): Promise<void> {

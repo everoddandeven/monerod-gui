@@ -68,12 +68,14 @@ function createWindow(): BrowserWindow {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
       allowRunningInsecureContent: (serve),
-      contextIsolation: true
+      contextIsolation: true,
+      devTools: true
     },
     autoHideMenuBar: true,
     icon: wdwIcon
   });
 
+  win.webContents.openDevTools();
 
   if (serve) {
     const debug = require('electron-debug');

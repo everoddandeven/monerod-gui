@@ -8,6 +8,7 @@ import { LogCategories } from '../../../common';
 export class LogsService {
   public readonly onLog: EventEmitter<string> = new EventEmitter<string>();
   public readonly lines: string[] = [];
+  public readonly maxLines: number = 250;
   public readonly categories: LogCategories = new LogCategories();
 
   constructor(private electronService: ElectronService, private ngZone: NgZone) {
@@ -31,7 +32,13 @@ export class LogsService {
 
   public log(message: string): void {
     this.ngZone.run(() => {
-      this.lines.push(this.cleanLog(message));
+      if (this.lines.length <= this.maxLines) {
+        this.lines.push(this.cleanLog(message));
+      }
+      else {
+        this.lines.shift();
+        this.lines.push(this.cleanLog(message));
+      }
       this.onLog.emit(this.cleanLog(message));
     });
 

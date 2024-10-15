@@ -9,6 +9,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onMonerodStarted: (callback) => {
     ipcRenderer.on('monerod-started', callback);
   },
+  unsubscribeOnMonerodStarted: () => {
+    const listeners = ipcRenderer.listeners('monerod-started');
+    
+    listeners.forEach((listener) => {
+      ipcRenderer.removeListener('monerod-started', listener);
+    });
+  },
   onMoneroStdout: (callback) => {
     ipcRenderer.on('monero-stdout', callback);
   },

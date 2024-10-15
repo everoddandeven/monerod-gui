@@ -60,6 +60,7 @@ declare global {
     electronAPI: {
       startMonerod: (options: string[]) => void;
       onMonerodStarted: (callback: (event: any, started: boolean) => void) => void;
+      unsubscribeOnMonerodStarted: () => void;
       onMoneroClose: (callback: (event: any, code: number) => void) => void;
       isWifiConnected: () => void;
       onIsWifiConnectedResponse: (callback: (event: any, connected: boolean) => void) => void;
