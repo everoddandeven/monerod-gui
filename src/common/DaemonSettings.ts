@@ -185,9 +185,11 @@ export class DaemonSettings {
     const options: string[] = [];
     if (this.monerodPath != '') options.push(this.monerodPath);
 
-    if (this.mainnet) options.push(`--mainnet`);
-    else if (this.testnet) options.push(`--testnet`);
+    if (this.testnet) options.push(`--testnet`);
     else if (this.stagenet) options.push(`--stagenet`);
+    else if (!this.mainnet) {
+      throw new Error("Invalid daemon settings");
+    }
 
     if (this.logFile != '') options.push('--log-file', this.logFile);
     if (this.logLevel >= 0 && this.logLevel <= 4) options.push('--log-level', `${this.logLevel}`);
