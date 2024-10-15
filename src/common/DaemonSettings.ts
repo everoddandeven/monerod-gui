@@ -193,8 +193,8 @@ export class DaemonSettings {
 
     if (this.logFile != '') options.push('--log-file', this.logFile);
     if (this.logLevel >= 0 && this.logLevel <= 4) options.push('--log-level', `${this.logLevel}`);
-    if (this.maxLogFileSize) options.push(`--max-log-file-size=${this.maxLogFileSize}`);
-    if (this.maxLogFiles) options.push(`--max-log-files=${this.maxLogFiles}`);
+    if (this.maxLogFileSize >= 0) options.push(`--max-log-file-size=${this.maxLogFileSize}`);
+    if (this.maxLogFiles >= 0) options.push(`--max-log-files=${this.maxLogFiles}`);
     if (this.maxConcurrency) options.push(`--max-concurrency=${this.maxConcurrency}`);
     if (this.proxy != '') options.push(`--proxy=${this.proxy}`);
     if (this.proxyAllowDnsLeaks) options.push(`--proxy-allow-dns-leaks`);
@@ -211,15 +211,15 @@ export class DaemonSettings {
     if (this.fixedDifficulty) options.push(`--fixed-difficulty`, `${this.fixedDifficulty}`);
     if (this.enforceDnsCheckpoint) options.push(`--enforce-dns-checkpoint`);
     if (this.prepBlocksThreads) options.push(`--prep-block-threads`, `${this.prepBlocksThreads}`);
-    if (this.fastBlockSync) options.push(`--fast-block-sync`, `1`);
+    if (!this.noSync && this.fastBlockSync) options.push(`--fast-block-sync`, `1`);
     if (this.showTimeStats) options.push(`--show-time-stats`);
-    if (this.blockSyncSize) options.push(`--block-sync-size`, `${this.blockSyncSize}`);
+    if (!this.noSync && this.blockSyncSize) options.push(`--block-sync-size`, `${this.blockSyncSize}`);
     if (this.checkUpdates) options.push(`--check-updates`, this.checkUpdates);
     if (this.noFluffyBlocks) options.push(`--no-fluffy-blocks`);
     if (this.offline) options.push(`--offline`);
     if (this.disableDnsCheckpoints) options.push(`--disable-dns-checkpoints`);
-    if (this.blockDownloadMaxSize) options.push(`--block-download-max-size`, `${this.blockDownloadMaxSize}`);
-    if (this.syncPrunedBlocks) options.push(`--sync-pruned-blocks`);
+    if (this.blockDownloadMaxSize >= 0) options.push(`--block-download-max-size`, `${this.blockDownloadMaxSize}`);
+    if (!this.noSync && this.syncPrunedBlocks) options.push(`--sync-pruned-blocks`);
     if (this.maxTxPoolWeight) options.push(`--max-txpool-weight`, `${this.maxTxPoolWeight}`);
     if (this.blockNotify != '') options.push(`--block-notify`, this.blockNotify);
     if (this.pruneBlockchain) options.push('--prune-blockchain');
@@ -234,15 +234,15 @@ export class DaemonSettings {
     if (this.bgMiningIdleThreshold) options.push(`--bg-mining-idle-threshold`, `${this.bgMiningIdleThreshold}`);
     if (this.bgMiningMinIdleInterval) options.push(`--bg-mining-idle-interval`, `${this.bgMiningMinIdleInterval}`);
     if (this.bgMiningMinerTarget) options.push(`--bg-mining-miner-target`, `${this.bgMiningMinerTarget}`);
-    if (this.dbSyncMode != '') options.push(`--db-sync-mode`, `${this.dbSyncMode}`);
+    if (!this.noSync && this.dbSyncMode != '') options.push(`--db-sync-mode`, `${this.dbSyncMode}`);
     if (this.dbSalvage) options.push(`--db-salvage`);
     if (this.p2pBindIp != '') options.push(`--p2p-bind-ip`, this.p2pBindIp);
     if (this.p2pBindIpv6Address != '') options.push(`--p2p-bind-ipv6-address`, this.p2pBindIpv6Address);
-    if (this.p2pBindPort) options.push(`--p2p-bind-port`, `${this.p2pBindPort}`);
-    if (this.p2pBindPortIpv6) options.push(`--p2p-bind-port-ipv6`, `${this.p2pBindPortIpv6}`);
+    if (this.p2pBindPort > 0) options.push(`--p2p-bind-port`, `${this.p2pBindPort}`);
+    if (this.p2pBindPortIpv6 > 0) options.push(`--p2p-bind-port-ipv6`, `${this.p2pBindPortIpv6}`);
     if (this.p2pUseIpv6) options.push(`--p2p-use-ipv6`);
     if (this.p2pIgnoreIpv4) options.push(`--p2p-ignore-ipv4`);
-    if (this.p2pExternalPort) options.push(`--p2p-external-port`, `${this.p2pExternalPort}`);
+    if (this.p2pExternalPort > 0) options.push(`--p2p-external-port`, `${this.p2pExternalPort}`);
     if (this.allowLocalIp) options.push(`--allow-local-ip`);
     if (this.addPeer != '') options.push('--add-peer', this.addPeer);
     if (this.addPriorityNode != '') options.push(`--add-priority-node`, this.addPriorityNode);
@@ -273,16 +273,16 @@ export class DaemonSettings {
     if (this.confirmExternalBind) options.push(`--confirm-external-bind`);
     if (this.rpcAccessControlOrigins != '') options.push(`--rpc-access-control-origins=${this.rpcAccessControlOrigins}`);
     if (this.rpcSsl) options.push(`--rpc-ssl`, this.rpcSsl);
-    if (this.rpcSslPrivateKey) options.push(`--rpc-ssl-private-key`, this.rpcSslPrivateKey);
-    if (this.rpcSslCertificate) options.push(`--rpc-ssl-certificate`, this.rpcSslCertificate);
-    if (this.rpcSslCACertificates) options.push(`--rpc-ssl-ca-certificates`, this.rpcSslCACertificates);
-    if (this.rpcAllowedFingerprints) options.push(`--rpc-allowed-fingerprints`, this.rpcAllowedFingerprints);
+    if (this.rpcSslPrivateKey != '') options.push(`--rpc-ssl-private-key`, this.rpcSslPrivateKey);
+    if (this.rpcSslCertificate != '') options.push(`--rpc-ssl-certificate`, this.rpcSslCertificate);
+    if (this.rpcSslCACertificates != '') options.push(`--rpc-ssl-ca-certificates`, this.rpcSslCACertificates);
+    if (this.rpcAllowedFingerprints != '') options.push(`--rpc-allowed-fingerprints`, this.rpcAllowedFingerprints);
     if (this.rpcSslAllowChained) options.push(`--rpc-ssl-allow-chained`);
     if (this.rpcSslAllowAnyCert) options.push(`--rpc-ssl-allow-any-cert`);
 
     if (this.rpcPaymentAddress != '') options.push(`--rpc-payment-address`, this.rpcPaymentAddress);
-    if (this.rpcPaymentDifficuly) options.push(`--rpc-payment-difficulty`, `${this.rpcPaymentDifficuly}`);
-    if (this.rpcPaymentCredits) options.push(`--rpc-payment-credits`, `${this.rpcPaymentCredits}`);
+    if (this.rpcPaymentDifficuly >= 0) options.push(`--rpc-payment-difficulty`, `${this.rpcPaymentDifficuly}`);
+    if (this.rpcPaymentCredits >= 0) options.push(`--rpc-payment-credits`, `${this.rpcPaymentCredits}`);
     if (this.rpcPaymentAllowFreeLoopback) options.push(`--rpc-payment-allow-free-loopback`);
     if (this.disableRpcBan) options.push(`--disable-rpc-ban`);
 
