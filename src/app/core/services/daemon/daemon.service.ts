@@ -91,8 +91,24 @@ export class DaemonService {
   private openDbPromise: Promise<IDBPDatabase>;
 
   private daemonRunning?: boolean;
-  private url: string = "http://127.0.0.1:28081";
+  private get url(): string {
+    return `http://127.0.0.1:${this.port}`;
+  }
   public settings: DaemonSettings;
+
+  private get port(): number {
+    if (this.settings.rpcBindPort > 0) {
+      return this.settings.rpcBindPort;
+    }
+    else if (this.settings.mainnet) {
+      return 18081;
+    }
+    else if (this.settings.testnet) {
+      return 28081;
+    }
+    
+    return 38081;
+  }
 
   //private url: string = "http://node2.monerodevs.org:28089";
   //private url: string = "https://testnet.xmr.ditatompel.com";
@@ -119,22 +135,11 @@ export class DaemonService {
     this.openDbPromise = this.openDatabase();
     this.settings = new DaemonSettings();
 
-    const wdw = (window as any);
-
-    if (this.electronService.isElectron) {
-      this.electronService.ipcRenderer.on('monero-close', (event, code: number | null) => {
-        console.log(event);
-        console.log(code);
-        this.onClose();
-      });
-    }
-    else if (wdw.electronAPI && wdw.electronAPI.onMoneroClose) {
-      wdw.electronAPI.onMoneroClose((event: any, code: number) => {
-        console.log(event);
-        console.log(code);
-        this.onClose();
-      });
-    }
+    window.electronAPI.onMoneroClose((event: any, code: number) => {
+      console.log(event);
+      console.log(code);
+      this.onClose();
+    });
   }
 
   public async isWifiConnected(): Promise<boolean> {
@@ -365,18 +370,20 @@ export class DaemonService {
         
         if (started) {
           console.log("Daemon started");
-          this.isRunning(true).then((running: boolean) => {
-            this.onDaemonStatusChanged.emit(running);
-            this.starting = false;
-            resolve();
+          this.delay(3000).then(() => {
+            this.isRunning(true).then((running: boolean) => {
+              this.onDaemonStatusChanged.emit(running);
+              this.starting = false;
+              resolve();
+            }).catch((error: any) => {
+              console.error(error);
+              this.onDaemonStatusChanged.emit(false);
+              this.starting = false;
+              reject(error);
+            });
           }).catch((error: any) => {
             console.error(error);
-            this.onDaemonStatusChanged.emit(false);
-            this.starting = false;
-            reject(error);
           });
-
-
         }
         else {
           console.log("Daemon not started");
