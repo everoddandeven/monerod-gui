@@ -68,15 +68,12 @@ function createWindow(): BrowserWindow {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
       allowRunningInsecureContent: (serve),
-      contextIsolation: true,
-      devTools: true,
+      contextIsolation: true
     },
     autoHideMenuBar: true,
     icon: wdwIcon
   });
 
-  //win.webContents.openDevTools();
-  //win.setIcon()
 
   if (serve) {
     const debug = require('electron-debug');
@@ -139,14 +136,12 @@ function isWifiConnectedOld() {
   const networkInterfaces = os.networkInterfaces();
   
   console.log(`isWifiConnected(): network interfaces ${networkInterfaces}`);
-  console.log(networkInterfaces);
 
   for (const interfaceName in networkInterfaces) {
     const networkInterface = networkInterfaces[interfaceName];
 
     if (networkInterface) {
       for (const network of networkInterface) {
-        console.log(network);
         if (network.family === 'IPv4' && !network.internal && network.mac !== '00:00:00:00:00:00') {
           if (interfaceName.toLowerCase().includes('wifi') || interfaceName.toLowerCase().includes('wlan')) {
             return true;

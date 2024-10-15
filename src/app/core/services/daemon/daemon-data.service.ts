@@ -337,17 +337,24 @@ export class DaemonDataService {
     }
     
     const syncAlreadyDisabled = this.daemonService.settings.noSync;
-    const wifiConnected = await this.daemonService.isWifiConnected();
 
-    if (!settings.noSync && !syncAlreadyDisabled && !settings.syncOnWifi && wifiConnected) {
-      console.log("Disabling sync ...");
+    if (!settings.noSync && !syncAlreadyDisabled && !settings.syncOnWifi) {
+      const wifiConnected = await this.daemonService.isWifiConnected();
 
-      await this.daemonService.disableSync();
+      if (wifiConnected) {
+        console.log("Disabling sync ...");
+        await this.daemonService.disableSync();
+      }
     }
-    else if (!settings.noSync && syncAlreadyDisabled && !settings.syncOnWifi && !wifiConnected) {
-      console.log("Enabling sync ...");
+    else if (!settings.noSync && syncAlreadyDisabled && !settings.syncOnWifi) {
+      const wifiConnected = await this.daemonService.isWifiConnected();
 
-      await this.daemonService.enableSync();
+      if (!wifiConnected) {
+        console.log("Enabling sync ...");
+
+        await this.daemonService.enableSync();
+      }
+
     }
 
     this.syncStart.emit({ first: this._firstRefresh });
