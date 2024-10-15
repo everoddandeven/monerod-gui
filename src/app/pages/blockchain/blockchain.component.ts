@@ -25,7 +25,14 @@ export class BlockchainComponent implements AfterViewInit {
     return this.daemonData.lastBlockHeader;
   }
 
-  public getLastBlockError: string = '';
+  public get daemonSynchronized(): boolean {
+    return this.daemonData.info ? this.daemonData.info.synchronized : false;
+  }
+
+  public get getLastBlockError(): string {
+    return this.daemonSynchronized ? '' : 'Last block header not available, blockchain is not synchronized';
+  }
+  
   public block?: Block;
   public getBlockByHash: boolean = false;
   public getBlockHash: string = '';

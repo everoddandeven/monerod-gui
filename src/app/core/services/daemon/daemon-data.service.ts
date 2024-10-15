@@ -420,7 +420,7 @@ export class DaemonDataService {
 
       await this.refreshMiningStatus();
 
-      await this.refreshMinerData();
+      if (this._daemonInfo.synchronized) await this.refreshMinerData();
 
       this._gettingPeerList = true;
       this._peerList = await this.daemonService.getPeerList();

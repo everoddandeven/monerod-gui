@@ -16,8 +16,9 @@ import { DaemonDataService } from '../../core/services';
 export class MiningComponent implements AfterViewInit {
 
   public readonly navbarLinks: NavbarLink[];
+
   public get coreBusy(): boolean {
-    return this.daemonData.minerDataCoreBusyError;
+    return this.daemonData.info? !this.daemonData.info.synchronized : true;
   }
 
   public get miningStatus(): MiningStatus | undefined {
