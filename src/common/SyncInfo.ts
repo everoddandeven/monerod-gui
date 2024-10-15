@@ -26,7 +26,7 @@ export class SyncInfo {
         const peers: Peer[] = [];
         const spans: Span[] = [];
         const rawPeers: any[] = syncInfo.peers;
-        const rawSpans: any[] | undefined = syncInfo.rawSpans;
+        const rawSpans: any[] | undefined = syncInfo.spans;
 
         if (rawPeers) rawPeers.forEach((peer: any) => peers.push(Peer.parse(peer)));
         if (rawSpans) rawSpans.forEach((span: any) => spans.push(Span.parse(span)));

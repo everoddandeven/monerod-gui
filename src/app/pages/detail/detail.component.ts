@@ -4,6 +4,7 @@ import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { DaemonService, DaemonDataService } from '../../core/services';
 import { Subscription } from 'rxjs';
+import { Connection, Span } from '../../../common';
 
 @Component({
   selector: 'app-detail',
@@ -118,7 +119,7 @@ export class DetailComponent implements AfterViewInit, OnDestroy {
 
     this.navbarLinks = [
       new NavbarLink('pills-home-tab', '#pills-home', 'pills-home', false, 'Overview', true),
-      new NavbarLink('pills-profile-tab', '#pills-profile', 'pills-profile', false, 'Peers', true),
+      new NavbarLink('pills-peers-tab', '#pills-peers', 'pills-peers', false, 'Peers', true),
       new NavbarLink('pills-spans-tab', '#pills-spans', 'pills-spans', false, 'Spans', true)
     ];
 
@@ -136,17 +137,7 @@ export class DetailComponent implements AfterViewInit, OnDestroy {
     }));
 
     this.subscriptions.push(this.daemonData.syncInfoRefreshEnd.subscribe(() => {
-      const $table = $('#table');
-      //$table.bootstrapTable({});
-      $table.bootstrapTable('refreshOptions', {
-        classes: 'table table-bordered table-hover table-dark table-striped'
-      });
-      if (this.getPeers().length == 0) $table.bootstrapTable('showLoading');
-      else 
-      {
-        $table.bootstrapTable('load', this.getPeers());
-        $table.bootstrapTable('hideLoading');
-      }
+      this.refreshTables();
 
       this.cards = this.createCards();
     }));
@@ -157,22 +148,64 @@ export class DetailComponent implements AfterViewInit, OnDestroy {
     console.log('DetailComponent AFTER VIEW INIT');
     this.navbarService.setLinks(this.navbarLinks);
     this.ngZone.run(() => {
-
-      const $table = $('#table');
-      $table.bootstrapTable({});
-      
-      $table.bootstrapTable('refreshOptions', {
-        classes: 'table table-bordered table-hover table-dark table-striped'
-      });
-
-      $table.bootstrapTable('showLoading');
-
+      this.initTables();
     });    
   }
 
   public ngOnDestroy(): void {
     this.subscriptions.forEach((sub) => sub.unsubscribe());
     this.subscriptions = [];
+  }
+
+  private initTable(table: string): void {
+    const $table = $(`#${table}Table`);
+    $table.bootstrapTable({});
+    
+    $table.bootstrapTable('refreshOptions', {
+      classes: 'table table-bordered table-hover table-dark table-striped'
+    });
+
+    $table.bootstrapTable('showLoading');
+  }
+
+  private initPeerTable(): void {
+    this.initTable('peers');
+  }
+
+  private initSpansTable(): void {
+    this.initTable('spans');
+  }
+
+  private initTables() {
+    this.initPeerTable();
+    this.initSpansTable();
+  }
+
+  private refreshTable(table: string, data: any[]): void {
+    const $peersTable = $(`#${table}Table`);
+    //$table.bootstrapTable({});
+    $peersTable.bootstrapTable('refreshOptions', {
+      classes: 'table table-bordered table-hover table-dark table-striped'
+    });
+    if (this.getPeers().length == 0) $peersTable.bootstrapTable('showLoading');
+    else 
+    {
+      $peersTable.bootstrapTable('load', data);
+      $peersTable.bootstrapTable('hideLoading');
+    }
+  }
+
+  private refreshPeersTable(): void {
+    this.refreshTable('peers', this.getPeers());
+  }
+
+  private refreshSpansTable(): void {
+    this.refreshTable('spans', this.getSpans());
+  }
+
+  private refreshTables(): void {
+    this.refreshPeersTable();
+    this.refreshSpansTable();
   }
 
   private createLoadingCards(): Card[] {
@@ -215,21 +248,20 @@ export class DetailComponent implements AfterViewInit, OnDestroy {
     ];
   }
 
-  public getPeers(): any[] {
+  public getPeers(): Connection[] {
     if (!this.daemonData.syncInfo) return [];
+    const infos: Connection[] = [];
 
-    const peers: any[] = [];
-    
-    this.daemonData.syncInfo.peers.forEach((peer: Peer) => peers.push({
-      'address': peer.info.address,
-      'peerId': peer.info.peerId,
-      'height': peer.info.height,
-      'pruningSeed': peer.info.pruningSeed,
-      'state': peer.info.state,
-      'currentDownload': `${peer.info.currentDownload / 1000} kB/s`
-    }));
+    this.daemonData.syncInfo.peers.forEach((peer: Peer) => {
+      infos.push(peer.info);
+    });
 
-    return peers;
+    return infos;
+  }
+
+  public getSpans(): Span[] {
+    if (!this.daemonData.syncInfo) return [];    
+    return this.daemonData.syncInfo.spans;
   }
 
 }
