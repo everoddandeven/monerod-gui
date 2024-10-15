@@ -58,3 +58,16 @@ jobs:
 
     - name: Build the app
       run: npm run electron:build
+  
+  release:
+    needs: build
+    runs-on: ubuntu-22.04
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist_electron/**/*.{AppImage,dmg,exe}
