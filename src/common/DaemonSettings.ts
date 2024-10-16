@@ -3,8 +3,8 @@ export class DaemonSettings {
 
   public syncOnWifi: boolean = true;
   public syncPeriodEnabled: boolean = false;
-  public syncPeriodFrom: any = '00:00';
-  public syncPeriodTo: any = '00:00';
+  public syncPeriodFrom: string = '00:00';
+  public syncPeriodTo: string = '00:00';
 
   public upgradeAutomatically: boolean = false;
   public downloadUpgradePath: string = '';
