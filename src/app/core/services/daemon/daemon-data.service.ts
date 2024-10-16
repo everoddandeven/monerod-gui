@@ -250,6 +250,8 @@ export class DaemonDataService {
       throw new Error("Loop already started");
     }
     this._firstRefresh = true;
+    this.syncDisabledByPeriodPolicy = false;
+    this.syncDisabledByWifiPolicy = false;
 
     this.refresh().then(() => {
       this.refreshInterval = setInterval(() => {
@@ -327,6 +329,40 @@ export class DaemonDataService {
 
   }
 
+  public syncDisabledByWifiPolicy: boolean = false;
+  public syncDisabledByPeriodPolicy: boolean = false;
+
+  private isInTimeRange(fromHours: string, toHours: string): boolean {
+    const now = new Date();
+    
+    // Estraiamo l'ora e i minuti dalla stringa in formato hh:mm
+    const [fromHour, fromMinute] = fromHours.split(":").map(Number);
+    const [toHour, toMinute] = toHours.split(":").map(Number);
+
+    // Otteniamo l'ora corrente in ore e minuti
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+
+    // Creiamo oggetti Date per le ore 'from', 'to', e l'ora attuale
+    const currentTime = new Date();
+    currentTime.setHours(currentHour, currentMinute, 0, 0);
+
+    const fromTime = new Date();
+    fromTime.setHours(fromHour, fromMinute, 0, 0);
+
+    const toTime = new Date();
+    toTime.setHours(toHour, toMinute, 0, 0);
+
+    // Gestione del caso in cui la fascia oraria attraversi la mezzanotte
+    if (fromTime > toTime) {
+        // Se l'ora attuale è dopo 'fromTime' o prima di 'toTime'
+        return currentTime >= fromTime || currentTime <= toTime;
+    } else {
+        // Caso normale: la fascia oraria è nello stesso giorno
+        return currentTime >= fromTime && currentTime <= toTime;
+    }
+  }
+
   private async refresh(): Promise<void> {
     if (this.refreshing || this.tooEarlyForRefresh) {
       return;
@@ -351,6 +387,7 @@ export class DaemonDataService {
       if (wifiConnected) {
         console.log("Disabling sync ...");
         await this.daemonService.disableSync();
+        this.syncDisabledByWifiPolicy = true;
       }
     }
     else if (!settings.noSync && syncAlreadyDisabled && !settings.syncOnWifi) {
@@ -360,8 +397,23 @@ export class DaemonDataService {
         console.log("Enabling sync ...");
 
         await this.daemonService.enableSync();
+        this.syncDisabledByWifiPolicy = false;
       }
+      else {
+        this.syncDisabledByWifiPolicy = true;
+      }
+    }
+    else {
+      this.syncDisabledByWifiPolicy = false;
+    }
 
+    if (!syncAlreadyDisabled && !this.syncDisabledByPeriodPolicy && settings.syncPeriodEnabled && !this.isInTimeRange(settings.syncPeriodFrom, settings.syncPeriodTo)) {
+      await this.daemonService.disableSync();
+      this.syncDisabledByPeriodPolicy = true;
+    }
+    else if (syncAlreadyDisabled && this.syncDisabledByPeriodPolicy && settings.syncPeriodEnabled && this.isInTimeRange(settings.syncPeriodFrom, settings.syncPeriodTo)) {
+      await this.daemonService.enableSync();
+      this.syncDisabledByPeriodPolicy = false;
     }
 
     this.syncStart.emit({ first: this._firstRefresh });

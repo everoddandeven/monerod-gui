@@ -28,6 +28,21 @@ export class DetailComponent implements AfterViewInit, OnDestroy {
 
   public readonly navbarLinks: NavbarLink[];
 
+  public get syncDisabledByWifiPolicy(): boolean {
+    return this.daemonData.syncDisabledByWifiPolicy;
+  }
+
+  public get syncDisabledByPeriodPolicy(): boolean {
+    return this.daemonData.syncDisabledByPeriodPolicy;
+  }
+
+  public get syncDisabledFrom(): string {
+    return this.daemonService.settings.syncPeriodFrom;
+  }
+
+  public get syncDisabledTo(): string {
+    return this.daemonService.settings.syncPeriodTo;
+  }
   //#region Sync Info
 
   private get height(): number {

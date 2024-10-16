@@ -201,7 +201,6 @@ function isConnectedToWiFi(): Promise<boolean> {
           // Check if the output indicates a connected status
           if (stdout) {
             const components: string[] = stdout.split("\n");
-            console.log(components);
 
             components.forEach((component: string) => {
               if (component.includes('wifi') && !component.includes('--')) {

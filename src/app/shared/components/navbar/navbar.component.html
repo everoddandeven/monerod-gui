@@ -24,7 +24,7 @@
   </span>
 
   <ul class="navbar-nav flex-row">
-    <li *ngIf="!running && !stopping && !starting" class="nav-item text-nowrap">
+    <li *ngIf="!running && !stopping && !starting && !restarting" class="nav-item text-nowrap">
       <button class="btn btn-outline-secondary px-3 text-white" type="button" data-bs-toggle="collapse" aria-expanded="false" aria-label="Start daemon" (click)="startDaemon()">
         <i class="bi bi-play-fill"></i>
       </button>
