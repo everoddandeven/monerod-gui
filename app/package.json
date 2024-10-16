@@ -11,7 +11,11 @@
   "private": true,
   "dependencies": {
     "os": "^0.1.2",
+    "pidusage": "^3.0.2",
     "tar": "^7.4.3",
     "unbzip2-stream": "^1.4.3"
+  },
+  "devDependencies": {
+    "@types/pidusage": "^2.0.5"
   }
 }

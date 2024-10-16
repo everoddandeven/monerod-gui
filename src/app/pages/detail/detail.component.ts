@@ -232,7 +232,7 @@ export class DetailComponent implements AfterViewInit, OnDestroy {
     if (this.daemonData.initializing || this.daemonService.starting) {
       return this.createLoadingCards();
     }
-    return [
+    const cards = [
       new Card('Connection Status', this.connectionStatus),
       new Card('Network Type', this.networkType),
       new Card('Node Type', this.nodeType),
@@ -246,6 +246,15 @@ export class DetailComponent implements AfterViewInit, OnDestroy {
       new Card('Transaction count', `${this.txCount}`),
       new Card('Pool size', `${this.poolSize}`)
     ];
+
+    if (this.daemonData.processStats) {
+      cards.push(
+        new Card('CPU usage', `${this.daemonData.processStats.cpu.toFixed(2)} %`),
+        new Card('Memory usage', `${(this.daemonData.processStats.memory / 1024 / 1024).toFixed(2)} MB`)
+      );
+    }
+
+    return cards;
   }
 
   public getPeers(): Connection[] {

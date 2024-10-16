@@ -38,6 +38,7 @@ export { NetStatsHistory, NetStatsHistoryEntry } from './NetStatsHistory';
 export { UnconfirmedTx } from './UnconfirmedTx';
 export { SpentKeyImage } from './SpentKeyImage';
 export { TxPool } from './TxPool';
+export { ProcessStats } from './ProcessStats';
 
 export * from './error';
 export * from './request';

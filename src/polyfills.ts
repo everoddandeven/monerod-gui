@@ -59,6 +59,18 @@ declare global {
   interface Window {
     electronAPI: {
       startMonerod: (options: string[]) => void;
+      monitorMonerod: () => void;
+      onMonitorMonerod: (callback: (event: any, stats: {
+        cpu: number;
+        memory: number;
+        ppid: number;
+        pid: number;
+        ctime: number;
+        elapsed: number;
+        timestamp: number;
+      }
+      ) => void) => void;
+      onMonitorMonerodError: (callback: (event: any, error: string) => void) => void;
       onMonerodStarted: (callback: (event: any, started: boolean) => void) => void;
       unsubscribeOnMonerodStarted: () => void;
       onMoneroClose: (callback: (event: any, code: number) => void) => void;

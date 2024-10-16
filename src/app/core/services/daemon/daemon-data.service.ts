@@ -1,6 +1,6 @@
 import { EventEmitter, Injectable, NgZone } from '@angular/core';
 import { DaemonService } from './daemon.service';
-import { BlockCount, BlockHeader, Chain, Connection, CoreIsBusyError, DaemonInfo, MinerData, MiningStatus, NetStats, NetStatsHistory, PeerInfo, PublicNode, SyncInfo, TxBacklogEntry, TxPool } from '../../../../common';
+import { BlockCount, BlockHeader, Chain, Connection, CoreIsBusyError, DaemonInfo, MinerData, MiningStatus, NetStats, NetStatsHistory, PeerInfo, ProcessStats, PublicNode, SyncInfo, TxBacklogEntry, TxPool } from '../../../../common';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +15,9 @@ export class DaemonDataService {
   private _lastRefreshHeight: number = -1;
 
   private _daemonRunning: boolean = false;
+
+  private _processStats?: ProcessStats;
+  private _gettingProcessStats: boolean = false;
 
   private _daemonInfo?: DaemonInfo;
   private _gettingDaemonInfo: boolean = false;
@@ -108,6 +111,14 @@ export class DaemonDataService {
 
   public get refreshing(): boolean {
     return this._refreshing;
+  }
+
+  public get processStats(): ProcessStats | undefined {
+    return this._processStats;
+  }
+
+  public get gettingProcessStats(): boolean {
+    return this._gettingProcessStats;
   }
 
   public get info(): DaemonInfo | undefined {
@@ -268,10 +279,6 @@ export class DaemonDataService {
     return Date.now() - this._lastRefresh <= this.refreshTimeoutMs;
   }
 
-  private async getInfo(): Promise<void> {
-
-  }
-
   private async refreshMiningStatus(): Promise<void> {
     this._gettingMiningStatus = true;
 
@@ -409,7 +416,7 @@ export class DaemonDataService {
       }
       this._gettingIsBlockchainPruned = false;
 
-      await this.refreshAltChains();
+      if (this._daemonInfo.synchronized) await this.refreshAltChains();
 
       this._gettingNetStats = true;
       this.netStatsRefreshStart.emit();
@@ -418,7 +425,7 @@ export class DaemonDataService {
       this.netStatsRefreshEnd.emit();
       this._gettingNetStats = false;
 
-      await this.refreshMiningStatus();
+      if (this._daemonInfo.synchronized) await this.refreshMiningStatus();
 
       if (this._daemonInfo.synchronized) await this.refreshMinerData();
 
@@ -439,6 +446,8 @@ export class DaemonDataService {
       this._gettingConnections = true;
       this._connections = await this.daemonService.getConnections();
       this._gettingConnections = false;
+
+      await this.refreshProcessStats();
 
       this._lastRefreshHeight = this._daemonInfo.heightWithoutBootstrap;
       this._lastRefresh = Date.now();
@@ -466,6 +475,20 @@ export class DaemonDataService {
     this.syncEnd.emit();
     this._firstRefresh = false;
     this._refreshing = false;
+  }
+
+  private async refreshProcessStats(): Promise<void> {
+    this._gettingProcessStats = true;
+
+    try {
+      this._processStats = await this.daemonService.getProcessStats();
+    }
+    catch(error: any) {
+      console.error(error);
+      this._processStats = undefined;
+    }
+
+    this._gettingProcessStats = false;
   }
 
 }

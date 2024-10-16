@@ -78,7 +78,7 @@ import { TxInfo } from '../../../../common/TxInfo';
 import { DaemonSettings } from '../../../../common/DaemonSettings';
 import { MethodNotFoundError } from '../../../../common/error/MethodNotFoundError';
 import { openDB, IDBPDatabase } from "idb"
-import { PeerInfo, TxPool } from '../../../../common';
+import { PeerInfo, ProcessStats, TxPool } from '../../../../common';
 import { MoneroInstallerService } from '../monero-installer/monero-installer.service';
 
 @Injectable({
@@ -1119,6 +1119,26 @@ export class DaemonService {
   public getGuiVersion(): string {
     return "0.1.0-alpha";
   }
+
+  public async getProcessStats(): Promise<ProcessStats> {
+    if (!await this.isRunning()) {
+      throw new Error("Daemon not running");
+    }
+
+    const getProcessStatsPromise = new Promise<ProcessStats>((resolve, reject) => {
+      window.electronAPI.onMonitorMonerodError((event: any, error: string) => {
+        reject(error);
+      });
+
+      window.electronAPI.onMonitorMonerod((event: any, stats: ProcessStats) => {
+        resolve(stats);
+      });
+    })
+
+    window.electronAPI.monitorMonerod();
+
+    return await getProcessStatsPromise;
+  } 
 
 }
 

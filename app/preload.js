@@ -9,6 +9,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onMonerodStarted: (callback) => {
     ipcRenderer.on('monerod-started', callback);
   },
+  monitorMonerod: () => {
+    ipcRenderer.invoke('monitor-monerod');
+  },
+  onMonitorMonerod: (callback) => {
+    ipcRenderer.on('on-monitor-monerod', callback);
+  },
+  onMonitorMonerodError: (callback) => {
+    ipcRenderer.on('on-monitor-monerod-error', callback);
+  },
   unsubscribeOnMonerodStarted: () => {
     const listeners = ipcRenderer.listeners('monerod-started');
     

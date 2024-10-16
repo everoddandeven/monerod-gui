@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, screen, dialog, Tray, Menu, MenuItemConstructorOptions } from 'electron';
+import { app, BrowserWindow, ipcMain, screen, dialog, Tray, Menu, MenuItemConstructorOptions, IpcMainInvokeEvent } from 'electron';
 import { ChildProcessWithoutNullStreams, exec, ExecException, spawn } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -6,6 +6,44 @@ import * as https from 'https';
 import { createHash } from 'crypto';
 import * as tar from 'tar';
 import * as os from 'os';
+import * as pidusage from 'pidusage';
+
+interface Stats {
+  /**
+   * percentage (from 0 to 100*vcore)
+   */
+  cpu: number;
+
+  /**
+   * bytes
+   */
+  memory: number;
+
+  /**
+   * PPID
+   */
+  ppid: number;
+
+  /**
+   * PID
+   */
+  pid: number;
+
+  /**
+   * ms user + system time
+   */
+  ctime: number;
+
+  /**
+   * ms since the start of the process
+   */
+  elapsed: number;
+
+  /**
+   * ms since epoch
+   */
+  timestamp: number;
+}
 
 //import bz2 from 'unbzip2-stream';
 //import * as bz2 from 'unbzip2-stream';
@@ -14,6 +52,7 @@ const bz2 = require('unbzip2-stream');
 let win: BrowserWindow | null = null;
 let isHidden: boolean = false;
 let isQuitting: boolean = false;
+let monerodProcess: ChildProcessWithoutNullStreams | null = null;
 
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
@@ -133,28 +172,6 @@ function createWindow(): BrowserWindow {
   return win;
 }
 
-function isWifiConnectedOld() {
-  console.log("isWifiConnected()");
-  const networkInterfaces = os.networkInterfaces();
-  
-  console.log(`isWifiConnected(): network interfaces ${networkInterfaces}`);
-
-  for (const interfaceName in networkInterfaces) {
-    const networkInterface = networkInterfaces[interfaceName];
-
-    if (networkInterface) {
-      for (const network of networkInterface) {
-        if (network.family === 'IPv4' && !network.internal && network.mac !== '00:00:00:00:00:00') {
-          if (interfaceName.toLowerCase().includes('wifi') || interfaceName.toLowerCase().includes('wlan')) {
-            return true;
-          }
-        }
-      }
-    }
-  }
-  return false;
-}
-
 function isConnectedToWiFi(): Promise<boolean> {
   return new Promise((resolve, reject) => {
     const platform = os.platform();  // Use os to get the platform
@@ -229,8 +246,13 @@ function startMoneroDaemon(commandOptions: string[]): ChildProcessWithoutNullStr
   const monerodPath = commandOptions.shift();
 
   if (!monerodPath) {
-    win?.webContents.send('monero-sterr', `Invalid monerod path provided: ${monerodPath}`);
-    throw Error("Invalid monerod path provided");
+    win?.webContents.send('monero-stderr', `Invalid monerod path provided: ${monerodPath}`);
+    throw new Error("Invalid monerod path provided");
+  }
+
+  if (monerodProcess != null) {
+    win?.webContents.send('monero-stderr', 'Monerod already started');
+    throw new Error("Monerod already started");
   }
 
   console.log("Starting monerod daemon with options: " + commandOptions.join(" "));
@@ -238,7 +260,7 @@ function startMoneroDaemon(commandOptions: string[]): ChildProcessWithoutNullStr
   moneroFirstStdout = true;
 
   // Avvia il processo usando spawn
-  const monerodProcess = spawn(monerodPath, commandOptions);
+  monerodProcess = spawn(monerodPath, commandOptions);
 
   // Gestisci l'output di stdout in streaming
   monerodProcess.stdout.on('data', (data) => {
@@ -271,9 +293,32 @@ function startMoneroDaemon(commandOptions: string[]): ChildProcessWithoutNullStr
     console.log(`monerod exited with code: ${code}`);
     win?.webContents.send('monero-stdout', `monerod exited with code: ${code}`);
     win?.webContents.send('monero-close', code);
+    monerodProcess = null;
   });
 
   return monerodProcess;
+}
+
+function monitorMonerod(): void {
+  if (!monerodProcess) {
+    win?.webContents.send('on-monitor-monerod-error', 'Monerod not running');
+    return;
+  }
+
+  if (!monerodProcess.pid) {
+    win?.webContents.send('on-monitor-monerod-error', 'Unknown monero pid');
+    return;
+  }
+
+  pidusage(monerodProcess.pid, (error: Error | null, stats: Stats) => {
+    if (error) {
+      win?.webContents.send('on-monitor-monerod-error', `${error}`);
+      return;
+    }
+
+    win?.webContents.send('on-monitor-monerod', stats);
+
+  });
 }
 
 const downloadFile = (url: string, destinationDir: string, onProgress: (progress: number) => void): Promise<string> => {
@@ -524,14 +569,18 @@ try {
 
   ipcMain.handle('is-wifi-connected', async (event) => {
     isWifiConnected();
-    //win?.webContents.send('is-wifi-connected-result', isWifiConnected());
   });
 
   ipcMain.handle('get-os-type', (event) => {
     win?.webContents.send('got-os-type', { platform: os.platform(), arch: os.arch() });
   })
 
+  ipcMain.handle('monitor-monerod', (event: IpcMainInvokeEvent) => {
+    monitorMonerod();
+  });
+
 } catch (e) {
   // Catch Error
+  console.error(e);
   // throw e;
 }
