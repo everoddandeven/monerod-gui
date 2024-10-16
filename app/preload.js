@@ -43,6 +43,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onSelectedFolder: (callback) => {
     ipcRenderer.on('selected-folder', callback);
   },
+  selectFile: () => {
+    ipcRenderer.invoke('select-file');
+  },
+  onSelectedFile: (callback) => {
+    ipcRenderer.on('selected-file', callback);
+  },
   isWifiConnected: () => {
     ipcRenderer.invoke('is-wifi-connected');
   },

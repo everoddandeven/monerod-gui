@@ -134,24 +134,6 @@ export class SettingsComponent {
     }
   }
 
-  public onMonerodPathChange(): void {
-    if (document) {
-      const element = <HTMLInputElement>document.getElementById('general-monerod-path');
-      if (element.files) {
-        this.currentSettings.monerodPath = element.files[0].path;
-      }
-    }
-  }
-
-  public onMonerodDownloadPathChange(): void {
-    if (document) {
-      const element = <HTMLInputElement>document.getElementById('general-download-monerod-path');
-      if (element.files) {
-        this.currentSettings.downloadUpgradePath = element.files[0].path;
-      }
-    }
-  }
-
   public async OnSave(): Promise<void> {
     if (!this.modified) {
       return;
@@ -181,39 +163,36 @@ export class SettingsComponent {
   }
 
   public chooseMonerodFile(): void {
-    const input = document.getElementById('general-monerod-path');
-
-    if (!input) {
+    if (!window.electronAPI) {
+      console.error("Not electron app");
       return;
     }
 
-    input.click();
-    
+    window.electronAPI.onSelectedFile((event: any, path: string) => {
+      if (path == '') {
+        return;
+      }
+
+      this.ngZone.run(() => {
+        this.currentSettings.monerodPath = path;
+      });
+    });
+
+    window.electronAPI.selectFile();
   }
 
   public chooseMoneroDownloadPath(): void {
-    /*
-    const input = document.getElementById('general-download-monerod-path');
-
-    if (!input) {
-      return;
-    }
-
-    input.click();
-    */
-    const wdw = (window as any);
-
-    if (wdw.electronAPI && wdw.electronAPI.selectFolder && wdw.electronAPI.onSelectedFolder) {
-      wdw.electronAPI.onSelectedFolder((event: any, folder: string) => {
+    if (window.electronAPI) {
+      window.electronAPI.onSelectedFolder((event: any, folder: string) => {
         if (folder == '') {
           return;
         }
         this.ngZone.run(() => {
           this.currentSettings.downloadUpgradePath = folder;
-        })
+        });
       });
 
-      wdw.electronAPI.selectFolder();
+      window.electronAPI.selectFolder();
     }
   }
 

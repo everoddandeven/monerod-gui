@@ -490,15 +490,36 @@ try {
       //throw new Error(`Error: ${error}`);
     }
   });
+
+  ipcMain.handle('select-file', async (event: any) => {
+    if (!win) 
+    {
+      return;
+    }
+
+    const result = await dialog.showOpenDialog(win, {
+      title: 'Select File',
+      properties: ['openFile']
+    });
+
+    const path = result.canceled ? null : result.filePaths[0];
+
+    win.webContents.send('selected-file', path ? `${path}` : '');
+  });
   
-  ipcMain.handle('select-folder', async (event) => {
-    const result = await dialog.showOpenDialog({
+  ipcMain.handle('select-folder', async (event: any) => {
+    if (!win) {
+      return;
+    }
+
+    const result = await dialog.showOpenDialog(win, {
+      title: 'Select Folder',
       properties: ['openDirectory'],  // Specifica che vogliamo solo cartelle
     });
 
     const path = result.canceled ? null : result.filePaths[0];
 
-    win?.webContents.send('selected-folder', path ? `${path}` : '');
+    win.webContents.send('selected-folder', path ? `${path}` : '');
   });
 
   ipcMain.handle('is-wifi-connected', async (event) => {

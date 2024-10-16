@@ -64,6 +64,10 @@ declare global {
       onMoneroClose: (callback: (event: any, code: number) => void) => void;
       isWifiConnected: () => void;
       onIsWifiConnectedResponse: (callback: (event: any, connected: boolean) => void) => void;
+      selectFolder: () => void;
+      selectFile: () => void;
+      onSelectedFolder: (callback: (event: any, path: string) => void) => void;
+      onSelectedFile: (callback: (event: any, path: string) => void) => void;
       getOsType: () => void;
       gotOsType: (callback: (event: any, osType: { platform: string, arch: string }) => void) => void;
       quit: () => void;
