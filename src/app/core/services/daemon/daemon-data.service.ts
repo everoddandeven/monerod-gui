@@ -377,6 +377,8 @@ export class DaemonDataService {
         return;
       }
 
+      await this.refreshProcessStats();
+
       this._gettingDaemonInfo = true;
       this._daemonInfo = await this.daemonService.getInfo();
       this._gettingDaemonInfo = false;
@@ -446,8 +448,6 @@ export class DaemonDataService {
       this._gettingConnections = true;
       this._connections = await this.daemonService.getConnections();
       this._gettingConnections = false;
-
-      await this.refreshProcessStats();
 
       this._lastRefreshHeight = this._daemonInfo.heightWithoutBootstrap;
       this._lastRefresh = Date.now();

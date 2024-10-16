@@ -5,6 +5,7 @@ import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { DaemonService, DaemonDataService } from '../../core/services';
 import { Subscription } from 'rxjs';
 import { Connection, Span } from '../../../common';
+import { SimpleBootstrapCard } from '../../shared/utils';
 
 @Component({
   selector: 'app-detail',
@@ -26,8 +27,6 @@ export class DetailComponent implements AfterViewInit, OnDestroy {
   }
 
   public readonly navbarLinks: NavbarLink[];
-
-  //private get syncStatus: string;
 
   //#region Sync Info
 
@@ -107,7 +106,7 @@ export class DetailComponent implements AfterViewInit, OnDestroy {
 
   //#endregion 
 
-  public cards: Card[];
+  public cards: SimpleBootstrapCard[];
 
   private subscriptions: Subscription[] = [];
 
@@ -131,7 +130,7 @@ export class DetailComponent implements AfterViewInit, OnDestroy {
       }
       
       this.ngZone.run(() => {
-        this.cards = this.createLoadingCards();
+        this.cards = this.createCards();
       });
 
     }));
@@ -208,49 +207,43 @@ export class DetailComponent implements AfterViewInit, OnDestroy {
     this.refreshSpansTable();
   }
 
-  private createLoadingCards(): Card[] {
-    return [
-      new Card('Connection Status', this.connectionStatus, true),
-      new Card('Network Type', this.networkType, true),
-      new Card('Node Type', this.nodeType, true),
-      new Card('Sync progress', this.syncProgress, true),
-      new Card('Scan Height', `${this.height} / ${this.targetHeight}`, true),
-      new Card('Next needed pruning seed', `${this.nextNeededPruningSeed}`, true),
-      new Card('Block count', `${this.blockCount}`, true),
-      new Card('Monero version', this.version, true),
-      new Card('Blockchain size', `${this.blockchainSize} GB`, true),
-      new Card('Disk usage', `${this.diskUsage} %`, true),
-      new Card('Transaction count', `${this.txCount}`, true),
-      new Card('Pool size', `${this.poolSize}`, true)
-    ];
-  }
-
-  private createCards(): Card[] {
+  private createCards(): SimpleBootstrapCard[] {
     if (!this.daemonRunning && !this.daemonService.starting) {
       return [];
     }
-    if (this.daemonData.initializing || this.daemonService.starting) {
-      return this.createLoadingCards();
+    const loading = this.daemonData.initializing || this.daemonService.starting;
+
+    const cards: SimpleBootstrapCard[] = [];
+
+    if (this.daemonService.startedAt) {
+      cards.push(new SimpleBootstrapCard('Started At', `${this.daemonService.startedAt.toLocaleDateString()} ${this.daemonService.startedAt.toLocaleTimeString()}`));
     }
-    const cards = [
-      new Card('Connection Status', this.connectionStatus),
-      new Card('Network Type', this.networkType),
-      new Card('Node Type', this.nodeType),
-      new Card('Sync progress', this.syncProgress),
-      new Card('Scan Height', `${this.height} / ${this.targetHeight}`),
-      new Card('Next needed pruning seed', `${this.nextNeededPruningSeed}`),
-      new Card('Block count', `${this.blockCount}`),
-      new Card('Monero version', this.version),
-      new Card('Blockchain size', `${this.blockchainSize} GB`),
-      new Card('Disk usage', `${this.diskUsage} %`),
-      new Card('Transaction count', `${this.txCount}`),
-      new Card('Pool size', `${this.poolSize}`)
-    ];
+
+    cards.push(
+      new SimpleBootstrapCard('Connection Status', this.connectionStatus, loading),
+      new SimpleBootstrapCard('Network Type', this.networkType, loading),
+      new SimpleBootstrapCard('Node Type', this.nodeType, loading),
+      new SimpleBootstrapCard('Sync progress', this.syncProgress, loading),
+      new SimpleBootstrapCard('Scan Height', `${this.height} / ${this.targetHeight}`, loading),
+      new SimpleBootstrapCard('Next needed pruning seed', `${this.nextNeededPruningSeed}`, loading),
+      new SimpleBootstrapCard('Block count', `${this.blockCount}`, loading),
+      new SimpleBootstrapCard('Monero version', this.version, loading),
+      new SimpleBootstrapCard('Blockchain size', `${this.blockchainSize} GB`, loading),
+      new SimpleBootstrapCard('Transaction count', `${this.txCount}`, loading),
+      new SimpleBootstrapCard('Pool size', `${this.poolSize}`, loading),
+      new SimpleBootstrapCard('Disk usage', `${this.diskUsage} %`, loading)
+    );
 
     if (this.daemonData.processStats) {
       cards.push(
-        new Card('CPU usage', `${this.daemonData.processStats.cpu.toFixed(2)} %`),
-        new Card('Memory usage', `${(this.daemonData.processStats.memory / 1024 / 1024).toFixed(2)} MB`)
+        new SimpleBootstrapCard('CPU usage', `${this.daemonData.processStats.cpu.toFixed(2)} %`),
+        new SimpleBootstrapCard('Memory usage', `${(this.daemonData.processStats.memory / 1024 / 1024).toFixed(2)} MB`)
+      );
+    }
+    else {
+      cards.push(
+        new SimpleBootstrapCard('CPU usage', ``, true),
+        new SimpleBootstrapCard('Memory usage', ``, true)
       );
     }
 
@@ -273,16 +266,4 @@ export class DetailComponent implements AfterViewInit, OnDestroy {
     return this.daemonData.syncInfo.spans;
   }
 
-}
-
-class Card {
-  public header: string;
-  public content: string;
-  public loading: boolean;
-
-  constructor(header: string, content: string, loading: boolean = false) {
-    this.header = header;
-    this.content = content;
-    this.loading = loading;
-  }
 }

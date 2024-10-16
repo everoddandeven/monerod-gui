@@ -119,6 +119,7 @@ export class DaemonService {
   public restarting: boolean = false;
   public disablingSync: boolean = false;
   public enablingSync: boolean = false;
+  public startedAt?: Date; 
 
   public readonly onDaemonStatusChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
   public readonly onDaemonStopStart: EventEmitter<void> = new EventEmitter<void>();
@@ -373,21 +374,25 @@ export class DaemonService {
           this.delay(3000).then(() => {
             this.isRunning(true).then((running: boolean) => {
               this.onDaemonStatusChanged.emit(running);
+              this.startedAt = new Date();
               this.starting = false;
               resolve();
             }).catch((error: any) => {
               console.error(error);
               this.onDaemonStatusChanged.emit(false);
+              this.startedAt = undefined;
               this.starting = false;
               reject(error);
             });
           }).catch((error: any) => {
+            this.startedAt = undefined;
             console.error(error);
           });
         }
         else {
           console.log("Daemon not started");
           this.onDaemonStatusChanged.emit(false);
+          this.startedAt = undefined;
           this.starting = false;
           reject('Could not start daemon');
         }
