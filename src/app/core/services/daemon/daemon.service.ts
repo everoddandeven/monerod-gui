@@ -818,7 +818,7 @@ export class DaemonService {
     return MinerData.parse(response.result);
   }
 
-  public async AddAuxPoW(blockTemplateBlob: string, auxPoW: AuxPoW[]): Promise<AddedAuxPow> {
+  public async addAuxPoW(blockTemplateBlob: string, auxPoW: AuxPoW[]): Promise<AddedAuxPow> {
     const response = await this.callRpc(new AddAuxPoWRequest(blockTemplateBlob, auxPoW));
 
     return AddedAuxPow.parse(response.result);

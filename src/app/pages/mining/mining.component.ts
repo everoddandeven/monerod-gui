@@ -5,7 +5,7 @@ import { MinerData } from '../../../common/MinerData';
 import { NavigationEnd, Router } from '@angular/router';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { Chain } from '../../../common/Chain';
-import { AuxPoW, BlockTemplate, GeneratedBlocks, MiningStatus } from '../../../common';
+import { AddedAuxPow, AuxPoW, BlockTemplate, GeneratedBlocks, MiningStatus } from '../../../common';
 import { DaemonDataService } from '../../core/services';
 
 @Component({
@@ -127,10 +127,10 @@ export class MiningComponent implements AfterViewInit {
 
   public addAuxPowAuxPowJsonString: string = '';
   public addAuxPowBlockTemplateBlob: string = '';
-  public auxPowArray: AuxPoW[] = [];
   public addingAuxPow: boolean = false;
   public addAuxPowSuccess: boolean = false;
   public addAuxPowError: string = '';
+  public addAuxPowResult?: AddedAuxPow;
 
   public get validStartMiningMinerAddress(): boolean {
     return this.startMiningMinerAddress != '';
@@ -168,14 +168,27 @@ export class MiningComponent implements AfterViewInit {
     this.navbarService.setLinks(this.navbarLinks);
 
     setTimeout(() => {
-      const $table = $('#chainsTable');
-      $table.bootstrapTable({});
-      $table.bootstrapTable('refreshOptions', {
+      const options = {
         classes: 'table table-bordered table-hover table-dark table-striped'
-      });      
+      };
+
+      const $chainsTable = $('#chainsTable');
+      $chainsTable.bootstrapTable({});
+      $chainsTable.bootstrapTable('refreshOptions', options);   
+      
       this.refresh();
 
     }, 500);
+  }
+
+  public initAuxPowTable(): void {
+    const options = {
+      classes: 'table table-bordered table-hover table-dark table-striped'
+    };
+    const $auxPowTable = $('#auxPowTable');
+    $auxPowTable.bootstrapTable({});
+    $auxPowTable.bootstrapTable('refreshOptions', options);
+    $auxPowTable.bootstrapTable('load', this.addAuxPowResult?.auxPoW);
   }
 
   private onNavigationEnd(): void {
@@ -342,8 +355,52 @@ export class MiningComponent implements AfterViewInit {
     this.stoppingMining = false;
   }
 
-  public async addAuxPow(): Promise<void> {
+  public get validAuxPowArray(): boolean {
+    try {
+      const auxPowArray: any[] = JSON.parse(this.addAuxPowAuxPowJsonString);
 
+      if (!Array.isArray(auxPowArray) || auxPowArray.length == 0) {
+        return false;
+      }
+
+      auxPowArray.forEach((auxPow: any) => AuxPoW.parse(auxPow));
+
+      return true;
+    }
+    catch {
+      return false;
+    }
+  }
+
+  public get auxPowArray(): AuxPoW[] {
+    if (!this.validAuxPowArray) {
+      return [];
+    }
+    
+    const _auxPowArray: any[] = JSON.parse(this.addAuxPowAuxPowJsonString);
+
+    const auxPowArray: AuxPoW[] = [];
+
+    _auxPowArray.forEach((auxPow: any) => auxPowArray.push(AuxPoW.parse(auxPow)));
+
+    return auxPowArray;
+  }
+
+  public async addAuxPow(): Promise<void> {
+    this.addingAuxPow = true;
+    this.addAuxPowResult = undefined;
+
+    try {
+      this.addAuxPowResult = await this.daemonService.addAuxPoW(this.addAuxPowBlockTemplateBlob, this.auxPowArray);
+      this.addAuxPowError = ``;
+      this.addAuxPowSuccess = true;
+    }
+    catch (error: any) {
+      this.addAuxPowSuccess = false;
+      this.addAuxPowError = `${error}`;
+    }
+
+    this.addingAuxPow = false;
   }
 
 }
