@@ -419,7 +419,6 @@ export class DaemonDataService {
     this.syncStart.emit({ first: this._firstRefresh });
 
     try {
-      const firstRefresh = this._firstRefresh;
       this._daemonRunning = await this.daemonService.isRunning();
       this._firstRefresh = false;
 
