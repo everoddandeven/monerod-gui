@@ -24,21 +24,21 @@
   </span>
 
   <ul class="navbar-nav flex-row">
-    <li *ngIf="!running && !stopping && !starting && !restarting" class="nav-item text-nowrap">
+    <li *ngIf="!quitting && !running && !stopping && !starting && !restarting" class="nav-item text-nowrap">
       <button class="btn btn-outline-secondary px-3 text-white" type="button" data-bs-toggle="collapse" aria-expanded="false" aria-label="Start daemon" (click)="startDaemon()">
         <i class="bi bi-play-fill"></i>
       </button>
       &nbsp;
     </li>
 
-    <li *ngIf="running && !stopping && !starting" class="nav-item text-nowrap">
+    <li *ngIf="!quitting && running && !stopping && !starting" class="nav-item text-nowrap">
       <button class="btn btn-outline-secondary px-3 text-white" type="button" data-bs-toggle="collapse" aria-expanded="false" aria-label="Stop daemon" (click)="stopDaemon()">
         <i class="bi bi-stop-fill"></i>
       </button>
       &nbsp;
     </li>
 
-    <li *ngIf="running && !stopping && !starting" class="nav-item text-nowrap">
+    <li *ngIf="!quitting && running && !stopping && !starting" class="nav-item text-nowrap">
       <button class="btn btn-outline-secondary px-3 text-white" type="button" data-bs-toggle="collapse" aria-expanded="false" aria-label="Restart daemon" (click)="restartDaemon()">
         <i class="bi bi-arrow-clockwise"></i>
       </button>
@@ -46,7 +46,7 @@
     </li>
 
     <li class="nav-item text-nowrap">
-      <button class="btn btn-outline-secondary px-3 text-white" type="button" data-bs-toggle="offcanvas" aria-label="Quit" [disabled]="stopping || starting" (click)="quit()">
+      <button class="btn btn-outline-secondary px-3 text-white" type="button" data-bs-toggle="offcanvas" aria-label="Quit" [disabled]="stopping || starting || quitting || restarting" (click)="quit()">
         <i class="bi bi-power"></i>
       </button>
       &nbsp;

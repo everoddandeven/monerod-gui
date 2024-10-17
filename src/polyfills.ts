@@ -74,6 +74,7 @@ declare global {
       onMonerodStarted: (callback: (event: any, started: boolean) => void) => void;
       unsubscribeOnMonerodStarted: () => void;
       onMoneroClose: (callback: (event: any, code: number) => void) => void;
+      onMoneroStdout: (callbak: (event: any, out: string) => void) => void;
       isWifiConnected: () => void;
       onIsWifiConnectedResponse: (callback: (event: any, connected: boolean) => void) => void;
       selectFolder: () => void;

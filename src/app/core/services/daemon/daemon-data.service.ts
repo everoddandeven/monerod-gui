@@ -458,9 +458,10 @@ export class DaemonDataService {
 
 
       this._gettingIsBlockchainPruned = true;
-      //if (firstRefresh) this._isBlockchainPruned = (await this.daemonService.pruneBlockchain(true)).pruned;
+
       const settings = await this.daemonService.getSettings();
       this._isBlockchainPruned = settings.pruneBlockchain;
+      /*
       if (firstRefresh) {
         this.daemonService.pruneBlockchain(true).then((info) => {
           this._isBlockchainPruned = info.pruned;
@@ -468,6 +469,8 @@ export class DaemonDataService {
           console.error(error);
         });
       }
+      */
+
       this._gettingIsBlockchainPruned = false;
 
       if (this._daemonInfo.synchronized) await this.refreshAltChains();

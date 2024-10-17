@@ -1143,7 +1143,24 @@ export class DaemonService {
     window.electronAPI.monitorMonerod();
 
     return await getProcessStatsPromise;
-  } 
+  }
+
+  private _quitting: boolean = false;
+
+  public get quitting(): boolean {
+    return this._quitting;
+  }
+
+  public async quit(): Promise<void> {
+    this._quitting = true;
+    const running: boolean = await this.isRunning();
+
+    if (running) {
+      await this.stopDaemon();
+    }
+
+    window.electronAPI.quit();
+  }
 
 }
 

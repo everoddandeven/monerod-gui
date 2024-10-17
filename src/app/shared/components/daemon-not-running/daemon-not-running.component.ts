@@ -10,25 +10,25 @@ import { DaemonDataService, MoneroInstallerService } from '../../../core/service
 export class DaemonNotRunningComponent {
 
   public get upgrading(): boolean {
-    return this.installer.upgrading;
+    return this.installer.upgrading && !this.quittingDaemon;
   }
 
   public get daemonRunning(): boolean {
-    return this.daemonData.running && !this.startingDaemon && !this.stoppingDaemon && !this.restartingDaemon && !this.upgrading;
+    return this.daemonData.running && !this.startingDaemon && !this.stoppingDaemon && !this.restartingDaemon && !this.upgrading && !this.quittingDaemon;
   }
 
   public daemonConfigured: boolean = true;
 
   public get startingDaemon(): boolean {
-    return this.daemonService.starting && !this.restartingDaemon && !this.stoppingDaemon && !this.upgrading;
+    return this.daemonService.starting && !this.restartingDaemon && !this.stoppingDaemon && !this.upgrading && !this.quittingDaemon;
   }
 
   public get stoppingDaemon(): boolean{
-    return this.daemonData.stopping && !this.restartingDaemon && !this.startingDaemon && !this.upgrading;
+    return this.daemonData.stopping && !this.restartingDaemon && !this.startingDaemon && !this.upgrading && !this.quittingDaemon;
   }
 
   public get restartingDaemon(): boolean {
-    return this.daemonService.restarting && ! this.upgrading;
+    return this.daemonService.restarting && ! this.upgrading && !this.quittingDaemon;
   }
 
   public get progressStatus(): string {
@@ -39,6 +39,10 @@ export class DaemonNotRunningComponent {
     }
 
     return progress.status;
+  }
+
+  public get quittingDaemon(): boolean {
+    return this.daemonService.quitting;
   }
 
   constructor(private installer: MoneroInstallerService, private daemonData: DaemonDataService, private daemonService: DaemonService, private ngZone: NgZone) {

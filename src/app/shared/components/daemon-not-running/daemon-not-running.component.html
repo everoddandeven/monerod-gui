@@ -1,19 +1,21 @@
 <div *ngIf="!daemonRunning || stoppingDaemon || restartingDaemon" class="h-100 p-5 text-bg-dark rounded-3 m-4 text-center">
-    <h2 *ngIf="!daemonRunning && !startingDaemon && !stoppingDaemon && !restartingDaemon && !upgrading && daemonConfigured"><i class="bi bi-exclamation-diamond m-4"></i> Daemon not running</h2>
-    <h2 *ngIf="!daemonRunning && !startingDaemon && !stoppingDaemon && !restartingDaemon && !upgrading && !daemonConfigured"><i class="bi bi-exclamation-diamond m-4"></i> Daemon not configured or installed</h2>
+    <h2 *ngIf="!daemonRunning && !startingDaemon && !stoppingDaemon && !restartingDaemon && !upgrading && daemonConfigured && !quittingDaemon"><i class="bi bi-exclamation-diamond m-4"></i> Daemon not running</h2>
+    <h2 *ngIf="!daemonRunning && !startingDaemon && !stoppingDaemon && !restartingDaemon && !upgrading && !daemonConfigured && !quittingDaemon"><i class="bi bi-exclamation-diamond m-4"></i> Daemon not configured or installed</h2>
     <h2 *ngIf="restartingDaemon && !upgrading"><i class="bi bi-arrow-clockwise m-4"></i> Daemon restarting</h2>
-    <h2 *ngIf="stoppingDaemon && !upgrading"><i class="bi bi-stop-fill m-4"></i> Daemon is stopping</h2>
+    <h2 *ngIf="stoppingDaemon && !upgrading && !quittingDaemon"><i class="bi bi-stop-fill m-4"></i> Daemon is stopping</h2>
     <h2 *ngIf="upgrading"><i class="bi bi-cloud-download m-4"></i> Daemon is upgrading</h2>
+    <h2 *ngIf="quittingDaemon"><i class="bi bi-power m-4"></i> Daemon is quiting</h2>
 
-    <p *ngIf="!daemonRunning && !startingDaemon && !stoppingDaemon && !restartingDaemon && daemonConfigured && !upgrading">Start monero daemon</p>
-    <p *ngIf="!startingDaemon && !startingDaemon && !stoppingDaemon && !restartingDaemon  && !daemonConfigured && !upgrading">Configure or install monero daemon</p>
+    <p *ngIf="!daemonRunning && !startingDaemon && !stoppingDaemon && !restartingDaemon && daemonConfigured && !upgrading && !quittingDaemon">Start monero daemon</p>
+    <p *ngIf="!startingDaemon && !startingDaemon && !stoppingDaemon && !restartingDaemon  && !daemonConfigured && !upgrading && !quittingDaemon">Configure or install monero daemon</p>
 
     <h2 *ngIf="startingDaemon"><i class="bi bi-play-fill m-4"></i> Daemon is starting</h2>
     <p *ngIf="startingDaemon">Starting monero daemon</p>
     <p *ngIf="restartingDaemon">Restarting monero daemon</p>
     <p *ngIf="upgrading">Upgrading monero daemon to latest version</p>
+    <p *ngIf="quittingDaemon">Quiting monero daemon</p>
 
-    <button *ngIf="!startingDaemon && !stoppingDaemon && !restartingDaemon && !upgrading && daemonConfigured" class="btn btn-outline-light" type="button" (click)="startDaemon()"><i class="bi bi-play-fill"></i> Start</button>
+    <button *ngIf="!startingDaemon && !stoppingDaemon && !restartingDaemon && !upgrading && daemonConfigured && !quittingDaemon" class="btn btn-outline-light" type="button" (click)="startDaemon()"><i class="bi bi-play-fill"></i> Start</button>
     <button *ngIf="startingDaemon" class="btn btn-outline-light" type="button" disabled>
       <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
       Starting monerod
@@ -24,9 +26,14 @@
       Restarting monerod
     </button>
     
-    <button *ngIf="stoppingDaemon" class="btn btn-outline-light" type="button" disabled>
+    <button *ngIf="stoppingDaemon && !quittingDaemon" class="btn btn-outline-light" type="button" disabled>
       <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
       Stopping monerod
+    </button>
+        
+    <button *ngIf="quittingDaemon" class="btn btn-outline-light" type="button" disabled>
+      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      Quiting monerod
     </button>
     
     <button *ngIf="upgrading" class="btn btn-outline-light" type="button" disabled>
@@ -35,7 +42,7 @@
     </button>
 
     &nbsp;
-    <button *ngIf="!startingDaemon && !stoppingDaemon && !restartingDaemon && !upgrading" routerLink="/settings" class="btn btn-outline-light" type="button"><i class="bi bi-gear"></i> Configure</button>
+    <button *ngIf="!startingDaemon && !stoppingDaemon && !restartingDaemon && !upgrading && !quittingDaemon" routerLink="/settings" class="btn btn-outline-light" type="button"><i class="bi bi-gear"></i> Configure</button>
     &nbsp;
-    <button *ngIf="!startingDaemon && !stoppingDaemon && !restartingDaemon && !upgrading && !daemonConfigured" routerLink="/version" class="btn btn-outline-light" type="button"><i class="bi bi-arrow-down-circle"></i> Install</button>
+    <button *ngIf="!startingDaemon && !stoppingDaemon && !restartingDaemon && !upgrading && !daemonConfigured && !quittingDaemon" routerLink="/version" class="btn btn-outline-light" type="button"><i class="bi bi-arrow-down-circle"></i> Install</button>
   </div>

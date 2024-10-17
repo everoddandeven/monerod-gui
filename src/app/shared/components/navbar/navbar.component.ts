@@ -12,6 +12,10 @@ export class NavbarComponent {
 
   private _running: boolean = false;
 
+  public get quitting(): boolean {
+    return this.daemonService.quitting;
+  }
+
   public get navbarLinks(): NavbarLink[] {
     return this.navbarService.links;
   }
@@ -72,12 +76,6 @@ export class NavbarComponent {
   }
 
   public async quit(): Promise<void> {
-    const running: boolean = await this.daemonService.isRunning();
-
-    if (running) {
-      await this.stopDaemon();
-    }
-
-    window.electronAPI.quit();
+    await this.daemonService.quit();
   }
 }
