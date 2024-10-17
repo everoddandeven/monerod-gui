@@ -49,6 +49,14 @@ interface Stats {
 //import * as bz2 from 'unbzip2-stream';
 const bz2 = require('unbzip2-stream');
 
+const gotInstanceLock = app.requestSingleInstanceLock();
+
+if (!gotInstanceLock) {
+  dialog.showErrorBox('Error', 'Another instance of monerod GUI is running');
+  app.quit();
+}
+
+
 let win: BrowserWindow | null = null;
 let isHidden: boolean = false;
 let isQuitting: boolean = false;
@@ -108,7 +116,8 @@ function createWindow(): BrowserWindow {
       nodeIntegration: false,
       allowRunningInsecureContent: (serve),
       contextIsolation: true,
-      devTools: !app.isPackaged
+      devTools: !app.isPackaged,
+      sandbox: false
     },
     autoHideMenuBar: true,
     icon: wdwIcon
