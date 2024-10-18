@@ -139,7 +139,7 @@ export class DetailComponent implements AfterViewInit, OnDestroy {
 
     this.cards = this.createCards();
 
-    this.subscriptions.push(<Subscription>this.daemonData.syncStart.subscribe((info) => {
+    const syncStartSub: Subscription = this.daemonData.syncStart.subscribe((info) => {
       if(!info.first) {
         return;
       }
@@ -147,14 +147,15 @@ export class DetailComponent implements AfterViewInit, OnDestroy {
       this.ngZone.run(() => {
         this.cards = this.createCards();
       });
+    });
 
-    }));
-
-    this.subscriptions.push(<Subscription>this.daemonData.syncInfoRefreshEnd.subscribe(() => {
+    const syncInfoRefreshEndSub: Subscription = this.daemonData.syncInfoRefreshEnd.subscribe(() => {
       this.refreshTables();
 
       this.cards = this.createCards();
-    }));
+    });
+
+    this.subscriptions.push(syncStartSub, syncInfoRefreshEndSub);
 
    }
 
