@@ -16,12 +16,19 @@ export class MoneroInstallerService {
     linuxriscv64: 'https://downloads.getmonero.org/cli/linuxriscv64'
   };
 
-  private _upgrading: boolean = false;
   private _progress: { progress: number, status: string } = { progress: 0, status: 'Starting upgrade' }
 
+  private alreadyConfigured: boolean = false;
+
   public get upgrading(): boolean {
-    return this._upgrading;
+    return this._downloading && this.alreadyConfigured;
   }
+
+  public get installing(): boolean {
+    return this._downloading && !this.alreadyConfigured;
+  }
+
+  private _downloading: boolean = false;
 
   public get progress(): { progress: number, status: string } {
     return this._progress;
@@ -29,45 +36,42 @@ export class MoneroInstallerService {
 
   constructor(private ngZone: NgZone) {}
 
-  public async downloadMonero(destination: string): Promise<string> {
-    this._upgrading = true;
+  public async downloadMonero(destination: string, alreadyConfigured: boolean): Promise<string> {
+    this.alreadyConfigured = alreadyConfigured;
+    this._downloading = true;
     const downloadUrl = await this.getMoneroDownloadLink();
     
     try {
       const result = await new Promise<string>((resolve, reject) => {
-        const wdw = (window as any);
-  
-        if (wdw.electronAPI && wdw.electronAPI.onDownloadProgress && wdw.electronAPI.downloadMonerod) {
-          wdw.electronAPI.onDownloadProgress((event: any, progress: { progress: number, status: string }) => {
-            //console.log(`${progress.progress.toFixed(2)} % ${progress.status}`);
-            this.ngZone.run(() => {
-              this._progress = progress;
-            });
 
-            if (progress.status.includes('Error')) {
-              reject(progress.status);
-            }
-  
-            if (progress.progress == 200) {
-              resolve(progress.status);
-            }
-  
+        window.electronAPI.onDownloadProgress((event: any, progress: { progress: number, status: string }) => {
+
+          this.ngZone.run(() => {
+            this._progress = progress;
           });
-  
-          wdw.electronAPI.downloadMonerod(downloadUrl, destination);
-        }
+
+          if (progress.status.includes('Error')) {
+            reject(progress.status);
+          }
+
+          if (progress.progress == 200) {
+            resolve(progress.status);
+          }
+
+        });
+
+        window.electronAPI.downloadMonerod(downloadUrl, destination);
       });
 
-      this._upgrading = false;
+      this._downloading = false;
       return result;
     }
     catch (error) {
       console.error(error);
-      this._upgrading = false;
+      this._downloading = false;
 
       throw error;
     }
-
   }
 
   private async getMoneroDownloadLink(): Promise<string> {

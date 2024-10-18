@@ -24,21 +24,21 @@
   </span>
 
   <ul class="navbar-nav flex-row">
-    <li *ngIf="!quitting && !running && !stopping && !starting && !restarting" class="nav-item text-nowrap">
+    <li *ngIf="!quitting && !running && !stopping && !starting && !restarting && !installing && !upgrading && daemonConfigured" class="nav-item text-nowrap">
       <button class="btn btn-outline-secondary px-3 text-white" type="button" data-bs-toggle="collapse" aria-expanded="false" aria-label="Start daemon" (click)="startDaemon()">
         <i class="bi bi-play-fill"></i>
       </button>
       &nbsp;
     </li>
 
-    <li *ngIf="!quitting && running && !stopping && !starting" class="nav-item text-nowrap">
+    <li *ngIf="!quitting && running && !stopping && !starting && !restarting && !installing && !upgrading" class="nav-item text-nowrap">
       <button class="btn btn-outline-secondary px-3 text-white" type="button" data-bs-toggle="collapse" aria-expanded="false" aria-label="Stop daemon" (click)="stopDaemon()">
         <i class="bi bi-stop-fill"></i>
       </button>
       &nbsp;
     </li>
 
-    <li *ngIf="!quitting && running && !stopping && !starting" class="nav-item text-nowrap">
+    <li *ngIf="!quitting && running && !stopping && !starting && !installing && !upgrading" class="nav-item text-nowrap">
       <button class="btn btn-outline-secondary px-3 text-white" type="button" data-bs-toggle="collapse" aria-expanded="false" aria-label="Restart daemon" (click)="restartDaemon()">
         <i class="bi bi-arrow-clockwise"></i>
       </button>
@@ -46,7 +46,7 @@
     </li>
 
     <li class="nav-item text-nowrap">
-      <button class="btn btn-outline-secondary px-3 text-white" type="button" data-bs-toggle="offcanvas" aria-label="Quit" [disabled]="stopping || starting || quitting || restarting" (click)="quit()">
+      <button class="btn btn-outline-secondary px-3 text-white" type="button" data-bs-toggle="offcanvas" aria-label="Quit" [disabled]="stopping || starting || quitting || restarting || upgrading || installing" (click)="quit()">
         <i class="bi bi-power"></i>
       </button>
       &nbsp;
@@ -55,11 +55,13 @@
   </ul>
 
   <ul class="navbar-nav flex-row d-md-none">
+  <!--
     <li class="nav-item text-nowrap">
       <button class="nav-link px-3 text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSearch" aria-controls="navbarSearch" aria-expanded="false" aria-label="Toggle search">
         <i class="bi bi-search"></i>
       </button>
     </li>
+  -->
     <li class="nav-item text-nowrap">
       <button class="nav-link px-3 text-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
         <i class="bi bi-list"></i>

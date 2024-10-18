@@ -42,3 +42,4 @@ export { ProcessStats } from './ProcessStats';
 
 export * from './error';
 export * from './request';
+export * from './utils';

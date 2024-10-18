@@ -46,6 +46,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onDownloadProgress: (callback) => {
     ipcRenderer.on('download-progress', callback);
   },
+  checkValidMonerodPath: (path) => {
+    ipcRenderer.invoke('check-valid-monerod-path', path);
+  },
+  onCheckValidMonerodPath: (callback) => {
+    ipcRenderer.on('on-check-valid-monerod-path', callback);
+  },
   selectFolder: () => {
     ipcRenderer.invoke('select-folder')
   },
@@ -69,6 +75,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   gotOsType: (callback) => {
     ipcRenderer.on('got-os-type', callback);
+  },
+  showNotification: (options) => {
+    ipcRenderer.invoke('show-notification', options);
   },
   quit: () => {
     ipcRenderer.invoke('quit');

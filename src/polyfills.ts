@@ -54,6 +54,7 @@ import 'zone.js';  // Included with Angular CLI.
 
 import 'jquery';
 import 'bootstrap-table';
+import { NotificationConstructorOptions } from 'electron';
 
 declare global {
   interface Window {
@@ -72,6 +73,13 @@ declare global {
       ) => void) => void;
       onMonitorMonerodError: (callback: (event: any, error: string) => void) => void;
       onMonerodStarted: (callback: (event: any, started: boolean) => void) => void;
+      getMoneroVersion: (path: string) => void;
+      onMoneroVersion: (callback: (event: any, version: string) => void) => void;
+      onMoneroVersionError: (callback: (event: any, error: string) => void) => void;
+      downloadMonerod: (downloadUrl:string, destination: string) => void;
+      onDownloadProgress: (callback: (event: any, progress: { progress: number, status: string }) => void) => void;
+      checkValidMonerodPath: (path: string) => void;
+      onCheckValidMonerodPath: (callback: (event: any, valid: boolean) => void) => void;
       unsubscribeOnMonerodStarted: () => void;
       onMoneroClose: (callback: (event: any, code: number) => void) => void;
       onMoneroStdout: (callbak: (event: any, out: string) => void) => void;
@@ -83,6 +91,7 @@ declare global {
       onSelectedFile: (callback: (event: any, path: string) => void) => void;
       getOsType: () => void;
       gotOsType: (callback: (event: any, osType: { platform: string, arch: string }) => void) => void;
+      showNotification: (options: NotificationConstructorOptions) => void;
       quit: () => void;
       
     };

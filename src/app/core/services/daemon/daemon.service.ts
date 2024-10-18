@@ -78,7 +78,7 @@ import { TxInfo } from '../../../../common/TxInfo';
 import { DaemonSettings } from '../../../../common/DaemonSettings';
 import { MethodNotFoundError } from '../../../../common/error/MethodNotFoundError';
 import { openDB, IDBPDatabase } from "idb"
-import { PeerInfo, ProcessStats, TxPool } from '../../../../common';
+import { PeerInfo, ProcessStats, TimeUtils, TxPool } from '../../../../common';
 import { MoneroInstallerService } from '../monero-installer/monero-installer.service';
 
 @Injectable({
@@ -124,6 +124,7 @@ export class DaemonService {
   public readonly onDaemonStatusChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
   public readonly onDaemonStopStart: EventEmitter<void> = new EventEmitter<void>();
   public readonly onDaemonStopEnd: EventEmitter<void> = new EventEmitter<void>();
+  public readonly onSavedSettings: EventEmitter<DaemonSettings> = new EventEmitter<DaemonSettings>();
 
   private isRunningPromise?: Promise<boolean>;
 
@@ -169,6 +170,12 @@ export class DaemonService {
   public async disableSync(): Promise<void> {
     this.disablingSync = true;
 
+    window.electronAPI.showNotification({
+      title: 'Disabling sync',
+      body: 'Node sync is about to be disabled',
+      closeButtonText: 'Dismiss'
+    });
+
     try {
       const running: boolean = await this.isRunning();
 
@@ -185,9 +192,21 @@ export class DaemonService {
       this.settings.noSync = true;
 
       await this.startDaemon(this.settings);
+
+      window.electronAPI.showNotification({
+        title: 'Sync disabled',
+        body: 'Node sync disabled successfully',
+        closeButtonText: 'Dismiss'
+      });
+      
     }
     catch(error: any) {
       console.error(error);
+      window.electronAPI.showNotification({
+        title: 'Error',
+        body: 'An error occurred while disabling sync',
+        closeButtonText: 'Dimiss'
+      })
     }
 
     this.disablingSync = false;
@@ -246,6 +265,7 @@ export class DaemonService {
   public async saveSettings(settings: DaemonSettings, restartDaemon: boolean = true): Promise<void> {
     const db = await this.openDbPromise;
     await db.put(this.storeName, { id: 1, ...settings });
+    this.onSavedSettings.emit(settings);
 
     if (restartDaemon) {
       const running = await this.isRunning();
@@ -261,6 +281,22 @@ export class DaemonService {
         console.error(error);
       }
     }
+  }
+
+  public async checkValidMonerodPath(path: string): Promise<boolean> {
+    if (path == null || path == undefined || path.replace(' ', '') == '') {
+      return false;
+    }
+
+    const checkPromise = new Promise<boolean>((resolve) => {
+      window.electronAPI.onCheckValidMonerodPath((event: any, valid: boolean) => {
+        resolve(valid);
+      });
+    });
+
+    window.electronAPI.checkValidMonerodPath(path);
+
+    return await checkPromise;
   }
 
   public async getSettings(): Promise<DaemonSettings> {
@@ -359,10 +395,10 @@ export class DaemonService {
 
       this.settings.noSync = true;
     }
-    else if (!this.settings.noSync && !this.settings.syncOnWifi && !await this.isWifiConnected()) {
-      console.log("Enabling sync ...");
+    else if (!this.settings.noSync && this.settings.syncPeriodEnabled && !TimeUtils.isInTimeRange(this.settings.syncPeriodFrom, this.settings.syncPeriodTo)) {
+      console.log("Disabling sync ...");
 
-      this.settings.noSync = false;
+      this.settings.noSync = true;
     }
 
     const startPromise = new Promise<void>((resolve, reject) => {
@@ -370,15 +406,25 @@ export class DaemonService {
         console.debug(event);
         
         if (started) {
-          console.log("Daemon started");
+          console.log("monerod started");
           this.delay(3000).then(() => {
             this.isRunning(true).then((running: boolean) => {
+              window.electronAPI.showNotification({
+                title: 'Daemon started',
+                body: 'Successfully started daemon',
+                closeButtonText: 'Dismiss'
+              });
               this.onDaemonStatusChanged.emit(running);
               this.startedAt = new Date();
               this.starting = false;
               resolve();
             }).catch((error: any) => {
               console.error(error);
+              window.electronAPI.showNotification({
+                title: 'Daemon error',
+                body: 'An error occurred while checking daemon status',
+                closeButtonText: 'Dismiss'
+              });
               this.onDaemonStatusChanged.emit(false);
               this.startedAt = undefined;
               this.starting = false;
@@ -391,12 +437,15 @@ export class DaemonService {
         }
         else {
           console.log("Daemon not started");
+          window.electronAPI.showNotification({
+            title: 'Daemon Error',
+            body: 'Could not start monerod'
+          });
           this.onDaemonStatusChanged.emit(false);
           this.startedAt = undefined;
           this.starting = false;
           reject('Could not start daemon');
         }
-
       })
     });
 
@@ -706,33 +755,19 @@ export class DaemonService {
     }
     else if (dontUseRpc) {
       const monerodPath: string = (await this.getSettings()).monerodPath;
-      const wdw = (window as any);
 
       if (monerodPath == '') {
         throw new Error("Daemon not configured");
       }
 
       return new Promise<DaemonVersion>((resolve, reject) => {
-        if (this.electronService.isElectron) {
-          this.electronService.ipcRenderer.on('on-monerod-version', (event, version: string) => {
-            resolve(DaemonVersion.parse(version));
-          });
-          
-          this.electronService.ipcRenderer.on('on-monerod-version-error', (event, version: string) => {
-            reject(version);
-          });
-  
-          this.electronService.ipcRenderer.send('get-monerod-version', monerodPath);
-        }
-        else if (wdw.electronAPI && wdw.electronAPI.getMoneroVersion) {
-          wdw.electronAPI.onMoneroVersion((event: any, version: string) => {
-            resolve(DaemonVersion.parse(version));
-          })
-          wdw.electronAPI.onMoneroVersionError((event: any, error: string) => {
-            reject(error);
-          });
-          wdw.electronAPI.getMoneroVersion(monerodPath);
-        }
+        window.electronAPI.onMoneroVersion((event: any, version: string) => {
+          resolve(DaemonVersion.parse(version));
+        })
+        window.electronAPI.onMoneroVersionError((event: any, error: string) => {
+          reject(error);
+        });
+        window.electronAPI.getMoneroVersion(monerodPath);
       });
     }
 
@@ -946,16 +981,6 @@ export class DaemonService {
     }
   
     throw new Error('Could not stop daemon');
-
-    /*
-    if (this.electronService.isElectron) {
-      return;
-    }
-
-    this.daemonRunning = false;
-    this.onDaemonStatusChanged.emit(false);
-    this.onDaemonStopEnd.emit();
-    */
   }
 
   public async setLimit(limitDown: number, limitUp: number): Promise<{ limitDown: number, limitUp: number }> {
@@ -1073,10 +1098,8 @@ export class DaemonService {
         throw new Error("Download path not configured");
       }
 
-      //const downloadUrl = 'https://downloads.getmonero.org/cli/linux64'; // Cambia in base al sistema
-      const destination = settings.downloadUpgradePath; // Aggiorna con il percorso desiderato
-  
-      const moneroFolder = await this.installer.downloadMonero(destination);
+      const destination = settings.downloadUpgradePath; // Aggiorna con il percorso desiderato  
+      const moneroFolder = await this.installer.downloadMonero(destination, settings.monerodPath != '');
       
       settings.monerodPath = `${moneroFolder}/monerod`;
 

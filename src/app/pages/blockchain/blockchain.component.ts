@@ -21,6 +21,10 @@ export class BlockchainComponent implements AfterViewInit {
     return this.daemonData.stopping;
   }
 
+  public get daemonStarting(): boolean {
+    return this.daemonService.starting;
+  }
+
   public get lastBlockHeader(): BlockHeader | undefined {
     return this.daemonData.lastBlockHeader;
   }

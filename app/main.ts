@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, screen, dialog, Tray, Menu, MenuItemConstructorOptions, IpcMainInvokeEvent } from 'electron';
+import { app, BrowserWindow, ipcMain, screen, dialog, Tray, Menu, MenuItemConstructorOptions, IpcMainInvokeEvent, Notification, NotificationConstructorOptions } from 'electron';
 import { ChildProcessWithoutNullStreams, exec, ExecException, spawn } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -248,22 +248,46 @@ function getMonerodVersion(monerodFilePath: string): void {
   })
 }
 
+function checkValidMonerodPath(monerodPath: string): void {
+  let foundUsage: boolean = false;
+  const monerodProcess = spawn(monerodPath, ['--help']);
+
+  monerodProcess.stderr.on('data', (data) => {
+    win?.webContents.send('on-check-valid-monerod-path', false);
+  });
+
+  monerodProcess.stdout.on('data', (data) => {
+    if (`${data}`.includes('monerod [options|settings] [daemon_command...]')) {
+      foundUsage = true;
+    }
+  });
+
+  monerodProcess.on('close', (code: number) => {
+    win?.webContents.send('on-check-valid-monerod-path', foundUsage);
+  })
+
+}
+
 let moneroFirstStdout: boolean = true;
 
 function startMoneroDaemon(commandOptions: string[]): ChildProcessWithoutNullStreams {
   const monerodPath = commandOptions.shift();
 
   if (!monerodPath) {
-    win?.webContents.send('monero-stderr', `Invalid monerod path provided: ${monerodPath}`);
+    const error = `Invalid monerod path provided: ${monerodPath}`;
+    win?.webContents.send('monero-stderr', error);
     throw new Error("Invalid monerod path provided");
   }
 
   if (monerodProcess != null) {
-    win?.webContents.send('monero-stderr', 'Monerod already started');
+    const error: string = 'Monero daemon already started';
+    win?.webContents.send('monero-stderr', error);
     throw new Error("Monerod already started");
   }
 
-  console.log("Starting monerod daemon with options: " + commandOptions.join(" "));
+  const message: string = "Starting monerod daemon with options: " + commandOptions.join(" ");
+  
+  console.log(message);
   
   moneroFirstStdout = true;
 
@@ -471,6 +495,10 @@ const extractTarBz2 = (filePath: string, destination: string): Promise<string> =
   });
 };
 
+function showNotification(options?: NotificationConstructorOptions): void {
+  new Notification(options).show();
+}
+
 try {
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
@@ -585,6 +613,14 @@ try {
 
   ipcMain.handle('monitor-monerod', (event: IpcMainInvokeEvent) => {
     monitorMonerod();
+  });
+
+  ipcMain.handle('check-valid-monerod-path', (event: IpcMainInvokeEvent, path: string) => {
+    checkValidMonerodPath(path);
+  })
+
+  ipcMain.handle('show-notification', (event: IpcMainInvokeEvent, options?: NotificationConstructorOptions) => {
+    showNotification(options);
   });
 
 } catch (e) {
