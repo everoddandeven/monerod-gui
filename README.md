@@ -161,7 +161,16 @@ Please note that Hot reload is only available in Renderer process.
 
 Please consider donating to support the development of this project.
 
+### Monero
+
 <p align="center">
 	<img src="donate.png" width="115" height="115"/><br>
 	<code>84Q1SdQgFWaEWRn5KcvSPCQUa3NF39EJ3HPCTaiM86RHLLftqgTZpkP24jXrK5YpeedWbQAjHcFcDLpFJfr9TypfAU7pPjA</code>
+</p>
+
+### Bitcoin
+
+<p align="center">
+	<img src="donate_btc.png" width="115" height="115"/><br>
+	<code>bc1qndc2lesy0sse9vj33a35pnfrqz4znlhhs58vfp</code>
 </p>
