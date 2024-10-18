@@ -42,7 +42,8 @@ export class SidebarComponent {
       new NavLink('Bans', '/bans', 'bi bi-ban', 'bottom'),
       new NavLink('Logs', '/logs', 'bi bi-terminal', 'bottom'),
       new NavLink('Version', '/version', 'bi bi-git', 'bottom'),
-      new NavLink('Settings', '/settings', 'bi bi-gear', 'bottom')
+      new NavLink('Settings', '/settings', 'bi bi-gear', 'bottom'),
+      new NavLink('About', '/about', 'bi bi-info-circle', 'bottom')
     ];
   }
 
