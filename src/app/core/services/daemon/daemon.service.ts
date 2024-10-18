@@ -229,14 +229,14 @@ export class DaemonService {
     this.onDaemonStopEnd.emit();
   }
 
-  private async openDatabase(): Promise<IDBPDatabase> {
-    return openDB(this.dbName, 1, {
+  private async openDatabase(): Promise<IDBPDatabase<any>> {
+    return await openDB<any>(this.dbName, 1, {
       upgrade(db) {
         // Crea un archivio (store) per i settings se non esiste già
         if (!db.objectStoreNames.contains('settingsStore')) {
           db.createObjectStore('settingsStore', {
             keyPath: 'id',
-            autoIncrement: true,
+            autoIncrement: true
           });
         }
       },
@@ -257,7 +257,7 @@ export class DaemonService {
       try {
         await this.restartDaemon();
       } 
-      catch(error) {
+      catch(error: any) {
         console.error(error);
       }
     }
@@ -324,7 +324,7 @@ export class DaemonService {
 
       return response;
     }
-    catch (error) {
+    catch (error: any) {
       if (error instanceof HttpErrorResponse) {
         if (error.status == 0) {
           const wasRunning = this.daemonRunning;
@@ -405,7 +405,7 @@ export class DaemonService {
     try {
       await startPromise;
     }
-    catch(error) {
+    catch(error: any) {
       console.error(error);
     }
     
@@ -426,7 +426,7 @@ export class DaemonService {
         await this.startDaemon();
       }
     }
-    catch(error) {
+    catch(error: any) {
       console.error(error);
       err = error;
     }
@@ -442,7 +442,7 @@ export class DaemonService {
     try {
       await this.callRpc(new EmptyRpcRequest());
     }
-    catch(error) {
+    catch(error: any) {
       if (error instanceof MethodNotFoundError) {
         return true;
       }
