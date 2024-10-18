@@ -75,7 +75,6 @@ export class VersionComponent implements AfterViewInit {
   }
 
   public ngAfterViewInit(): void {
-    this.upgrading = this.moneroInstaller.upgrading;
     this.load()
       .then(() => {
         this.cards = this.createCards();
@@ -98,19 +97,25 @@ export class VersionComponent implements AfterViewInit {
     this.latestVersion = latestVersion;
   }
 
-  public upgrading: boolean = false;
+  public get upgrading(): boolean {
+    return this.moneroInstaller.upgrading;
+  }
+
+  public get installing(): boolean {
+    return this.moneroInstaller.installing;
+  }
+
   public upgradeSuccess: boolean = false;
   public upgradeError: string = '';
   public downloadProgress: number = 100;
   public downloadStatus : string = '';
 
   public async upgrade(): Promise<void> {
-    if (this.upgrading) {
+    if (this.upgrading || this.installing) {
       console.warn("Already upgrading");
       return;
     }
 
-    this.upgrading = true;
     try {    
       await this.daemonService.upgrade();
 
@@ -122,7 +127,5 @@ export class VersionComponent implements AfterViewInit {
       this.upgradeSuccess = false;
       this.upgradeError = `${error}`;
     }
-
-    this.upgrading = false;
   }
 }

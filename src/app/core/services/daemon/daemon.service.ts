@@ -410,8 +410,8 @@ export class DaemonService {
           this.delay(3000).then(() => {
             this.isRunning(true).then((running: boolean) => {
               window.electronAPI.showNotification({
-                title: 'Daemon started',
-                body: 'Successfully started daemon',
+                title: this.enablingSync ? 'Enabled blockchain sync' : this.restarting ? 'Daemon restarted' : 'Daemon started',
+                body: this.enablingSync ? 'Successfully enabled node blockchain sync' : this.restarting ? 'Successfully restarted daemon' : 'Successfully started daemon',
                 closeButtonText: 'Dismiss'
               });
               this.onDaemonStatusChanged.emit(running);
@@ -439,7 +439,7 @@ export class DaemonService {
           console.log("Daemon not started");
           window.electronAPI.showNotification({
             title: 'Daemon Error',
-            body: 'Could not start monerod'
+            body: this.enablingSync ? 'Could not enable node blockchain sync' : this.restarting ? 'Could not restart monerod' : 'Could not start monerod'
           });
           this.onDaemonStatusChanged.emit(false);
           this.startedAt = undefined;
@@ -960,6 +960,11 @@ export class DaemonService {
       return;
     }
 
+    window.electronAPI.showNotification({
+      title: this.quitting ? 'Quiting monero daemon' : this.restarting ? 'Restarting monero daemon' : 'Stopping monero daemon',
+      body: this.quitting ? 'Monero daemon is quiting' : this.restarting ? 'Monero daemon is restarting' : 'Monero daemon is stopping'
+    });
+
     this.stopping = true;
     this.onDaemonStopStart.emit();
 
@@ -967,6 +972,10 @@ export class DaemonService {
     console.log(response);
 
     if (typeof response.status == 'string' && response.status != 'OK') {
+      window.electronAPI.showNotification({
+        title: 'Error',
+        body: 'Could not stop daemon'
+      });
       throw new Error(`Could not stop daemon: ${response.status}`);
     }
 
@@ -975,11 +984,23 @@ export class DaemonService {
     for(let i = 0; i < maxChecks; i++) {
       if (!await this.isRunning(true)) {
         this.stopping = false;
+
+        if (!this.restarting) {
+          window.electronAPI.showNotification({
+            title: 'Daemon stopped',
+            body: 'Successfully stopped monero daemon'
+          });
+        }
+
         return;
       } 
       await this.delay(5000);
     }
-  
+
+    window.electronAPI.showNotification({
+      title: 'Error',
+      body: 'Could not stop daemon'
+    });
     throw new Error('Could not stop daemon');
   }
 
