@@ -139,7 +139,7 @@ export class DetailComponent implements AfterViewInit, OnDestroy {
 
     this.cards = this.createCards();
 
-    this.subscriptions.push(this.daemonData.syncStart.subscribe((info) => {
+    this.subscriptions.push(<Subscription>this.daemonData.syncStart.subscribe((info) => {
       if(!info.first) {
         return;
       }
@@ -150,7 +150,7 @@ export class DetailComponent implements AfterViewInit, OnDestroy {
 
     }));
 
-    this.subscriptions.push(this.daemonData.syncInfoRefreshEnd.subscribe(() => {
+    this.subscriptions.push(<Subscription>this.daemonData.syncInfoRefreshEnd.subscribe(() => {
       this.refreshTables();
 
       this.cards = this.createCards();

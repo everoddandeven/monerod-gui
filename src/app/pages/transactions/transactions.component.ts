@@ -100,7 +100,7 @@ export class TransactionsComponent implements AfterViewInit, OnDestroy {
       this.navbarService.setLinks(this.navbarLinks);
       
       this.initTables();
-      this.subscriptions.push(this.daemonData.syncEnd.subscribe(() => {
+      this.subscriptions.push(<Subscription>this.daemonData.syncEnd.subscribe(() => {
         this.refreshTables();
       }));
     });

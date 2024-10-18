@@ -66,7 +66,7 @@ export class PeersComponent implements AfterViewInit, OnDestroy {
       $publicNodesTable.bootstrapTable('load', this.daemonData.publicNodes);
       $peerListTable.bootstrapTable('load', this.daemonData.peerList);
 
-      const sub = this.daemonData.syncEnd.subscribe(() => {
+      const sub = <Subscription>this.daemonData.syncEnd.subscribe(() => {
         $publicNodesTable.bootstrapTable('load', this.daemonData.publicNodes);
         //$peerListTable.bootstrapTable('load', this.daemonData.peerList);
       });

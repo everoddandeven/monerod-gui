@@ -230,7 +230,7 @@ export class DaemonService {
   }
 
   private async openDatabase(): Promise<IDBPDatabase<any>> {
-    return await openDB<any>(this.dbName, 1, {
+    return await openDB<IDBPDatabase<any>>(this.dbName, 1, {
       upgrade(db) {
         // Crea un archivio (store) per i settings se non esiste già
         if (!db.objectStoreNames.contains('settingsStore')) {

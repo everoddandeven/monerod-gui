@@ -41,11 +41,11 @@ export class NetworkComponent implements AfterViewInit, OnDestroy {
       new NavbarLink('pills-limits-tab', '#pills-limit', 'pills-limit', false, 'Limit')
     ];
 
-    this.subscriptions.push(this.daemonData.netStatsRefreshEnd.subscribe(() => {
+    this.subscriptions.push(<Subscription>this.daemonData.netStatsRefreshEnd.subscribe(() => {
       this.refreshNetStatsHistory();
     }));
 
-    this.subscriptions.push(this.daemonData.syncEnd.subscribe(() => {
+    this.subscriptions.push(<Subscription>this.daemonData.syncEnd.subscribe(() => {
       this.loadConnectionsTable();
     }));
 
