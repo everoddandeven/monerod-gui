@@ -7,6 +7,7 @@ body {
 $primary: #ff5733;
 
 @import "/node_modules/bootstrap/scss/bootstrap";
+
 .bi {
   display: inline-block;
   width: 1rem;
@@ -23,6 +24,7 @@ $primary: #ff5733;
     position: sticky;
     top: 48px;
   }
+  
   .navbar-search {
     display: block;
   }

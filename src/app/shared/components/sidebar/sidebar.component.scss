@@ -23,6 +23,7 @@ main {
   color: var(--bs-emphasis-color);
   background-color: transparent;
 }
+
 .btn-toggle:hover,
 .btn-toggle:focus {
   color: rgba(var(--bs-emphasis-color-rgb), .85);
@@ -44,6 +45,7 @@ main {
 .btn-toggle[aria-expanded="true"] {
   color: rgba(var(--bs-emphasis-color-rgb), .85);
 }
+
 .btn-toggle[aria-expanded="true"]::before {
   transform: rotate(90deg);
 }
@@ -53,6 +55,7 @@ main {
   margin-top: .125rem;
   margin-left: 1.25rem;
 }
+
 .btn-toggle-nav a:hover,
 .btn-toggle-nav a:focus {
   background-color: var(--bs-tertiary-bg);
