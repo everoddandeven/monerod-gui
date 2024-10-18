@@ -4,6 +4,7 @@
 [![Make a pull request][prs-badge]][prs]
 [![License][license-badge]](LICENSE.md)
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/fe60ace15aeb4b28a15533f9866807c6)](https://app.codacy.com/gh/everoddandeven/monerod-gui?utm_source=github.com&utm_medium=referral&utm_content=everoddandeven/monerod-gui&utm_campaign=Badge_Grade)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/505405b43cb74d5a996f106a3371588e)](https://app.codacy.com/gh/everoddandeven/monerod-gui/dashboard)
 
 [![Linux Build][linux-build-badge]][linux-build]
