@@ -4,6 +4,8 @@
 [![Make a pull request][prs-badge]][prs]
 [![License][license-badge]](LICENSE.md)
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/505405b43cb74d5a996f106a3371588e)](https://app.codacy.com/gh/everoddandeven/monerod-gui/dashboard)
+
 [![Linux Build][linux-build-badge]][linux-build]
 [![MacOS Build][macos-build-badge]][macos-build]
 [![Windows Build][windows-build-badge]][windows-build]
