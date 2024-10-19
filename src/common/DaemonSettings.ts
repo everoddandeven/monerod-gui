@@ -256,7 +256,7 @@ export class DaemonSettings {
     if (this.banList != '') options.push(`--ban-list`, this.banList);
     if (this.hideMyPort) options.push(`--hide-my-port`);
     if (this.noSync) options.push(`--no-sync`);
-    if (this.enableDnsBlocklist) options.push(`--enable-dns-block-list`);
+    if (this.enableDnsBlocklist) options.push(`--enable-dns-blocklist`);
     if (this.noIgd) options.push(`--no-igd`);
     if (this.outPeers >= 0) options.push(`--out-peers`, `${this.outPeers}`);
     if (this.inPeers >= 0) options.push(`--in-peers`, `${this.inPeers}`);
