@@ -89,6 +89,7 @@
     "@types/jest": "29.5.13",
     "@types/jquery": "3.5.31",
     "@types/node": "20.12.7",
+    "@types/pidusage": "2.0.5",
     "@types/unbzip2-stream": "1.4.3",
     "@typescript-eslint/eslint-plugin": "7.7.1",
     "@typescript-eslint/parser": "7.7.1",
