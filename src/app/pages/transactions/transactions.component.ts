@@ -165,12 +165,80 @@ export class TransactionsComponent extends BasePageComponent implements AfterVie
     await this.daemonService.relayTx(...txIds);
   }
 
-  public async onFlush(): Promise<void> {
+  public flushing: boolean = false;
+  public flushSuccess: boolean = true;
+  public flushError: string = '';
+  public flushTxIdsJsonString: string = '';
 
+  public get validFlushTxIds(): boolean {
+    try {
+      const txIds: any[] = JSON.parse(this.flushTxIdsJsonString);
+
+      if (!Array.isArray(txIds) || txIds.length == 0) {
+        return false;
+      }
+
+      let valid: boolean = true;
+
+      txIds.forEach((txId: string) => {
+        if (typeof txId != 'string' || txId == '') {
+          valid = false;
+        }
+      });
+
+      return valid;
+    }
+    catch {
+      return false;
+    }
   }
 
-  public async onFlushFromCache(): Promise<void> {
+  private get flushTxIds(): string[] {
+    if (!this.validFlushTxIds) {
+      return [];
+    }
 
+    const txIds: string[] = JSON.parse(this.flushTxIdsJsonString);
+
+    return txIds;
+  }
+
+  public async flush(): Promise<void> {
+    this.flushing = true;
+
+    try {
+      await this.daemonService.flushTxPool(...this.flushTxIds);
+      this.flushError = '';
+      this.flushSuccess = true;
+    }
+    catch(error) {
+      this.flushSuccess = false;
+      this.flushError = `${error}`;
+    }
+
+    this.flushing = false;
+  }
+
+  public flushingCache: boolean = false;
+  public flushCacheBadTxs: boolean = false;
+  public flushCacheBadBlocks: boolean = false;
+  public flushCacheSuccess: boolean = false;
+  public flushCacheError: string = '';
+
+  public async flushCache(): Promise<void> {
+    this.flushingCache = true;
+
+    try {
+      await this.daemonService.flushCache(this.flushCacheBadTxs, this.flushCacheBadBlocks);
+      this.flushCacheError = '';
+      this.flushCacheSuccess = true;
+    }
+    catch(error) {
+      this.flushCacheSuccess = false;
+      this.flushCacheError = `${error}`;
+    }
+
+    this.flushingCache = false;
   }
 
 
