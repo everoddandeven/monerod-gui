@@ -211,7 +211,7 @@ export class TransactionsComponent extends BasePageComponent implements AfterVie
       this.flushError = '';
       this.flushSuccess = true;
     }
-    catch(error) {
+    catch(error: any) {
       this.flushSuccess = false;
       this.flushError = `${error}`;
     }
@@ -233,7 +233,7 @@ export class TransactionsComponent extends BasePageComponent implements AfterVie
       this.flushCacheError = '';
       this.flushCacheSuccess = true;
     }
-    catch(error) {
+    catch(error: any) {
       this.flushCacheSuccess = false;
       this.flushCacheError = `${error}`;
     }
