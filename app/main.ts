@@ -60,7 +60,9 @@ if (!gotInstanceLock) {
 let win: BrowserWindow | null = null;
 let isHidden: boolean = false;
 let isQuitting: boolean = false;
+const dirname = __dirname.endsWith('/app') ? __dirname.replace('/app', '/src') : __dirname;
 let monerodProcess: ChildProcessWithoutNullStreams | null = null;
+const wdwIcon = path.join(dirname, 'assets/icons/monero-symbol-on-white-480.png');
 
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
@@ -68,14 +70,6 @@ const args = process.argv.slice(1),
 function createWindow(): BrowserWindow {
 
   const size = screen.getPrimaryDisplay().workAreaSize;
-  let dirname = __dirname;
-
-  if (dirname.endsWith('/app')) {
-    dirname = dirname.replace('/app', '/src')
-  }
-
-  const wdwIcon = path.join(dirname, 'assets/icons/monero-symbol-on-white-480.png');
-
   const trayMenuTemplate: MenuItemConstructorOptions[] = [
     {
       id: "stopDaemon",
@@ -496,6 +490,14 @@ const extractTarBz2 = (filePath: string, destination: string): Promise<string> =
 };
 
 function showNotification(options?: NotificationConstructorOptions): void {
+  if (!options) {
+    return;
+  }
+
+  if (!options.icon) {
+    options.icon = wdwIcon;
+  }
+  
   new Notification(options).show();
 }
 
