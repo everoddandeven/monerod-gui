@@ -1166,7 +1166,7 @@ export class DaemonService {
   }
 
   public getGuiVersion(): string {
-    return "0.1.0-alpha";
+    return "0.1.0-rc";
   }
 
   public async getProcessStats(): Promise<ProcessStats> {

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
+import { DaemonService } from '../../core/services';
 
 @Component({
   selector: 'app-about',
@@ -11,7 +12,11 @@ export class AboutComponent {
     new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', true, 'Overview')
   ];
 
-  constructor() {
+  public get guiVersion(): string {
+    return this.daemonService.getGuiVersion();
+  }
+
+  constructor(private daemonService: DaemonService) {
 
   }
 
