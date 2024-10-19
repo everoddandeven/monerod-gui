@@ -166,7 +166,7 @@ export class TransactionsComponent extends BasePageComponent implements AfterVie
   }
 
   public flushing: boolean = false;
-  public flushSuccess: boolean = true;
+  public flushSuccess: boolean = false;
   public flushError: string = '';
   public flushTxIdsJsonString: string = '';
 
