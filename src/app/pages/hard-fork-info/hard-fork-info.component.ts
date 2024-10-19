@@ -1,17 +1,17 @@
 import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
-import { NavigationEnd, Router } from '@angular/router';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { SimpleBootstrapCard } from '../../shared/utils';
 import { DaemonDataService } from '../../core/services';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
+import { BasePageComponent } from '../base-page/base-page.component';
 
 @Component({
   selector: 'app-hard-fork-info',
   templateUrl: './hard-fork-info.component.html',
   styleUrl: './hard-fork-info.component.scss'
 })
-export class HardForkInfoComponent implements AfterViewInit {
+export class HardForkInfoComponent extends BasePageComponent implements AfterViewInit {
   public cards: SimpleBootstrapCard[];
   private earliestHeight: number;
   private enabled: boolean;
@@ -31,11 +31,12 @@ export class HardForkInfoComponent implements AfterViewInit {
 
   public loading: boolean = false;
 
-  public readonly navbarLinks: NavbarLink[] = [
-    new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', false, 'Overview'),
-  ];
+  constructor(private daemonData: DaemonDataService, private daemonService: DaemonService, navbarService: NavbarService, private ngZone: NgZone) {
+    super(navbarService);
 
-  constructor(private router: Router, private daemonData: DaemonDataService, private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
+    this.setLinks([
+      new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', false, 'Overview'),
+    ]);
     this.cards = [];
     this.enabled = false;
     this.earliestHeight = 0;
@@ -44,26 +45,14 @@ export class HardForkInfoComponent implements AfterViewInit {
     this.votes = 0;
     this.voting = 0;
     this.window = 0;
-
-    this.router.events.subscribe((event) => {
-      if (event instanceof NavigationEnd) {
-        if (event.url != '/hardforkinfo') return;
-        this.onNavigationEnd();
-      }
-    });
   }
 
-  ngAfterViewInit(): void {
-      this.navbarService.setLinks(this.navbarLinks);
-  }
-
-  private onNavigationEnd(): void {
+  public ngAfterViewInit(): void {
     this.load().then(() => {
       this.cards = this.createCards();
     }).catch((error: any) => {
       console.error(error);
-    });
-    
+    });  
   }
 
   private async load(): Promise<void> {

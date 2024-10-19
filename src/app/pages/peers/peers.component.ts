@@ -1,17 +1,16 @@
-import { AfterViewInit, Component, NgZone, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { DaemonDataService, DaemonService } from '../../core/services';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { Subscription } from 'rxjs';
+import { BasePageComponent } from '../base-page/base-page.component';
 
 @Component({
   selector: 'app-peers',
   templateUrl: './peers.component.html',
   styleUrl: './peers.component.scss'
 })
-export class PeersComponent implements AfterViewInit, OnDestroy {
-
-  public readonly navbarLinks: NavbarLink[];
+export class PeersComponent extends BasePageComponent implements AfterViewInit {
 
   public limitInPeers: number = 0;
   public limitingInPeers: boolean = false;
@@ -35,44 +34,39 @@ export class PeersComponent implements AfterViewInit, OnDestroy {
     return this.daemonData.stopping;
   }
 
-  private subscriptions: Subscription[] = [];
-
-  constructor(private daemonService: DaemonService, private daemonData: DaemonDataService, private navbarService: NavbarService, private ngZone: NgZone) {
-    this.navbarLinks = [
+  constructor(private daemonService: DaemonService, private daemonData: DaemonDataService, navbarService: NavbarService, private ngZone: NgZone) {
+    super(navbarService);
+    this.setLinks([
       new NavbarLink('pills-peer-list-tab', '#pills-peer-list', 'pills-peer-list', false, 'Peer List'),
       new NavbarLink('pills-public-nodes-tab', '#pills-public-nodes', 'pills-public-nodes', false, 'Public Nodes'),
       new NavbarLink('pills-in-peers-tab', '#pills-in-peers', 'pills-in-peers', false, 'In Peers'),
       new NavbarLink('pills-out-peers-tab', '#pills-out-peers', 'pills-out-peers', false, 'Out Peers')
-    ];
+    ]);
   }
 
   public ngAfterViewInit(): void {
-    this.navbarService.setLinks(this.navbarLinks);
-
     this.ngZone.run(() => {
-      const $publicNodesTable = $('#publicNodesTable');
-      const $peerListTable = $('#peerListTable');
-
-      $publicNodesTable.bootstrapTable({});
-      $publicNodesTable.bootstrapTable('refreshOptions', {
-        classes: 'table table-bordered table-hover table-dark table-striped'
-      });
-  
-      $peerListTable.bootstrapTable({});
-      $peerListTable.bootstrapTable('refreshOptions', {
-        classes: 'table table-bordered table-hover table-dark table-striped'
-      });
-
-      $publicNodesTable.bootstrapTable('load', this.daemonData.publicNodes);
-      $peerListTable.bootstrapTable('load', this.daemonData.peerList);
+      this.loadTables();
 
       const sub: Subscription = this.daemonData.syncEnd.subscribe(() => {
-        $publicNodesTable.bootstrapTable('load', this.daemonData.publicNodes);
-        //$peerListTable.bootstrapTable('load', this.daemonData.peerList);
+        this.loadPublicNodesTable();
       });
   
       this.subscriptions.push(sub);
     });
+  }
+
+  private loadTables(): void {
+    this.loadPeerListTable();
+    this.loadPublicNodesTable();
+  }
+
+  private loadPeerListTable(): void {
+    this.loadTable('peerListTable', this.daemonData.peerList);
+  }
+
+  private loadPublicNodesTable(): void {
+    this.loadTable('publicNodesTable', this.daemonData.publicNodes);
   }
 
   public async refreshPeerListTable(): Promise<void> {
@@ -83,8 +77,7 @@ export class PeersComponent implements AfterViewInit, OnDestroy {
         setTimeout(() => {
           this.ngZone.run(() => {
             try {
-              const $peerListTable = $('#peerListTable');
-              $peerListTable.bootstrapTable('load', this.daemonData.peerList);
+              this.loadPeerListTable();
               resolve();
             }
             catch(error) {
@@ -99,14 +92,6 @@ export class PeersComponent implements AfterViewInit, OnDestroy {
     }
 
     this.refreshingPeerList = false;
-  }
-
-  public ngOnDestroy(): void {
-    this.subscriptions.forEach((sub) => {
-      sub.unsubscribe();
-    });
-
-    this.subscriptions = [];
   }
 
   public async inPeers(): Promise<void> {

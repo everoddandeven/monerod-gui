@@ -1,17 +1,17 @@
-import { AfterViewInit, Component, NgZone } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { Block, BlockHeader } from '../../../common';
 import { DaemonDataService } from '../../core/services';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
+import { BasePageComponent } from '../base-page/base-page.component';
 
 @Component({
   selector: 'app-blockchain',
   templateUrl: './blockchain.component.html',
   styleUrl: './blockchain.component.scss'
 })
-export class BlockchainComponent implements AfterViewInit {
-  public readonly navbarLinks: NavbarLink[];
+export class BlockchainComponent extends BasePageComponent {
   
   public get daemonRunning(): boolean {
     return this.daemonData.running;
@@ -67,19 +67,16 @@ export class BlockchainComponent implements AfterViewInit {
   public pruneBlockchainError: string = '';
   public blockchainPruned: boolean = false;
 
-  constructor(private daemonService: DaemonService, private daemonData: DaemonDataService, private navbarService: NavbarService, private ngZone: NgZone) {
-    this.navbarLinks = [
+  constructor(private daemonService: DaemonService, private daemonData: DaemonDataService, navbarService: NavbarService, private ngZone: NgZone) {
+    super(navbarService);
+    this.setLinks([
       new NavbarLink('pills-last-block-header-tab', '#pills-last-block-header', 'pills-last-block-header', false, 'Last Block Header'),
       new NavbarLink('pills-get-block-tab', '#pills-get-block', 'pills-get-block', false, 'Get Block'),
       new NavbarLink('pills-get-block-header-tab', '#pills-get-block-header', 'pills-get-block-header', false, 'Get Block Header'),
       new NavbarLink('pills-pop-blocks-tab', '#pills-pop-blocks', 'pills-pop-blocks', false, 'Pop Blocks'),
       new NavbarLink('pills-prune-blockchain-tab', '#pills-prune-blockchain', 'pills-prune-blockchain', false, 'Prune'),
       new NavbarLink('pills-save-bc-tab', '#pills-save-bc', 'pills-save-bc', false, 'Save')
-    ];
-  }
-
-  public ngAfterViewInit(): void {
-    this.navbarService.setLinks(this.navbarLinks);
+    ]);
   }
 
   public async getBlock(): Promise<void> {

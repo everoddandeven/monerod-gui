@@ -1,21 +1,16 @@
 import { AfterViewInit, Component, NgZone } from '@angular/core';
-import { DaemonService } from '../../core/services/daemon/daemon.service';
-import { NavbarService } from '../../shared/components/navbar/navbar.service';
-import { MinerData } from '../../../common/MinerData';
-import { NavigationEnd, Router } from '@angular/router';
-import { NavbarLink } from '../../shared/components/navbar/navbar.model';
-import { Chain } from '../../../common/Chain';
-import { AddedAuxPow, AuxPoW, BlockTemplate, GeneratedBlocks, MiningStatus } from '../../../common';
-import { DaemonDataService } from '../../core/services';
+import { DaemonService, DaemonDataService } from '../../core/services';
+import { NavbarLink, NavbarService } from '../../shared/components';
+import { AddedAuxPow, AuxPoW, BlockTemplate, GeneratedBlocks, MiningStatus, MinerData, Chain } from '../../../common';
+import { BasePageComponent } from '../base-page/base-page.component';
+import { SimpleBootstrapCard } from '../../shared/utils';
 
 @Component({
   selector: 'app-mining',
   templateUrl: './mining.component.html',
   styleUrl: './mining.component.scss'
 })
-export class MiningComponent implements AfterViewInit {
-
-  public readonly navbarLinks: NavbarLink[];
+export class MiningComponent extends BasePageComponent implements AfterViewInit {
 
   public get coreBusy(): boolean {
     return this.daemonData.info? !this.daemonData.info.synchronized : true;
@@ -104,7 +99,7 @@ export class MiningComponent implements AfterViewInit {
   }
 
   //private txBacklog: MineableTxBacklog[]
-  public cards: Card[];
+  public cards: SimpleBootstrapCard[];
 
   public get daemonRunning(): boolean {
     return this.daemonData.running;
@@ -136,10 +131,11 @@ export class MiningComponent implements AfterViewInit {
     return this.startMiningMinerAddress != '';
   }
 
-  constructor(private router: Router, private daemonService: DaemonService, private daemonData: DaemonDataService, private navbarService: NavbarService, private ngZone: NgZone) {
+  constructor(private daemonService: DaemonService, private daemonData: DaemonDataService, navbarService: NavbarService, private ngZone: NgZone) {
+    super(navbarService)
     this.cards = [];
 
-    this.navbarLinks = [
+    this.setLinks([
       new NavbarLink('pills-mining-status-tab', '#pills-mining-status', 'mining-status', false, 'Status'),
       new NavbarLink('pills-miner-data-tab', '#pills-miner-data', 'miner-data', false, 'Miner Data'),
       new NavbarLink('pills-hashrate-tab', '#pills-hashrate', 'hashrate', false, 'Hashrate'),
@@ -149,14 +145,7 @@ export class MiningComponent implements AfterViewInit {
       new NavbarLink('pills-submit-block-tab', '#pills-submit-block', 'submit-block', false, 'Submit Block'),
       new NavbarLink('pills-calc-pow-tab', '#pills-calc-pow', 'calc-pow', false, 'Calculate PoW Hash'),
       new NavbarLink('pills-add-aux-pow-tab', '#pills-add-aux-pow', 'add-aux-pow', false, 'Add Aux PoW')
-    ];
-
-    this.router.events.subscribe((event) => {
-      if (event instanceof NavigationEnd) {
-        if (event.url != '/mining') return;
-        this.onNavigationEnd();
-      }
-    });
+    ]);
     
     this.daemonData.syncEnd.subscribe(() => {
       this.refresh();
@@ -165,34 +154,21 @@ export class MiningComponent implements AfterViewInit {
 
   public ngAfterViewInit(): void {
     console.log('DetailComponent AFTER VIEW INIT');
-    this.navbarService.setLinks(this.navbarLinks);
-
-    setTimeout(() => {
-      const options = {
-        classes: 'table table-bordered table-hover table-dark table-striped'
-      };
-
-      const $chainsTable = $('#chainsTable');
-      $chainsTable.bootstrapTable({});
-      $chainsTable.bootstrapTable('refreshOptions', options);   
-      
-      this.refresh();
-
-    }, 500);
+    this.loadTables();
+    this.cards = this.createCards();
   }
 
-  public initAuxPowTable(): void {
-    const options = {
-      classes: 'table table-bordered table-hover table-dark table-striped'
-    };
-    const $auxPowTable = $('#auxPowTable');
-    $auxPowTable.bootstrapTable({});
-    $auxPowTable.bootstrapTable('refreshOptions', options);
-    $auxPowTable.bootstrapTable('load', this.addAuxPowResult?.auxPoW);
+  private loadTables(): void {
+    this.loadChainsTable();
+    this.loadAuxPowTable();
   }
 
-  private onNavigationEnd(): void {
-    this.refresh();
+  private loadChainsTable(): void {
+    this.loadTable('chainsTable', this.alternateChains);
+  }
+
+  private loadAuxPowTable(): void {
+    this.loadTable('auxPowTable', this.addAuxPowResult ? this.addAuxPowResult.auxPoW : []);
   }
 
   public async getBlockTemplate(): Promise<void> {
@@ -250,46 +226,24 @@ export class MiningComponent implements AfterViewInit {
   }
 
   private refresh(): void {
-
-    try {
-      const $table = $('#chainsTable');
-      $table.bootstrapTable('load', this.getChains());
-      this.cards = this.createCards();
-    }
-    catch(error) {
-      this.navbarService.disableLinks();
-    }
-    
+    this.loadChainsTable();
+    this.cards = this.createCards();
   }
 
-  private createCards(): Card[] {
+  private createCards(): SimpleBootstrapCard[] {
     if (this.coreBusy) {
       return [
       ]
     }
     return [
-      new Card('Major Fork Version', `${this.majorVersion}`),
-      new Card('Current block height', `${this.height}`),
-      new Card('Previous Block Id', `${this.prevId}`),
-      new Card('Seed hash', `${this.seedHash}`),
-      new Card('Network difficulty', `${this.difficulty}`),
-      new Card('Median block weight', `${this.medianWeight}`),
-      new Card('Generated Coins', `${this.alreadyGeneratedCoins}`)
+      new SimpleBootstrapCard('Major Fork Version', `${this.majorVersion}`),
+      new SimpleBootstrapCard('Current block height', `${this.height}`),
+      new SimpleBootstrapCard('Previous Block Id', `${this.prevId}`),
+      new SimpleBootstrapCard('Seed hash', `${this.seedHash}`),
+      new SimpleBootstrapCard('Network difficulty', `${this.difficulty}`),
+      new SimpleBootstrapCard('Median block weight', `${this.medianWeight}`),
+      new SimpleBootstrapCard('Generated Coins', `${this.alreadyGeneratedCoins}`)
     ];
-  }
-
-  private getChains(): any[] {
-    const chains: any[] = [];
-
-    this.alternateChains.forEach((chain: Chain) => chains.push({
-      'blockHash': chain.blockHash,
-      'height': chain.height,
-      'length': chain.length,
-      'mainChainParentBlock': chain.mainChainParentBlock,
-      'wideDifficulty': chain.wideDifficulty
-    }))
-
-    return chains;
   }
 
   public async calcPowHash() {
@@ -394,6 +348,7 @@ export class MiningComponent implements AfterViewInit {
       this.addAuxPowResult = await this.daemonService.addAuxPoW(this.addAuxPowBlockTemplateBlob, this.auxPowArray);
       this.addAuxPowError = ``;
       this.addAuxPowSuccess = true;
+      this.loadAuxPowTable();
     }
     catch (error: any) {
       this.addAuxPowSuccess = false;
@@ -403,14 +358,4 @@ export class MiningComponent implements AfterViewInit {
     this.addingAuxPow = false;
   }
 
-}
-
-class Card {
-  public header: string;
-  public content: string;
-
-  constructor(header: string, content: string) {
-    this.header = header;
-    this.content = content;
-  }
 }

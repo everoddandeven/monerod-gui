@@ -1,17 +1,17 @@
-import { AfterViewInit, Component, NgZone } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { HistogramEntry, Output, OutputDistribution } from '../../../common';
 import { DaemonDataService } from '../../core/services';
+import { BasePageComponent } from '../base-page/base-page.component';
 
 @Component({
   selector: 'app-outputs',
   templateUrl: './outputs.component.html',
   styleUrl: './outputs.component.scss'
 })
-export class OutputsComponent implements AfterViewInit {
-  public readonly navbarLinks: NavbarLink[];
+export class OutputsComponent extends BasePageComponent {
 
   public get daemonRunning(): boolean {
     return this.daemonData.running;
@@ -97,41 +97,15 @@ export class OutputsComponent implements AfterViewInit {
     return <number[]>JSON.parse(this.getOutDistributionAmountsJsonString);
   }
 
-  constructor(private daemonData: DaemonDataService, private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
-    this.navbarLinks = [
+  constructor(private daemonData: DaemonDataService, private daemonService: DaemonService, navbarService: NavbarService, private ngZone: NgZone) {
+    super(navbarService);
+
+    this.setLinks([
       new NavbarLink('pills-outputs-get-outs-tab', '#pills-outputs-get-outs', 'outputs-get-outs', false, 'Get Outs'),
       new NavbarLink('pills-outputs-histogram-tab', '#pills-outputs-histogram', 'outputs-histogram', false, 'Histogram'),
       new NavbarLink('pills-outputs-distribution-tab', '#pills-outputs-distribution', 'outputs-distribution', false, 'Distribution'),
       new NavbarLink('pills-is-key-image-spent-tab', '#pills-is-key-image-spent', 'is-key-image-spent', false, 'Is Key Image Spent')
-    ];
-  }
-
-  public ngAfterViewInit(): void {
-      this.navbarService.setLinks(this.navbarLinks);
-      this.ngZone.run(async () => {
-        //const $ = require('jquery');
-        //const bootstrapTable = require('bootstrap-table');
-        const options = {
-          classes: 'table table-bordered table-hover table-dark table-striped'
-        };
-
-        const $table = $('#outsTable');
-        $table.bootstrapTable({});
-
-        const $distributionsTable = $('#outDistributionsTable');
-        $distributionsTable.bootstrapTable({});
-
-        const $histogramTable = $('#outHistrogramsTable');
-        $histogramTable.bootstrapTable({});
-
-        $table.bootstrapTable('refreshOptions', options);
-        $distributionsTable.bootstrapTable('refreshOptions', options);
-        $histogramTable.bootstrapTable('refreshOptions', options);
-
-        await this.load();
-      }).then().catch((error: any) => {
-        console.error(error);
-      });
+    ]);
   }
 
   public get getOutsOuts() {
@@ -251,13 +225,11 @@ export class OutputsComponent implements AfterViewInit {
   }
 
   private loadOutDistributionTable(): void {
-    const $table = $('#outDistributionsTable');
-    $table.bootstrapTable('load', this.getOutDistributionResult);
+    this.loadTable('outDistributionsTable', this.getOutDistributionResult ? this.getOutDistributionResult : []);
   }
 
   private loadOutHistogramTable(): void {
-    const $table = $('#outHistogramsTable');
-    $table.bootstrapTable('load', this.getOutHistogramResult);
+    this.loadTable('outHistogramsTable', this.getOutHistogramResult ? this.getOutHistogramResult : []);
   }
 
   public async getOutHistogram(): Promise<void> {
@@ -298,9 +270,7 @@ export class OutputsComponent implements AfterViewInit {
           spentStatus: spentStatus == 0 ? 'unspent' : spentStatus == 1 ? 'spent in blockchain' : spentStatus == 2 ? 'spent in tx pool' : 'unknown'
         })
 
-        const $table = $('#keyImagesTable');
-        $table.bootstrapTable({});
-        $table.bootstrapTable('load', this.isKeyImageSpentResult);
+        this.loadTable('keyImagesTable', this.isKeyImageSpentResult);
         this.isKeyImageSpentError = '';
       }
 
@@ -312,6 +282,4 @@ export class OutputsComponent implements AfterViewInit {
     this.gettingKeyImages = false;
   }
 
-  public async load() {
-  }
 }

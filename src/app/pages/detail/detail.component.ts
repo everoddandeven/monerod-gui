@@ -1,18 +1,18 @@
-import { Component, AfterViewInit, NgZone, OnDestroy } from '@angular/core';
-import { Peer } from '../../../common/Peer';
+import { Component, AfterViewInit, NgZone } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { DaemonService, DaemonDataService } from '../../core/services';
 import { Subscription } from 'rxjs';
-import { Connection, Span } from '../../../common';
+import { Connection, Span, Peer } from '../../../common';
 import { SimpleBootstrapCard } from '../../shared/utils';
+import { BasePageComponent } from '../base-page/base-page.component';
 
 @Component({
   selector: 'app-detail',
   templateUrl: './detail.component.html',
   styleUrls: ['./detail.component.scss']
 })
-export class DetailComponent implements AfterViewInit, OnDestroy {
+export class DetailComponent extends BasePageComponent implements AfterViewInit {
 
   public get daemonRunning(): boolean {
     return this.daemonData.running;
@@ -26,14 +26,16 @@ export class DetailComponent implements AfterViewInit, OnDestroy {
     return this.daemonData.stopping;
   }
 
-  public readonly navbarLinks: NavbarLink[];
-
   public get syncDisabledByWifiPolicy(): boolean {
     return this.daemonData.syncDisabledByWifiPolicy;
   }
 
   public get syncDisabledByPeriodPolicy(): boolean {
     return this.daemonData.syncDisabledByPeriodPolicy;
+  }
+
+  public get syncDisabled(): boolean {
+    return this.daemonService.settings.noSync;
   }
 
   public get syncDisabledFrom(): string {
@@ -123,22 +125,24 @@ export class DetailComponent implements AfterViewInit, OnDestroy {
 
   public cards: SimpleBootstrapCard[];
 
-  private subscriptions: Subscription[] = [];
-
   constructor(
     private daemonService: DaemonService, 
-    private navbarService: NavbarService, 
+    navbarService: NavbarService, 
     private daemonData: DaemonDataService, 
     private ngZone: NgZone) {
+    
+    super(navbarService);
 
-    this.navbarLinks = [
+    this.setLinks([
       new NavbarLink('pills-home-tab', '#pills-home', 'pills-home', false, 'Overview', true),
       new NavbarLink('pills-peers-tab', '#pills-peers', 'pills-peers', false, 'Peers', true),
       new NavbarLink('pills-spans-tab', '#pills-spans', 'pills-spans', false, 'Spans', true)
-    ];
+    ]);
 
     this.cards = this.createCards();
+  }
 
+  private registerEventListeners(): void {
     const syncStartSub: Subscription = this.daemonData.syncStart.subscribe((info) => {
       if(!info.first) {
         return;
@@ -150,77 +154,32 @@ export class DetailComponent implements AfterViewInit, OnDestroy {
     });
 
     const syncInfoRefreshEndSub: Subscription = this.daemonData.syncInfoRefreshEnd.subscribe(() => {
-      this.refreshTables();
+      this.loadTables();
 
       this.cards = this.createCards();
     });
 
     this.subscriptions.push(syncStartSub, syncInfoRefreshEndSub);
-
-   }
+  }
 
   public ngAfterViewInit(): void {
-    console.log('DetailComponent AFTER VIEW INIT');
-    this.navbarService.setLinks(this.navbarLinks);
     this.ngZone.run(() => {
-      this.initTables();
-    });    
-  }
-
-  public ngOnDestroy(): void {
-    this.subscriptions.forEach((sub) => sub.unsubscribe());
-    this.subscriptions = [];
-  }
-
-  private initTable(table: string): void {
-    const $table = $(`#${table}Table`);
-    $table.bootstrapTable({});
-    
-    $table.bootstrapTable('refreshOptions', {
-      classes: 'table table-bordered table-hover table-dark table-striped'
+      this.registerEventListeners();
+      this.loadTables();
     });
-
-    $table.bootstrapTable('showLoading');
   }
 
-  private initPeerTable(): void {
-    this.initTable('peers');
+  private loadPeersTable(): void {
+    this.loadTable('peersTable', this.getPeers());
   }
 
-  private initSpansTable(): void {
-    this.initTable('spans');
+  private loadSpansTable(): void {
+    this.loadTable('spansTable', this.getSpans());
   }
 
-  private initTables() {
-    this.initPeerTable();
-    this.initSpansTable();
-  }
-
-  private refreshTable(table: string, data: any[]): void {
-    const $peersTable = $(`#${table}Table`);
-    //$table.bootstrapTable({});
-    $peersTable.bootstrapTable('refreshOptions', {
-      classes: 'table table-bordered table-hover table-dark table-striped'
-    });
-    if (this.getPeers().length == 0) $peersTable.bootstrapTable('showLoading');
-    else 
-    {
-      $peersTable.bootstrapTable('load', data);
-      $peersTable.bootstrapTable('hideLoading');
-    }
-  }
-
-  private refreshPeersTable(): void {
-    this.refreshTable('peers', this.getPeers());
-  }
-
-  private refreshSpansTable(): void {
-    this.refreshTable('spans', this.getSpans());
-  }
-
-  private refreshTables(): void {
-    this.refreshPeersTable();
-    this.refreshSpansTable();
+  private loadTables(): void {
+    this.loadPeersTable();
+    this.loadSpansTable();
   }
 
   private createCards(): SimpleBootstrapCard[] {
@@ -266,7 +225,7 @@ export class DetailComponent implements AfterViewInit, OnDestroy {
     return cards;
   }
 
-  public getPeers(): Connection[] {
+  private getPeers(): Connection[] {
     if (!this.daemonData.syncInfo) return [];
     const infos: Connection[] = [];
 
@@ -277,7 +236,7 @@ export class DetailComponent implements AfterViewInit, OnDestroy {
     return infos;
   }
 
-  public getSpans(): Span[] {
+  private getSpans(): Span[] {
     if (!this.daemonData.syncInfo) return [];    
     return this.daemonData.syncInfo.spans;
   }

@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, NgZone, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
@@ -7,14 +7,14 @@ import { SimpleBootstrapCard } from '../../shared/utils';
 import { DaemonDataService } from '../../core/services';
 import { FeeEstimate, SpentKeyImage, UnconfirmedTx } from '../../../common';
 import { Subscription } from 'rxjs';
+import { BasePageComponent } from '../base-page/base-page.component';
 
 @Component({
   selector: 'app-transactions',
   templateUrl: './transactions.component.html',
   styleUrl: './transactions.component.scss'
 })
-export class TransactionsComponent implements AfterViewInit, OnDestroy {
-  public readonly navbarLinks: NavbarLink[];
+export class TransactionsComponent extends BasePageComponent implements AfterViewInit {
 
   public canRelay: boolean;
   
@@ -76,10 +76,10 @@ export class TransactionsComponent implements AfterViewInit, OnDestroy {
     return this.daemonData.transactionPool.spentKeyImages;
   }
 
-  private subscriptions: Subscription[] = [];
+  constructor(private daemonData: DaemonDataService, private daemonService: DaemonService, navbarService: NavbarService, private ngZone: NgZone) {
+    super(navbarService);
 
-  constructor(private daemonData: DaemonDataService, private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
-    this.navbarLinks = [
+    this.setLinks([
       new NavbarLink('pills-tx-pool-tab', '#pills-tx-pool', 'pills-tx-pool', false, 'Pool'),
       new NavbarLink('pills-relay-tx-tab', '#pills-relay-tx', 'pills-relay-tx', false, 'Relay Tx'),
       new NavbarLink('pills-send-raw-tx-tab', '#pills-send-raw-tx', 'pills-send-raw-tx', false, 'Send Raw Tx'),
@@ -88,7 +88,7 @@ export class TransactionsComponent implements AfterViewInit, OnDestroy {
       new NavbarLink('pills-coinbase-tx-sum-tab', '#pills-coinbase-tx-sum', 'pills-coinbase-tx-sum', false, 'Coinbase Tx Sum'),
       new NavbarLink('pills-flush-tx-pool-tab', '#pills-flush-tx-pool', 'pills-flush-tx-pool', false, 'Flush Tx Pool'),
       new NavbarLink('pills-flush-cahe-tab', '#pills-flush-cache', 'pills-flush-cache', false, 'Flush Cache')
-    ];
+    ]);
     this.height = 0;
     this.count = 0;
 
@@ -96,59 +96,28 @@ export class TransactionsComponent implements AfterViewInit, OnDestroy {
   }
 
   public ngAfterViewInit(): void {
-    this.ngZone.run(() => {
-      this.navbarService.setLinks(this.navbarLinks);
-      
-      this.initTables();
+    this.ngZone.run(() => {      
+      this.loadTables();
 
-      const onSyncEndSub: Subscription = this.daemonData.syncEnd.subscribe(() => this.refreshTables());
+      const onSyncEndSub: Subscription = this.daemonData.syncEnd.subscribe(() => this.loadTables());
 
       this.subscriptions.push(onSyncEndSub);
     });
   }
 
-  public ngOnDestroy(): void {
-    this.subscriptions.forEach((sub) => {
-      sub.unsubscribe();
-    });
-
-    this.subscriptions = [];
-  }
-
-  private initTable(id: string): void {
-    const $table = $(`#${id}`);
-
-    $table.bootstrapTable({});
-    $table.bootstrapTable('refreshOptions', {
-      classes: 'table table-bordered table-hover table-dark table-striped'
-    });
-  }
-
-  private initTables(): void {
-    this.initTable('spentKeyImagesTable');
-    this.initTable('transactionsTable');
-    this.initTable('txPoolBacklogTable');
-  }
-
   private loadTransactionsTable(): void {
-    const $table = $('#transactionsTable');
-
-    $table.bootstrapTable('load', this.unconfirmedTxs);
+    this.loadTable('transactionsTable', this.unconfirmedTxs);
   }
 
   private loadSpentKeyImagesTable(): void {
-    const $table = $('#spentKeyImagesTable');
-
-    $table.bootstrapTable('load', this.spentKeyImages);
+    this.loadTable('spentKeyImagesTable', this.spentKeyImages);
   }
 
   private loadTxPoolBacklogTable(): void {
-    const $table = $('#txPoolBacklogTable');
-
-    $table.bootstrapTable('load', this.txPoolBacklog)
+    this.loadTable('txPoolBacklogTable', this.txPoolBacklog);
   }
 
-  private refreshTables(): void {
+  private loadTables(): void {
     this.loadSpentKeyImagesTable();
     this.loadTransactionsTable();
     this.loadTxPoolBacklogTable();
