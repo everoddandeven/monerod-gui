@@ -529,6 +529,8 @@ try {
     isQuitting = true;
   });
 
+  app.setLoginItemSettings
+
   ipcMain.handle('quit', (event) => {
     isQuitting = true;
     app.quit();
