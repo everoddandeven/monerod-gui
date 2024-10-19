@@ -58,8 +58,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onSelectedFolder: (callback) => {
     ipcRenderer.on('selected-folder', callback);
   },
-  selectFile: () => {
-    ipcRenderer.invoke('select-file');
+  selectFile: (extensions = undefined) => {
+    ipcRenderer.invoke('select-file', extensions);
   },
   onSelectedFile: (callback) => {
     ipcRenderer.on('selected-file', callback);

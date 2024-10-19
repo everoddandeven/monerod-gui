@@ -34,6 +34,8 @@ export class DaemonSettings {
   public stagenet: boolean = false;
 
   public regtest: boolean = false;
+
+  public dataDir: string = '';
   
   public keepFakeChain: boolean = false;
   public fixedDifficulty: number = 0;
@@ -196,6 +198,7 @@ export class DaemonSettings {
     if (this.maxLogFileSize >= 0) options.push(`--max-log-file-size=${this.maxLogFileSize}`);
     if (this.maxLogFiles >= 0) options.push(`--max-log-files=${this.maxLogFiles}`);
     if (this.maxConcurrency) options.push(`--max-concurrency=${this.maxConcurrency}`);
+    if (this.dataDir != '') options.push(`--data-dir`, `${this.dataDir}`);
     if (this.proxy != '') options.push(`--proxy=${this.proxy}`);
     if (this.proxyAllowDnsLeaks) options.push(`--proxy-allow-dns-leaks`);
     if (this.publicNode) options.push(`--public-node`);

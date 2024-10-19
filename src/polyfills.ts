@@ -86,7 +86,7 @@ declare global {
       isWifiConnected: () => void;
       onIsWifiConnectedResponse: (callback: (event: any, connected: boolean) => void) => void;
       selectFolder: () => void;
-      selectFile: () => void;
+      selectFile: (extensions?: string[]) => void;
       onSelectedFolder: (callback: (event: any, path: string) => void) => void;
       onSelectedFile: (callback: (event: any, path: string) => void) => void;
       getOsType: () => void;

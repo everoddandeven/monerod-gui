@@ -162,38 +162,100 @@ export class SettingsComponent {
     this.savingChanges = false;
   }
 
-  public chooseMonerodFile(): void {
-    if (!window.electronAPI) {
-      console.error("Not electron app");
+  public async chooseMonerodFile(): Promise<void> {
+    const file = await this.selectFile();
+
+    if (file == '') {
       return;
     }
 
-    window.electronAPI.onSelectedFile((event: any, path: string) => {
-      if (path == '') {
-        return;
-      }
+    this.ngZone.run(() => {
+      this.currentSettings.monerodPath = file;
+    });
+  }
 
-      this.ngZone.run(() => {
-        this.currentSettings.monerodPath = path;
+  private async choosePemFile(): Promise<string> {
+    return await this.selectFile(['pem', 'PEM']);
+  }
+
+  public async selectSslPrivateKey(): Promise<void> {
+    const privateKey = await this.choosePemFile();
+
+    if (privateKey == '') return;
+
+    this.ngZone.run(() => {
+      this.currentSettings.rpcSslPrivateKey = privateKey;
+    });
+  }
+
+  public async selectSslCertificate(): Promise<void> {
+    const cert = await this.choosePemFile();
+
+    if (cert == '') return;
+
+    this.ngZone.run(() => {
+      this.currentSettings.rpcSslCertificate = cert;
+    });
+  }
+
+  public async selectSslCACertificates(): Promise<void> {
+    const cert = await this.choosePemFile();
+
+    if (cert == '') return;
+
+    this.ngZone.run(() => {
+      this.currentSettings.rpcSslCACertificates = cert;
+    });
+  }
+
+  private async selectFile(extensions?: string[]): Promise<string> {
+  
+    const selectPromise: Promise<string> = new Promise<string>((resolve) => {
+      window.electronAPI.onSelectedFile((event: any, path: string) => {
+        resolve(path);
       });
     });
 
-    window.electronAPI.selectFile();
+    window.electronAPI.selectFile(extensions);
+    
+    return await selectPromise;
   }
 
-  public chooseMoneroDownloadPath(): void {
-    if (window.electronAPI) {
+  private async selectFolder(): Promise<string> {
+    const selectPromise = new Promise<string>((resolve) => {
       window.electronAPI.onSelectedFolder((event: any, folder: string) => {
-        if (folder == '') {
-          return;
-        }
-        this.ngZone.run(() => {
-          this.currentSettings.downloadUpgradePath = folder;
-        });
+        resolve(folder);
       });
+    });
 
-      window.electronAPI.selectFolder();
+    window.electronAPI.selectFolder();
+    
+    return await selectPromise;
+  }
+
+  public async chooseMoneroDownloadPath(): Promise<void> {
+    const folder = await this.selectFolder();
+
+    if (folder == '')
+    {
+      return;
     }
+
+    this.ngZone.run(() => {
+      this.currentSettings.downloadUpgradePath = folder;
+    });
+  }
+
+  public async chooseDataDir(): Promise<void> {
+    const folder = await this.selectFolder();
+
+    if (folder == '') {
+      return;
+    }
+
+    this.ngZone.run(() => {
+      this.currentSettings.dataDir = folder;
+    });
   }
 
   public chooseXmrigFile(): void {

@@ -30,11 +30,30 @@
 
   <div class="tab-pane fade show active" id="pills-general" role="tabpanel" aria-labelledby="pills-general-tab" tabindex="0">
     <div class="row g-5 p-2">
-      <div class="col-md-7 col-lg-10">
+      <div class="col-md-7 col-lg-12">
         <h4 class="mb-3">Node</h4>
 
         <div class="row gy-3">
-          
+          <div class="col-md-6">
+            <label for="max-concurrency" class="form-label">Max concurrency</label>
+            <input type="number" min="0" class="form-control" id="max-concurrency" placeholder="0" [(ngModel)]="currentSettings.maxConcurrency" [ngModelOptions]="{standalone: true}">
+            <small class="text-body-secondary">Max number of threads to use for a parallel job</small>
+          </div>
+
+          <div class="col-md-6">
+            <label for="max-connections-per-ip" class="form-label">Max connections per IP</label>
+            <input type="number" min="0" class="form-control" id="max-connections-per-ip" placeholder="1" [(ngModel)]="currentSettings.maxConnectionsPerIp" [ngModelOptions]="{standalone: true}">
+            <small class="text-body-secondary">Maximum number of connections allowed from the same IP address</small>
+          </div>
+
+
+          <div class="form-check form-switch col-md-6">
+            <label for="regtest" class="form-check-label">Regtest</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="regtest" [checked]="currentSettings.regtest" [(ngModel)]="currentSettings.regtest" [ngModelOptions]="{standalone: true}">
+            <br>
+            <small class="text-body-secondary">Run in a regression testing mode</small>
+          </div>
+
           <div class="col-md-12">
             <label for="general-monerod-path-control" class="form-label">Monerod path</label>
             <div class="input-group mb-3">
@@ -42,6 +61,103 @@
               <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseMonerodFile()">Choose file</button></span>            
             </div>
             <small class="text-body-secondary">Path to monerod executable</small>
+          </div>
+
+          <div class="col-md-12">
+            <label for="data-dir" class="form-label">Data dir</label>
+            <div class="input-group mb-3">
+              <input id="data-dir" type="text" class="form-control form-control-sm" placeholder="" aria-label="Data dir" aria-describedby="basic-addon2" [value]="currentSettings.dataDir" readonly>
+              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseDataDir()">Choose folder</button></span>            
+            </div>
+            <small class="text-body-secondary">Specify data directory</small>
+          </div>
+
+        </div>
+
+        <hr class="my-4">
+        <h4 class="mb-3">Proxy/DNS</h4>
+
+        <div class="row g-3">
+
+          <div class="col-12">
+            <label for="proxy" class="form-label">Proxy</label>
+            <input type="text" class="form-control" id="proxy" placeholder="socks-ip:port" [(ngModel)]="currentSettings.proxy" [ngModelOptions]="{standalone: true}">
+            <small class="text-body-secondary">Network communication through proxy</small>
+          </div>
+
+          <div class="col-12">
+            <label for="anonymous-inbound" class="form-label">Anonymous inbound</label>
+            <input type="text" class="form-control" id="anonymous-inbound" placeholder="x.onion,127.0.0.1:18083,100" [(ngModel)]="currentSettings.anonymousInbound" [ngModelOptions]="{standalone: true}">
+            <small class="text-body-secondary">
+              hidden-service-address,[bind-ip:]port[,max_connections]
+            </small>
+          </div>
+
+          <div class="col-12">
+            <label for="tx-proxy" class="form-label">Tx Proxy</label>
+            <input type="text" class="form-control" id="tx-proxy" placeholder="tor,127.0.0.1:9050,100,disable_noise" [(ngModel)]="currentSettings.txProxy" [ngModelOptions]="{standalone: true}">
+            <small class="text-body-secondary">
+              Send local txes through proxy: network-type,socks-ip:port[,max_connections][,disable_noise]
+            </small>
+          </div>
+
+          <div class="form-check form-switch col-md-6">
+            <label for="proxy-allow-dns-leaks" class="form-check-label">Allow DNS leaks</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="proxy-allow-dns-leaks" [checked]="currentSettings.proxyAllowDnsLeaks" [(ngModel)]="currentSettings.proxyAllowDnsLeaks" [ngModelOptions]="{standalone: true}">
+            <br>
+            <small class="text-body-secondary">Allow DNS leaks outside of proxy</small>
+          </div>
+  
+  
+          <div class="form-check form-switch col-md-6">
+            <label for="enforce-dns-checkpoints" class="form-check-label">Enforce DNS checkpoints</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="enforce-dns-checkpoints" [checked]="currentSettings.enforceDnsCheckpoint" [(ngModel)]="currentSettings.enforceDnsCheckpoint" [ngModelOptions]="{standalone: true}">
+            <br>
+            <small class="text-body-secondary">Checkpoints from DNS server will be enforced</small>
+          </div>
+  
+  
+          <div class="form-check form-switch col-md-6">
+            <label for="disable-dns-checkpoints" class="form-check-label">Disable DNS checkpoints</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="disable-dns-checkpoints" [checked]="currentSettings.disableDnsCheckpoints" [(ngModel)]="currentSettings.disableDnsCheckpoints" [ngModelOptions]="{standalone: true}">
+            <br>
+            <small class="text-body-secondary">Do not retrieve checkpoints from DNS</small>
+          </div>
+  
+  
+          <div class="form-check form-switch col-md-6">
+            <label for="enable-dns-blocklist" class="form-check-label">Enable DNS blocklist</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="enable-dns-blocklist" [checked]="currentSettings.enableDnsBlocklist" [(ngModel)]="currentSettings.enableDnsBlocklist" [ngModelOptions]="{standalone: true}">
+            <br>
+            <small class="text-body-secondary">Apply realtime blocklist from DNS</small>
+          </div>
+  
+  
+          <div class="form-check form-switch col-md-6">
+            <label for="hide-my-port" class="form-check-label">Hide my port</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="disable-dns-checkpoints" [checked]="currentSettings.hideMyPort" [(ngModel)]="currentSettings.hideMyPort" [ngModelOptions]="{standalone: true}">
+            <br>
+            <small class="text-body-secondary">Do not announce yourself as peerlist candidate</small>
+          </div>
+        </div>
+
+        <hr class="my-4">
+        <h4 class="mb-3">Updates</h4>
+
+        <div class="row g-3">
+                        
+          <div class="col-md-6">
+            <label for="check-updates" class="form-label">Check updates</label>
+            <select class="form-select" id="log-level" [(ngModel)]="currentSettings.checkUpdates" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="'disabled'">Disabled</option>
+              <option [ngValue]="'notify'">Notify</option>
+              <option [ngValue]="'download'">Download</option>
+              <option [ngValue]="'update'">Update</option>
+            </select>
+            <br>
+            <small class="text-body-secondary">
+              Check for new versions of monero
+            </small>
           </div>
 
           <div class="form-check form-switch col-md-6">
@@ -68,7 +184,7 @@
 
   <div class="tab-pane fade" id="pills-rpc" role="tabpanel" aria-labelledby="pills-rpc-tab" tabindex="0">
     <div class="row g-5 p-2">
-      <div class="col-md-7 col-lg-10">
+      <div class="col-md-7 col-lg-12">
         <h4 class="mb-3">General</h4>
         <div class="row gy-3">
 
@@ -264,21 +380,33 @@
             <small class="text-body-secondary">Allow any peer certificate</small>
           </div>
 
+
           <div class="col-md-12">
             <label for="rpc-ssl-private-key" class="form-label">Private key</label>
-            <input type="file" class="form-control" id="rpc-ssl-private-key" [(ngModel)]="currentSettings.rpcSslPrivateKey" [ngModelOptions]="{standalone: true}">
+            <div class="input-group mb-3">
+              <input id="rpc-ssl-private-key" type="text" class="form-control form-control-sm" placeholder="" aria-label="Monerod path" aria-describedby="basic-addon2" [value]="currentSettings.rpcSslPrivateKey" readonly>
+              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="selectSslPrivateKey()">Choose file</button></span>            
+            </div>
             <small class="text-body-secondary">Path to a PEM format private key</small>
           </div>
 
+
           <div class="col-md-12">
             <label for="rpc-ssl-certificate" class="form-label">Certificate</label>
-            <input type="file" class="form-control" id="rpc-ssl-certificate" [(ngModel)]="currentSettings.rpcSslCertificate" [ngModelOptions]="{standalone: true}">
+            <div class="input-group mb-3">
+              <input id="rpc-ssl-certificate" type="text" class="form-control form-control-sm" placeholder="" aria-label="RPC SSL Certificate" aria-describedby="basic-addon2" [value]="currentSettings.rpcSslCertificate" readonly>
+              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="selectSslCertificate()">Choose file</button></span>            
+            </div>
             <small class="text-body-secondary">Path to a PEM format certificate</small>
           </div>
 
+
           <div class="col-md-12">
             <label for="rpc-ssl-ca-certificates" class="form-label">CA Certificates</label>
-            <input type="file" class="form-control" id="rpc-ssl-ca-certificates" [(ngModel)]="currentSettings.rpcSslCACertificates" [ngModelOptions]="{standalone: true}">
+            <div class="input-group mb-3">
+              <input id="rpc-ssl-ca-certificates" type="text" class="form-control form-control-sm" placeholder="" aria-label="RPC SSL CA Certificates" aria-describedby="basic-addon2" [value]="currentSettings.rpcSslCACertificates" readonly>
+              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="selectSslCACertificates()">Choose file</button></span>            
+            </div>
             <small class="text-body-secondary">Path to file containing concatenated PEM format certificate(s) to replace system CA(s)</small>
           </div>
 
@@ -290,7 +418,7 @@
 
   <div class="tab-pane fade" id="pills-p2p" role="tabpanel" aria-labelledby="pills-p2p-tab" tabindex="0">
     <div class="row g-5 p-2">
-      <div class="col-md-7 col-lg-10">
+      <div class="col-md-7 col-lg-12">
         <h4 class="mb-3">General</h4>
         <div class="row gy-3">
 
@@ -352,12 +480,34 @@
   </div>
 
   <div class="tab-pane fade" id="pills-blockchain" role="tabpanel" aria-labelledby="pills-blockchain-tab" tabindex="0">
+    
+    
     <div class="row g-5 p-2">
-      <div class="col-md-7 col-lg-10">
-        <h4 class="mb-3">Bootstrap Daemon</h4>
+      <div class="col-md-7 col-lg-12">
         <form class="needs-validation" novalidate="">
+                
+          <h4 class="mb-3">Network type</h4>
+  
+          <div class="my-3">
+            <div class="form-check">
+              <input id="credit" name="paymentMethod" type="radio" class="form-check-input" [value]="'mainnet'" [(ngModel)]="networkType" [ngModelOptions]="{standalone: true}" (change)="OnNetworkTypeChange()">
+              <label class="form-check-label" for="credit">mainnet</label>
+            </div>
+            <div class="form-check">
+              <input id="debit" name="paymentMethod" type="radio" class="form-check-input" [value]="'testnet'" [(ngModel)]="networkType" [ngModelOptions]="{standalone: true}" (change)="OnNetworkTypeChange()">
+              <label class="form-check-label" for="debit">testnet</label>
+            </div>
+            <div class="form-check">
+              <input id="paypal" name="paymentMethod" type="radio" class="form-check-input" [value]="'stagenet'" [(ngModel)]="networkType" [ngModelOptions]="{standalone: true}" (change)="OnNetworkTypeChange()">
+              <label class="form-check-label" for="paypal">stagenet</label>
+            </div>
+          </div>
+          
+          <hr class="my-4">
+          
           <div class="row g-3">
-      
+            <h4 class="mb-3">Bootstrap Daemon</h4>
+
             <div class="col-12">
                 <label for="address" class="form-label">Address</label>
                 <input type="text" class="form-control" id="address" placeholder="Use 'auto' to enable automatic discovering and switching" [(ngModel)]="currentSettings.bootstrapDaemonAddress" [ngModelOptions]="{standalone: true}">
@@ -440,13 +590,21 @@
               </div>
     
               <div class="col-md-4">
+                <label for="prep-block-threads" class="form-label">Prep blocks threads</label>
+                <input type="number" min="0" class="form-control" id="prep-block-threds" placeholder="4" [(ngModel)]="currentSettings.prepBlocksThreads" [ngModelOptions]="{standalone: true}">
+                <small class="text-body-secondary">Max number of threads to use when preparing block hashes in groups</small>
+              </div>
+    
+              <div class="col-md-4">
                   <label for="block-sync-size" class="form-label">Block sync size</label>
                   <input type="number" min="0" class="form-control" id="block-sync-size" placeholder="" [(ngModel)]="currentSettings.blockSyncSize" [ngModelOptions]="{standalone: true}">
+                  <small class="text-body-secondary">How many blocks to sync at once during chain synchronization (0 = adaptive)</small>
               </div>
       
               <div class="col-md-4">
                   <label for="block-download-max-size" class="form-label">Block download max size</label>
                   <input type="number" min="0" class="form-control" id="block-download-max-size" placeholder="" [(ngModel)]="currentSettings.blockDownloadMaxSize" [ngModelOptions]="{standalone: true}">
+                  <small class="text-body-secondary">Set maximum size of block download queue in bytes (0 for default)</small>
               </div>
     
               <div class="col-md-4">
@@ -474,25 +632,7 @@
                   <input id="sync-period-to" type="time" class="form-control" value="10:05 AM" [disabled]="!currentSettings.syncPeriodEnabled" [(ngModel)]="currentSettings.syncPeriodTo" [ngModelOptions]="{standalone: true}"/>
                 </div>
               </div>
-      
-              <hr class="my-4">
-      
-              <h4 class="mb-3">Network type</h4>
-      
-              <div class="my-3">
-                <div class="form-check">
-                  <input id="credit" name="paymentMethod" type="radio" class="form-check-input" [value]="'mainnet'" [(ngModel)]="networkType" [ngModelOptions]="{standalone: true}" (change)="OnNetworkTypeChange()">
-                  <label class="form-check-label" for="credit">mainnet</label>
-                </div>
-                <div class="form-check">
-                  <input id="debit" name="paymentMethod" type="radio" class="form-check-input" [value]="'testnet'" [(ngModel)]="networkType" [ngModelOptions]="{standalone: true}" (change)="OnNetworkTypeChange()">
-                  <label class="form-check-label" for="debit">testnet</label>
-                </div>
-                <div class="form-check">
-                  <input id="paypal" name="paymentMethod" type="radio" class="form-check-input" [value]="'stagenet'" [(ngModel)]="networkType" [ngModelOptions]="{standalone: true}" (change)="OnNetworkTypeChange()">
-                  <label class="form-check-label" for="paypal">stagenet</label>
-                </div>
-              </div>
+
           </div>
 
         </form>
@@ -502,7 +642,7 @@
 
   <div class="tab-pane fade" id="pills-mining" role="tabpanel" aria-labelledby="pills-mining-tab" tabindex="0">
     <div class="row g-5 p-2">
-      <div class="col-md-7 col-lg-10">
+      <div class="col-md-7 col-lg-12">
         <form class="needs-validation" novalidate="">
     
           <div class="row g-3">
@@ -549,7 +689,7 @@
 
   <div class="tab-pane fade" id="pills-logs" role="tabpanel" aria-labelledby="pills-logs-tab" tabindex="0">
     <div class="row g-5 p-2">
-      <div class="col-md-7 col-lg-10">
+      <div class="col-md-7 col-lg-12">
         <form class="needs-validation" novalidate="">
     
           <div class="row g-3">

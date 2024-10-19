@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, screen, dialog, Tray, Menu, MenuItemConstructorOptions, IpcMainInvokeEvent, Notification, NotificationConstructorOptions } from 'electron';
+import { app, BrowserWindow, ipcMain, screen, dialog, Tray, Menu, MenuItemConstructorOptions, FileFilter, IpcMainInvokeEvent, Notification, NotificationConstructorOptions } from 'electron';
 import { ChildProcessWithoutNullStreams, exec, ExecException, spawn } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -572,7 +572,7 @@ try {
     }
   });
 
-  ipcMain.handle('select-file', async (event: any) => {
+  ipcMain.handle('select-file', async (event: any, extensions?: string[]) => {
     if (!win) 
     {
       return;
@@ -580,6 +580,10 @@ try {
 
     const result = await dialog.showOpenDialog(win, {
       title: 'Select File',
+      filters: extensions ? [{
+        name: 'filter',
+        extensions: extensions
+      }] : [],
       properties: ['openFile']
     });
 
