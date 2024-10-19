@@ -33,6 +33,7 @@
     "icon": "dist/assets/icons",
     "target": [
       "AppImage"
-    ]
+    ],
+    "category": "Internet"
   }
 }
