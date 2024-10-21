@@ -1,4 +1,4 @@
-###*First check it exists a version of your library compatible with the version of Angular defined in package.json.*
+### *First check it exists a version of your library compatible with the version of Angular defined in package.json.*
 
 ### How to install ng-bootstrap
 

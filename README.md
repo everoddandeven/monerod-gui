@@ -15,35 +15,42 @@
 
 # Introduction
 
-**Monerod-GUI** is a desktop application that provides a graphical user interface (GUI) for installing, updating, and interacting with the Monero daemon (`monerod`). This tool simplifies the process of managing a full Monero node, enabling users to run, configure, and monitor `monerod` without needing to use the command line.
+**Monerod GUI** is a desktop application that provides a graphical user interface (GUI) for installing, updating, and interacting with the Monero daemon (`monerod`). This tool simplifies the process of managing a full Monero node, enabling users to run, configure, and monitor `monerod` without needing to use the command line.
 
 ## Features
 
 ### 1. Simple Monerod Setup
+
 - Automatically downloads and installs the latest version of `monerod` based on your operating system (Windows, macOS, Linux).
 - Provides configuration options for running `monerod` with custom parameters (e.g., enabling testnet, fast block sync, blockchain pruning).
 
 ### 2. Seamless Updates
+
 - Automatically checks for new `monerod` releases.
 - One-click updates to the latest version, keeping your node secure and up-to-date.
 
 ### 3. Interactive Control Panel
+
 - Start, stop, and monitor the status of the Monero daemon from an intuitive control panel.
 - Configure important `monerod` settings like RPC access, logging level, concurrency, and more from the GUI.
 
 ### 4. Real-Time Log Monitoring
+
 - Displays real-time `monerod` logs in a clean, readable format, helping users track sync progress, transactions, and errors.
 - Offers log filtering for easier monitoring of specific events or errors.
 
 ### 5. Network and Connectivity Monitoring
+
 - Detects whether your current connection is over Wi-Fi and provides feedback on network stability.
 - Supports external bind confirmations and allows for easy configuration of RPC access control for enhanced security.
 
 ### 6. Cross-Platform Support
+
 - Monerod-GUI automatically detects the operating system and selects the appropriate `monerod` version to download.
 - Available for Windows, macOS, and Linux.
 
 ### 7. Customizable Installation
+
 - Users can choose the installation directory for `monerod`, allowing for greater flexibility in managing the software on different systems.
 
 ### Usage
@@ -91,7 +98,7 @@ Why two package.json ? This project follow [Electron Builder two package.json st
 
 Voila! You can use your Angular + Electron app in a local development environment with hot reload!
 
-The application code is managed by `app/main.ts`. In this sample, the app runs with a simple Angular App (http://localhost:4200), and an Electron window. \
+The application code is managed by `app/main.ts`. In this sample, the app runs with a simple Angular App (`http://localhost:4200`), and an Electron window. \
 The Angular component contains an example of Electron and NodeJS native lib import. \
 You can disable "Developer Tools" by commenting `win.webContents.openDevTools();` in `app/main.ts`.
 
@@ -141,7 +148,6 @@ Please note that Hot reload is only available in Renderer process.
 
 [maintained-badge]: https://img.shields.io/badge/maintained-yes-brightgreen
 [license-badge]: https://img.shields.io/badge/license-MIT-blue.svg
-[license]: https://github.com/everoddandeven/monerod-gui/blob/main/LICENSE.md
 [prs-badge]: https://img.shields.io/badge/PRs-welcome-red.svg
 [prs]: http://makeapullrequest.com
 
@@ -164,13 +170,13 @@ Please consider donating to support the development of this project.
 ### Monero
 
 <p align="center">
-	<img src="donate.png" width="115" height="115"/><br>
-	<code>84Q1SdQgFWaEWRn5KcvSPCQUa3NF39EJ3HPCTaiM86RHLLftqgTZpkP24jXrK5YpeedWbQAjHcFcDLpFJfr9TypfAU7pPjA</code>
+ <img src="donate.png" width="115" height="115" alt="xmrQrCode"/><br>
+ <code>84Q1SdQgFWaEWRn5KcvSPCQUa3NF39EJ3HPCTaiM86RHLLftqgTZpkP24jXrK5YpeedWbQAjHcFcDLpFJfr9TypfAU7pPjA</code>
 </p>
 
 ### Bitcoin
 
 <p align="center">
-	<img src="donate_btc.png" width="115" height="115"/><br>
-	<code>bc1qndc2lesy0sse9vj33a35pnfrqz4znlhhs58vfp</code>
+ <img src="donate_btc.png" width="115" height="115" alt="btcQrCode"/><br>
+ <code>bc1qndc2lesy0sse9vj33a35pnfrqz4znlhhs58vfp</code>
 </p>
