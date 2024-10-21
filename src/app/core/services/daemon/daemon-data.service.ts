@@ -474,6 +474,9 @@ export class DaemonDataService {
         this._transactionPool = await this.daemonService.getTransactionPool();
         this._gettingTransactionPool = false;
       }
+      else if (this._daemonInfo.txPoolSize == 0 && this._transactionPool != undefined) {
+        this._transactionPool = undefined;
+      }
 
       this._gettingConnections = true;
       this._connections = await this.daemonService.getConnections();
