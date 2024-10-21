@@ -2,6 +2,7 @@ import { Component, NgZone } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonSettings } from '../../../common/DaemonSettings';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
+import { ElectronService } from '../../core/services';
 
 @Component({
   selector: 'app-settings',
@@ -24,7 +25,7 @@ export class SettingsComponent {
 
   public networkType: 'mainnet' | 'testnet' | 'stagenet' = 'mainnet';
 
-  constructor(private daemonService: DaemonService, private ngZone: NgZone) {
+  constructor(private daemonService: DaemonService, private electronService: ElectronService, private ngZone: NgZone) {
     this.loading = true;
 
     this.navbarLinks = [
@@ -55,11 +56,15 @@ export class SettingsComponent {
     });
   }
 
+  public isAppImage: boolean = true;
+
   private async load(): Promise<void> {
     console.log("getting settings");
     this.originalSettings = await this.daemonService.getSettings();
     this.currentSettings = this.originalSettings.clone();
     this.loading = false;
+
+    this.isAppImage = await this.electronService.isAppImage();
 
     this.networkType = this.currentSettings.mainnet ? 'mainnet' : this.currentSettings.testnet ? 'testnet' : this.currentSettings.stagenet ? 'stagenet' : 'mainnet';
   }
@@ -134,6 +139,21 @@ export class SettingsComponent {
     }
   }
 
+  private async refreshAutoLanch(): Promise<void> {
+    if (await this.electronService.isAppImage()) {
+      return;
+    }
+
+    const enabled = await this.electronService.isAutoLaunchEnabled();
+
+    if (this.originalSettings.startAtLogin && !enabled) {
+      await this.electronService.enableAutoLaunch();
+    }
+    else if (!this.originalSettings.startAtLogin && enabled) {
+      await this.electronService.disableAutoLaunch();
+    }
+  }
+
   public async OnSave(): Promise<void> {
     if (!this.modified) {
       return;
@@ -149,6 +169,12 @@ export class SettingsComponent {
       await this.daemonService.saveSettings(this.currentSettings);
 
       this.originalSettings = this.currentSettings.clone();
+
+      try {
+        await this.refreshAutoLanch();
+      } catch(error: any) {
+        console.error(error);
+      }
 
       this.savingChangesError = ``;
       this.savingChangesSuccess = true;

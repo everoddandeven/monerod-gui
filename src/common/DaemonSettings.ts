@@ -1,6 +1,9 @@
 export class DaemonSettings {
   public monerodPath: string = '';
 
+  public startAtLogin: boolean = false;
+  public startAtLoginMinimized: boolean = false;
+
   public syncOnWifi: boolean = true;
   public syncPeriodEnabled: boolean = false;
   public syncPeriodFrom: string = '00:00';

@@ -89,7 +89,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('is-auto-launch-enabled');
   },
   onIsAutoLaunchEnabled: (callback) => {
-    ipcRenderer.on('on-is-auto-enabled', callback);
+    ipcRenderer.on('on-is-auto-launch-enabled', callback);
   },
   onEnableAutoLaunchError: (callback) => {
     ipcRenderer.on('on-enable-auto-launch-error', callback);

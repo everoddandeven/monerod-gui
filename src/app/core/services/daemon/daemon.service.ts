@@ -303,7 +303,17 @@ export class DaemonService {
     const db = await this.openDbPromise;
     const result = await db.get(this.storeName, 1);
     if (result) {
-      return DaemonSettings.parse(result);
+      const settings = DaemonSettings.parse(result);
+      
+      const enabled = await this.electronService.isAutoLaunchEnabled();
+
+      settings.startAtLogin = enabled;
+     
+      if (!enabled) {
+        settings.startAtLoginMinimized = false;
+      }
+
+      return settings;
     }
     else
     {

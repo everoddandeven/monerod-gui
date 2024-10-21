@@ -46,6 +46,19 @@
             <small class="text-body-secondary">Maximum number of connections allowed from the same IP address</small>
           </div>
 
+          <div *ngIf="!isAppImage" class="form-check form-switch col-md-6">
+            <label for="start-at-login" class="form-check-label">Start at login</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="start-at-login" [checked]="currentSettings.startAtLogin" [(ngModel)]="currentSettings.startAtLogin" [ngModelOptions]="{standalone: true}">
+            <br>
+            <small class="text-body-secondary">Start monero daemon at login</small>
+          </div>
+
+          <div *ngIf="!isAppImage" class="form-check form-switch col-md-6">
+            <label for="start-minimized" class="form-check-label">Start minimized</label>
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="start-minimized" [checked]="currentSettings.startAtLoginMinimized" [(ngModel)]="currentSettings.startAtLoginMinimized" [ngModelOptions]="{standalone: true}">
+            <br>
+            <small class="text-body-secondary">Start monero daemon at login as tray icon</small>
+          </div>
 
           <div class="form-check form-switch col-md-6">
             <label for="regtest" class="form-check-label">Regtest</label>
