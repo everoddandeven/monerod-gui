@@ -51,6 +51,10 @@ export class LogsComponent implements AfterViewInit {
     return this.logsService.lines;
   }
 
+  public get logs(): string {
+    return this.lines.join("\n");
+  }
+
   private scrollToBottom(): void {
     this.ngZone.run(() => {
       this.lines;
