@@ -213,7 +213,7 @@ export class DaemonSettings {
     if (this.keepFakeChain) options.push(`--keep-fakechain`);
     if (this.fixedDifficulty) options.push(`--fixed-difficulty`, `${this.fixedDifficulty}`);
     if (this.enforceDnsCheckpoint) options.push(`--enforce-dns-checkpoint`);
-    if (this.prepBlocksThreads) options.push(`--prep-block-threads`, `${this.prepBlocksThreads}`);
+    if (this.prepBlocksThreads) options.push(`--prep-blocks-threads`, `${this.prepBlocksThreads}`);
     if (!this.noSync && this.fastBlockSync) options.push(`--fast-block-sync`, `1`);
     if (this.showTimeStats) options.push(`--show-time-stats`);
     if (!this.noSync && this.blockSyncSize) options.push(`--block-sync-size`, `${this.blockSyncSize}`);

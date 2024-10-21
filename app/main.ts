@@ -49,6 +49,7 @@ interface Stats {
 //import * as bz2 from 'unbzip2-stream';
 const bz2 = require('unbzip2-stream');
 
+app.setName('Monero Daemon');
 const gotInstanceLock = app.requestSingleInstanceLock();
 
 if (!gotInstanceLock) {
