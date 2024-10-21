@@ -81,5 +81,35 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   quit: () => {
     ipcRenderer.invoke('quit');
+  },
+  enableAutoLaunch: () => {
+    ipcRenderer.invoke('enable-auto-launch');
+  },
+  isAutoLaunchEnabled: () => {
+    ipcRenderer.invoke('is-auto-launch-enabled');
+  },
+  onIsAutoLaunchEnabled: (callback) => {
+    ipcRenderer.on('on-is-auto-enabled', callback);
+  },
+  onEnableAutoLaunchError: (callback) => {
+    ipcRenderer.on('on-enable-auto-launch-error', callback);
+  },
+  onEnableAutoLaunchSuccess: (callback) => {
+    ipcRenderer.on('on-enable-auto-launch-success', callback);
+  },
+  disableAutoLaunch: () => {
+    ipcRenderer.invoke('disable-auto-launch');
+  },
+  onDisableAutoLaunchError: (callback) => {
+    ipcRenderer.on('on-disable-auto-launch-error', callback);
+  },
+  onDisableAutoLaunchSuccess: (callback) => {
+    ipcRenderer.on('on-disable-auto-launch-success', callback);
+  },
+  isAppImage: () => {
+    ipcRenderer.invoke('is-app-image');
+  },
+  onIsAppImage: (callback) => {
+    ipcRenderer.on('on-is-app-image', callback);
   }
 });

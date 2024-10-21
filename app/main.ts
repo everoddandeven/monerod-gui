@@ -8,6 +8,9 @@ import * as tar from 'tar';
 import * as os from 'os';
 import * as pidusage from 'pidusage';
 
+const AutoLaunch = require('auto-launch');
+
+
 interface Stats {
   /**
    * percentage (from 0 to 100*vcore)
@@ -56,6 +59,11 @@ if (!gotInstanceLock) {
   dialog.showErrorBox('Error', 'Another instance of monerod GUI is running');
   app.quit();
 }
+
+const autoLauncher = new AutoLaunch({
+	name: 'Monero Daemon'
+});
+
 
 
 let win: BrowserWindow | null = null;
@@ -176,6 +184,13 @@ function createWindow(): BrowserWindow {
   return win;
 }
 
+// #region Auto Launch 
+
+
+// #endregion
+
+// #region WiFi 
+
 function isConnectedToWiFi(): Promise<boolean> {
   return new Promise((resolve, reject) => {
     const platform = os.platform();  // Use os to get the platform
@@ -230,6 +245,10 @@ function isWifiConnected() {
     win?.webContents.send('is-wifi-connected-result', false);
   });
 }
+
+// #endregion
+
+// #region monerod 
 
 function getMonerodVersion(monerodFilePath: string): void {
   const monerodProcess = spawn(monerodFilePath, [ '--version' ]);
@@ -347,6 +366,10 @@ function monitorMonerod(): void {
 
   });
 }
+
+// #endregion
+
+// #region Download Utils 
 
 const downloadFile = (url: string, destinationDir: string, onProgress: (progress: number) => void): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -490,6 +513,8 @@ const extractTarBz2 = (filePath: string, destination: string): Promise<string> =
   });
 };
 
+// #endregion
+
 function showNotification(options?: NotificationConstructorOptions): void {
   if (!options) {
     return;
@@ -630,6 +655,76 @@ try {
 
   ipcMain.handle('show-notification', (event: IpcMainInvokeEvent, options?: NotificationConstructorOptions) => {
     showNotification(options);
+  });
+
+  ipcMain.handle('is-auto-launch-enabled', (event: IpcMainInvokeEvent) => {
+    autoLauncher.isEnabled().then((enabled: boolean) => {
+      win?.webContents.send('on-is-auto-launch-enabled', enabled);
+    }).catch((error: any) => {
+      console.error(error);
+      win?.webContents.send('on-is-auto-launch-enabled', false);
+    });
+  });
+
+  ipcMain.handle('enable-auto-launch', (event:IpcMainInvokeEvent) => {
+    autoLauncher.isEnabled().then((enabled: boolean) => {
+      if (enabled) {
+        win?.webContents.send('on-enable-auto-launch-error', 'already enabled');
+        return;
+      }
+
+      autoLauncher.enable().then(() => {
+        autoLauncher.isEnabled().then((enabled: boolean) => {
+          if (enabled) {
+            win?.webContents.send('on-enable-auto-launch-success');
+          }
+          win?.webContents.send('on-enable-auto-launch-error', `Could not enabled auto launch`);
+        }).catch((error: any) => {
+          win?.webContents.send('on-enable-auto-launch-error', `${error}`);
+        });
+
+      }).catch((error: any) => {
+        console.error(error);
+        win?.webContents.send('on-enable-auto-launch-error', `${error}`);
+      });
+    }).catch((error: any) => {
+      console.error(error);
+      win?.webContents.send('on-enable-auto-launch-error', `${error}`);
+    });
+  });
+
+
+  ipcMain.handle('disable-auto-launch', (event:IpcMainInvokeEvent) => {
+    autoLauncher.isEnabled().then((enabled: boolean) => {
+      if (!enabled) {
+        win?.webContents.send('on-disable-auto-launch-error', 'already disabled');
+        return;
+      }
+
+      autoLauncher.disable().then(() => {
+        autoLauncher.isEnabled().then((enabled: boolean) => {
+          if (!enabled) {
+            win?.webContents.send('on-disable-auto-launch-success');
+          }
+          win?.webContents.send('on-disable-auto-launch-error', `Could not disable auto launch`);
+        }).catch((error: any) => {
+          win?.webContents.send('on-disable-auto-launch-error', `${error}`);
+        });
+
+      }).catch((error: any) => {
+        console.error(error);
+        win?.webContents.send('on-disable-auto-launch-error', `${error}`);
+      });
+    }).catch((error: any) => {
+      console.error(error);
+      win?.webContents.send('on-disable-auto-launch-error', `${error}`);
+    });
+  });
+
+  ipcMain.handle('is-app-image', (event: IpcMainInvokeEvent) => {
+    const isAppImage: boolean = !!process.env.APPIMAGE;
+
+    win?.webContents.send('on-is-app-image', isAppImage ? true : false);
   });
 
 } catch (e) {

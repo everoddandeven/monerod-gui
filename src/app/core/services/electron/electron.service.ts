@@ -53,4 +53,90 @@ export class ElectronService {
   get isElectron(): boolean {
     return !!(window && window.process && window.process.type);
   }
+
+  public async isAutoLaunchEnabled(): Promise<boolean> {
+    if (await this.isAppImage()) {
+      return false;
+    }
+
+    const promise = new Promise<boolean>((resolve) => {
+      window.electronAPI.onIsAutoLaunchEnabled((event: any, enabled: boolean) => {
+        resolve(enabled);
+      });
+    });
+
+    window.electronAPI.isAutoLaunchEnabled();
+
+    return await promise;
+  }
+
+  public async enableAutoLaunch(): Promise<void> {
+    if (await this.isAppImage()) {
+      throw new Error("Cannot enable auto launch");
+    }
+
+    const enabled = await this.isAutoLaunchEnabled();
+
+    if (enabled) {
+      throw new Error("Auto launch already enabled");
+    }
+
+    const promise = new Promise<void>((resolve, reject) => {
+      window.electronAPI.onEnableAutoLaunchError((event: any, error: string) => {
+        console.debug(event);
+        reject(error);
+      });
+
+      window.electronAPI.onEnableAutoLaunchSuccess((event: any) => {
+        console.debug(event);
+        resolve();
+      });
+    });
+
+    window.electronAPI.enableAutoLaunch();
+
+    await promise;
+  }
+
+
+  public async disableAutoLaunch(): Promise<void> {
+    if (await this.isAppImage()) {
+      throw new Error("Cannot disable auto launch");
+    }
+
+    const enabled = await this.isAutoLaunchEnabled();
+
+    if (!enabled) {
+      throw new Error("Auto launch already disabled");
+    }
+
+    const promise = new Promise<void>((resolve, reject) => {
+      window.electronAPI.onDisableAutoLaunchError((event: any, error: string) => {
+        console.debug(event);
+        reject(error);
+      });
+
+      window.electronAPI.onDisableAutoLaunchSuccess((event: any) => {
+        console.debug(event);
+        resolve();
+      });
+    });
+
+    window.electronAPI.disableAutoLaunch();
+
+    await promise;
+  }
+
+  public async isAppImage(): Promise<boolean> {
+    const promise = new Promise<boolean>((resolve) => {
+      window.electronAPI.onIsAppImage((event: any, value: boolean) => {
+        resolve(value);
+      });
+    });
+
+    window.electronAPI.isAppImage();
+
+    return await promise;
+  }
+
 }

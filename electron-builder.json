@@ -32,7 +32,8 @@
   "linux": {
     "icon": "dist/assets/icons",
     "target": [
-      "AppImage"
+      "AppImage",
+      "deb"
     ],
     "category": "Network"
   }

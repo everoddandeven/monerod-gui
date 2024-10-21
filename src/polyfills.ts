@@ -93,7 +93,21 @@ declare global {
       gotOsType: (callback: (event: any, osType: { platform: string, arch: string }) => void) => void;
       showNotification: (options: NotificationConstructorOptions) => void;
       quit: () => void;
-      
+
+      isAppImage: () => void;
+      onIsAppImage: (callback: (event: any, value: boolean) => void) => void;
+
+      isAutoLaunchEnabled: () => void;
+      onIsAutoLaunchEnabled: (callback: (event: any, enabled: boolean) => void) => void;
+
+      enableAutoLaunch: () => void;
+      onEnableAutoLaunchError: (callback: (event: any, error: string) => void) => void;
+      onEnableAutoLaunchSuccess: (callback: (event: any) => void) => void;
+    
+      disableAutoLaunch: () => void;
+      onDisableAutoLaunchError: (callback: (event: any, error: string) => void) => void;
+      onDisableAutoLaunchSuccess: (callback: (event: any) => void) => void;
+    
     };
   }
 }
