@@ -1,0 +1,14 @@
+{
+  "name": "monerod-gui",
+  "productName": "Monero Daemon",
+  "genericName": "Cryptocurrency Node Manager",
+  "version": "0.1.0",
+  "dest": "dist/installers/",
+  "icon": "src/assets/icons/favicon.256x256.png",
+  "categories": [
+    "Network"
+  ],
+  "lintianOverrides": [
+    "changelog-file-missing-in-native-package"
+  ]
+}

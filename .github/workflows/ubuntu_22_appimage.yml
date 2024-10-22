@@ -1,5 +1,5 @@
 # This is a basic workflow to help you get started with Actions
-name: 'Linux Build'
+name: 'Ubuntu 22.04 - AppImage Build'
 
 # Controls when the action will run.
 on:
