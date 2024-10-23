@@ -21,7 +21,11 @@
     "sass",
     "windows",
     "mac",
-    "linux"
+    "linux",
+    "monero",
+    "monerod",
+    "monerod gui",
+    "monerod-gui"
   ],
   "main": "app/main.js",
   "private": true,
@@ -33,7 +37,8 @@
     "build": "npm run electron:serve-tsc && ng build --base-href ./",
     "build:dev": "npm run build -- -c dev",
     "build:prod": "npm run build -- -c production",
-    "build:prod:deb": "npm run build:prod && electron-packager . monerod-gui --platform linux --arch x64 --out dist/ --ignore=/e2e --ignore=/release --overwrite",
+    "electron:package:deb": "electron-packager . monerod-gui --platform linux --arch x64 --out dist/ --ignore=/e2e --ignore=/release --ignore=/src --overwrite && mv dist/src dist/monerod-gui-linux-x64/resources/app/src",
+    "build:prod:deb": "npm run build:prod && cp -R dist/ temp && mv temp dist/src && npm run electron:package:deb && cd dist/monerod-gui-linux-x64/resources/app/app && npm install && cd ../../../../../",
     "web:build": "npm run build -- -c web-production",
     "electron": "electron",
     "electron:serve-tsc": "tsc -p tsconfig.serve.json",
@@ -67,7 +72,6 @@
     "jquery": "3.7.1",
     "os": "0.1.2",
     "rxjs": "7.8.1",
-    "tar": "7.4.3",
     "tslib": "2.6.2",
     "unbzip2-stream": "1.4.3",
     "zone.js": "0.14.4"

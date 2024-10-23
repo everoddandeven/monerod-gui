@@ -69,9 +69,10 @@ const autoLauncher = new AutoLaunch({
 let win: BrowserWindow | null = null;
 let isHidden: boolean = false;
 let isQuitting: boolean = false;
-const dirname = __dirname.endsWith('/app') ? __dirname.replace('/app', '/src') : __dirname;
+const dirname = __dirname.endsWith('/app/app') ? __dirname.replace('/app/app', '/app/src') : __dirname.endsWith('/app') ? __dirname.replace('/app', '/src') : __dirname;
 let monerodProcess: ChildProcessWithoutNullStreams | null = null;
-const wdwIcon = path.join(dirname, 'assets/icons/monero-symbol-on-white-480.png');
+const iconRelPath: string = 'assets/icons/monero-symbol-on-white-480.png';
+const wdwIcon = `${dirname}/${iconRelPath}`;
 
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
@@ -124,7 +125,7 @@ function createWindow(): BrowserWindow {
     },
     autoHideMenuBar: true,
     icon: wdwIcon
-  });
+    });
 
   if (!app.isPackaged)win.webContents.openDevTools();
 
@@ -138,12 +139,12 @@ function createWindow(): BrowserWindow {
     // Path when running electron executable
     let pathIndex = './index.html';
 
-    if (fs.existsSync(path.join(__dirname, '../dist/index.html'))) {
+    if (fs.existsSync(path.join(dirname, '../dist/index.html'))) {
        // Path when running electron in local folder
       pathIndex = '../dist/index.html';
     }
 
-    const url = new URL(path.join('file:', __dirname, pathIndex));
+    const url = new URL(path.join('file:', dirname, pathIndex));
     win.loadURL(url.href);
   }
 
@@ -555,7 +556,30 @@ try {
     isQuitting = true;
   });
 
-  app.setLoginItemSettings
+  // #region Security 
+
+  app.on('web-contents-created', (event, webContents) => {
+    webContents.setWindowOpenHandler((details) => {
+      console.warn("Prevented unsafe window creation");
+      console.warn(details);
+      return { action: 'deny' };
+    });
+  });
+
+  app.on('web-contents-created', (event, contents) => {
+    contents.on('will-navigate', (event, navigationUrl) => {
+      event.preventDefault();
+      console.warn(`Prevented unsage window navigation to ${navigationUrl}`);
+      /*
+      const parsedUrl = new URL(navigationUrl)
+  
+      if (parsedUrl.origin !== 'https://example.com') {
+        event.preventDefault()
+      }
+      */
+    })
+  })
+  // #endregion
 
   ipcMain.handle('quit', (event) => {
     isQuitting = true;
