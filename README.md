@@ -6,8 +6,9 @@
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c705f535eebe4ba8b7a5789f6b409933)](https://app.codacy.com/gh/everoddandeven/monerod-gui/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
-[![Ubuntu 22.04 - x64 DEB Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_22_deb.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_22_deb.yml)
-[![Ubuntu 24.04 - x64 DEB Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_24_deb.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_24_deb.yml)
+[![Ubuntu jammy AppImage Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_22_appimage.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_22_appimage.yml)
+[![Ubuntu jammy x64 DEB Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_22_deb.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_22_deb.yml)
+[![Ubuntu noble x64 DEB Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_24_deb.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_24_deb.yml)
 [![MacOS Build][macos-build-badge]][macos-build]
 [![Windows Build][windows-build-badge]][windows-build]
 
