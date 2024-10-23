@@ -6,7 +6,8 @@
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c705f535eebe4ba8b7a5789f6b409933)](https://app.codacy.com/gh/everoddandeven/monerod-gui/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
-[![Linux Build][linux-build-badge]][linux-build]
+[![Ubuntu 22.04 - x64 DEB Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_22_deb.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_22_deb.yml)
+[![Ubuntu 24.04 - x64 DEB Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_24_deb.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_24_deb.yml)
 [![MacOS Build][macos-build-badge]][macos-build]
 [![Windows Build][windows-build-badge]][windows-build]
 
@@ -151,8 +152,6 @@ Please note that Hot reload is only available in Renderer process.
 [prs-badge]: https://img.shields.io/badge/PRs-welcome-red.svg
 [prs]: http://makeapullrequest.com
 
-[linux-build-badge]: https://github.com/everoddandeven/monerod-gui/workflows/Linux%20Build/badge.svg
-[linux-build]: https://github.com/everoddandeven/monerod-gui/actions?query=workflow%3A%22Linux+Build%22
 [macos-build-badge]: https://github.com/everoddandeven/monerod-gui/workflows/MacOS%20Build/badge.svg
 [macos-build]: https://github.com/everoddandeven/monerod-gui/actions?query=workflow%3A%22MacOS+Build%22
 [windows-build-badge]: https://github.com/everoddandeven/monerod-gui/workflows/Windows%20Build/badge.svg
