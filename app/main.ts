@@ -7,9 +7,8 @@ import { createHash } from 'crypto';
 import * as tar from 'tar';
 import * as os from 'os';
 import * as pidusage from 'pidusage';
-
-import AutoLaunch from 'auto-launch';
-//const AutoLaunch = require('auto-launch');
+//import AutoLaunch from 'auto-launch';
+const AutoLaunch = require('auto-launch');
 
 interface Stats {
   /**

@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { ElectronService } from './core/services';
-import { TranslateService } from '@ngx-translate/core';
 import { APP_CONFIG } from '../environments/environment';
 import { DaemonService } from './core/services/daemon/daemon.service';
 import { DaemonDataService } from './core/services/daemon/daemon-data.service';
@@ -21,12 +20,10 @@ export class AppComponent {
 
   constructor(
     private electronService: ElectronService,
-    private translate: TranslateService,
     private daemonService: DaemonService,
     private daemonData: DaemonDataService,
     private LogService: LogsService
   ) {
-    this.translate.setDefaultLang('en');
     console.log('APP_CONFIG', APP_CONFIG);
 
     if (electronService.isElectron) {
@@ -38,7 +35,7 @@ export class AppComponent {
       console.log('Run in browser');
     }
 
-    this.load();
+    this.load().then().catch((error: any) => console.error(error));
   }
 
   private async isAutoLaunched(): Promise<boolean> {
