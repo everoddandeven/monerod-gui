@@ -8,8 +8,8 @@ import * as tar from 'tar';
 import * as os from 'os';
 import * as pidusage from 'pidusage';
 
-const AutoLaunch = require('auto-launch');
-
+import AutoLaunch from 'auto-launch';
+//const AutoLaunch = require('auto-launch');
 
 interface Stats {
   /**
@@ -61,9 +61,13 @@ if (!gotInstanceLock) {
 }
 
 const autoLauncher = new AutoLaunch({
-	name: 'Monero Daemon'
+	name: 'Monero Daemon',
+  path: `${process.execPath} --auto-launch`
 });
 
+const isAutoLaunched: boolean = process.argv.includes('--auto-launch');
+
+dialog.showErrorBox(`Info`, `is auto launched: ${isAutoLaunched}, process.argv: ${process.argv.join(' ')}`)
 
 
 let win: BrowserWindow | null = null;
@@ -580,6 +584,12 @@ try {
     })
   })
   // #endregion
+
+  ipcMain.handle('is-auto-launched', (event: IpcMainInvokeEvent) => {
+    console.debug(event);
+    
+    win?.webContents.send('on-is-auto-launched', isAutoLaunched);
+  });
 
   ipcMain.handle('quit', (event) => {
     isQuitting = true;

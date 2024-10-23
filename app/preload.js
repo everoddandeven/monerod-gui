@@ -111,5 +111,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   onIsAppImage: (callback) => {
     ipcRenderer.on('on-is-app-image', callback);
+  },
+  isAutoLaunched: () => {
+    ipcRenderer.invoke('is-auto-launched');
+  },
+  onIsAutoLaunched: (callback) => {
+    ipcRenderer.on('on-is-auto-launched', callback);
   }
 });

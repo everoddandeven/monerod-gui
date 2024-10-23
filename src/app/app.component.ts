@@ -12,8 +12,8 @@ import { LogsService } from './pages/logs/logs.service';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  public loading: boolean;
-  public daemonRunning: boolean;
+  public loading: boolean = false;
+  public daemonRunning: boolean = false;
 
   public get initializing(): boolean {
     return this.daemonData.initializing;
@@ -38,23 +38,42 @@ export class AppComponent {
       console.log('Run in browser');
     }
 
-    this.loading = false;
-    this.daemonRunning = false;
     this.load();
   }
 
-  private load(): void {
+  private async isAutoLaunched(): Promise<boolean> {
+    try {
+      const promise = new Promise<boolean>((resolve) => {
+        window.electronAPI.onIsAutoLaunched((event: any, isAutoLaunched: boolean) => {
+          console.debug(event);
+          resolve(isAutoLaunched);
+        });
+      });
+
+      window.electronAPI.isAutoLaunched();
+
+      return await promise;
+    } catch(error: any) {
+      console.error(error);
+      return false;
+    }
+  }
+
+  private async load(): Promise<void> {
     this.loading = true;
 
-    this.daemonService.isRunning().then((running: boolean) => {
-      this.daemonRunning = running;
-      this.loading;
-    }).catch((error) => {
-      console.error(error);
+    try {
+      this.daemonRunning = await this.daemonService.isRunning(true);
+
+      const isAutoLaunched = await this.isAutoLaunched();
+
+      if (isAutoLaunched) {
+        await this.daemonService.startDaemon();
+      }
+
+    } catch {
       this.daemonRunning = false;
-    }).finally(() => {
-      this.loading = false;
-    });
+    }
 
     this.loading = false;
   }
