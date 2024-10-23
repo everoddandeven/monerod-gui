@@ -1,4 +1,6 @@
-import { app, BrowserWindow, ipcMain, screen, dialog, Tray, Menu, MenuItemConstructorOptions, FileFilter, IpcMainInvokeEvent, Notification, NotificationConstructorOptions } from 'electron';
+import { app, BrowserWindow, ipcMain, screen, dialog, Tray, Menu, MenuItemConstructorOptions, 
+  IpcMainInvokeEvent, Notification, NotificationConstructorOptions 
+} from 'electron';
 import { ChildProcessWithoutNullStreams, exec, ExecException, spawn } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -7,8 +9,7 @@ import { createHash } from 'crypto';
 import * as tar from 'tar';
 import * as os from 'os';
 import * as pidusage from 'pidusage';
-//import AutoLaunch from 'auto-launch';
-const AutoLaunch = require('auto-launch');
+import AutoLaunch from './auto-launch';
 
 interface Stats {
   /**
@@ -60,8 +61,13 @@ if (!gotInstanceLock) {
 }
 
 const autoLauncher = new AutoLaunch({
-	name: 'Monero Daemon',
-  path: `${process.execPath} --auto-launch`
+	name: 'monerod-gui',
+  path: process.execPath,
+  options: {
+    extraArguments: [
+      '--auto-launch'
+    ]
+  }
 });
 
 const isAutoLaunched: boolean = process.argv.includes('--auto-launch');

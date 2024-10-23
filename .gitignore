@@ -8,6 +8,7 @@
 /release
 main.js
 src/**/*.js
+app/auto-launch/**/*.js
 *.js.map
 
 # dependencies
