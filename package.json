@@ -1,6 +1,6 @@
 {
   "name": "monerod-gui",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Monero daemon GUI",
   "icon": "./assets/icons/favicon.ico",
   "homepage": "https://github.com/everoddandeven/monerod-gui",
