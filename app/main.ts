@@ -60,7 +60,7 @@ if (!gotInstanceLock) {
   app.quit();
 }
 
-const autoLauncher = new AutoLaunch({
+let autoLauncher = new AutoLaunch({
 	name: 'monerod-gui',
   path: process.execPath,
   options: {
@@ -71,6 +71,7 @@ const autoLauncher = new AutoLaunch({
 });
 
 const isAutoLaunched: boolean = process.argv.includes('--auto-launch');
+const minimized: boolean = process.argv.includes('--hidden');
 
 dialog.showErrorBox(`Info`, `is auto launched: ${isAutoLaunched}, process.argv: ${process.argv.join(' ')}`)
 
@@ -118,6 +119,7 @@ function createWindow(): BrowserWindow {
 
   console.log(`createWindow(): icon = ${wdwIcon}`);
   console.log(`app.isPackaged: ${app.isPackaged}`);
+
   // Create the browser window.
   win = new BrowserWindow({
     x: 0,
@@ -132,11 +134,14 @@ function createWindow(): BrowserWindow {
       devTools: !app.isPackaged,
       sandbox: false
     },
+    show: !minimized,
     autoHideMenuBar: true,
     icon: wdwIcon
-    });
+  });
 
-  if (!app.isPackaged)win.webContents.openDevTools();
+  isHidden = minimized;
+
+  if (!app.isPackaged) win.webContents.openDevTools();
 
   if (serve) {
     const debug = require('electron-debug');
@@ -154,6 +159,7 @@ function createWindow(): BrowserWindow {
     }
 
     const url = new URL(path.join('file:', dirname, pathIndex));
+
     win.loadURL(url.href);
   }
 
@@ -596,21 +602,21 @@ try {
     win?.webContents.send('on-is-auto-launched', isAutoLaunched);
   });
 
-  ipcMain.handle('quit', (event) => {
+  ipcMain.handle('quit', (event: IpcMainInvokeEvent) => {
     isQuitting = true;
     app.quit();
   });
 
-  ipcMain.handle('start-monerod', (event, configFilePath: string[]) => {
+  ipcMain.handle('start-monerod', (event: IpcMainInvokeEvent, configFilePath: string[]) => {
     startMoneroDaemon(configFilePath);
   })
 
-  ipcMain.handle('get-monero-version', (event, configFilePath: string) => {
+  ipcMain.handle('get-monero-version', (event: IpcMainInvokeEvent, configFilePath: string) => {
     getMonerodVersion(configFilePath);
   });
 
   // Gestione IPC
-  ipcMain.handle('download-monerod', async (event, downloadUrl: string, destination: string) => {
+  ipcMain.handle('download-monerod', async (event: IpcMainInvokeEvent, downloadUrl: string, destination: string) => {
     try {
       //const fileName = path.basename(downloadUrl);
       //const filePath = path.join(destination, fileName);
@@ -641,7 +647,7 @@ try {
     }
   });
 
-  ipcMain.handle('select-file', async (event: any, extensions?: string[]) => {
+  ipcMain.handle('select-file', async (event: IpcMainInvokeEvent, extensions?: string[]) => {
     if (!win) 
     {
       return;
@@ -661,7 +667,7 @@ try {
     win.webContents.send('selected-file', path ? `${path}` : '');
   });
   
-  ipcMain.handle('select-folder', async (event: any) => {
+  ipcMain.handle('select-folder', async (event: IpcMainInvokeEvent) => {
     if (!win) {
       return;
     }
@@ -676,11 +682,11 @@ try {
     win.webContents.send('selected-folder', path ? `${path}` : '');
   });
 
-  ipcMain.handle('is-wifi-connected', async (event) => {
+  ipcMain.handle('is-wifi-connected', async (event: IpcMainInvokeEvent) => {
     isWifiConnected();
   });
 
-  ipcMain.handle('get-os-type', (event) => {
+  ipcMain.handle('get-os-type', (event: IpcMainInvokeEvent) => {
     win?.webContents.send('got-os-type', { platform: os.platform(), arch: os.arch() });
   })
 
@@ -696,6 +702,8 @@ try {
     showNotification(options);
   });
 
+  // #region Auto Launch 
+
   ipcMain.handle('is-auto-launch-enabled', (event: IpcMainInvokeEvent) => {
     autoLauncher.isEnabled().then((enabled: boolean) => {
       win?.webContents.send('on-is-auto-launch-enabled', enabled);
@@ -705,13 +713,24 @@ try {
     });
   });
 
-  ipcMain.handle('enable-auto-launch', (event:IpcMainInvokeEvent) => {
+  ipcMain.handle('enable-auto-launch', (event: IpcMainInvokeEvent, minimized: boolean) => {
     autoLauncher.isEnabled().then((enabled: boolean) => {
       if (enabled) {
         win?.webContents.send('on-enable-auto-launch-error', 'already enabled');
         return;
       }
 
+      autoLauncher = new AutoLaunch({
+        name: 'monerod-gui',
+        path: process.execPath,
+        options: {
+          launchInBackground: minimized,
+          extraArguments: [
+            '--auto-launch'
+          ]
+        }
+      });
+      
       autoLauncher.enable().then(() => {
         autoLauncher.isEnabled().then((enabled: boolean) => {
           if (enabled) {
@@ -732,8 +751,7 @@ try {
     });
   });
 
-
-  ipcMain.handle('disable-auto-launch', (event:IpcMainInvokeEvent) => {
+  ipcMain.handle('disable-auto-launch', (event: IpcMainInvokeEvent) => {
     autoLauncher.isEnabled().then((enabled: boolean) => {
       if (!enabled) {
         win?.webContents.send('on-disable-auto-launch-error', 'already disabled');
@@ -759,6 +777,8 @@ try {
       win?.webContents.send('on-disable-auto-launch-error', `${error}`);
     });
   });
+
+  // #endregion
 
   ipcMain.handle('is-app-image', (event: IpcMainInvokeEvent) => {
     const isAppImage: boolean = !!process.env.APPIMAGE;

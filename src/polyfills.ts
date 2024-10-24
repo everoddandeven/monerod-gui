@@ -100,7 +100,7 @@ declare global {
       isAutoLaunchEnabled: () => void;
       onIsAutoLaunchEnabled: (callback: (event: any, enabled: boolean) => void) => void;
 
-      enableAutoLaunch: () => void;
+      enableAutoLaunch: (minimized: boolean) => void;
       onEnableAutoLaunchError: (callback: (event: any, error: string) => void) => void;
       onEnableAutoLaunchSuccess: (callback: (event: any) => void) => void;
     

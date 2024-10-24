@@ -139,18 +139,26 @@ export class SettingsComponent {
     }
   }
 
-  private async refreshAutoLanch(): Promise<void> {
+  private async refreshAutoLanch(minimizeChanged: boolean): Promise<void> {
     if (await this.electronService.isAppImage()) {
       return;
     }
 
     const enabled = await this.electronService.isAutoLaunchEnabled();
 
-    if (this.originalSettings.startAtLogin && !enabled) {
-      await this.electronService.enableAutoLaunch();
+    const shouldEnable = this.originalSettings.startAtLogin && !enabled;
+    const shouldDisable = !this.originalSettings.startAtLogin && enabled;
+    const shouldUpdate = enabled && minimizeChanged;
+
+    if (shouldEnable) {
+      await this.electronService.enableAutoLaunch(this.originalSettings.startAtLoginMinimized);
     }
-    else if (!this.originalSettings.startAtLogin && enabled) {
+    else if (shouldDisable) {
       await this.electronService.disableAutoLaunch();
+    }
+    else if (shouldUpdate) {
+      await this.electronService.disableAutoLaunch();
+      await this.electronService.enableAutoLaunch(this.originalSettings.startAtLoginMinimized);
     }
   }
 
@@ -166,12 +174,16 @@ export class SettingsComponent {
         throw new Error('You must set a download path for monerod updates when enabling automatic upgrade');
       }
       
+      const oldStartMinimized: boolean = this.originalSettings.startAtLoginMinimized;
+
       await this.daemonService.saveSettings(this.currentSettings);
 
       this.originalSettings = this.currentSettings.clone();
 
+      const minimizedChanged: boolean = oldStartMinimized == this.originalSettings.startAtLoginMinimized;
+
       try {
-        await this.refreshAutoLanch();
+        await this.refreshAutoLanch(minimizedChanged);
       } catch(error: any) {
         console.error(error);
       }

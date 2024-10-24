@@ -82,8 +82,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   quit: () => {
     ipcRenderer.invoke('quit');
   },
-  enableAutoLaunch: () => {
-    ipcRenderer.invoke('enable-auto-launch');
+  enableAutoLaunch: (minimized) => {
+    ipcRenderer.invoke('enable-auto-launch', minimized);
   },
   isAutoLaunchEnabled: () => {
     ipcRenderer.invoke('is-auto-launch-enabled');

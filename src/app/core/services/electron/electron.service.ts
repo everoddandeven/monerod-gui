@@ -70,7 +70,7 @@ export class ElectronService {
     return await promise;
   }
 
-  public async enableAutoLaunch(): Promise<void> {
+  public async enableAutoLaunch(minimized: boolean): Promise<void> {
     if (await this.isAppImage()) {
       throw new Error("Cannot enable auto launch");
     }
@@ -93,7 +93,7 @@ export class ElectronService {
       });
     });
 
-    window.electronAPI.enableAutoLaunch();
+    window.electronAPI.enableAutoLaunch(minimized);
 
     await promise;
   }
