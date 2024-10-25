@@ -10,6 +10,7 @@ import * as tar from 'tar';
 import * as os from 'os';
 import * as pidusage from 'pidusage';
 import AutoLaunch from './auto-launch';
+import AdmZip from 'adm-zip';
 
 interface Stats {
   /**
@@ -529,6 +530,47 @@ const extractTarBz2 = (filePath: string, destination: string): Promise<string> =
   });
 };
 
+const extractZip = (filePath: string, destination: string): Promise<string> => {
+  return new Promise<string>((resolve, reject) => {
+    try {
+      const zip = new AdmZip(filePath);
+
+      // Ensure destination exists
+      if (!fs.existsSync(destination)) {
+        fs.mkdirSync(destination, { recursive: true });
+      }
+
+      // Extract the ZIP file
+      zip.extractAllTo(destination, true);
+
+      // Get the name of the extracted folder
+      const extractedEntries = zip.getEntries();
+      const folderName = extractedEntries[0]?.entryName.split('/')[0];
+
+      // Ensure folder name exists
+      if (!folderName) {
+        reject(new Error("Could not determine the extracted folder name"));
+        return;
+      }
+
+      resolve(path.join(destination, folderName));
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+const extract = (filePath: string, destination: string): Promise<string> => {
+  if (filePath.endsWith('.zip')) {
+    return extractZip(filePath, destination);
+  }
+  else if (filePath.endsWith('.tar.bz2')) {
+    return extractTarBz2(filePath, destination);
+  }
+
+  throw new Error("Unknown file type " + filePath);
+}
+
 // #endregion
 
 function showNotification(options?: NotificationConstructorOptions): void {
@@ -637,7 +679,7 @@ try {
       // Estrai il file
       const fPath = `${destination}/${fileName}`;
       event.sender.send('download-progress', { progress: 100, status: 'Extracting' });
-      const extractedDir = await extractTarBz2(fPath, destination);
+      const extractedDir = await extract(fPath, destination);
 
       event.sender.send('download-progress', { progress: 100, status: 'Download and extraction completed successfully' });
       event.sender.send('download-progress', { progress: 200, status: `${destination}/${extractedDir}` });
