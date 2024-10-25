@@ -1,18 +1,18 @@
-import { AfterViewInit, Component, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component } from '@angular/core';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { DaemonDataService, DaemonService } from '../../core/services';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { Chart, ChartData } from 'chart.js/auto'
 import { NetStatsHistoryEntry } from '../../../common';
 import { Subscription } from 'rxjs';
+import { BasePageComponent } from '../base-page/base-page.component';
 
 @Component({
   selector: 'app-network',
   templateUrl: './network.component.html',
   styleUrl: './network.component.scss'
 })
-export class NetworkComponent implements AfterViewInit, OnDestroy {
-  public readonly navbarLinks: NavbarLink[];
+export class NetworkComponent extends BasePageComponent implements AfterViewInit {
 
   private netStatsBytesInChart?: Chart;
   private netStatsBytesOutChart?: Chart;
@@ -32,14 +32,13 @@ export class NetworkComponent implements AfterViewInit, OnDestroy {
   public setLimitSuccess: boolean = false;
   public setLimitError: string = '';
 
-  private subscriptions: Subscription[] = [];
-
-  constructor(private navbarService: NavbarService, private daemonService: DaemonService, private daemonData: DaemonDataService) {
-    this.navbarLinks = [
+  constructor(navbarService: NavbarService, private daemonService: DaemonService, private daemonData: DaemonDataService) {
+    super(navbarService);
+    this.setLinks([
       new NavbarLink('pills-net-stats-tab', '#pills-net-stats', 'pills-net-stats', false, 'Statistics'),
       new NavbarLink('pills-connections-tab', '#pills-connections', 'connections', false, 'Connetions'),
       new NavbarLink('pills-limits-tab', '#pills-limit', 'pills-limit', false, 'Limit')
-    ];
+    ]);
 
     const netStatsRefreshStartSub: Subscription = this.daemonData.netStatsRefreshEnd.subscribe(() => {
       this.refreshNetStatsHistory();
@@ -49,44 +48,29 @@ export class NetworkComponent implements AfterViewInit, OnDestroy {
       this.loadConnectionsTable();
     });
 
-    this.subscriptions.push(netStatsRefreshStartSub, syncEndSub);
-
-    this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
+    const daemonStatusSub: Subscription = this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
       if (!running) {
         if (this.netStatsBytesInChart) {
           this.netStatsBytesInChart.destroy();
           this.netStatsBytesInChart = undefined;
         }
       }
+      else {
+        this.initNetStatsHistoryChart();
+        this.loadConnectionsTable();
+      }
     });
+
+    this.subscriptions.push(netStatsRefreshStartSub, syncEndSub, daemonStatusSub);
   }
 
   public ngAfterViewInit(): void {
-    this.navbarService.setLinks(this.navbarLinks);
     this.initNetStatsHistoryChart();
-    this.initConnectionsTable();
-  }
-
-  public ngOnDestroy(): void {
-    this.subscriptions.forEach((sub) => {
-      sub.unsubscribe();
-    });
-
-    this.subscriptions = [];
-  }
-
-  private initConnectionsTable(): void {
-    const $table = $('#connectionsTable');
-    $table.bootstrapTable({});
-    $table.bootstrapTable('refreshOptions', {
-      classes: 'table table-bordered table-hover table-dark table-striped'
-    });
+    this.loadConnectionsTable();
   }
 
   private loadConnectionsTable(): void {
-    const $table = $('#connectionsTable');
-
-    $table.bootstrapTable('load', this.daemonData.connections);
+    this.loadTable('connectionsTable', this.daemonData.connections);
   }
 
   private buildChartBytesInData(): ChartData {
@@ -141,12 +125,17 @@ export class NetworkComponent implements AfterViewInit, OnDestroy {
       type: 'line',
       data: this.buildChartBytesInData(),
       options: {
+        animation: false,
         plugins: {
           legend: {
             display: false
           },
           tooltip: {
             boxPadding: 3
+          },
+          decimation: {
+            enabled: true,
+            algorithm: 'min-max'
           }
         }
       }
@@ -156,12 +145,17 @@ export class NetworkComponent implements AfterViewInit, OnDestroy {
       type: 'line',
       data: this.buildChartBytesOutData(),
       options: {
+        animation: false,
         plugins: {
           legend: {
             display: false
           },
           tooltip: {
             boxPadding: 3
+          },
+          decimation: {
+            enabled: true,
+            algorithm: 'min-max'
           }
         }
       }
@@ -216,5 +210,5 @@ export class NetworkComponent implements AfterViewInit, OnDestroy {
     }
 
     this.limiting = false;
-  } 
+  }
 }
