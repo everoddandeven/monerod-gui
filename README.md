@@ -169,7 +169,7 @@ Please note that Hot reload is only available in Renderer process.
 [github-star-badge]: https://img.shields.io/github/stars/everoddandeven/monerod-gui.svg?style=social
 [github-star]: https://github.com/everoddandeven/monerod-gui/stargazers
 
-[bitcoin-donated]: https://github.com/everoddandeven/monerod-gui/](https://github.com/everoddandeven/monerod-gui/edit/main/README.md#bitcoin
+[bitcoin-donated]: https://github.com/everoddandeven/monerod-gui?tab=readme-ov-file#bitcoin
 [bitcoin-donated-badge]: https://img.shields.io/badge/dynamic/json?url=https://explorer.viawallet.com/res/btc/addresses/bc1qndc2lesy0sse9vj33a35pnfrqz4znlhhs58vfp&query=$.data.balance&suffix=%20BTC&logo=bitcoin&label=donated
 
 ## Donating
