@@ -87,14 +87,25 @@ export class VersionComponent implements AfterViewInit {
       });
   }
 
-  public async load(): Promise<void> {
-    this.settings = await this.daemonService.getSettings();
-    const isElectron = this.electronService.isElectron || (window as any).electronAPI != null;
-    const version = await this.daemonService.getVersion(isElectron);
-    const latestVersion = await this.daemonService.getLatestVersion();
+  public loading: boolean = true;
 
-    this.currentVersion = version;
-    this.latestVersion = latestVersion;
+  public async load(): Promise<void> {
+    this.loading = true;
+
+    try {
+      this.settings = await this.daemonService.getSettings();
+      const isElectron = this.electronService.isElectron || (window as any).electronAPI != null;
+      const version = await this.daemonService.getVersion(isElectron);
+      const latestVersion = await this.daemonService.getLatestVersion();
+  
+      this.currentVersion = version;
+      this.latestVersion = latestVersion;
+    }
+    catch(error: any) {
+      console.error(error);
+    }
+
+    this.loading = false;
   }
 
   public get upgrading(): boolean {

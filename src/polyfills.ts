@@ -110,6 +110,7 @@ declare global {
 
       isAutoLaunched: () => void;
       onIsAutoLaunched: (callback: (event: any, isAutoLaunched: boolean) => void) => void;
+      unregisterOnIsAutoLaunched: () => void;
     };
   }
 }

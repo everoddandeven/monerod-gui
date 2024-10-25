@@ -43,6 +43,7 @@ export class AppComponent {
       const promise = new Promise<boolean>((resolve) => {
         window.electronAPI.onIsAutoLaunched((event: any, isAutoLaunched: boolean) => {
           console.debug(event);
+          window.electronAPI.unregisterOnIsAutoLaunched();
           resolve(isAutoLaunched);
         });
       });

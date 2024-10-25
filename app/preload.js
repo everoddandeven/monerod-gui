@@ -91,6 +91,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onIsAutoLaunchEnabled: (callback) => {
     ipcRenderer.on('on-is-auto-launch-enabled', callback);
   },
+  unregisterOnIsAutoLaunchEnabled: () => {
+    const listeners = ipcRenderer.listeners('on-is-auto-launch-enabled');
+
+    listeners.forEach((listener) => ipcRenderer.removeListener('on-is-auto-launch-enabled', listener));
+  },
   onEnableAutoLaunchError: (callback) => {
     ipcRenderer.on('on-enable-auto-launch-error', callback);
   },
@@ -117,5 +122,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   onIsAutoLaunched: (callback) => {
     ipcRenderer.on('on-is-auto-launched', callback);
+  },
+  unregisterOnIsAutoLaunched: () => {
+    ipcRenderer.removeAllListeners('on-is-auto-launched');
   }
 });

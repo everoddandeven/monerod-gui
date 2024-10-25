@@ -4,6 +4,7 @@ import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonDataService } from '../../core/services';
 import { Ban } from '../../../common';
+import { BasePageComponent } from '../base-page/base-page.component';
 
 
 @Component({
@@ -11,12 +12,7 @@ import { Ban } from '../../../common';
   templateUrl: './bans.component.html',
   styleUrl: './bans.component.scss'
 })
-export class BansComponent implements AfterViewInit {
-  public readonly navbarLinks: NavbarLink[] = [
-    new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', false, 'Overview', true),
-    new NavbarLink('pills-set-bans-tab', '#pills-set-bans', 'pills-set-bans', false, 'Set Bans', true)
-  ];
-  
+export class BansComponent extends BasePageComponent implements AfterViewInit {  
   public refreshingBansTable: boolean = false;
   
   public get daemonRunning(): boolean {
@@ -65,19 +61,20 @@ export class BansComponent implements AfterViewInit {
     return bans;
   }
 
-  constructor(private daemonData: DaemonDataService, private daemonService: DaemonService, private navbarService: NavbarService, private ngZone: NgZone) {
+  constructor(private daemonData: DaemonDataService, private daemonService: DaemonService, navbarService: NavbarService, private ngZone: NgZone) {
+    super(navbarService);
+
+    this.setLinks([
+      new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', false, 'Overview', true),
+      new NavbarLink('pills-set-bans-tab', '#pills-set-bans', 'pills-set-bans', false, 'Set Bans', true)
+    ]);
   }
 
   public ngAfterViewInit(): void {
-    this.navbarService.setLinks(this.navbarLinks);
-
     this.ngZone.run(async () => {
-      const $table = $('#bansTable');
-      $table.bootstrapTable({});
-      $table.bootstrapTable('refreshOptions', {
-        classes: 'table table-bordered table-hover table-dark table-striped'
-      });
-      $table.bootstrapTable('showLoading');      
+
+      this.initTable('bansTable', true);
+
       await this.refreshBansTable();
     }).then().catch((error: any) => {
       console.error(error);
@@ -85,34 +82,24 @@ export class BansComponent implements AfterViewInit {
   }
 
   public async refreshBansTable(): Promise<void> {
-    const $table = $('#bansTable');
-    let _bans: Ban[] = [];
+    let bans: Ban[] = [];
     
     try {
       const running = await this.daemonService.isRunning();
 
       if (running) {
-        _bans = await this.daemonService.getBans();
+        bans = await this.daemonService.getBans();
       }
       else {
-        _bans = [];
+        bans = [];
       }
     }
     catch (error) {
       console.error(error);
-      _bans = [];
+      bans = [];
     }
 
-    const bans: any[] = [];
-
-    _bans.forEach((ban) => bans.push({
-      'ip': ban.ip,
-      'host': ban.host,
-      'seconds': ban.seconds
-    }));
-    $table.bootstrapTable('hideLoading');
-    $table.bootstrapTable('load', bans);
-
+    this.loadTable('bansTable', bans);
   }
 
   public async setBans(): Promise<void> {

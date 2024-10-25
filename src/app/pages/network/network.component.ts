@@ -1,4 +1,4 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy } from '@angular/core';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { DaemonDataService, DaemonService } from '../../core/services';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
@@ -12,7 +12,7 @@ import { BasePageComponent } from '../base-page/base-page.component';
   templateUrl: './network.component.html',
   styleUrl: './network.component.scss'
 })
-export class NetworkComponent extends BasePageComponent implements AfterViewInit {
+export class NetworkComponent extends BasePageComponent implements AfterViewInit, OnDestroy {
 
   private netStatsBytesInChart?: Chart;
   private netStatsBytesOutChart?: Chart;
@@ -210,5 +210,16 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
     }
 
     this.limiting = false;
+  }
+
+  public override ngOnDestroy(): void {
+    if (this.netStatsBytesInChart) {
+      this.netStatsBytesInChart.destroy();
+    }
+    if (this.netStatsBytesOutChart) {
+      this.netStatsBytesOutChart.destroy();
+    }
+
+    super.ngOnDestroy();
   }
 }

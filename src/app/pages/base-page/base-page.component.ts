@@ -7,7 +7,7 @@ import { Subscription } from 'rxjs';
 })
 export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
 
-  private readonly initializedTables: { [key: string]: boolean } = {};
+  private readonly initializedTables: { [key: string]: JQuery<HTMLElement> | undefined } = {};
   private _links: NavbarLink[] = [];
 
   public get links(): NavbarLink[] {
@@ -44,7 +44,7 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
 
     if(loading) $table.bootstrapTable('showLoading');
 
-    this.setTableInitialized(id);
+    this.setTableInitialized(id, $table);
   }
 
   protected loadTable(id: string, rows: any[]): void {
@@ -54,47 +54,42 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
 
     if (!this.isTableInitialized(id)) {
       console.warn(`Cannot load table ${id}`);
+      return;
     }
 
-    const $table = $(`#${id}`);
+    const $table = this.initializedTables[id] as JQuery<HTMLElement>;
+
     $table.bootstrapTable('load', rows);
     $table.bootstrapTable('hideLoading');
   }
 
   private destroyTable(id: string): void {
-    if (!document.getElementById(id)) {
-      console.warn(`Cannot find table ${id}`);
-      return;
-    }
+    const $table = this.initializedTables[id];
 
-    if (!this.isTableInitialized(id)) {
+    if (!$table) {
       console.warn(`Table ${id} is not initialized`);
       return;
     }
 
-    const $table = $(`#${id}`);
     $table.bootstrapTable('destroy');
-    this.setTableInitialized(id, false);
+    
+    this.initializedTables[id] = undefined;
   }
 
   private destroyTables(): void {
     for(const key in this.initializedTables) {
-      const initialized: boolean = this.initializedTables[key];
-
-      if (!initialized) continue;
-
       this.destroyTable(key);
     }
   }
 
-  private setTableInitialized(id: string, initialized: boolean = true): void {
-    this.initializedTables[id] = initialized;
+  private setTableInitialized(id: string, table: JQuery<HTMLElement>): void {
+    this.initializedTables[id] = table;
   }
 
   protected isTableInitialized(id: string): boolean {
-    const initalized: boolean | undefined = this.initializedTables[id];
+    const initalized: JQuery<HTMLElement> | undefined = this.initializedTables[id];
 
-    if (initalized == true) {
+    if (initalized) {
       return true;
     }
 

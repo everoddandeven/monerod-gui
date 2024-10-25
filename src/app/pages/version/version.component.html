@@ -57,8 +57,8 @@
     
     <hr class="my-4">
     
-    <button *ngIf="!upgrading && !installing" class="w-100 btn btn-primary btn-lg" type="submit" (click)="upgrade()" [disabled]="buttonDisabled">{{ buttonTitle }}</button>
-    <button *ngIf="upgrading || installing" class="w-100 btn btn-primary btn-lg" type="button" disabled>
+    <button *ngIf="!loading && !upgrading && !installing" class="w-100 btn btn-primary btn-lg" type="submit" (click)="upgrade()" [disabled]="buttonDisabled">{{ buttonTitle }}</button>
+    <button *ngIf="!loading && upgrading || installing" class="w-100 btn btn-primary btn-lg" type="button" disabled>
       <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
       {{ upgrading ? 'Upgrading' : 'Installing' }} monerod
     </button>

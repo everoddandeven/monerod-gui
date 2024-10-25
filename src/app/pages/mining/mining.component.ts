@@ -160,7 +160,6 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit 
 
   private loadTables(): void {
     this.loadChainsTable();
-    this.loadAuxPowTable();
   }
 
   private loadChainsTable(): void {
