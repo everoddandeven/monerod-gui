@@ -1,5 +1,7 @@
-# Monerod GUI
-
+<div align="center">
+	<img src="src/assets/icons/icon_128x128.png">
+  <h1>Monerod GUI</h1>
+  
 ![Maintained][maintained-badge]
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c705f535eebe4ba8b7a5789f6b409933)](https://app.codacy.com/gh/everoddandeven/monerod-gui/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![Make a pull request][prs-badge]][prs]
@@ -8,11 +10,16 @@
 [![Ubuntu jammy AppImage Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_22_appimage.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_22_appimage.yml)
 [![Ubuntu jammy x64 DEB Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_22_deb.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_22_deb.yml)
 [![Ubuntu noble x64 DEB Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_24_deb.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_24_deb.yml)
+
 [![MacOS Build][macos-build-badge]][macos-build]
 [![Windows Build][windows-build-badge]][windows-build]
 
 [![Watch on GitHub][github-watch-badge]][github-watch]
 [![Star on GitHub][github-star-badge]][github-star]
+
+[![BTC Donated][bitcoin-donated-badge]][bitcoin-donated]
+
+</div>
 
 ## Introduction
 
@@ -47,7 +54,7 @@
 
 ### 6. Cross-Platform Support
 
-- Monerod-GUI automatically detects the operating system and selects the appropriate `monerod` version to download.
+- Monerod GUI automatically detects the operating system and selects the appropriate `monerod` version to download.
 - Available for Windows, macOS, and Linux.
 
 ### 7. Customizable Installation
@@ -56,7 +63,7 @@
 
 ### Usage
 
-1. On the first run, Monerod-GUI will detect your operating system and prompt you to download the appropriate version of `monerod`.
+1. On the first run, Monerod GUI will detect your operating system and prompt you to download the appropriate version of `monerod`.
 2. Once installed, you can start the Monero daemon with one click and configure various settings like testnet mode, fast sync, and more.
 3. Monitor real-time logs to keep track of blockchain synchronization and transaction details.
 
@@ -161,6 +168,9 @@ Please note that Hot reload is only available in Renderer process.
 [github-watch]: https://github.com/everoddandeven/monerod-gui/watchers
 [github-star-badge]: https://img.shields.io/github/stars/everoddandeven/monerod-gui.svg?style=social
 [github-star]: https://github.com/everoddandeven/monerod-gui/stargazers
+
+[bitcoin-donated]: https://github.com/everoddandeven/monerod-gui/](https://github.com/everoddandeven/monerod-gui/edit/main/README.md#bitcoin
+[bitcoin-donated-badge]: https://img.shields.io/badge/dynamic/json?url=https://explorer.viawallet.com/res/btc/addresses/bc1qndc2lesy0sse9vj33a35pnfrqz4znlhhs58vfp&query=$.data.balance&suffix=%20BTC&logo=bitcoin&label=donated
 
 ## Donating
 
