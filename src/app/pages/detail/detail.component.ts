@@ -14,6 +14,32 @@ import { BasePageComponent } from '../base-page/base-page.component';
 })
 export class DetailComponent extends BasePageComponent implements AfterViewInit {
 
+  public get uptime(): { seconds: string, minutes: string, hours: string } {
+    const startedAt = this.daemonService.startedAt;
+
+    if (!startedAt) {
+      return {
+        seconds: '00',
+        minutes: '00',
+        hours: '00'
+      };
+    }
+
+    const now = new Date();
+    const elapsedMilliseconds = now.getTime() - startedAt.getTime();
+
+    const seconds = Math.floor((elapsedMilliseconds / 1000) % 60);
+    const minutes = Math.floor((elapsedMilliseconds / (1000 * 60)) % 60);
+    const hours = Math.floor(elapsedMilliseconds / (1000 * 60 * 60));
+
+    return {
+      hours: hours < 10 ? `0${hours}` : `${hours}`,
+      minutes: minutes < 10 ? `0${minutes}` : `${minutes}`,
+      seconds: seconds < 10 ? `0${seconds}` : `${seconds}`
+    }
+}
+
+
   public get daemonRunning(): boolean {
     return this.daemonData.running;
   }
@@ -189,10 +215,6 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
     const loading = this.daemonData.initializing || this.daemonService.starting;
 
     const cards: SimpleBootstrapCard[] = [];
-
-    if (this.daemonService.startedAt) {
-      cards.push(new SimpleBootstrapCard('Started At', `${this.daemonService.startedAt.toLocaleDateString()} ${this.daemonService.startedAt.toLocaleTimeString()}`));
-    }
 
     cards.push(
       new SimpleBootstrapCard('Connection Status', this.connectionStatus, loading),
