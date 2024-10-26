@@ -400,6 +400,14 @@ export class DaemonService {
 
     console.log("Starting daemon");
 
+    if (!this.restarting && !this.enablingSync) {
+      window.electronAPI.showNotification({
+        title: 'Daemon starting',
+        body: 'Monero daemon is starting',
+        closeButtonText: 'Dismiss'
+      });
+    }
+
     this.settings = customSettings ? customSettings : await this.getSettings();
     
     if (!this.settings.noSync && !this.settings.syncOnWifi && await this.isWifiConnected()) {

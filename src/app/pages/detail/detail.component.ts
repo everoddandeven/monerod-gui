@@ -150,13 +150,13 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
       
       this.ngZone.run(() => {
         this.cards = this.createCards();
+        this.loadTables(true);
       });
     });
 
     const syncInfoRefreshEndSub: Subscription = this.daemonData.syncInfoRefreshEnd.subscribe(() => {
-      this.loadTables();
-
       this.cards = this.createCards();
+      this.loadTables();
     });
 
     this.subscriptions.push(syncStartSub, syncInfoRefreshEndSub);
@@ -169,17 +169,17 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
     });
   }
 
-  private loadPeersTable(): void {
-    this.loadTable('peersTable', this.getPeers());
+  private loadPeersTable(loading: boolean = false): void {
+    this.loadTable('peersTable', this.getPeers(), loading);
   }
 
-  private loadSpansTable(): void {
-    this.loadTable('spansTable', this.getSpans());
+  private loadSpansTable(loading: boolean = false): void {
+    this.loadTable('spansTable', this.getSpans(), loading);
   }
 
-  private loadTables(): void {
-    this.loadPeersTable();
-    this.loadSpansTable();
+  private loadTables(loading: boolean = false): void {
+    this.loadPeersTable(loading);
+    this.loadSpansTable(loading);
   }
 
   private createCards(): SimpleBootstrapCard[] {

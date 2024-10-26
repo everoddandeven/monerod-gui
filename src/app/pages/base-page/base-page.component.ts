@@ -47,7 +47,23 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
     this.setTableInitialized(id, $table);
   }
 
-  protected loadTable(id: string, rows: any[]): void {
+  protected setTableLoading(id: string, loading: boolean = true): void {
+    if (!this.isTableInitialized(id)) {
+      this.initTable(id, loading);
+      return;
+    }
+
+    const $table = this.initializedTables[id];
+
+    if (!$table) {
+      console.warn(`Could not set table loading to ${id}`);
+      return;
+    }
+
+    $table.bootstrapTable('showLoading');
+  }
+
+  protected loadTable(id: string, rows: any[], loading: boolean = false): void {
     if (!this.isTableInitialized(id)) {
       this.initTable(id);
     }
@@ -60,10 +76,11 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
     const $table = this.initializedTables[id] as JQuery<HTMLElement>;
 
     $table.bootstrapTable('load', rows);
-    $table.bootstrapTable('hideLoading');
+    if (loading) $table.bootstrapTable('showLoading');
+    else $table.bootstrapTable('hideLoading');
   }
 
-  private destroyTable(id: string): void {
+  protected destroyTable(id: string): void {
     const $table = this.initializedTables[id];
 
     if (!$table) {
@@ -76,7 +93,7 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
     this.initializedTables[id] = undefined;
   }
 
-  private destroyTables(): void {
+  protected destroyTables(): void {
     for(const key in this.initializedTables) {
       this.destroyTable(key);
     }

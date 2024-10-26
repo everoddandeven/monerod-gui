@@ -3,7 +3,7 @@ import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { DaemonDataService, DaemonService } from '../../core/services';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { Chart, ChartData } from 'chart.js/auto'
-import { NetStatsHistoryEntry } from '../../../common';
+import { NetStats, NetStatsHistoryEntry } from '../../../common';
 import { Subscription } from 'rxjs';
 import { BasePageComponent } from '../base-page/base-page.component';
 
@@ -32,6 +32,8 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
   public setLimitSuccess: boolean = false;
   public setLimitError: string = '';
 
+  public currentNetStats: NetStats;
+
   constructor(navbarService: NavbarService, private daemonService: DaemonService, private daemonData: DaemonDataService) {
     super(navbarService);
     this.setLinks([
@@ -39,6 +41,9 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
       new NavbarLink('pills-connections-tab', '#pills-connections', 'connections', false, 'Connetions'),
       new NavbarLink('pills-limits-tab', '#pills-limit', 'pills-limit', false, 'Limit')
     ]);
+
+    const lastNetStats = this.daemonData.netStatsHistory.last;
+    this.currentNetStats = lastNetStats ? lastNetStats.netStats : new NetStats(0, 0, 0, 0);
 
     const netStatsRefreshStartSub: Subscription = this.daemonData.netStatsRefreshEnd.subscribe(() => {
       this.refreshNetStatsHistory();
@@ -53,6 +58,10 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
         if (this.netStatsBytesInChart) {
           this.netStatsBytesInChart.destroy();
           this.netStatsBytesInChart = undefined;
+        }
+        if (this.netStatsBytesOutChart) {
+          this.netStatsBytesOutChart.destroy();
+          this.netStatsBytesOutChart = undefined;
         }
       }
       else {
@@ -78,7 +87,7 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
     const data: number[] = [];
     this.daemonData.netStatsHistory.history.forEach((entry: NetStatsHistoryEntry) => {
       labels.push(`${entry.date.toLocaleTimeString()} ${entry.date.toLocaleDateString()}`);
-      data.push(entry.netStats.totalBytesIn);
+      data.push(entry.netStats.totalGigaBytesIn);
     });
 
     return {
@@ -86,9 +95,10 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
       datasets: [{
         data: data,
         backgroundColor: 'transparent',
-        borderColor: '#007bff',
+        borderColor: '#ff5733',
         borderWidth: 4,
-        pointBackgroundColor: '#007bff'
+        pointBackgroundColor: '#ff5733',
+        radius: 0
       }]
     };
   }
@@ -98,7 +108,7 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
     const data: number[] = [];
     this.daemonData.netStatsHistory.history.forEach((entry: NetStatsHistoryEntry) => {
       labels.push(`${entry.date.toLocaleTimeString()} ${entry.date.toLocaleDateString()}`);
-      data.push(entry.netStats.totalBytesOut);
+      data.push(entry.netStats.totalGigaBytesOut);
     });
 
     return {
@@ -106,9 +116,10 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
       datasets: [{
         data: data,
         backgroundColor: 'transparent',
-        borderColor: '#007bff',
+        borderColor: '#ff5733',
         borderWidth: 4,
-        pointBackgroundColor: '#007bff'
+        pointBackgroundColor: '#ff5733',
+        radius: 0
       }]
     };
   }
@@ -166,32 +177,28 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
   }
 
   private refreshNetStatsHistory(): void {
-    if (!this.netStatsBytesInChart) {
-      return;
-    }
-
     const last = this.daemonData.netStatsHistory.last;
 
     if (!this.netStatsBytesInChart || !this.netStatsBytesOutChart) {
       this.initNetStatsHistoryChart();
     }
     else if (last) {
-      const label = `${last.date.toLocaleTimeString()} ${last.date.toLocaleDateString()}`;
+      const label = `${last.date.toLocaleDateString()} ${last.date.toLocaleTimeString()}`;
       
       this.netStatsBytesInChart.data.labels?.push(label);
       this.netStatsBytesInChart.data.datasets.forEach((dataset) => {
-        dataset.data.push(last.netStats.totalBytesIn);
+        dataset.data.push(last.netStats.totalGigaBytesIn);
       });
 
       this.netStatsBytesOutChart.data.labels?.push(label);
       this.netStatsBytesOutChart.data.datasets.forEach((dataset) => {
-        dataset.data.push(last.netStats.totalBytesOut);
+        dataset.data.push(last.netStats.totalGigaBytesOut);
       });
 
       this.netStatsBytesInChart.update();
       this.netStatsBytesOutChart.update();
+      this.currentNetStats = last.netStats;
     }
-
   }
 
   public async setLimit(): Promise<void> {
