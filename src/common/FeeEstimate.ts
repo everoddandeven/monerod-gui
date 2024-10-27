@@ -11,7 +11,7 @@ export class FeeEstimate {
 
     public static parse(estimate: any): FeeEstimate {
         const fee: number = estimate.fee;
-        const fees: number[] = estimate.fees;
+        const fees: number[] = estimate.fees ? estimate.fees : [];
         const quantizationMask: number = estimate.quantization_mask;
 
         return new FeeEstimate(fee, fees, quantizationMask);

@@ -310,14 +310,19 @@ export class TransactionsComponent extends BasePageComponent implements AfterVie
       this.feeEstimateCards = [
         new SimpleBootstrapCard('Fee Per Byte', `${this.getFeeEstimateResult.fee}`),
         new SimpleBootstrapCard('Quantization Mask', `${this.getFeeEstimateResult.quantizationMask}`),
-        new SimpleBootstrapCard('Fee (slow)', `${this.getFeeEstimateResult.fees[0]}`),
-        new SimpleBootstrapCard('Fee (normal)', `${this.getFeeEstimateResult.fees[1]}`),
-        new SimpleBootstrapCard('Fee (fast)', `${this.getFeeEstimateResult.fees[2]}`),
-        new SimpleBootstrapCard('Fee (fastest)', `${this.getFeeEstimateResult.fees[3]}`)
       ];
+
+      if (this.getFeeEstimateResult.fees.length > 0) {
+        this.feeEstimateCards.push(
+          new SimpleBootstrapCard('Fee (slow)', `${this.getFeeEstimateResult.fees[0]}`),
+          new SimpleBootstrapCard('Fee (normal)', `${this.getFeeEstimateResult.fees[1]}`),
+          new SimpleBootstrapCard('Fee (fast)', `${this.getFeeEstimateResult.fees[2]}`),
+          new SimpleBootstrapCard('Fee (fastest)', `${this.getFeeEstimateResult.fees[3]}`)
+        );
+      }
+
       this.getFeeEstimateSuccess = true;
       this.getFeeEstimateError = ``;
-
     }
     catch(error: any) {
       console.error(error);
