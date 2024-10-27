@@ -25,6 +25,10 @@
 
 **Monerod GUI** is a desktop application that provides a graphical user interface (GUI) for installing, updating, and interacting with the Monero daemon (`monerod`). This tool simplifies the process of managing a full Monero node, enabling users to run, configure, and monitor `monerod` without needing to use the command line.
 
+## Demo
+
+[![Monerod GUI Demo](https://github.com/everoddandeven/monerod-gui/monerod-gui-demo.mp4)](https://github.com/everoddandeven/monerod-gui/monerod-gui-demo.mp4)
+
 ## Features
 
 ### 1. Simple Monerod Setup
