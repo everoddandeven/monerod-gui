@@ -27,7 +27,7 @@
 
 ## Demo
 
-[![Monerod GUI Demo](https://github.com/everoddandeven/monerod-gui/monerod-gui-demo.mp4)](https://github.com/everoddandeven/monerod-gui/monerod-gui-demo.mp4)
+https://github.com/user-attachments/assets/c4a50d2f-5bbb-48ac-9425-30ecc20ada7c
 
 ## Features
 
