@@ -144,29 +144,6 @@ export class DaemonService {
     });
   }
 
-  public async isWifiConnected(): Promise<boolean> {
-    try {
-      return new Promise<boolean>((resolve, reject) => {
-        try {
-          window.electronAPI.onIsWifiConnectedResponse((event: any, connected: boolean) => {
-            console.debug(event);
-            resolve(connected);
-          });
-
-          window.electronAPI.isWifiConnected();
-        }
-        catch(error: any) {
-          reject(error);
-        }
-      });
-    }
-    catch(error: any) {
-      console.error(error);
-    }
-
-    return false;
-  }
-
   public async disableSync(): Promise<void> {
     this.disablingSync = true;
 
@@ -410,7 +387,7 @@ export class DaemonService {
 
     this.settings = customSettings ? customSettings : await this.getSettings();
     
-    if (!this.settings.noSync && !this.settings.syncOnWifi && await this.isWifiConnected()) {
+    if (!this.settings.noSync && !this.settings.syncOnWifi && await this.electronService.isWifiConnected()) {
       console.log("Disabling sync ...");
 
       this.settings.noSync = true;
@@ -780,15 +757,22 @@ export class DaemonService {
         throw new Error("Daemon not configured");
       }
 
-      return new Promise<DaemonVersion>((resolve, reject) => {
+      const promise = new Promise<DaemonVersion>((resolve, reject) => {
         window.electronAPI.onMoneroVersion((event: any, version: string) => {
+          window.electronAPI.unregisterOnMoneroVersion();
+          window.electronAPI.unregisterOnMoneroVersionError();
           resolve(DaemonVersion.parse(version));
         })
         window.electronAPI.onMoneroVersionError((event: any, error: string) => {
+          window.electronAPI.unregisterOnMoneroVersion();
+          window.electronAPI.unregisterOnMoneroVersionError();
           reject(error);
         });
-        window.electronAPI.getMoneroVersion(monerodPath);
       });
+
+      window.electronAPI.getMoneroVersion(monerodPath);
+
+      return await promise;
     }
 
     throw new Error("Daemon not running");
@@ -1011,7 +995,7 @@ export class DaemonService {
             body: 'Successfully stopped monero daemon'
           });
         }
-
+        
         return;
       } 
       await this.delay(5000);
@@ -1021,6 +1005,7 @@ export class DaemonService {
       title: 'Error',
       body: 'Could not stop daemon'
     });
+
     throw new Error('Could not stop daemon');
   }
 
@@ -1196,10 +1181,14 @@ export class DaemonService {
 
     const getProcessStatsPromise = new Promise<ProcessStats>((resolve, reject) => {
       window.electronAPI.onMonitorMonerodError((event: any, error: string) => {
+        window.electronAPI.unregisterOnMonitorMonerod();
+        window.electronAPI.unregisterOnMonitorMonerodError();
         reject(error);
       });
 
       window.electronAPI.onMonitorMonerod((event: any, stats: ProcessStats) => {
+        window.electronAPI.unregisterOnMonitorMonerod();
+        window.electronAPI.unregisterOnMonitorMonerodError();
         resolve(stats);
       });
     })

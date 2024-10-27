@@ -38,32 +38,13 @@ export class AppComponent {
     this.load().then().catch((error: any) => console.error(error));
   }
 
-  private async isAutoLaunched(): Promise<boolean> {
-    try {
-      const promise = new Promise<boolean>((resolve) => {
-        window.electronAPI.onIsAutoLaunched((event: any, isAutoLaunched: boolean) => {
-          console.debug(event);
-          window.electronAPI.unregisterOnIsAutoLaunched();
-          resolve(isAutoLaunched);
-        });
-      });
-
-      window.electronAPI.isAutoLaunched();
-
-      return await promise;
-    } catch(error: any) {
-      console.error(error);
-      return false;
-    }
-  }
-
   private async load(): Promise<void> {
     this.loading = true;
 
     try {
       this.daemonRunning = await this.daemonService.isRunning(true);
 
-      const isAutoLaunched = await this.isAutoLaunched();
+      const isAutoLaunched = await this.electronService.isAutoLaunched();
 
       if (isAutoLaunched) {
         await this.daemonService.startDaemon();

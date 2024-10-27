@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-
 // If you import a module but never use any of the imported values other than as TypeScript types,
 // the resulting javascript file will look as if you never imported the module at all.
 import { ipcRenderer, webFrame } from 'electron';
@@ -14,6 +13,9 @@ export class ElectronService {
   webFrame!: typeof webFrame;
   childProcess!: typeof childProcess;
   fs!: typeof fs;
+
+  private _isAppImage?: boolean;
+  private _isAutoLaunched?: boolean;
 
   constructor() {
     // Conditional imports
@@ -54,6 +56,55 @@ export class ElectronService {
     return !!(window && window.process && window.process.type);
   }
 
+  public async isWifiConnected(): Promise<boolean> {
+    try {
+      const promise = new Promise<boolean>((resolve, reject) => {
+        try {
+          window.electronAPI.onIsWifiConnectedResponse((event: any, connected: boolean) => {
+            console.debug(event);
+            window.electronAPI.unregisterOnIsWifiConnectedResponse();
+            resolve(connected);
+          });
+        }
+        catch(error: any) {
+          reject(error);
+        }
+      });
+
+      window.electronAPI.isWifiConnected();
+
+      return await promise;
+    }
+    catch(error: any) {
+      console.error(error);
+    }
+
+    return false;
+  }
+
+  public async isAutoLaunched(): Promise<boolean> {
+    if (this._isAutoLaunched === undefined) {
+      try {
+        const promise = new Promise<boolean>((resolve) => {
+          window.electronAPI.onIsAutoLaunched((event: any, isAutoLaunched: boolean) => {
+            console.debug(event);
+            window.electronAPI.unregisterOnIsAutoLaunched();
+            resolve(isAutoLaunched);
+          });
+        });
+  
+        window.electronAPI.isAutoLaunched();
+  
+        this._isAutoLaunched = await promise;
+      } catch(error: any) {
+        console.error(error);
+        this._isAutoLaunched = false;
+      }
+    }
+
+    return this._isAutoLaunched;
+  }
+
   public async isAutoLaunchEnabled(): Promise<boolean> {
     if (await this.isAppImage()) {
       return false;
@@ -61,6 +112,7 @@ export class ElectronService {
 
     const promise = new Promise<boolean>((resolve) => {
       window.electronAPI.onIsAutoLaunchEnabled((event: any, enabled: boolean) => {
+        window.electronAPI.unregisterOnIsAutoLaunchEnabled();
         resolve(enabled);
       });
     });
@@ -84,11 +136,15 @@ export class ElectronService {
     const promise = new Promise<void>((resolve, reject) => {
       window.electronAPI.onEnableAutoLaunchError((event: any, error: string) => {
         console.debug(event);
+        window.electronAPI.unregisterOnEnableAutoLaunchError();
+        window.electronAPI.unregisterOnEnableAutoLaunchSuccess();
         reject(error);
       });
 
       window.electronAPI.onEnableAutoLaunchSuccess((event: any) => {
         console.debug(event);
+        window.electronAPI.unregisterOnEnableAutoLaunchError();
+        window.electronAPI.unregisterOnEnableAutoLaunchSuccess();
         resolve();
       });
     });
@@ -113,11 +169,15 @@ export class ElectronService {
     const promise = new Promise<void>((resolve, reject) => {
       window.electronAPI.onDisableAutoLaunchError((event: any, error: string) => {
         console.debug(event);
+        window.electronAPI.unregisterOnDisableAutoLaunchError();
+        window.electronAPI.unregisterOnDisableAutoLaunchSuccess();
         reject(error);
       });
 
       window.electronAPI.onDisableAutoLaunchSuccess((event: any) => {
         console.debug(event);
+        window.electronAPI.unregisterOnDisableAutoLaunchError();
+        window.electronAPI.unregisterOnDisableAutoLaunchSuccess();
         resolve();
       });
     });
@@ -128,15 +188,20 @@ export class ElectronService {
   }
 
   public async isAppImage(): Promise<boolean> {
-    const promise = new Promise<boolean>((resolve) => {
-      window.electronAPI.onIsAppImage((event: any, value: boolean) => {
-        resolve(value);
+    if (this._isAppImage === undefined) {
+      const promise = new Promise<boolean>((resolve) => {
+        window.electronAPI.onIsAppImage((event: any, value: boolean) => {
+          window.electronAPI.unregisterOnIsAppImage();
+          resolve(value);
+        });
       });
-    });
+  
+      window.electronAPI.isAppImage();
+  
+      this._isAppImage = await promise;
+    }
 
-    window.electronAPI.isAppImage();
-
-    return await promise;
+    return this._isAppImage;
   }
 
 }

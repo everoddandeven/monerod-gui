@@ -49,6 +49,10 @@ export class BlockHeader {
     public readonly wideCumulativeDifficulty: string;
     public readonly wideDifficulty: string;
 
+    public get rewardXMR(): number {
+      return this.reward / 1e12;
+    }
+
     constructor(blockSize: number, blockWeight: number, cumulativeDifficulty: number, cumulativeDifficultyTop64: number, depth: number, difficulty: number, difficultyTop64: number, hash: string, height: number, longTermWeight: number, majorVersion: number
         , minerTxHash: string, minorVersion: number, nonce: number, numTxes: number, orphanStatus: boolean, powHash: string, prevHash: string, reward: number, timestamp: number, wideCumulativeDifficulty: string, wideDifficulty: string
     ) {

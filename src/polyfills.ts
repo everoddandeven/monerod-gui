@@ -60,6 +60,7 @@ declare global {
   interface Window {
     electronAPI: {
       startMonerod: (options: string[]) => void;
+      
       monitorMonerod: () => void;
       onMonitorMonerod: (callback: (event: any, stats: {
         cpu: number;
@@ -72,10 +73,17 @@ declare global {
       }
       ) => void) => void;
       onMonitorMonerodError: (callback: (event: any, error: string) => void) => void;
+      unregisterOnMonitorMonerod: () => void,
+      unregisterOnMonitorMonerodError: () => void,
+
       onMonerodStarted: (callback: (event: any, started: boolean) => void) => void;
       getMoneroVersion: (path: string) => void;
+
       onMoneroVersion: (callback: (event: any, version: string) => void) => void;
       onMoneroVersionError: (callback: (event: any, error: string) => void) => void;
+      unregisterOnMoneroVersion: () => void;
+      unregisterOnMoneroVersionError: () => void;
+
       downloadMonerod: (downloadUrl:string, destination: string) => void;
       onDownloadProgress: (callback: (event: any, progress: { progress: number, status: string }) => void) => void;
       checkValidMonerodPath: (path: string) => void;
@@ -83,30 +91,40 @@ declare global {
       unsubscribeOnMonerodStarted: () => void;
       onMoneroClose: (callback: (event: any, code: number) => void) => void;
       onMoneroStdout: (callbak: (event: any, out: string) => void) => void;
+      unregisterOnMoneroStdout: () => void;
+
       isWifiConnected: () => void;
       onIsWifiConnectedResponse: (callback: (event: any, connected: boolean) => void) => void;
+      unregisterOnIsWifiConnectedResponse: () => void;
       selectFolder: () => void;
       selectFile: (extensions?: string[]) => void;
       onSelectedFolder: (callback: (event: any, path: string) => void) => void;
       onSelectedFile: (callback: (event: any, path: string) => void) => void;
       getOsType: () => void;
       gotOsType: (callback: (event: any, osType: { platform: string, arch: string }) => void) => void;
+      unregisterGotOsType: () => void;
       showNotification: (options: NotificationConstructorOptions) => void;
       quit: () => void;
 
       isAppImage: () => void;
       onIsAppImage: (callback: (event: any, value: boolean) => void) => void;
+      unregisterOnIsAppImage: () => void;
 
       isAutoLaunchEnabled: () => void;
       onIsAutoLaunchEnabled: (callback: (event: any, enabled: boolean) => void) => void;
+      unregisterOnIsAutoLaunchEnabled: () => void;
 
       enableAutoLaunch: (minimized: boolean) => void;
       onEnableAutoLaunchError: (callback: (event: any, error: string) => void) => void;
       onEnableAutoLaunchSuccess: (callback: (event: any) => void) => void;
+      unregisterOnEnableAutoLaunchError: () => void,
+      unregisterOnEnableAutoLaunchSuccess: () => void,
     
       disableAutoLaunch: () => void;
       onDisableAutoLaunchError: (callback: (event: any, error: string) => void) => void;
       onDisableAutoLaunchSuccess: (callback: (event: any) => void) => void;
+      unregisterOnDisableAutoLaunchError: () => void,
+      unregisterOnDisableAutoLaunchSuccess: () => void,
 
       isAutoLaunched: () => void;
       onIsAutoLaunched: (callback: (event: any, isAutoLaunched: boolean) => void) => void;

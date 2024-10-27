@@ -241,7 +241,7 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit 
       new SimpleBootstrapCard('Seed hash', `${this.seedHash}`),
       new SimpleBootstrapCard('Network difficulty', `${this.difficulty}`),
       new SimpleBootstrapCard('Median block weight', `${this.medianWeight}`),
-      new SimpleBootstrapCard('Generated Coins', `${this.alreadyGeneratedCoins}`)
+      new SimpleBootstrapCard('Generated Coins', `${this.alreadyGeneratedCoins / 1e12} XMR`)
     ];
   }
 

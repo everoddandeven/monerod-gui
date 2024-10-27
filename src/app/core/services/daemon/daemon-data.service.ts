@@ -1,6 +1,7 @@
 import { EventEmitter, Injectable, NgZone } from '@angular/core';
 import { DaemonService } from './daemon.service';
 import { BlockCount, BlockHeader, Chain, Connection, CoreIsBusyError, DaemonInfo, MinerData, MiningStatus, NetStats, NetStatsHistory, PeerInfo, ProcessStats, PublicNode, SyncInfo, TimeUtils, TxBacklogEntry, TxPool } from '../../../../common';
+import { ElectronService } from '../electron/electron.service';
 
 @Injectable({
   providedIn: 'root'
@@ -73,7 +74,7 @@ export class DaemonDataService {
   public readonly netStatsRefreshStart: EventEmitter<void> = new EventEmitter<void>();
   public readonly netStatsRefreshEnd: EventEmitter<void> = new EventEmitter<void>();
 
-  constructor(private daemonService: DaemonService, private ngZone: NgZone) {
+  constructor(private daemonService: DaemonService, private electronService: ElectronService, private ngZone: NgZone) {
 
     this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
       this.ngZone.run(() => {
@@ -352,7 +353,7 @@ export class DaemonDataService {
     const syncAlreadyDisabled = this.daemonService.settings.noSync;
 
     if (!settings.noSync && !syncAlreadyDisabled && !settings.syncOnWifi) {
-      const wifiConnected = await this.daemonService.isWifiConnected();
+      const wifiConnected = await this.electronService.isWifiConnected();
 
       if (wifiConnected) {
         console.log("Disabling sync ...");
@@ -361,7 +362,7 @@ export class DaemonDataService {
       }
     }
     else if (!settings.noSync && syncAlreadyDisabled && !settings.syncOnWifi) {
-      const wifiConnected = await this.daemonService.isWifiConnected();
+      const wifiConnected = await this.electronService.isWifiConnected();
 
       if (!wifiConnected) {
         console.log("Enabling sync ...");

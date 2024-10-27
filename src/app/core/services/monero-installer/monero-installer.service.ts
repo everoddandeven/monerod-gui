@@ -75,7 +75,7 @@ export class MoneroInstallerService {
   }
 
   private async getMoneroDownloadLink(): Promise<string> {
-    return new Promise<string>((resolve, reject) => {
+    const promise = new Promise<string>((resolve, reject) => {
       window.electronAPI.gotOsType((event: any, osType: { platform: string, arch: string }) => {
         const platform = osType.platform;
         const arch = osType.arch;
@@ -104,6 +104,9 @@ export class MoneroInstallerService {
             resource = this.resources.linuxriscv64;
           }
         }
+
+        window.electronAPI.unregisterGotOsType();
+
         if (resource != '')
         {
           resolve(resource);
@@ -111,11 +114,10 @@ export class MoneroInstallerService {
         
         reject('Unsopported platform ' + platform);
       });
-
-      window.electronAPI.getOsType();
     });
-
-
     
+    window.electronAPI.getOsType();
+
+    return await promise;
   }
 }

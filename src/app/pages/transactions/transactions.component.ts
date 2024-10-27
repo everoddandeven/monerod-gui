@@ -247,9 +247,9 @@ export class TransactionsComponent extends BasePageComponent implements AfterVie
       const coinbaseTxSum = await this.daemonService.getCoinbaseTxSum(this.coinbaseTxSumHeight, this.coinbaseTxSumCount);
 
       this.cards = [
-        new SimpleBootstrapCard('Emission Amount', `${coinbaseTxSum.emissionAmount}`),
+        new SimpleBootstrapCard('Emission Amount', `${coinbaseTxSum.emissionAmount / 1e12} XMR`),
         new SimpleBootstrapCard('Emission Amount Top 64', `${coinbaseTxSum.emissionAmountTop64}`),
-        new SimpleBootstrapCard('Fee Amount', `${coinbaseTxSum.feeAmount}`),
+        new SimpleBootstrapCard('Fee Amount', `${coinbaseTxSum.feeAmount / 1e12} XMR`),
         new SimpleBootstrapCard('Fee Amount Top 64', `${coinbaseTxSum.feeAmountTop64}`),
         new SimpleBootstrapCard('Wide Emission Amount', coinbaseTxSum.wideEmissionAmount),
         new SimpleBootstrapCard('Wide Fee Amount', coinbaseTxSum.wideFeeAmount)

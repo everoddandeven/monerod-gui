@@ -1,6 +1,5 @@
 // preload.js
 const { contextBridge, ipcRenderer } = require('electron');
-//const os = require('os');
 
 contextBridge.exposeInMainWorld('electronAPI', {
   startMonerod: (args) => {
@@ -18,18 +17,23 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onMonitorMonerodError: (callback) => {
     ipcRenderer.on('on-monitor-monerod-error', callback);
   },
+  unregisterOnMonitorMonerod: () => {
+    ipcRenderer.removeAllListeners('on-monitor-monerod');
+  },
+  unregisterOnMonitorMonerodError: () => {
+    ipcRenderer.removeAllListeners('on-monitor-monerod-error');
+  },
   unsubscribeOnMonerodStarted: () => {
-    const listeners = ipcRenderer.listeners('monerod-started');
-    
-    listeners.forEach((listener) => {
-      ipcRenderer.removeListener('monerod-started', listener);
-    });
+    ipcRenderer.removeAllListeners('monerod-started');
   },
   onMoneroStdout: (callback) => {
     ipcRenderer.on('monero-stdout', callback);
   },
   onMoneroClose: (callback) => {
     ipcRenderer.on('monero-close', callback);
+  },
+  unregisterOnMoneroStdout: () => {
+    ipcRenderer.removeAllListeners('monero-stdout');
   },
   getMoneroVersion: (monerodPath) => {
     ipcRenderer.invoke('get-monero-version', monerodPath);
@@ -40,6 +44,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onMoneroVersionError: (callback) => {
     ipcRenderer.on('monero-version-error', callback);
   },
+  unregisterOnMoneroVersion: () => {
+    ipcRenderer.removeAllListeners('on-monero-version');
+  },
+  unregisterOnMoneroVersionError: () => {
+    ipcRenderer.removeAllListeners('unregister-on-monero-version-error');
+  },
+
   downloadMonerod: (downloadUrl, destination) => {
     ipcRenderer.invoke('download-monerod', downloadUrl, destination);
   },
@@ -70,12 +81,19 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onIsWifiConnectedResponse: (callback) => {
     ipcRenderer.on('is-wifi-connected-result', callback);
   },
+  unregisterOnIsWifiConnectedResponse: () => {
+    ipcRenderer.removeAllListeners('is-wifi-connected-result');
+  },
   getOsType: () => {
     ipcRenderer.invoke('get-os-type');
   },
   gotOsType: (callback) => {
     ipcRenderer.on('got-os-type', callback);
   },
+  unregisterGotOsType: () => {
+    ipcRenderer.removeAllListeners('got-os-type');
+  },
+
   showNotification: (options) => {
     ipcRenderer.invoke('show-notification', options);
   },
@@ -92,15 +110,19 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('on-is-auto-launch-enabled', callback);
   },
   unregisterOnIsAutoLaunchEnabled: () => {
-    const listeners = ipcRenderer.listeners('on-is-auto-launch-enabled');
-
-    listeners.forEach((listener) => ipcRenderer.removeListener('on-is-auto-launch-enabled', listener));
+    ipcRenderer.removeAllListeners('on-is-auto-launch-enabled');
   },
   onEnableAutoLaunchError: (callback) => {
     ipcRenderer.on('on-enable-auto-launch-error', callback);
   },
   onEnableAutoLaunchSuccess: (callback) => {
     ipcRenderer.on('on-enable-auto-launch-success', callback);
+  },
+  unregisterOnEnableAutoLaunchError: () => {
+    ipcRenderer.removeAllListeners('on-enable-auto-launch-error');
+  },
+  unregisterOnEnableAutoLaunchSuccess: () => {
+    ipcRenderer.removeAllListeners('on-enable-auto-launch-success')
   },
   disableAutoLaunch: () => {
     ipcRenderer.invoke('disable-auto-launch');
@@ -111,11 +133,20 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onDisableAutoLaunchSuccess: (callback) => {
     ipcRenderer.on('on-disable-auto-launch-success', callback);
   },
+  unregisterOnDisableAutoLaunchError: () => {
+    ipcRenderer.removeAllListeners('on-disable-auto-launch-error');
+  },
+  unregisterOnDisableAutoLaunchSuccess: () => {
+    ipcRenderer.removeAllListeners('on-disable-auto-launch-success')
+  },
   isAppImage: () => {
     ipcRenderer.invoke('is-app-image');
   },
   onIsAppImage: (callback) => {
     ipcRenderer.on('on-is-app-image', callback);
+  },
+  unregisterOnIsAppImage: () => {
+    ipcRenderer.removeAllListeners('on-is-app-image');
   },
   isAutoLaunched: () => {
     ipcRenderer.invoke('is-auto-launched');
