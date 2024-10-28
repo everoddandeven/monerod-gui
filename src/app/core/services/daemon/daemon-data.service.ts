@@ -256,9 +256,11 @@ export class DaemonDataService {
 
     this.refresh().then(() => {
       this.refreshInterval = setInterval(() => {
-        this.refresh().then().catch((error: any) => {
-          console.error(error);
-        });
+        setTimeout(() => {
+          this.refresh().then().catch((error: any) => {
+            console.error(error);
+          });
+        }, 0);
       },this.refreshTimeoutMs);
     }).catch((error: any) => {
       console.error(error);

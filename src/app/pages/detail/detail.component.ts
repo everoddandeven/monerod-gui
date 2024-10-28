@@ -37,8 +37,7 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
       minutes: minutes < 10 ? `0${minutes}` : `${minutes}`,
       seconds: seconds < 10 ? `0${seconds}` : `${seconds}`
     }
-}
-
+  }
 
   public get daemonRunning(): boolean {
     return this.daemonData.running;
@@ -212,7 +211,7 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
     if (!this.daemonRunning && !this.daemonService.starting) {
       return [];
     }
-    const loading = this.daemonData.initializing || this.daemonService.starting;
+    const loading = this.daemonData.initializing || this.daemonService.starting || this.daemonData.info === undefined || this.daemonData.syncInfo === undefined;
 
     const cards: SimpleBootstrapCard[] = [];
 

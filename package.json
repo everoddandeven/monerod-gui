@@ -37,7 +37,7 @@
     "build": "npm run electron:serve-tsc && ng build --base-href ./",
     "build:dev": "npm run build -- -c dev",
     "build:prod": "npm run build -- -c production",
-    "electron:package:deb": "electron-packager . monerod-gui --platform linux --arch x64 --out dist/ --ignore=/e2e --ignore=/release --ignore=/src --overwrite && mv dist/src dist/monerod-gui-linux-x64/resources/app/src",
+    "electron:package:deb": "electron-packager . monerod-gui --platform linux --arch x64 --out dist/ --ignore=/node_modules --ignore=/e2e --ignore=/release --ignore=/src --overwrite && mv dist/src dist/monerod-gui-linux-x64/resources/app/src",
     "build:prod:deb": "npm run build:prod && cp -R dist/ temp && mv temp dist/src && npm run electron:package:deb && cd dist/monerod-gui-linux-x64/resources/app/app && npm install && cd ../../../../../",
     "web:build": "npm run build -- -c web-production",
     "electron": "electron",
