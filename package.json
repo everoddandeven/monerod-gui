@@ -37,6 +37,7 @@
     "build": "npm run electron:serve-tsc && ng build --base-href ./",
     "build:dev": "npm run build -- -c dev",
     "build:prod": "npm run build -- -c production",
+    "electron:package:win": "electron-packager . monerod-gui --platform win32 --arch x64 --out dist/ --ignore=/node_modules --ignore=/e2e --ignore=/release --ignore=/src --overwrite && mv dist/src dist/monerod-gui-win32-x64/resources/app/src",
     "electron:package:deb": "electron-packager . monerod-gui --platform linux --arch x64 --out dist/ --ignore=/node_modules --ignore=/e2e --ignore=/release --ignore=/src --overwrite && mv dist/src dist/monerod-gui-linux-x64/resources/app/src",
     "build:prod:deb": "npm run build:prod && cp -R dist/ temp && mv temp dist/src && npm run electron:package:deb && cd dist/monerod-gui-linux-x64/resources/app/app && npm install && cd ../../../../../",
     "web:build": "npm run build -- -c web-production",
@@ -47,6 +48,7 @@
     "electron:local:dev": "npm run build:dev && electron .",
     "electron:build": "npm run build:prod && electron-builder build --publish=never",
     "electron:build:deb": "npm run build:prod:deb && electron-installer-debian --src dist/monerod-gui-linux-x64/ --dest dist/installers/ --arch amd64 --config electron-installer-debian.json",
+    "electron:build:win": "npm run build:prod:win && electron-installer-windows --src dist/monerod-gui-win32-x64/ --dest dist/installers/ --arch amd64 --config electron-installer-win32.json",
     "test": "ng test --watch=false",
     "test:watch": "ng test",
     "e2e": "npm run build:prod && playwright test -c e2e/playwright.config.ts e2e/",
@@ -120,7 +122,9 @@
     "webdriver-manager": "12.1.9"
   },
   "optionalDependencies": {
-    "electron-installer-debian": "3.2.0"
+    "electron-installer-debian": "3.2.0",
+    "electron-installer-dmg": "5.0.1",
+    "electron-installer-windows": "3.0.0"
   },
   "engines": {
     "node": ">= 16.14.0 || >= 18.10.0"
