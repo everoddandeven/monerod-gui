@@ -14,6 +14,10 @@ export class BlockTemplate {
     public readonly untrusted: boolean;
     public readonly wideDifficulty: string;
 
+    public get expectedRewardXMR(): number {
+      return this.expectedReward / 1e12;
+    }
+
     constructor(blockHashingBlob: string, blockTemplateBlob: string, difficulty: number, difficultyTop64: number, expectedReward: number, height: number, nextSeedHash: string, prevHash: string, reservedOffset: number, seedHash: string, seedHeight: number, status: string, untrusted: boolean, wideDifficulty: string) {
         this.blockHashingBlob = blockHashingBlob;
         this.blockTemplateBlob = blockTemplateBlob;

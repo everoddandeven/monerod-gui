@@ -203,6 +203,57 @@
       </div>
     </div>
 
+    <div *ngIf="blockTemplate" class="card">
+      <div class="card-header bg-dark text-white">
+        <h4>Block Template</h4>
+      </div>
+      <div class="card-body">
+
+        <div class="row">
+          <div class="col-md-12">
+            <h6>Block Template Blob</h6>
+            <p class="text-break bg-dark p-2">{{ blockTemplate.blockTemplateBlob }}</p>
+          </div>
+        </div>
+        
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <h6>Block Header</h6>
+            <div class="card">
+              <div class="card-body">
+                <ul class="list-group">
+                  <li class="list-group-item"><strong>Block Hashing Blob:</strong> {{ blockTemplate.blockHashingBlob }} bytes</li>
+                  <li class="list-group-item"><strong>Height:</strong> {{ blockTemplate.height }}</li>
+                  <li class="list-group-item"><strong>Previous Hash:</strong> {{ blockTemplate.prevHash }}</li>
+                  <li class="list-group-item"><strong>Expected Reward:</strong> {{ blockTemplate.expectedRewardXMR }} XMR</li>
+                  <li class="list-group-item"><strong>Difficulty:</strong> {{ blockTemplate.difficulty }}</li>
+                  <li class="list-group-item"><strong>Wide Difficulty:</strong> {{ blockTemplate.wideDifficulty }}</li>
+                  <li class="list-group-item"><strong>Reserved Offset:</strong> {{ blockTemplate.reservedOffset }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <h6>Seed</h6>
+            <div class="card">
+              <div class="card-body">
+                <ul class="list-group">
+                  <li class="list-group-item"><strong>Seed Hash:</strong> {{ blockTemplate.seedHash }}</li>
+                  <li class="list-group-item"><strong>Seed Height:</strong> {{ blockTemplate.seedHeight }}</li>
+                  <li class="list-group-item"><strong>Next Seed Hash:</strong> {{ blockTemplate.nextSeedHash }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <hr *ngIf="blockTemplate" class="my-4">
+
     <div class="row g-5 p-2">
       <div class="cold-md-7 col-lg-12">
         <div class="row gy-3">
