@@ -201,7 +201,7 @@ export class SettingsComponent {
   }
 
   public async chooseMonerodFile(): Promise<void> {
-    const file = await this.selectFile();
+    const file = await this.electronService.selectFile();
 
     if (file == '') {
       return;
@@ -213,7 +213,7 @@ export class SettingsComponent {
   }
 
   private async choosePemFile(): Promise<string> {
-    return await this.selectFile(['pem', 'PEM']);
+    return await this.electronService.selectFile(['pem', 'PEM']);
   }
 
   public async selectSslPrivateKey(): Promise<void> {
@@ -246,33 +246,8 @@ export class SettingsComponent {
     });
   }
 
-  private async selectFile(extensions?: string[]): Promise<string> {
-  
-    const selectPromise: Promise<string> = new Promise<string>((resolve) => {
-      window.electronAPI.onSelectedFile((event: any, path: string) => {
-        resolve(path);
-      });
-    });
-
-    window.electronAPI.selectFile(extensions);
-    
-    return await selectPromise;
-  }
-
-  private async selectFolder(): Promise<string> {
-    const selectPromise = new Promise<string>((resolve) => {
-      window.electronAPI.onSelectedFolder((event: any, folder: string) => {
-        resolve(folder);
-      });
-    });
-
-    window.electronAPI.selectFolder();
-    
-    return await selectPromise;
-  }
-
   public async chooseMoneroDownloadPath(): Promise<void> {
-    const folder = await this.selectFolder();
+    const folder = await this.electronService.selectFolder();
 
     if (folder == '')
     {
@@ -285,7 +260,7 @@ export class SettingsComponent {
   }
 
   public async chooseDataDir(): Promise<void> {
-    const folder = await this.selectFolder();
+    const folder = await this.electronService.selectFolder();
 
     if (folder == '') {
       return;

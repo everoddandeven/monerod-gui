@@ -69,11 +69,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onSelectedFolder: (callback) => {
     ipcRenderer.on('selected-folder', callback);
   },
+  unregisterOnSelectedFolder: () => {
+    ipcRenderer.removeAllListeners('selected-folder');
+  },
   selectFile: (extensions = undefined) => {
     ipcRenderer.invoke('select-file', extensions);
   },
   onSelectedFile: (callback) => {
     ipcRenderer.on('selected-file', callback);
+  },
+  unregisterOnSelectedFile: () => {
+    ipcRenderer.removeAllListeners('selected-file');
   },
   isWifiConnected: () => {
     ipcRenderer.invoke('is-wifi-connected');

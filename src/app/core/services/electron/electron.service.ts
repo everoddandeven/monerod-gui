@@ -204,4 +204,31 @@ export class ElectronService {
     return this._isAppImage;
   }
 
+  public async selectFile(extensions?: string[]): Promise<string> {
+  
+    const selectPromise: Promise<string> = new Promise<string>((resolve) => {
+      window.electronAPI.onSelectedFile((event: any, path: string) => {
+        window.electronAPI.unregisterOnSelectedFile();
+        resolve(path);
+      });
+    });
+
+    window.electronAPI.selectFile(extensions);
+    
+    return await selectPromise;
+  }
+
+  public async selectFolder(): Promise<string> {
+    const selectPromise = new Promise<string>((resolve) => {
+      window.electronAPI.onSelectedFolder((event: any, folder: string) => {
+        window.electronAPI.unregisterOnSelectedFolder();
+        resolve(folder);
+      });
+    });
+
+    window.electronAPI.selectFolder();
+    
+    return await selectPromise;
+  }
+
 }

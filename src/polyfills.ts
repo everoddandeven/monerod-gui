@@ -100,6 +100,8 @@ declare global {
       selectFile: (extensions?: string[]) => void;
       onSelectedFolder: (callback: (event: any, path: string) => void) => void;
       onSelectedFile: (callback: (event: any, path: string) => void) => void;
+      unregisterOnSelectedFile: () => void;
+      unregisterOnSelectedFolder: () => void;
       getOsType: () => void;
       gotOsType: (callback: (event: any, osType: { platform: string, arch: string }) => void) => void;
       unregisterGotOsType: () => void;

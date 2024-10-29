@@ -68,9 +68,7 @@ export class VersionComponent implements AfterViewInit {
 
   private createErrorCards(): SimpleBootstrapCard[] {
     return [
-      new SimpleBootstrapCard('GUI Version', this.daemonService.getGuiVersion()),
-      new SimpleBootstrapCard('Current Monerod version', 'Error', false), 
-      new SimpleBootstrapCard('Latest Monerod version', 'Error', false)
+      new SimpleBootstrapCard('GUI Version', this.daemonService.getGuiVersion())
     ];
   }
 
@@ -103,6 +101,7 @@ export class VersionComponent implements AfterViewInit {
     }
     catch(error: any) {
       console.error(error);
+      this.cards = this.createErrorCards();
     }
 
     this.loading = false;
@@ -123,17 +122,31 @@ export class VersionComponent implements AfterViewInit {
 
   public async upgrade(): Promise<void> {
     if (this.upgrading || this.installing) {
-      console.warn("Already upgrading");
+      this.upgradeSuccess = false;
+      this.upgradeError = `Daemon is already upgrading`;
       return;
     }
 
     try {    
+      const settings = await this.daemonService.getSettings();
+
+      if (settings.downloadUpgradePath == '') {
+        settings.downloadUpgradePath = await this.electronService.selectFolder();
+        if (settings.downloadUpgradePath != '') {
+          await this.daemonService.saveSettings(settings, true);
+        }
+        else {
+          throw new Error("Must select a valid download path before installing");
+        }
+      }
+
       await this.daemonService.upgrade();
 
       this.upgradeError = '';
       this.upgradeSuccess = true;
     }
     catch(error: any) {
+      
       console.error(error);
       this.upgradeSuccess = false;
       this.upgradeError = `${error}`;

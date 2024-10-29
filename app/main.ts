@@ -669,14 +669,26 @@ try {
 
       // Inizializza il progresso
       event.sender.send('download-progress', { progress: 0, status: 'Starting download' });
+      
+      win?.setProgressBar(0, {
+        mode: 'normal'
+      });
 
       // Scarica il file Monero
       const fileName = await downloadFile(downloadUrl, destination, (progress) => {
+        win?.setProgressBar(progress, {
+          mode: 'normal'
+        });
+
         event.sender.send('download-progress', { progress, status: 'Downloading' });
       });
 
       // Scarica e verifica l'hash
       event.sender.send('download-progress', { progress: 100, status: 'Verifying hash' });
+      win?.setProgressBar(100, {
+        mode: 'indeterminate'
+      });
+
       await downloadAndVerifyHash(hashUrl, fileName, destination);
 
       // Estrai il file
@@ -686,9 +698,13 @@ try {
 
       event.sender.send('download-progress', { progress: 100, status: 'Download and extraction completed successfully' });
       event.sender.send('download-progress', { progress: 200, status: `${destination}/${extractedDir}` });
+
+      win?.setProgressBar(100, {
+        mode: 'none'
+      });
+      
     } catch (error) {
       event.sender.send('download-progress', { progress: 0, status: `Error: ${error}` });
-      //throw new Error(`Error: ${error}`);
     }
   });
 
