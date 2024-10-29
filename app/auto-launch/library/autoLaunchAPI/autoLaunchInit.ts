@@ -20,5 +20,9 @@ export interface AutoLaunchOptions {
   mac?: {
     useLaunchAgent?: boolean;
   },
+  linux?: {
+    version?: string;
+    comment?: string;
+  },
   extraArguments?: string[];
 }

@@ -54,12 +54,6 @@ interface Stats {
 const bz2 = require('unbzip2-stream');
 
 app.setName('Monero Daemon');
-const gotInstanceLock = app.requestSingleInstanceLock();
-
-if (!gotInstanceLock) {
-  dialog.showErrorBox('Error', 'Another instance of monerod GUI is running');
-  app.quit();
-}
 
 let autoLauncher = new AutoLaunch({
 	name: 'monerod-gui',
@@ -67,15 +61,16 @@ let autoLauncher = new AutoLaunch({
   options: {
     extraArguments: [
       '--auto-launch'
-    ]
+    ],
+    linux: {
+      comment: 'Monerod GUI startup script',
+      version: '0.1.1'
+    }
   }
 });
 
 const isAutoLaunched: boolean = process.argv.includes('--auto-launch');
 const minimized: boolean = process.argv.includes('--hidden');
-
-dialog.showErrorBox(`Info`, `is auto launched: ${isAutoLaunched}, process.argv: ${process.argv.join(' ')}`)
-
 
 let win: BrowserWindow | null = null;
 let isHidden: boolean = false;
@@ -174,9 +169,6 @@ function createWindow(): BrowserWindow {
       win?.hide();
       isHidden = true;
     }
-    
-    console.log("Clicked monero gui icon tray");
-    console.log(event);
   });
 
   win.on('close', (event) => {
@@ -590,7 +582,18 @@ try {
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
   // Added 400 ms to fix the black background issue while using transparent window. More detais at https://github.com/electron/electron/issues/15947
-  app.on('ready', () => setTimeout(createWindow, 400));
+  app.on('ready', () => {
+    Menu.setApplicationMenu(null);
+    const gotInstanceLock = app.requestSingleInstanceLock();
+
+    if (!gotInstanceLock) {
+      dialog.showErrorBox('', 'Another instance of monerod GUI is running');
+      app.quit();
+      return;
+    }
+
+    setTimeout(createWindow, 400);
+  });
 
   // Quit when all windows are closed.
   app.on('window-all-closed', () => {

@@ -8,9 +8,9 @@ const LINUX_AUTOSTART_DIR = '~/.config/autostart';
 const LINUX_DESKTOP = `
 [Desktop Entry]
 Type=Application
-Version=1.0
+Version={{VERSION}}
 Name={{APP_NAME}}
-Comment={{APP_NAME}} startup script
+Comment={{COMMENT}}
 Exec={{APP_PATH}} {{ARGS}}
 StartupNotify=false
 Terminal=false
@@ -38,10 +38,26 @@ export default class AutoLaunchAPILinux extends AutoLaunchAPI {
       programArguments.push(extraArgs);
     }
     const args = programArguments.join(' ');
+    let comment = `${this.appName} startup script`;
+    let version = `1.0`;
+
+    if (this.options.linux) {
+      if (this.options.linux.comment && this.options.linux.comment != '')
+      {
+        comment = this.options.linux.comment;
+      }
+
+      if (this.options.linux.version && this.options.linux.version != '')
+      {
+        version = this.options.linux.version;
+      }
+    }
 
     const desktop = LINUX_DESKTOP.trim()
       .replace(/{{APP_NAME}}/g, this.appName)
       .replace(/{{APP_PATH}}/g, this.appPath)
+      .replace(/{{COMMENT}}/g, comment)
+      .replace(/{{VERSION}}/g, version)
       .replace(/{{ARGS}}/g, args);
 
     return fileBasedUtilities.createFile({
