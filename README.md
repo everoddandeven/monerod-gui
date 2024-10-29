@@ -17,6 +17,7 @@
 [![Watch on GitHub][github-watch-badge]][github-watch]
 [![Star on GitHub][github-star-badge]][github-star]
 
+[![XMR Donated](https://img.shields.io/badge/donated-0.188011974017_XMR-blue?logo=monero)](https://github.com/everoddandeven/monerod-gui?tab=readme-ov-file#monero)
 [![BTC Donated][bitcoin-donated-badge]][bitcoin-donated]
 
 </div>
