@@ -179,12 +179,18 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
       });
     });
 
+    const daemonStatusSub = this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
+      if (!running) {
+        this.destroyTables();
+      }
+    });
+
     const syncInfoRefreshEndSub: Subscription = this.daemonData.syncInfoRefreshEnd.subscribe(() => {
       this.cards = this.createCards();
       this.loadTables();
     });
 
-    this.subscriptions.push(syncStartSub, syncInfoRefreshEndSub);
+    this.subscriptions.push(syncStartSub, syncInfoRefreshEndSub, daemonStatusSub);
   }
 
   public ngAfterViewInit(): void {

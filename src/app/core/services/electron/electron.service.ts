@@ -16,6 +16,7 @@ export class ElectronService {
 
   private _isAppImage?: boolean;
   private _isAutoLaunched?: boolean;
+  private _online: boolean = false;
 
   constructor() {
     // Conditional imports
@@ -50,6 +51,14 @@ export class ElectronService {
       // ipcRenderer.invoke can serve many common use cases.
       // https://www.electronjs.org/docs/latest/api/ipc-renderer#ipcrendererinvokechannel-args
     }
+
+    this._online = navigator.onLine;
+    window.addEventListener('online', () => this._online = true);
+    window.addEventListener('offline', () => this._online = false);
+  }
+
+  public get online(): boolean {
+    return this._online;
   }
 
   get isElectron(): boolean {

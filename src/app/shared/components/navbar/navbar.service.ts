@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { NavbarLink } from './navbar.model';
 import { DaemonService } from '../../../core/services';
 
@@ -13,31 +13,49 @@ export class NavbarService {
     return this._navbarLinks;
   }
 
-  constructor(private daemonService: DaemonService) {
+  constructor(private daemonService: DaemonService, private zone: NgZone) {
     this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
       this.daemonRunning = running;
-      if (!running) this.disableLinks();
-      if (running) this.enableLinks();
+      this.refreshLinks();
     });
 
     this.daemonService.isRunning().then((running: boolean) => {
       this.daemonRunning = running;
-      if (!running) this.disableLinks();
-      if (running) this.enableLinks();
     }).catch((error: any) => {
       console.error(error);
-      this.disableLinks();
+    }).finally(() => {
+      this.refreshLinks();
+    });
+  }
+
+  private refreshLinks(): void {
+    if (this._navbarLinks.length == 0) {
+      return;
+    }
+
+    const links = this._navbarLinks;
+    this.zone.run(() => {
+      setTimeout(() => {
+        this.setLinks([]);
+      }, 0);
+      setTimeout(() => {
+        this.setLinks(links);
+      }, 0);
     })
-   }
+  }
 
   public addLink(... navbarLinks: NavbarLink[]): void {
     navbarLinks.forEach((navLink: NavbarLink) => this._navbarLinks.push(navLink));
   }
 
+  private get enabled(): boolean {
+    return this.daemonRunning && !this.daemonService.stopping && !this.daemonService.starting && !this.daemonService.restarting;
+  }
+
   public setLinks(navbarLinks: NavbarLink[]): void {
     this._navbarLinks = navbarLinks;
 
-    if (this.daemonRunning) this.enableLinks();
+    if (this.enabled) this.enableLinks();
     else this.disableLinks();
   }
 

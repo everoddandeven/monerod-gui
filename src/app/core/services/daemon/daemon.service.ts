@@ -990,10 +990,18 @@ export class DaemonService {
         this.stopping = false;
 
         if (!this.restarting) {
-          window.electronAPI.showNotification({
-            title: 'Daemon stopped',
-            body: 'Successfully stopped monero daemon'
-          });
+          if (!this.quitting) {
+            window.electronAPI.showNotification({
+              title: 'Daemon stopped',
+              body: 'Successfully stopped monero daemon'
+            });
+          }
+          else {
+            window.electronAPI.showNotification({
+              title: 'Daemon quitted',
+              body: 'Successfully quit monero daemon'
+            });
+          }
         }
         
         return;

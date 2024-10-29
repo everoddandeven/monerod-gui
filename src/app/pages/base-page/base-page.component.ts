@@ -11,7 +11,7 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
   private _links: NavbarLink[] = [];
 
   public get links(): NavbarLink[] {
-    return this._links;
+    return this.navbarService.links;
   }
 
   protected subscriptions: Subscription[] = [];
