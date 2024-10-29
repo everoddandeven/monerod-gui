@@ -130,7 +130,7 @@ function createWindow(): BrowserWindow {
       devTools: !app.isPackaged,
       sandbox: false
     },
-    show: !minimized,
+    show: false,
     autoHideMenuBar: true,
     icon: wdwIcon
   });
@@ -191,6 +191,42 @@ function createWindow(): BrowserWindow {
   });
 
   return win;
+}
+
+const createSplashWindow = async (): Promise<BrowserWindow> => {
+  const window = new BrowserWindow({
+    width: 480,
+    height: 480,
+    transparent: true, 
+    frame: false, 
+    alwaysOnTop: true,
+    show: false,
+    icon: wdwIcon,
+    minimizable: false,
+    maximizable: false,
+    fullscreen: false
+  });
+
+  // Path when running electron executable
+  let pathIndex = './splash.html';
+
+  if (fs.existsSync(path.join(dirname, '../dist/splash.html'))) {
+      // Path when running electron in local folder
+    pathIndex = '../dist/splash.html';
+  }
+
+  const url = new URL(path.join('file:', dirname, pathIndex));
+
+  await window.loadURL(url.href);
+
+  await new Promise<void>((resolve) => {
+    setTimeout(() => {
+      window.show();
+      resolve();
+    }, 1000);
+  });
+
+  return window;
 }
 
 // #region Auto Launch 
@@ -592,7 +628,23 @@ try {
       return;
     }
 
-    setTimeout(createWindow, 400);
+    setTimeout(async () => {
+      const splash = await createSplashWindow();
+      createWindow();
+
+      await new Promise<void>((resolve, reject) => {
+        try {
+          setTimeout(() => {
+            splash.close();
+            if (!minimized) win?.show();
+            resolve();
+          }, 2600);
+        }
+        catch(error: any) {
+          reject(error);
+        }
+      });
+    }, 400);
   });
 
   // Quit when all windows are closed.
