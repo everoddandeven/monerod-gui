@@ -18,7 +18,16 @@ $primary: #ff5733;
  * Sidebar
  */
 
+.sidebar {
+  position: inherit !important;
+  height: 100%;
+}
+
+
 @media (min-width: 768px) {
+  .sidebar {
+    position: fixed !important;
+  }
   .sidebar .offcanvas-lg {
     position: sticky;
     top: 48px;
