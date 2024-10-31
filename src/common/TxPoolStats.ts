@@ -16,6 +16,10 @@ export class TxPoolStats {
   public readonly oldest: number;
   public readonly txsTotal: number;
 
+  public get feeTotalXMR(): number {
+    return this.feeTotal / 1e12;
+  }
+
   constructor(bytesMax: number, bytesMed: number, bytesMin: number, bytesTotal: number,
     feeTotal: number, histo: TxPoolHisto, histo98pc: number, num10m: number,
     numDoubleSpends: number, numFailing: number, numNotRelayed: number, oldest: number,
@@ -41,10 +45,10 @@ export class TxPoolStats {
     const bytesMed: number = txPoolStats.bytes_med;
     const bytesMin: number = txPoolStats.bytes_min;
     const bytesTotal: number = txPoolStats.bytes_total;
-    const feeTotal: number = txPoolStats.total_fee;
-    const histo: TxPoolHisto = TxPoolHisto.parse(txPoolStats.histo);
-    const histo98pc: number = txPoolStats.histo98pc;
-    const num10m: number = txPoolStats.num10m;
+    const feeTotal: number = txPoolStats.fee_total;
+    const histo: TxPoolHisto = txPoolStats.histo ? TxPoolHisto.parse(txPoolStats.histo) : new TxPoolHisto(0, 0);
+    const histo98pc: number = txPoolStats.histo_98pc;
+    const num10m: number = txPoolStats.num_10m;
     const numDoubleSpends: number = txPoolStats.num_double_spends;
     const numFailing: number = txPoolStats.num_failing;
     const numNotRelayed: number = txPoolStats.num_not_relayed;

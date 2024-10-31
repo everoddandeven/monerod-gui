@@ -26,8 +26,8 @@
           <div class="col-md-6">
             <h6>Bytes</h6>
             <ul class="list-group">
-              <li class="list-group-item"><strong>Bytes Max:</strong> {{ txPoolStats.bytesMax }} bytes</li>
-              <li class="list-group-item"><strong>Bytes Med:</strong> {{ txPoolStats.bytesMed }} units</li>
+              <li class="list-group-item"><strong>Bytes Max:</strong> {{ txPoolStats.bytesMax }}</li>
+              <li class="list-group-item"><strong>Bytes Med:</strong> {{ txPoolStats.bytesMed }}</li>
               <li class="list-group-item"><strong>Bytes Min:</strong> {{ txPoolStats.bytesMin }}</li>
               <li class="list-group-item"><strong>Bytes Total:</strong> {{ txPoolStats.bytesTotal }}</li>
             </ul>
@@ -51,6 +51,7 @@
               <li class="list-group-item"><strong>Failing transactions:</strong> {{ txPoolStats.numFailing }}</li>
               <li class="list-group-item"><strong>Non-relayed transactions:</strong> {{ txPoolStats.numNotRelayed }}</li>
               <li class="list-group-item"><strong>Oldest transaction in the pool:</strong> {{ txPoolStats.oldest }}</li>
+              <li class="list-group-item"><strong>Fee total:</strong> {{ txPoolStats.feeTotalXMR }} XMR</li>
               <li class="list-group-item"><strong>Total number of transactions:</strong> {{ txPoolStats.txsTotal }}</li>             
             </ul>
           </div>

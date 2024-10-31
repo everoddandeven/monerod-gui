@@ -1098,7 +1098,7 @@ export class DaemonService {
       throw new Error(response.status);
     }
 
-    return TxPoolStats.parse(response);
+    return TxPoolStats.parse(response.pool_stats);
   }
 
   public async getTransactionPoolHashes(): Promise<string[]> {
