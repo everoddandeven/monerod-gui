@@ -70,6 +70,7 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
   public get syncDisabledTo(): string {
     return this.daemonService.settings.syncPeriodTo;
   }
+
   //#region Sync Info
 
   private get height(): number {
@@ -146,7 +147,40 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
     return `${(height*100/targetHeight).toFixed(2)} %`;
   }
 
+  private get wasBootstrapEverUsed(): boolean {
+    return this.daemonData.info ? this.daemonData.info.wasBoostrapEverUsed : false;
+  }
+
+  private get _bootstrapDaemonAddress(): string {
+    return this.daemonData.info ? this.daemonData.info.bootstrapDaemonAddress : 'Not set';
+  }
+
+  private get heightWithoutBootstrap(): number {
+    return this.daemonData.info ? this.daemonData.info.heightWithoutBootstrap : 0;
+  }
+
   //#endregion 
+
+  //#region Bootstrap Daemon 
+
+  public boostrapCards: SimpleBootstrapCard[] = [];
+  public settingBootstrapDaemon: boolean = false;
+  public bootstrapDaemonAddress: string = '';
+  public bootstrapDaemonUsername: string = '';
+  public bootstrapDaemonPassword: string = '';
+  public bootstrapDaemonProxy: string = '';
+  public setBootstrapDaemonSuccess: boolean = false;
+  public setBootstrapDaemonError: string = '';
+
+  public get canSetBootstrapDaemon(): boolean {
+    if (this.settingBootstrapDaemon) {
+      return false;
+    }
+
+    return this.bootstrapDaemonAddress != '';
+  }
+
+  //#endregion
 
   public cards: SimpleBootstrapCard[];
 
@@ -161,10 +195,12 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
     this.setLinks([
       new NavbarLink('pills-home-tab', '#pills-home', 'pills-home', false, 'Overview', true),
       new NavbarLink('pills-peers-tab', '#pills-peers', 'pills-peers', false, 'Peers', true),
-      new NavbarLink('pills-spans-tab', '#pills-spans', 'pills-spans', false, 'Spans', true)
+      new NavbarLink('pills-spans-tab', '#pills-spans', 'pills-spans', false, 'Spans', true),
+      new NavbarLink('pills-bootstrap-tab', '#pills-bootstrap', 'pills-bootstrap', false, 'Bootstrap')
     ]);
 
     this.cards = this.createCards();
+    this.boostrapCards = this.createBootstrapCards();
   }
 
   private registerEventListeners(): void {
@@ -175,6 +211,7 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
       
       this.ngZone.run(() => {
         this.cards = this.createCards();
+        this.boostrapCards = this.createBootstrapCards();
         this.loadTables(true);
       });
     });
@@ -187,6 +224,7 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
 
     const syncInfoRefreshEndSub: Subscription = this.daemonData.syncInfoRefreshEnd.subscribe(() => {
       this.cards = this.createCards();
+      this.boostrapCards = this.createBootstrapCards();
       this.loadTables();
     });
 
@@ -252,6 +290,23 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
     return cards;
   }
 
+  private createBootstrapCards(): SimpleBootstrapCard[] {
+    if (!this.daemonRunning && !this.daemonService.starting) {
+      return [];
+    }
+    const loading = this.daemonData.initializing || this.daemonService.starting || this.daemonData.info === undefined || this.daemonData.syncInfo === undefined;
+
+    const cards: SimpleBootstrapCard[] = [];
+
+    cards.push(
+      new SimpleBootstrapCard('Was Bootstrap Ever Used', `${this.wasBootstrapEverUsed}`, loading),
+      new SimpleBootstrapCard('Boostrap Daemon Address', this._bootstrapDaemonAddress, loading),
+      new SimpleBootstrapCard('Height Without Bootstrap', `${this.heightWithoutBootstrap}`, loading)
+    );
+
+    return cards;
+  }
+
   private getPeers(): Connection[] {
     if (!this.daemonData.syncInfo) return [];
     const infos: Connection[] = [];
@@ -266,6 +321,22 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
   private getSpans(): Span[] {
     if (!this.daemonData.syncInfo) return [];    
     return this.daemonData.syncInfo.spans;
+  }
+
+  public async setBootstrapDaemon(): Promise<void> {
+    this.settingBootstrapDaemon = true;
+
+    try {
+      await this.daemonService.setBootstrapDaemon(this.bootstrapDaemonAddress, this.bootstrapDaemonUsername, this.bootstrapDaemonPassword, this.bootstrapDaemonProxy);
+      this.setBootstrapDaemonError = '';
+      this.setBootstrapDaemonSuccess = true;
+    }
+    catch(error: any) {
+      this.setBootstrapDaemonSuccess = false;
+      this.setBootstrapDaemonError = `${error}`;
+    }
+
+    this.settingBootstrapDaemon = false;
   }
 
 }

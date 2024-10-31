@@ -189,7 +189,6 @@ export class DaemonService {
     this.disablingSync = false;
   }
 
-
   public async enableSync(): Promise<void> {
     this.enablingSync = true;
 
@@ -216,7 +215,6 @@ export class DaemonService {
 
     this.enablingSync = false;
   }
-
 
   private onClose(): void {
     this.daemonRunning = false;
