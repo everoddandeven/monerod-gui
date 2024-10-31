@@ -200,8 +200,25 @@ export class SettingsComponent {
     this.savingChanges = false;
   }
 
+  private async getMonerodFileSpec(): Promise<{ extensions?: string[]; mimeType: string; }> {
+    const { platform } = await this.electronService.getOsType();
+
+    if (platform == 'win32') {
+      return { mimeType: 'application/vnd.microsoft.portable-executable', extensions: ['exe']};
+    }
+    else if (platform == 'darwin') {
+      return { mimeType: 'application/octet-stream' };
+    }
+    else if (platform == 'linux') {
+      return { mimeType: 'application/x-executable'};
+    }
+
+    throw new Error("Could not get monerod mime type");
+  }
+
   public async chooseMonerodFile(): Promise<void> {
-    const file = await this.electronService.selectFile();
+    const spec = await this.getMonerodFileSpec();
+    const file = await this.electronService.selectFile(spec.extensions);
 
     if (file == '') {
       return;

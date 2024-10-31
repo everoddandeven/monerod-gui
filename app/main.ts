@@ -83,6 +83,8 @@ const wdwIcon = `${dirname}/${iconRelPath}`;
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
 
+// #region Window
+
 function createWindow(): BrowserWindow {
 
   const size = screen.getPrimaryDisplay().workAreaSize;
@@ -228,9 +230,6 @@ const createSplashWindow = async (): Promise<BrowserWindow> => {
 
   return window;
 }
-
-// #region Auto Launch 
-
 
 // #endregion
 

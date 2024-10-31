@@ -240,4 +240,18 @@ export class ElectronService {
     return await selectPromise;
   }
 
+
+  public async getOsType(): Promise<{ platform: string, arch: string }> {
+    const promise = new Promise<{ platform: string, arch: string }>((resolve) => {
+      window.electronAPI.gotOsType((event: any, osType: { platform: string; arch: string; }) => {
+        window.electronAPI.unregisterGotOsType();
+        resolve(osType);
+      });
+    });
+
+    window.electronAPI.getOsType();
+
+    return await promise;
+  }
+
 }

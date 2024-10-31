@@ -1,4 +1,5 @@
 import { Injectable, NgZone } from '@angular/core';
+import { ElectronService } from '../electron/electron.service';
 
 @Injectable({
   providedIn: 'root'
@@ -34,7 +35,7 @@ export class MoneroInstallerService {
     return this._progress;
   }
 
-  constructor(private ngZone: NgZone) {}
+  constructor(private electronService: ElectronService, private ngZone: NgZone) {}
 
   public async downloadMonero(destination: string, alreadyConfigured: boolean): Promise<string> {
     this.alreadyConfigured = alreadyConfigured;
@@ -75,49 +76,41 @@ export class MoneroInstallerService {
   }
 
   private async getMoneroDownloadLink(): Promise<string> {
-    const promise = new Promise<string>((resolve, reject) => {
-      window.electronAPI.gotOsType((event: any, osType: { platform: string, arch: string }) => {
-        const platform = osType.platform;
-        const arch = osType.arch;
-        let resource: string = '';
+    const osType = await this.electronService.getOsType();
 
-        // Mappatura tra sistema operativo e architettura
-        if (platform === 'win32') {
-          resource = arch === 'x64' ? this.resources.win64 : this.resources.win32;
-        } else if (platform === 'darwin') {
-          resource = arch === 'arm64' ? this.resources.macarm8 : this.resources.mac64;
-        } 
-        else if (platform === 'linux') {
-          if (arch === 'x64') {
-            resource = this.resources.linux64;
-          } 
-          else if (arch === 'ia32') {
-            resource = this.resources.linux32;
-          } 
-          else if (arch === 'arm') {
-            resource = this.resources.linuxarm7;
-          } 
-          else if (arch === 'arm64') {
-            resource = this.resources.linuxarm8;
-          } 
-          else if (arch === 'riscv64') {
-            resource = this.resources.linuxriscv64;
-          }
-        }
+    const platform = osType.platform;
+    const arch = osType.arch;
+    let resource: string = '';
 
-        window.electronAPI.unregisterGotOsType();
+    // Mappatura tra sistema operativo e architettura
+    if (platform === 'win32') {
+      resource = arch === 'x64' ? this.resources.win64 : this.resources.win32;
+    } else if (platform === 'darwin') {
+      resource = arch === 'arm64' ? this.resources.macarm8 : this.resources.mac64;
+    } 
+    else if (platform === 'linux') {
+      if (arch === 'x64') {
+        resource = this.resources.linux64;
+      } 
+      else if (arch === 'ia32') {
+        resource = this.resources.linux32;
+      } 
+      else if (arch === 'arm') {
+        resource = this.resources.linuxarm7;
+      } 
+      else if (arch === 'arm64') {
+        resource = this.resources.linuxarm8;
+      } 
+      else if (arch === 'riscv64') {
+        resource = this.resources.linuxriscv64;
+      }
+    }
 
-        if (resource != '')
-        {
-          resolve(resource);
-        }
-        
-        reject('Unsopported platform ' + platform);
-      });
-    });
-    
-    window.electronAPI.getOsType();
+    if (resource == '')
+    {
+      throw new Error('Unsopported platform ' + platform);
+    }
 
-    return await promise;
+    return resource;
   }
 }
