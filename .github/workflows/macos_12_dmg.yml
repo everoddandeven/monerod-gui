@@ -55,4 +55,4 @@ jobs:
       run: npm run lint
 
     - name: Build the app
-      run: npm run electron:build:dmg
+      run: npm run electron:build:mac
