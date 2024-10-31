@@ -49,7 +49,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
 
     - name: Install Dependencies
-      run: brew upgrade python-setuptools && npm i && npm i appdmg && npm i -D cli-truncate iconv-corefoundation
+      run: brew upgrade python-setuptools && python3 -m pip install setuptools && npm install -g appdmg && npm i && npm i -D cli-truncate iconv-corefoundation
 
     - name: Check lint
       run: npm run lint
