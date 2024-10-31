@@ -492,7 +492,7 @@ export class DaemonDataService {
         this._transactionPool = undefined;
       }
 
-      if (this._daemonInfo.synchronized) {
+      if (this._daemonInfo.synchronized && this._daemonInfo.txPoolSize > 0) {
         this._gettingTxPoolStats = true;
         this._txPoolStats = await this.daemonService.getTransactionPoolStats();
         this._gettingTxPoolStats = false;

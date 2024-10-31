@@ -152,7 +152,7 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
   }
 
   private get _bootstrapDaemonAddress(): string {
-    return this.daemonData.info ? this.daemonData.info.bootstrapDaemonAddress : 'Not set';
+    return this.daemonData.info && this.daemonData.info.bootstrapDaemonAddress != '' ? this.daemonData.info.bootstrapDaemonAddress : 'Not set';
   }
 
   private get heightWithoutBootstrap(): number {

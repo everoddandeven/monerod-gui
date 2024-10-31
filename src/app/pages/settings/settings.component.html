@@ -37,7 +37,7 @@
           <label for="general-monerod-path-control" class="form-label">Monerod path</label>
           <div class="input-group mb-3">
             <input id="general-monerod-path-control" type="text" class="form-control form-control-sm" placeholder="" aria-label="Monerod path" aria-describedby="basic-addon2" [value]="currentSettings.monerodPath" readonly>
-            <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseMonerodFile()">Choose file</button></span>            
+            <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseMonerodFile()"><i class="bi bi-filetype-exe"></i> Choose executable</button></span>            
           </div>
           <small class="text-body-secondary">Path to monerod executable</small>
         </div>
@@ -50,7 +50,7 @@
           <div class="col-md-6">
             <label for="import-config-file" class="form-label">Import config file</label>
             <div class="input-group mb-3">
-              <button type="button" class="btn btn-secondary btn-sm" (click)="importMonerodConfigFile()">Import</button>
+              <button type="button" class="btn btn-secondary btn-sm" (click)="importMonerodConfigFile()"><i class="bi bi-box-arrow-in-down"></i> Import</button>
             </div>
             <small class="text-body-secondary">Import custom monerod config file</small>
           </div>
@@ -58,7 +58,7 @@
           <div class="col-md-6">
             <label for="export-config-file" class="form-label">Export config file</label>
             <div class="input-group mb-3">
-              <button type="button" class="btn btn-secondary btn-sm" (click)="exportMonerodConfigFile()">Export</button>
+              <button type="button" class="btn btn-secondary btn-sm" (click)="exportMonerodConfigFile()"><i class="bi bi-box-arrow-up-right"></i> Export</button>
             </div>
             <small class="text-body-secondary">Export current saved settings to config file</small>
           </div>
@@ -112,7 +112,7 @@
             <label for="data-dir" class="form-label">Data dir</label>
             <div class="input-group mb-3">
               <input id="data-dir" type="text" class="form-control form-control-sm" placeholder="" aria-label="Data dir" aria-describedby="basic-addon2" [value]="currentSettings.dataDir" readonly>
-              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseDataDir()">Choose folder</button></span>            
+              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseDataDir()"><i class="bi bi-folder"></i> Choose folder</button></span>            
             </div>
             <small class="text-body-secondary">Specify data directory</small>
           </div>
@@ -216,7 +216,7 @@
             <label for="upgrade-download-path" class="form-label">Download path</label>
             <div class="input-group mb-3">
               <input id="upgrade-download-path=" type="text" class="form-control form-control-sm" placeholder="" aria-label="Monerod path" aria-describedby="basic-addon2" [value]="currentSettings.downloadUpgradePath" readonly>
-              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseMoneroDownloadPath()">Choose folder</button></span>            
+              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseMoneroDownloadPath()"><i class="bi bi-folder"></i> Choose folder</button></span>            
             </div>
             <small class="text-body-secondary">Folder where to save updates</small>
           </div>
@@ -430,7 +430,7 @@
             <label for="rpc-ssl-private-key" class="form-label">Private key</label>
             <div class="input-group mb-3">
               <input id="rpc-ssl-private-key" type="text" class="form-control form-control-sm" placeholder="" aria-label="Monerod path" aria-describedby="basic-addon2" [value]="currentSettings.rpcSslPrivateKey" readonly>
-              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="selectSslPrivateKey()">Choose file</button></span>            
+              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="selectSslPrivateKey()"><i class="bi bi-filetype-key"></i> Choose file</button></span>            
             </div>
             <small class="text-body-secondary">Path to a PEM format private key</small>
           </div>
@@ -440,7 +440,7 @@
             <label for="rpc-ssl-certificate" class="form-label">Certificate</label>
             <div class="input-group mb-3">
               <input id="rpc-ssl-certificate" type="text" class="form-control form-control-sm" placeholder="" aria-label="RPC SSL Certificate" aria-describedby="basic-addon2" [value]="currentSettings.rpcSslCertificate" readonly>
-              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="selectSslCertificate()">Choose file</button></span>            
+              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="selectSslCertificate()"><i class="bi bi-postcard"></i> Choose file</button></span>            
             </div>
             <small class="text-body-secondary">Path to a PEM format certificate</small>
           </div>
@@ -450,7 +450,7 @@
             <label for="rpc-ssl-ca-certificates" class="form-label">CA Certificates</label>
             <div class="input-group mb-3">
               <input id="rpc-ssl-ca-certificates" type="text" class="form-control form-control-sm" placeholder="" aria-label="RPC SSL CA Certificates" aria-describedby="basic-addon2" [value]="currentSettings.rpcSslCACertificates" readonly>
-              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="selectSslCACertificates()">Choose file</button></span>            
+              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="selectSslCACertificates()"><i class="bi bi-postcard"></i> Choose file</button></span>            
             </div>
             <small class="text-body-secondary">Path to file containing concatenated PEM format certificate(s) to replace system CA(s)</small>
           </div>

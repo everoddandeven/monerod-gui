@@ -80,22 +80,28 @@ let monerodProcess: ChildProcessWithoutNullStreams | null = null;
 const iconRelPath: string = 'assets/icons/monero-symbol-on-white-480.png';
 const wdwIcon = `${dirname}/${iconRelPath}`;
 
+let tray: Tray;
+let trayMenu: Menu;
+
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
 
+
+
 // #region Window
 
-function createWindow(): BrowserWindow {
+const onStartStopDaemon: () => void = () => {
+  console.log("onStartStopDaemon()");
 
-  const size = screen.getPrimaryDisplay().workAreaSize;
-  const trayMenuTemplate: MenuItemConstructorOptions[] = [
+};
+
+function createTrayMenuTemplate(): MenuItemConstructorOptions[] {
+  return [
     {
-      id: "stopDaemon",
-      label: "Stop",
-      toolTip: "Stop monero daemon",
-      click: () => {
-        console.log("Clicked stop daemon tray icon menu");
-      }
+      id: "startStopDaemon",
+      label: "Start",
+      toolTip: "Start monero daemon",
+      click: onStartStopDaemon
     },
     {
       id: "quitDaemon",
@@ -107,16 +113,36 @@ function createWindow(): BrowserWindow {
         console.log("Quit monero daemon");
       }
     }
-  ];
+  ]
+}
 
+function createTray(): Tray {
+  const trayMenuTemplate = createTrayMenuTemplate();
   const tray = new Tray(wdwIcon);
-  const trayMenu = Menu.buildFromTemplate(trayMenuTemplate);
+  trayMenu = Menu.buildFromTemplate(trayMenuTemplate);
 
   tray.setToolTip('Monero Daemon');
   tray.setContextMenu(trayMenu);
 
-  console.log(`createWindow(): icon = ${wdwIcon}`);
-  console.log(`app.isPackaged: ${app.isPackaged}`);
+  tray.on('click', (event) => {
+    if (isHidden) {
+      win?.show();
+      isHidden = false;
+    }
+    else
+    {
+      win?.hide();
+      isHidden = true;
+    }
+  });
+
+  return tray;
+}
+
+function createWindow(): BrowserWindow {
+  const size = screen.getPrimaryDisplay().workAreaSize;
+  
+  tray = createTray();
 
   // Create the browser window.
   win = new BrowserWindow({
@@ -160,18 +186,6 @@ function createWindow(): BrowserWindow {
 
     win.loadURL(url.href);
   }
-
-  tray.on('click', (event) => {
-    if (isHidden) {
-      win?.show();
-      isHidden = false;
-    }
-    else
-    {
-      win?.hide();
-      isHidden = true;
-    }
-  });
 
   win.on('close', (event) => {
     if (!isQuitting) {
