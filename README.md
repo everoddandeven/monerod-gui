@@ -72,6 +72,25 @@ https://github.com/user-attachments/assets/c4a50d2f-5bbb-48ac-9425-30ecc20ada7c
 2. Once installed, you can start the Monero daemon with one click and configure various settings like testnet mode, fast sync, and more.
 3. Monitor real-time logs to keep track of blockchain synchronization and transaction details.
 
+## To Do
+
+- [X] Detect wired/Wi-Fi connection
+- [ ] Detect preinstalled `monerod`
+  - [ ] Linux
+  - [ ] Windows
+  - [ ] MacOs
+- [X] Automatic startup at login
+  - [X] Linux
+  - [X] Windows
+  - [X] MacOS
+- [ ] Import/export `monerod.conf` node configuration
+- [X] Synchronization in a specific time slot
+- [ ] Installers
+  - [X] Linux
+  - [ ] Windows
+  - [ ] MacOS  
+- [ ] Remote node management
+  - [ ] No CORS connection
 
 ## Getting Started
 
