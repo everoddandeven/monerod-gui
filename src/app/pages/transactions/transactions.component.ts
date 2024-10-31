@@ -5,7 +5,7 @@ import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { TxBacklogEntry } from '../../../common/TxBacklogEntry';
 import { SimpleBootstrapCard } from '../../shared/utils';
 import { DaemonDataService } from '../../core/services';
-import { FeeEstimate, SpentKeyImage, UnconfirmedTx } from '../../../common';
+import { FeeEstimate, SpentKeyImage, TxPoolHisto, TxPoolStats, UnconfirmedTx } from '../../../common';
 import { Subscription } from 'rxjs';
 import { BasePageComponent } from '../base-page/base-page.component';
 
@@ -76,6 +76,14 @@ export class TransactionsComponent extends BasePageComponent implements AfterVie
     return this.daemonData.transactionPool.spentKeyImages;
   }
 
+  public get txPoolStats(): TxPoolStats {
+    if (this.daemonData.txPoolStats) {
+      return this.daemonData.txPoolStats;
+    }
+
+    return new TxPoolStats(0, 0, 0, 0, 0, new TxPoolHisto(0, 0), 0, 0, 0, 0, 0, 0, 0)
+  }
+
   constructor(private daemonData: DaemonDataService, private daemonService: DaemonService, navbarService: NavbarService, private ngZone: NgZone) {
     super(navbarService);
 
@@ -99,10 +107,19 @@ export class TransactionsComponent extends BasePageComponent implements AfterVie
     this.ngZone.run(() => {      
       this.loadTables();
 
-      const onSyncEndSub: Subscription = this.daemonData.syncEnd.subscribe(() => this.loadTables());
+      const onSyncEndSub: Subscription = this.daemonData.syncEnd.subscribe(() => this.refresh());
 
       this.subscriptions.push(onSyncEndSub);
     });
+  }
+
+  private refresh(): void {
+    this.loadTables();
+    this.loadPoolStats();
+  }
+
+  private loadPoolStats(): void {
+
   }
 
   private loadTransactionsTable(): void {

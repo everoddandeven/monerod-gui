@@ -60,6 +60,7 @@ export { SetLogCategoriesRequest } from "./SetLogCategoriesRequest";
 export { GetTransactionPoolRequest } from "./GetTransactionPoolRequest";
 export { GetPeerListRequest } from "./GetPeerListRequest";
 export { GetTransactionsRequest } from "./GetTransactionsRequest";
+export { GetTransactionPoolStatsRequest } from "./GetTransactionPoolStatsRequest";
 
 /**
  * Restricted requests

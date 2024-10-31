@@ -1,6 +1,6 @@
 import { EventEmitter, Injectable, NgZone } from '@angular/core';
 import { DaemonService } from './daemon.service';
-import { BlockCount, BlockHeader, Chain, Connection, CoreIsBusyError, DaemonInfo, MinerData, MiningStatus, NetStats, NetStatsHistory, PeerInfo, ProcessStats, PublicNode, SyncInfo, TimeUtils, TxBacklogEntry, TxPool } from '../../../../common';
+import { BlockCount, BlockHeader, Chain, Connection, CoreIsBusyError, DaemonInfo, MinerData, MiningStatus, NetStats, NetStatsHistory, PeerInfo, ProcessStats, PublicNode, SyncInfo, TimeUtils, TxBacklogEntry, TxPool, TxPoolStats } from '../../../../common';
 import { ElectronService } from '../electron/electron.service';
 
 @Injectable({
@@ -63,6 +63,9 @@ export class DaemonDataService {
 
   private _txPoolBacklog: TxBacklogEntry[] = [];
   private _gettingTxPoolBackLog: boolean = false;
+
+  private _txPoolStats?: TxPoolStats;
+  private _gettingTxPoolStats: boolean = false;
 
   public readonly syncStart: EventEmitter<{ first: boolean }> = new EventEmitter<{ first: boolean }>();
   public readonly syncEnd: EventEmitter<void> = new EventEmitter<void>();
@@ -240,6 +243,14 @@ export class DaemonDataService {
 
   public get gettingTxPoolBacklog(): boolean {
     return this._gettingTxPoolBackLog;
+  }
+
+  public get txPoolStats(): TxPoolStats | undefined {
+    return this._txPoolStats;
+  }
+
+  public get gettingTxPoolStats(): boolean {
+    return this._gettingTxPoolStats;
   }
 
   public setRefreshTimeout(ms: number = 5000): void {
@@ -481,6 +492,15 @@ export class DaemonDataService {
         this._transactionPool = undefined;
       }
 
+      if (this._daemonInfo.synchronized) {
+        this._gettingTxPoolStats = true;
+        this._txPoolStats = await this.daemonService.getTransactionPoolStats();
+        this._gettingTxPoolStats = false;
+      }
+      else {
+        this._txPoolStats = undefined;
+      }
+
       this._gettingConnections = true;
       this._connections = await this.daemonService.getConnections();
       this._gettingConnections = false;
@@ -500,6 +520,7 @@ export class DaemonDataService {
       this._gettingTransactionPool = false;
       this._gettingConnections = false;
       this._gettingPeerList = false;
+      this._gettingTxPoolStats = false;
 
       this.syncError.emit(<Error>error);
 

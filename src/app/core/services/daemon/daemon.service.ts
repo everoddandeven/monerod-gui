@@ -43,7 +43,8 @@ import {
   SetLogHashRateRequest,
   SetLogCategoriesRequest,
   GetTransactionPoolRequest,
-  GetPeerListRequest
+  GetPeerListRequest,
+  GetTransactionPoolStatsRequest
 } from '../../../../common/request';
 import { BlockTemplate } from '../../../../common/BlockTemplate';
 import { GeneratedBlocks } from '../../../../common/GeneratedBlocks';
@@ -78,7 +79,7 @@ import { TxInfo } from '../../../../common/TxInfo';
 import { DaemonSettings } from '../../../../common/DaemonSettings';
 import { MethodNotFoundError } from '../../../../common/error/MethodNotFoundError';
 import { openDB, IDBPDatabase } from "idb"
-import { PeerInfo, ProcessStats, TimeUtils, TxPool } from '../../../../common';
+import { PeerInfo, ProcessStats, TimeUtils, TxPool, TxPoolStats } from '../../../../common';
 import { MoneroInstallerService } from '../monero-installer/monero-installer.service';
 
 @Injectable({
@@ -1088,6 +1089,16 @@ export class DaemonService {
     }
 
     return TxPool.parse(response);
+  }
+
+  public async getTransactionPoolStats(): Promise<TxPoolStats> {
+    const response = await this.callRpc(new GetTransactionPoolStatsRequest());
+
+    if (typeof response.status == 'string' && response.status != 'OK') {
+      throw new Error(response.status);
+    }
+
+    return TxPoolStats.parse(response);
   }
 
   public async getTransactionPoolHashes(): Promise<string[]> {
