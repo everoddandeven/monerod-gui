@@ -61,8 +61,8 @@ export class VersionComponent implements AfterViewInit {
   private createCards(): SimpleBootstrapCard[] {
     return [
       new SimpleBootstrapCard('GUI Version', this.daemonService.getGuiVersion()),
-      new SimpleBootstrapCard('Current Monerod version', this.currentVersion ? this.currentVersion.fullname : '', this.currentVersion == null),
-      new SimpleBootstrapCard('Latest Monerod version', this.latestVersion ? this.latestVersion.fullname : '', this.latestVersion == null)
+      new SimpleBootstrapCard('Current Monerod version', this.currentVersion ? this.currentVersion.fullname : 'Not found', this.loading),
+      new SimpleBootstrapCard('Latest Monerod version', this.latestVersion ? this.latestVersion.fullname : 'Error', this.loading)
     ];
   }
 
@@ -87,17 +87,33 @@ export class VersionComponent implements AfterViewInit {
 
   public loading: boolean = true;
 
+  private async refreshCurrentVersion(): Promise<void> {
+    try {
+      this.currentVersion = await this.daemonService.getVersion(true);
+    }
+    catch(error: any) {
+      console.error(error);
+      this.currentVersion = undefined;
+    }
+  }
+
+  private async refreshLatestVersion(): Promise<void> {
+    try {
+      this.latestVersion = await this.daemonService.getLatestVersion();
+    }
+    catch(error: any) {
+      console.error(error);
+      this.latestVersion = undefined;
+    }
+  }
+
   public async load(): Promise<void> {
     this.loading = true;
-
+  
     try {
       this.settings = await this.daemonService.getSettings();
-      const isElectron = this.electronService.isElectron || (window as any).electronAPI != null;
-      const version = await this.daemonService.getVersion(isElectron);
-      const latestVersion = await this.daemonService.getLatestVersion();
-  
-      this.currentVersion = version;
-      this.latestVersion = latestVersion;
+      await this.refreshLatestVersion();
+      await this.refreshCurrentVersion();
     }
     catch(error: any) {
       console.error(error);

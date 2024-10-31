@@ -227,6 +227,42 @@ export class ElectronService {
     return await selectPromise;
   }
 
+  public async readFile(filePath: string): Promise<string> {
+    const promise = new Promise<string>((resolve, reject) => {
+      window.electronAPI.onReadFileError((event: any, error: string) => {
+        window.electronAPI.unregisterOnReadFile();
+        reject(error);
+      });
+
+      window.electronAPI.onReadFile((event: any, data: string) => {
+        window.electronAPI.unregisterOnReadFile();
+        resolve(data);
+      });
+    });
+
+    window.electronAPI.readFile(filePath);
+
+    return await promise;
+  }
+
+  public async saveFile(defaultPath: string, content: string): Promise<string> {
+    const promise = new Promise<string>((resolve, reject) => {
+      window.electronAPI.onSaveFileError((event: any, error: string) => {
+        window.electronAPI.unregisterOnSaveFile();
+        reject(error);
+      });
+
+      window.electronAPI.onSaveFile((event: any, filePath: string) => {
+        window.electronAPI.unregisterOnSaveFile();
+        resolve(filePath);
+      })
+    });
+
+    window.electronAPI.saveFile(defaultPath, content);
+
+    return await promise;
+  }
+
   public async selectFolder(): Promise<string> {
     const selectPromise = new Promise<string>((resolve) => {
       window.electronAPI.onSelectedFolder((event: any, folder: string) => {
@@ -240,6 +276,18 @@ export class ElectronService {
     return await selectPromise;
   }
 
+  public async getPath(path: 'home' | 'appData' | 'userData' | 'sessionData' | 'temp' | 'exe' | 'module' | 'desktop' | 'documents' | 'downloads' | 'music' | 'pictures' | 'videos' | 'recent' | 'logs' | 'crashDumps'): Promise<string> {
+    const promise = new Promise<string>((resolve) => {
+      window.electronAPI.onGetPath((event: any, result: string) => {
+        window.electronAPI.unregisterOnGetPath();
+        resolve(result);
+      })
+    });
+
+    window.electronAPI.getPath(path);
+
+    return await promise;
+  }
 
   public async getOsType(): Promise<{ platform: string, arch: string }> {
     const promise = new Promise<{ platform: string, arch: string }>((resolve) => {

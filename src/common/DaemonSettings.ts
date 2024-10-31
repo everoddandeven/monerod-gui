@@ -186,6 +186,152 @@ export class DaemonSettings {
     return settings;
   }
 
+  public toConfig(): string {
+    const commandOptions = this.toCommandOptions();
+    const lines: string[] = [];
+
+    commandOptions.forEach((commandOption: string, i: number, array: string[]) => {
+      if (commandOption.startsWith('--')) {
+        const next: string | undefined = array[i + 1];
+
+        if (!next || next.startsWith('--')) {
+          // option without parameter
+          lines.push(commandOption.includes('=') ? `${commandOption.replace('--', '')}` : `${commandOption.replace('--', '')}=1`);
+        }
+        else {
+          lines.push(`${commandOption.replace('--', '')}=${next}`);
+        }
+      }
+    });
+
+    return lines.join('\n');
+  }
+
+  public static parseConfig(configTxt: string): DaemonSettings {
+    const settings = new DaemonSettings();
+    const lines = configTxt.split('\n');
+
+    lines.forEach(line => {
+        line = line.trim();
+
+        // Ignore comments and empty lines
+        if (line.startsWith('#') || line === '') return;
+
+        const [key, value] = line.split('=').map(part => part.trim());
+        
+        const boolValue = value === '1'; // Interpret 1 as true, 0 as false
+
+        switch (key) {
+            case 'data-dir': settings.dataDir = value; break;
+            case 'log-file': settings.logFile = value; break;
+            case 'log-level': settings.logLevel = parseInt(value, 10); break;
+            case 'max-log-files': settings.maxLogFileSize = parseInt(value, 10); break;
+            case 'max-log-file-size': settings.maxLogFileSize = parseInt(value, 10); break;
+            case 'no-igd': settings.noIgd = boolValue; break;
+            case 'enable-dns-blocklist': settings.enableDnsBlocklist = boolValue; break;
+            case 'testnet': settings.testnet = boolValue; break;
+            case 'mainnet': settings.mainnet = boolValue; break;
+            case 'stagenet': settings.stagenet = boolValue; break;
+            case 'offline': settings.offline = boolValue; break;
+            case 'limit-rate': settings.limitRate = parseInt(value, 10); break;
+            case 'limit-rate-up': settings.limitRateUp = parseInt(value, 10); break;
+            case 'limit-rate-down': settings.limitRateDown = parseInt(value, 10); break;
+            case 'proxy': settings.proxy = value; break;
+            case 'proxy-allow-dns-leaks': settings.proxyAllowDnsLeaks = boolValue; break;
+            case 'p2p-bind-ip': settings.p2pBindIp = value; break;
+            case 'p2p-bind-ipv6-address': settings.p2pBindIpv6Address = value; break;
+            case 'p2p-bind-port': settings.p2pBindPort = parseInt(value, 10); break;
+            case 'p2p-use-ipv6': settings.p2pUseIpv6 = boolValue; break;
+            case 'add-peer': settings.addPeer = value; break;
+            case 'add-priority-node': settings.addPriorityNode = value; break;
+            case 'bootstrap-daemon-address': settings.bootstrapDaemonAddress = value; break;
+            case 'bootstrap-daemon-login': settings.bootstrapDaemonLogin = value; break;
+            case 'bootstrap-daemon-proxy': settings.bootstrapDaemonProxy = value; break;
+            case 'rpc-bind-ip': settings.rpcBindIp = value; break;
+            case 'rpc-bind-port': settings.rpcBindPort = parseInt(value, 10); break;
+            case 'confirm-external-bind': settings.confirmExternalBind = boolValue; break;
+            case 'disable-dns-checkpoints': settings.disableDnsCheckpoints = boolValue; break;
+            case 'sync-pruned-blocks': settings.syncPrunedBlocks = boolValue; break;
+            case 'max-concurrency': settings.maxConcurrency = parseInt(value, 10); break;
+            case 'check-updates': settings.checkUpdates = value as 'disabled' | 'notify' | 'download' | 'update'; break;
+            case 'db-sync-mode': settings.dbSyncMode = value; break;
+            case 'db-salvage': settings.dbSalvage = boolValue; break;
+            case 'regtest': settings.regtest = boolValue; break;
+            case 'pad-transactions': settings.padTransactions = boolValue; break;
+            case 'anonymous-inbound': settings.anonymousInbound = value; break;
+            case 'fluffy-blocks': settings.fluffyBlocks = boolValue; break;
+            case 'no-fluffy-blocks': settings.noFluffyBlocks = boolValue; break;
+            case 'tx-proxy': settings.txProxy = value; break;
+            case 'max-txpool-weight': settings.maxTxPoolWeight = parseInt(value, 10); break;
+            case 'public-node': settings.publicNode = boolValue; break;
+            case 'allow-local-ip': settings.allowLocalIp = boolValue; break;
+            case 'tos-flag': settings.tosFlag = parseInt(value, 10); break;
+            case 'max-connections-per-ip': settings.maxConnectionsPerIp = parseInt(value, 10); break;
+            case 'disable-rpc-ban': settings.disableRpcBan = boolValue; break;
+            case 'rpc-access-control-origins': settings.rpcAccessControlOrigins = value; break;
+            case 'rpc-ssl': settings.rpcSsl = value as 'autodetect' | 'enabled' | 'disabled'; break;
+            case 'rpc-ssl-private-key': settings.rpcSslPrivateKey = value; break;
+            case 'rpc-ssl-certificate': settings.rpcSslCertificate = value; break;
+            case 'rpc-ssl-ca-certificates': settings.rpcSslCACertificates = value; break;
+            case 'rpc-ssl-allow-chained': settings.rpcSslAllowChained = boolValue; break;
+            case 'rpc-ssl-allow-any-cert': settings.rpcSslAllowAnyCert = boolValue; break;
+            case 'rpc-allowed-fingerprints': settings.rpcAllowedFingerprints = value; break;
+            case 'rpc-payment-allow-free-loopback': settings.rpcPaymentAllowFreeLoopback = boolValue; break;
+            case 'rpc-payment-difficulty': settings.rpcPaymentDifficuly = parseInt(value, 10); break;
+            case 'rpc-payment-credits': settings.rpcPaymentCredits = parseInt(value, 10); break;
+            case 'extra-messages-file': settings.extraMessagesFile = value; break;
+            case 'seed-node': settings.seedNode = value; break;
+            case 'zmq-rpc-bind-ip': settings.zmqRpcBindIp = value; break;
+            case 'zmq-rpc-bind-port': settings.zmqRpcBindPort = parseInt(value, 10); break;
+            case 'zmq-pub': settings.zmqPub = value; break;
+            case 'rpc-payment-address': settings.rpcPaymentAddress = value; break;
+            case 'no-zmq': settings.noZmq = boolValue; break;
+            case 'fixed-difficulty': settings.fixedDifficulty = parseInt(value, 10); break;
+            case 'prep-blocks-threads': settings.prepBlocksThreads = parseInt(value, 10); break;
+            case 'fast-block-sync': settings.fastBlockSync = boolValue; break;
+            case 'block-notify': settings.blockNotify = value; break;
+            case 'show-time-stats': settings.showTimeStats = boolValue; break;
+            case 'block-sync-size': settings.blockSyncSize = parseInt(value, 10); break;
+            case 'block-rate-notify': settings.blockRateNotify = value; break;
+            case 'reorg-notify': settings.reorgNotify = value; break;
+            case 'prune-blockchain': settings.pruneBlockchain = boolValue; break;
+            case 'keep-alt-blocks': settings.keepAltBlocks = boolValue; break;
+            case 'keep-fake-chain': settings.keepFakeChain = boolValue; break;
+            case 'add-exclusive-node': settings.addExclusiveNode = value; break;
+            case 'no-sync': settings.noSync = boolValue; break;
+            case 'start-mining': settings.startMining = value; break;
+            case 'mining-threads': settings.miningThreds = parseInt(value, 10); break;
+            case 'bg-mining-enable': settings.bgMiningEnable = boolValue; break;
+            case 'bg-mining-ignore-battery': settings.bgMiningIgnoreBattery = boolValue; break;
+            case 'bg-mining-idle-threshold': settings.bgMiningIdleThreshold = parseInt(value, 10); break;
+            case 'bg-mining-miner-target': settings.bgMiningMinerTarget = parseInt(value, 10); break;
+            case 'hide-my-port': settings.hideMyPort = boolValue; break;
+            case 'enforce-dns-checkpoint': settings.enforceDnsCheckpoint = boolValue; break;
+            case 'test-drop-download': settings.testDropDownload = boolValue; break;
+            case 'test-drop-download-height': settings.testDropDownloadHeight = parseInt(value, 10); break;
+            case 'test-dbg-lock-sleep': settings.testDbgLockSleep = parseInt(value, 10); break;
+            case 'in-peers': settings.inPeers = parseInt(value, 10); break;
+            case 'out-peers': settings.outPeers = parseInt(value, 10); break;
+
+            default: throw new Error(`Invalid setting: ${key}`);
+        }
+    });
+
+    return settings;
+  }
+
+  public static validateConfigFormat(confixTxt: string): boolean {
+    try {
+      DaemonSettings.parseConfig(confixTxt);
+
+      return true;
+    }
+    catch(error: any) {
+      console.warn(error);
+      return false;
+    }
+  }
+
   public toCommandOptions(): string[] {
     const options: string[] = [];
     if (this.monerodPath != '') options.push(this.monerodPath);

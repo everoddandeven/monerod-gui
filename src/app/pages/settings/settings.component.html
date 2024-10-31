@@ -21,14 +21,55 @@
     </div>
   </div>
 
-  <div *ngIf="savingChangesSuccess" class="alert alert-success d-flex align-items-center justify-content-center text-center" role="alert">
+  <div *ngIf="successMessage !== ''" class="alert alert-success d-flex align-items-center justify-content-center text-center" role="alert">
     <h4><i class="bi bi-check-circle m-2"></i></h4>&nbsp;&nbsp;
     <div>
-      Successfully saved settings
+      {{ successMessage }}
     </div>
   </div>
 
   <div class="tab-pane fade show active" id="pills-general" role="tabpanel" aria-labelledby="pills-general-tab" tabindex="0">
+    <div class="row g-5 p-2">
+      <div class="col-md-7 col-lg-12">
+        <h4 class="mb-3">Monerod</h4>
+
+        <div class="col-md-12">
+          <label for="general-monerod-path-control" class="form-label">Monerod path</label>
+          <div class="input-group mb-3">
+            <input id="general-monerod-path-control" type="text" class="form-control form-control-sm" placeholder="" aria-label="Monerod path" aria-describedby="basic-addon2" [value]="currentSettings.monerodPath" readonly>
+            <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseMonerodFile()">Choose file</button></span>            
+          </div>
+          <small class="text-body-secondary">Path to monerod executable</small>
+        </div>
+
+        <hr class="my-4">
+        <h4 class="mb-3">Config file</h4>
+
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <label for="import-config-file" class="form-label">Import config file</label>
+            <div class="input-group mb-3">
+              <button type="button" class="btn btn-secondary btn-sm" (click)="importMonerodConfigFile()">Import</button>
+            </div>
+            <small class="text-body-secondary">Import custom monerod config file</small>
+          </div>
+          
+          <div class="col-md-6">
+            <label for="export-config-file" class="form-label">Export config file</label>
+            <div class="input-group mb-3">
+              <button type="button" class="btn btn-secondary btn-sm" (click)="exportMonerodConfigFile()">Export</button>
+            </div>
+            <small class="text-body-secondary">Export current saved settings to config file</small>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id="pills-node" role="tabpanel" aria-labelledby="pills-node-tab" tabindex="0">
     <div class="row g-5 p-2">
       <div class="col-md-7 col-lg-12">
         <h4 class="mb-3">Node</h4>
@@ -65,15 +106,6 @@
             <input class="form-control form-check-input" type="checkbox" role="switch" id="regtest" [checked]="currentSettings.regtest" [(ngModel)]="currentSettings.regtest" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Run in a regression testing mode</small>
-          </div>
-
-          <div class="col-md-12">
-            <label for="general-monerod-path-control" class="form-label">Monerod path</label>
-            <div class="input-group mb-3">
-              <input id="general-monerod-path-control" type="text" class="form-control form-control-sm" placeholder="" aria-label="Monerod path" aria-describedby="basic-addon2" [value]="currentSettings.monerodPath" readonly>
-              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseMonerodFile()">Choose file</button></span>            
-            </div>
-            <small class="text-body-secondary">Path to monerod executable</small>
           </div>
 
           <div class="col-md-12">

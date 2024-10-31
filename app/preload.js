@@ -69,8 +69,34 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onSelectedFolder: (callback) => {
     ipcRenderer.on('selected-folder', callback);
   },
+  readFile: (filePath) => {
+    ipcRenderer.invoke('read-file', filePath);
+  },
+  onReadFile: (callback) => {
+    ipcRenderer.on('on-read-file', callback);
+  },
+  onReadFileError: (callback) => {
+    ipcRenderer.on('on-read-file-error', callback);
+  },
+  unregisterOnReadFile: () => {
+    ipcRenderer.removeAllListeners('on-read-file');
+    ipcRenderer.removeAllListeners('on-read-file-error');
+  },
   unregisterOnSelectedFolder: () => {
     ipcRenderer.removeAllListeners('selected-folder');
+  },
+  saveFile: (defaultPath, content) => {
+    ipcRenderer.invoke('save-file', defaultPath, content);
+  },
+  onSaveFileError: (callback) => {
+    ipcRenderer.on('on-save-file-error', callback);
+  },
+  onSaveFile: (callback) => {
+    ipcRenderer.on('on-save-file', callback);
+  },
+  unregisterOnSaveFile: () => {
+    ipcRenderer.removeAllListeners('on-save-file-error');
+    ipcRenderer.removeAllListeners('on-save-file');
   },
   selectFile: (extensions = undefined) => {
     ipcRenderer.invoke('select-file', extensions);
@@ -89,6 +115,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   unregisterOnIsWifiConnectedResponse: () => {
     ipcRenderer.removeAllListeners('is-wifi-connected-result');
+  },
+  getPath: (path) => {
+    ipcRenderer.invoke('get-path', path);
+  },
+  onGetPath: (callback) => {
+    ipcRenderer.on('on-get-path', callback);
+  },
+  unregisterOnGetPath: () => {
+    ipcRenderer.removeAllListeners('on-get-path');
   },
   getOsType: () => {
     ipcRenderer.invoke('get-os-type');

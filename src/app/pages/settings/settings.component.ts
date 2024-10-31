@@ -25,11 +25,14 @@ export class SettingsComponent {
 
   public networkType: 'mainnet' | 'testnet' | 'stagenet' = 'mainnet';
 
+  public successMessage: string = '';
+
   constructor(private daemonService: DaemonService, private electronService: ElectronService, private ngZone: NgZone) {
     this.loading = true;
 
     this.navbarLinks = [
       new NavbarLink('pills-general-tab', '#pills-general', 'pills-general', true, 'General', false),
+      new NavbarLink('pills-node-tab', '#pills-node', 'pills-node', false, 'Node', false),
       new NavbarLink('pills-rpc-tab', '#pills-rpc', 'pills-rpc', false, 'RPC', false),
       new NavbarLink('pills-p2p-tab', '#pills-p2p', 'pills-p2p', false, 'P2P', false),
       new NavbarLink('pills-blockchain-tab', '#pills-blockchain', 'pills-blockchain', false, 'Blockchain', false),
@@ -189,10 +192,12 @@ export class SettingsComponent {
       }
 
       this.savingChangesError = ``;
+      this.successMessage = 'Successfully saved settings';
       this.savingChangesSuccess = true;
     }
     catch(error: any) {
       console.error(error);
+      this.successMessage = '';
       this.savingChangesError = `${error}`;
       this.savingChangesSuccess = false;
     }
@@ -214,6 +219,68 @@ export class SettingsComponent {
     }
 
     throw new Error("Could not get monerod mime type");
+  }
+
+  public async importMonerodConfigFile(): Promise<void> {
+    try {
+      try {
+        const filePath = await this.electronService.selectFile();
+
+        if (filePath == '') {
+          return;
+        }
+    
+        const content = await this.electronService.readFile(filePath);
+
+        const settings = DaemonSettings.parseConfig(content);
+
+        settings.monerodPath = this.originalSettings.monerodPath;
+        settings.syncOnWifi = this.originalSettings.syncOnWifi;
+        settings.syncPeriodEnabled = this.originalSettings.syncPeriodEnabled;
+        settings.syncPeriodFrom = this.originalSettings.syncPeriodFrom;
+        settings.syncPeriodTo = this.originalSettings.syncPeriodTo;
+        settings.startAtLogin = this.originalSettings.startAtLogin;
+        settings.startAtLoginMinimized = this.originalSettings.startAtLoginMinimized;
+        settings.upgradeAutomatically = this.originalSettings.upgradeAutomatically;
+        settings.downloadUpgradePath = this.originalSettings.downloadUpgradePath;
+
+        this.currentSettings = settings;
+
+        await this.OnSave();
+
+        this.successMessage = 'Succesfully imported settings';
+      }
+      catch(error: any) {
+        console.error(error);
+        this.successMessage = '';
+        throw new Error("Could not parse monerod config file");
+      }
+    }
+    catch(error: any) {
+      console.error(error);
+      this.successMessage = '';
+      this.savingChangesError = `${error}`;
+    }
+  }
+
+  public async exportMonerodConfigFile(): Promise<void> {
+    try {
+      const config = this.originalSettings.toConfig();
+      const homePath = await this.electronService.getPath('home');
+      const resultPath = await this.electronService.saveFile(`${homePath}/monerod.conf`, config);
+
+      if (resultPath == '') {
+        return;
+      }
+
+      this.successMessage = 'Successfully exported config file to ' + resultPath;
+      this.savingChangesError = '';
+    }
+    catch(error: any) {
+      console.error(error);
+      this.successMessage = '';
+      this.savingChangesError = `${error}`;
+    }
   }
 
   public async chooseMonerodFile(): Promise<void> {

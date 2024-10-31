@@ -759,6 +759,44 @@ try {
     }
   });
 
+  ipcMain.handle('read-file', (event: IpcMainInvokeEvent, filePath: string) => {
+    fs.readFile(filePath, 'utf-8', (err, data) => {
+      if (err != null) {
+        win?.webContents.send('on-read-file-error', `${err}`);
+        return;
+      }
+
+      win?.webContents.send('on-read-file', data);
+    });
+  });
+
+  ipcMain.handle('save-file', async (event: IpcMainInvokeEvent, defaultPath: string, content: string) => {
+    if (!win) {
+      return;
+    }
+
+    const result = await dialog.showSaveDialog(win, {
+      title: 'Save File',
+      defaultPath: defaultPath,
+      properties: [
+        'showOverwriteConfirmation'
+      ]
+    });
+
+    if (result.canceled) {
+      win.webContents.send('on-save-file', '');
+      return;
+    }
+    try {
+      fs.writeFileSync(result.filePath, content);
+
+      win.webContents.send('on-save-file', result.filePath);
+    }
+    catch(error: any) {
+      win.webContents.send('on-save-file-error', `${error}`);
+    }
+  });
+
   ipcMain.handle('select-file', async (event: IpcMainInvokeEvent, extensions?: string[]) => {
     if (!win) 
     {
@@ -792,6 +830,10 @@ try {
     const path = result.canceled ? null : result.filePaths[0];
 
     win.webContents.send('selected-folder', path ? `${path}` : '');
+  });
+
+  ipcMain.handle('get-path', (event: IpcMainInvokeEvent, path: 'home' | 'appData' | 'userData' | 'sessionData' | 'temp' | 'exe' | 'module' | 'desktop' | 'documents' | 'downloads' | 'music' | 'pictures' | 'videos' | 'recent' | 'logs' | 'crashDumps') => {
+    win?.webContents.send('on-get-path', app.getPath(path));
   });
 
   ipcMain.handle('is-wifi-connected', async (event: IpcMainInvokeEvent) => {

@@ -98,10 +98,23 @@ declare global {
       unregisterOnIsWifiConnectedResponse: () => void;
       selectFolder: () => void;
       selectFile: (extensions?: string[]) => void;
+      readFile: (filePath: string) => void;
+      unregisterOnReadFile: () => void;
+      onReadFile: (callback: (event: any, data: string) => void) => void;
+      onReadFileError: (callback: (event: any, error: string) => void) => void;
+      saveFile: (defaultPath: string, content: string) => void;
+      onSaveFile: (callback: (event: any, filePath: string) => void) => void;
+      onSaveFileError: (callback: (event: any, error: string) => void) => void;
+      unregisterOnSaveFile: () => void;
       onSelectedFolder: (callback: (event: any, path: string) => void) => void;
       onSelectedFile: (callback: (event: any, path: string) => void) => void;
       unregisterOnSelectedFile: () => void;
       unregisterOnSelectedFolder: () => void;
+
+      getPath: (path: 'home' | 'appData' | 'userData' | 'sessionData' | 'temp' | 'exe' | 'module' | 'desktop' | 'documents' | 'downloads' | 'music' | 'pictures' | 'videos' | 'recent' | 'logs' | 'crashDumps') => void;
+      onGetPath: (callback: (event: any, path: string) => void) => void;
+      unregisterOnGetPath: () => void;
+
       getOsType: () => void;
       gotOsType: (callback: (event: any, osType: { platform: string, arch: string }) => void) => void;
       unregisterGotOsType: () => void;

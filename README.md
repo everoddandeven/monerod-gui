@@ -83,7 +83,7 @@ https://github.com/user-attachments/assets/c4a50d2f-5bbb-48ac-9425-30ecc20ada7c
   - [X] Linux
   - [X] Windows
   - [X] MacOS
-- [ ] Import/export `monerod.conf` node configuration
+- [X] Import/export `monerod.conf` node configuration
 - [X] Synchronization in a specific time slot
 - [ ] Installers
   - [X] Linux
