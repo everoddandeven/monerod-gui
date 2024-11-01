@@ -51,8 +51,13 @@ export class PeersComponent extends BasePageComponent implements AfterViewInit {
       const sub: Subscription = this.daemonData.syncEnd.subscribe(() => {
         this.loadPublicNodesTable();
       });
+
+      const statusSub: Subscription = this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
+        if (running) this.loadTables();
+        else this.destroyTables();
+      });
   
-      this.subscriptions.push(sub);
+      this.subscriptions.push(sub, statusSub);
     });
   }
 

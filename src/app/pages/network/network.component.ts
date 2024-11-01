@@ -63,6 +63,8 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
           this.netStatsBytesOutChart.destroy();
           this.netStatsBytesOutChart = undefined;
         }
+
+        this.destroyTables();
       }
       else {
         this.initNetStatsHistoryChart();

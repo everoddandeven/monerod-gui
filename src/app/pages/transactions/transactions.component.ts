@@ -109,7 +109,16 @@ export class TransactionsComponent extends BasePageComponent implements AfterVie
 
       const onSyncEndSub: Subscription = this.daemonData.syncEnd.subscribe(() => this.refresh());
 
-      this.subscriptions.push(onSyncEndSub);
+      const statusSub: Subscription = this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
+        if (running) {
+          this.loadTables();
+        }
+        else {
+          this.destroyTables();
+        }
+      });
+
+      this.subscriptions.push(onSyncEndSub, statusSub);
     });
   }
 
