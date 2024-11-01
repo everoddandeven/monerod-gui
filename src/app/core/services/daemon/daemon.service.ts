@@ -139,8 +139,8 @@ export class DaemonService {
     this.settings = new DaemonSettings();
 
     window.electronAPI.onMoneroClose((event: any, code: number) => {
-      console.log(event);
-      console.log(code);
+      console.debug(event);
+      console.debug(code);
       this.onClose();
     });
   }
@@ -963,7 +963,6 @@ export class DaemonService {
     this.onDaemonStopStart.emit();
 
     const response = await this.callRpc(new StopDaemonRequest());
-    console.log(response);
 
     if (typeof response.status == 'string' && response.status != 'OK') {
       window.electronAPI.showNotification({

@@ -69,6 +69,7 @@
     "@angular/platform-browser": "17.3.12",
     "@angular/platform-browser-dynamic": "17.3.12",
     "@angular/router": "17.3.12",
+    "@popperjs/core": "2.11.8",
     "bootstrap": "5.3.3",
     "bootstrap-icons": "1.11.3",
     "bootstrap-table": "1.23.5",

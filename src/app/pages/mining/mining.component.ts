@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, NgZone } from '@angular/core';
+import { AfterContentInit, AfterViewInit, Component, NgZone } from '@angular/core';
 import { DaemonService, DaemonDataService } from '../../core/services';
 import { NavbarLink, NavbarService } from '../../shared/components';
 import { AddedAuxPow, AuxPoW, BlockTemplate, GeneratedBlocks, MiningStatus, MinerData, Chain } from '../../../common';
@@ -10,7 +10,7 @@ import { SimpleBootstrapCard } from '../../shared/utils';
   templateUrl: './mining.component.html',
   styleUrl: './mining.component.scss'
 })
-export class MiningComponent extends BasePageComponent implements AfterViewInit {
+export class MiningComponent extends BasePageComponent implements AfterViewInit, AfterContentInit {
 
   public get coreBusy(): boolean {
     return this.daemonData.info? !this.daemonData.info.synchronized : true;
@@ -153,8 +153,12 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit 
   }
 
   public ngAfterViewInit(): void {
-    console.log('DetailComponent AFTER VIEW INIT');
     this.loadTables();
+  }
+
+  public override ngAfterContentInit(): void {
+    super.ngAfterContentInit();
+
     this.cards = this.createCards();
   }
 

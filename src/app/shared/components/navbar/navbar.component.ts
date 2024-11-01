@@ -1,17 +1,18 @@
-import { Component, NgZone, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, NgZone, OnDestroy } from '@angular/core';
 import { NavbarService } from './navbar.service';
 import { NavbarLink } from './navbar.model';
 import { DaemonService } from '../../../core/services/daemon/daemon.service';
-import { MoneroInstallerService } from '../../../core/services';
+import { DaemonDataService, MoneroInstallerService } from '../../../core/services';
 import { DaemonSettings } from '../../../../common';
 import { Subscription } from 'rxjs';
+import * as bootstrap from 'bootstrap';
 
 @Component({
   selector: 'app-navbar',
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
 })
-export class NavbarComponent implements OnDestroy {
+export class NavbarComponent implements AfterViewInit, OnDestroy {
 
   private _running: boolean = false;
 
@@ -51,36 +52,85 @@ export class NavbarComponent implements OnDestroy {
     return this.daemonSettings.monerodPath != '';
   }
 
+  public get syncDisabled(): boolean {
+    return this.syncDisabledByPeriodPolicy || this.syncDisabledByWifiPolicy || this.daemonService.settings.noSync;
+  }
+
+  public get syncDisabledByPeriodPolicy(): boolean {
+    return this.daemonData.syncDisabledByPeriodPolicy;
+  }
+
+  public get syncDisabledByWifiPolicy(): boolean {
+    return this.daemonData.syncDisabledByWifiPolicy;
+  }
+
+  public disablingSync: boolean = false;
+  public enablingSync: boolean = false;
+
   private daemonSettings: DaemonSettings = new DaemonSettings();
   private subscriptions: Subscription[] = [];
 
-  constructor(private navbarService: NavbarService, private daemonService: DaemonService, private installerService: MoneroInstallerService, private ngZone: NgZone) {
+  constructor(private navbarService: NavbarService, private daemonService: DaemonService, private daemonData: DaemonDataService, private installerService: MoneroInstallerService, private ngZone: NgZone) {
     const onSavedSettingsSub: Subscription = this.daemonService.onSavedSettings.subscribe((settings: DaemonSettings) => {
       this.daemonSettings = settings;
     });
 
     this.daemonService.getSettings().then((settings: DaemonSettings) => {
       this.daemonSettings = settings;
+      this.enableToolTips();
     }).catch((error: any) => {
       console.error(error);
+      this.enableToolTips();
     });
 
     this.daemonService.isRunning().then((running: boolean) => {
       this.ngZone.run(() => {
         this._running = running;
+        this.enableToolTips();
       });
     }).catch((error) => {
       console.error(error);
       this._running = false;
+      this.enableToolTips();
     });
 
     const onStatusChangedSub: Subscription = this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
       this.ngZone.run(() => {
         this._running = running;
+        this.enableToolTips();
       });
     });
 
     this.subscriptions.push(onSavedSettingsSub, onStatusChangedSub);
+  }
+
+  private lastTooltips: bootstrap.Tooltip[] = [];
+
+  private disposeTooltips(): void {
+    this.lastTooltips.forEach((tooltip) => {
+      tooltip.hide();
+      tooltip.dispose();
+    });
+
+    this.lastTooltips = [];
+  }
+
+  private enableToolTips(): void {
+    setTimeout(() => {
+      this.disposeTooltips();
+
+      const tooltipTriggerList: Element[] = [] ;
+    
+      const queryResult = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      
+      queryResult.forEach((el) => tooltipTriggerList.push(el));
+
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl, {
+        placement: 'bottom'
+      }));
+  
+      this.lastTooltips = tooltipList;
+    }, 0);
   }
 
   public async startDaemon(): Promise<void> {
@@ -103,12 +153,43 @@ export class NavbarComponent implements OnDestroy {
     await this.daemonService.restartDaemon();
   }
 
+  public async startSync(): Promise<void> {
+    this.enablingSync = true;
+
+    try {
+      await this.daemonService.enableSync();
+    }
+    catch(error: any) {
+      console.error(error);
+    }
+
+    this.enablingSync = false;
+  }
+
+  public async stopSync(): Promise<void> {
+    this.disablingSync = true;
+
+    try {
+      await this.daemonService.disableSync();
+    }
+    catch(error: any) {
+      console.error(error);
+    }
+
+    this.disablingSync = false;
+  }
+
   public async quit(): Promise<void> {
     await this.daemonService.quit();
+  }
+
+  public ngAfterViewInit(): void {
+    this.enableToolTips();
   }
 
   public ngOnDestroy(): void {
     this.subscriptions.forEach((sub: Subscription) => sub.unsubscribe());
     this.subscriptions = [];
+    this.disposeTooltips();
   }
 }

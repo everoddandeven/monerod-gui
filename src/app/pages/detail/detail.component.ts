@@ -142,9 +142,14 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
   private get syncProgress(): string {
     const targetHeight = this.targetHeight;
     const height = this.height;
-    console.log(`Sync progress, height ${height},targetHeight ${targetHeight}`)
+    
+    const progress = `${(height*100/targetHeight).toFixed(2)} %`;
 
-    return `${(height*100/targetHeight).toFixed(2)} %`;
+    if (height < targetHeight && progress == '100 %') {
+      return '99.99 %';
+    }
+
+    return progress;
   }
 
   private get wasBootstrapEverUsed(): boolean {
