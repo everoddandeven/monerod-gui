@@ -1134,8 +1134,10 @@ export class DaemonService {
 
       const destination = settings.downloadUpgradePath; // Aggiorna con il percorso desiderato  
       const moneroFolder = await this.installer.downloadMonero(destination, settings.monerodPath != '');
-      
-      settings.monerodPath = `${moneroFolder}/monerod`;
+      const { platform } = await this.electronService.getOsType();
+      const ext = platform == 'win32' ? '.exe' : '';
+      const separator = platform ?? 'win32' ? '\\' : '/';
+      settings.monerodPath = `${moneroFolder}${separator}monerod${ext}`;
 
       await this.saveSettings(settings);
   }

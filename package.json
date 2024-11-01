@@ -48,7 +48,7 @@
     "electron:serve-tsc": "tsc -p tsconfig.serve.json",
     "electron:serve": "wait-on tcp:4200 && npm run electron:serve-tsc && electron . --serve",
     "electron:local": "npm run build:prod && electron .",
-    "electron:local:dev": "npm run build:dev && electron .",
+    "electron:local:dev": "npm run build:dev && electron --trace-warnings .",
     "electron:build": "npm run build:prod && electron-builder build --publish=never",
     "electron:build:deb": "npm run build:prod:deb && electron-installer-debian --src dist/monerod-gui-linux-x64/ --dest dist/installers/ --arch amd64 --config electron-installer-debian.json",
     "electron:build:win": "npm run build:prod:win && electron-installer-windows --src dist/monerod-gui-win32-x64/ --dest dist/installers/ --arch amd64 --config electron-installer-windows.json",

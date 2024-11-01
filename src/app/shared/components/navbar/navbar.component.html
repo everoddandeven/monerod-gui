@@ -27,14 +27,14 @@
     &nbsp;
 
     <li *ngIf="!quitting && running && syncDisabled && !starting && !restarting && !installing && !upgrading" class="nav-item text-nowrap">
-      <button [disabled]="enablingSync || syncDisabledByPeriodPolicy || syncDisabledByWifiPolicy" class="btn btn-outline-secondary px-3 text-white" type="button" data-bs-toggle="tooltip" data-bs-placement="bottom"  data-bs-title="Start Sync" aria-expanded="false" aria-label="Start Sync" (click)="startSync()">
+      <button [disabled]="enablingSync || syncDisabledByPeriodPolicy || syncDisabledByWifiPolicy || stopping" class="btn btn-outline-secondary px-3 text-white" type="button" data-bs-toggle="tooltip" data-bs-placement="bottom"  data-bs-title="Start Sync" aria-expanded="false" aria-label="Start Sync" (click)="startSync()">
         <i class="bi bi-wifi"></i>
       </button>
       &nbsp;
     </li>
 
     <li *ngIf="!quitting && running && !syncDisabled && !starting && !restarting && !installing && !upgrading" class="nav-item text-nowrap">
-      <button [disabled]="disablingSync" class="btn btn-outline-secondary px-3 text-white" type="button" data-bs-toggle="tooltip" data-bs-placement="bottom"  data-bs-title="Stop Sync" aria-expanded="false" aria-label="Stop Sync" (click)="stopSync()">
+      <button [disabled]="disablingSync || stopping" class="btn btn-outline-secondary px-3 text-white" type="button" data-bs-toggle="tooltip" data-bs-placement="bottom"  data-bs-title="Stop Sync" aria-expanded="false" aria-label="Stop Sync" (click)="stopSync()">
         <i class="bi bi-wifi-off"></i>
       </button>
       &nbsp;

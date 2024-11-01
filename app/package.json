@@ -12,6 +12,7 @@
   "dependencies": {
     "adm-zip": "^0.5.16",
     "applescript": "^1.0.0",
+    "network": "^0.7.0",
     "os": "^0.1.2",
     "pidusage": "^3.0.2",
     "tar": "^7.4.3",

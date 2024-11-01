@@ -348,7 +348,7 @@ export class DaemonDataService {
 
 
   private async refresh(): Promise<void> {
-    if (this.refreshing || this.tooEarlyForRefresh) {
+    if (this.refreshing || this.tooEarlyForRefresh || this.daemonService.stopping) {
       return;
     }
 

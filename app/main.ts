@@ -10,7 +10,8 @@ import * as tar from 'tar';
 import * as os from 'os';
 import * as pidusage from 'pidusage';
 import AutoLaunch from './auto-launch';
-import AdmZip from 'adm-zip';
+import * as AdmZip from 'adm-zip';
+const network = require('network');
 
 interface Stats {
   /**
@@ -75,10 +76,19 @@ const minimized: boolean = process.argv.includes('--hidden');
 let win: BrowserWindow | null = null;
 let isHidden: boolean = false;
 let isQuitting: boolean = false;
-const dirname = __dirname.endsWith('/app/app') ? __dirname.replace('/app/app', '/app/src') : __dirname.endsWith('/app') ? __dirname.replace('/app', '/src') : __dirname;
+const separator: string = os.platform() == 'win32' ? '\\' : '/';
+const appApp = `${separator}app${separator}app`;
+const appSrc = `${separator}app${separator}src`;
+const _app = `${separator}app`;
+const _src = `${separator}src`;
+const dirname = (__dirname.endsWith(appApp) ? __dirname.replace(appApp, appSrc) : __dirname.endsWith(_app) ? __dirname.replace(_app, _src) : __dirname);
+
+console.log('dirname: ' + dirname);
+
 let monerodProcess: ChildProcessWithoutNullStreams | null = null;
 const iconRelPath: string = 'assets/icons/monero-symbol-on-white-480.png';
-const wdwIcon = `${dirname}/${iconRelPath}`;
+//const wdwIcon = `${dirname}/${iconRelPath}`;
+const wdwIcon = path.join(dirname, iconRelPath);
 
 let tray: Tray;
 let trayMenu: Menu;
@@ -244,7 +254,11 @@ function createWindow(): BrowserWindow {
   return win;
 }
 
-const createSplashWindow = async (): Promise<BrowserWindow> => {
+const createSplashWindow = async (): Promise<BrowserWindow | undefined> => {
+  if (os.platform() == 'win32') {
+    return undefined;
+  }
+
   const window = new BrowserWindow({
     width: 480,
     height: 480,
@@ -266,7 +280,8 @@ const createSplashWindow = async (): Promise<BrowserWindow> => {
     pathIndex = '../dist/splash.html';
   }
 
-  const url = new URL(path.join('file:', dirname, pathIndex));
+  const cdir = dirname.replace('/app/', '/src/');
+  const url = new URL(path.join('file:', cdir, pathIndex));
 
   await window.loadURL(url.href);
 
@@ -285,6 +300,22 @@ const createSplashWindow = async (): Promise<BrowserWindow> => {
 // #region WiFi 
 
 function isConnectedToWiFi(): Promise<boolean> {
+  return new Promise<boolean>((resolve, reject) => {
+    network.get_active_interface((err: any | null, obj: { name: string, ip_address: string, mac_address: string, type: string, netmask: string, gateway_ip: string }) => {
+      if (err) {
+        console.error("Errore durante il controllo della connessione Wi-Fi:", err);
+        reject(err);
+      }
+      else {
+        console.log('isConnectedToWifi:');
+        console.log(obj);
+        resolve(obj.type == 'Wireless');
+      }
+    })
+  });
+}
+
+function isConnectedToWiFiOld(): Promise<boolean> {
   return new Promise((resolve, reject) => {
     const platform = os.platform();  // Use os to get the platform
 
@@ -397,6 +428,8 @@ function startMoneroDaemon(commandOptions: string[]): ChildProcessWithoutNullStr
   console.log(message);
   
   moneroFirstStdout = true;
+
+  commandOptions.push('--non-interactive');
 
   // Avvia il processo usando spawn
   monerodProcess = spawn(monerodPath, commandOptions);
@@ -683,7 +716,7 @@ try {
       await new Promise<void>((resolve, reject) => {
         try {
           setTimeout(() => {
-            splash.close();
+            if (splash) splash.close();
             if (!minimized) win?.show();
             resolve();
           }, 2600);
@@ -797,7 +830,7 @@ try {
       const extractedDir = await extract(fPath, destination);
 
       event.sender.send('download-progress', { progress: 100, status: 'Download and extraction completed successfully' });
-      event.sender.send('download-progress', { progress: 200, status: `${destination}/${extractedDir}` });
+      event.sender.send('download-progress', { progress: 200, status: os.platform() == 'win32' ? extractedDir : `${destination}/${extractedDir}` });
 
       win?.setProgressBar(100, {
         mode: 'none'
@@ -805,6 +838,9 @@ try {
       
     } catch (error) {
       event.sender.send('download-progress', { progress: 0, status: `Error: ${error}` });
+      win?.setProgressBar(0, {
+        mode: 'error'
+      });
     }
   });
 

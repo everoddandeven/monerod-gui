@@ -65,7 +65,7 @@ export default class AutoLaunchAPIWindows extends AutoLaunchAPI {
         }
       }
 
-      regKey.set(this.appName, Winreg.REG_SZ, `"${pathToAutoLaunchedApp}"${args}`, (err) => {
+      regKey.set(this.appName, Winreg.REG_SZ, args != '' ? `"${pathToAutoLaunchedApp}"` : `"${pathToAutoLaunchedApp}"`, (err) => {
         if (err != null) {
           return reject(err);
         }
