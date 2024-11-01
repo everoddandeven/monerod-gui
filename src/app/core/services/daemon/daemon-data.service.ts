@@ -69,7 +69,7 @@ export class DaemonDataService {
 
   public readonly syncStart: EventEmitter<{ first: boolean }> = new EventEmitter<{ first: boolean }>();
   public readonly syncEnd: EventEmitter<void> = new EventEmitter<void>();
-  public readonly syncError: EventEmitter<Error> = new EventEmitter<Error>();
+  public readonly syncError: EventEmitter<any> = new EventEmitter<any>();
 
   public readonly syncInfoRefreshStart: EventEmitter<void> = new EventEmitter<void>();
   public readonly syncInfoRefreshEnd: EventEmitter<void> = new EventEmitter<void>();
@@ -354,58 +354,64 @@ export class DaemonDataService {
 
     this._refreshing = true;
 
-    const settings = await this.daemonService.getSettings();
+    try {
+      const settings = await this.daemonService.getSettings();
     
-    const updateInfo = await this.daemonService.checkUpdate()
-
-    if (updateInfo.update) {
-      await this.daemonService.upgrade();
-      return;
-    }
-    
-    const syncAlreadyDisabled = this.daemonService.settings.noSync;
-
-    if (!settings.noSync && !syncAlreadyDisabled && !settings.syncOnWifi) {
-      const wifiConnected = await this.electronService.isWifiConnected();
-
-      if (wifiConnected) {
-        console.log("Disabling sync ...");
-        await this.daemonService.disableSync();
-        this.syncDisabledByWifiPolicy = true;
+      const updateInfo = await this.daemonService.checkUpdate()
+  
+      if (updateInfo.update && settings.upgradeAutomatically) {
+        await this.daemonService.upgrade();
+        return;
       }
-    }
-    else if (!settings.noSync && syncAlreadyDisabled && !settings.syncOnWifi) {
-      const wifiConnected = await this.electronService.isWifiConnected();
-
-      if (!wifiConnected) {
-        console.log("Enabling sync ...");
-
-        await this.daemonService.enableSync();
-        this.syncDisabledByWifiPolicy = false;
+      
+      const syncAlreadyDisabled = this.daemonService.settings.noSync;
+  
+      if (!settings.noSync && !syncAlreadyDisabled && !settings.syncOnWifi) {
+        const wifiConnected = await this.electronService.isWifiConnected();
+  
+        if (wifiConnected) {
+          console.log("Disabling sync ...");
+          await this.daemonService.disableSync();
+          this.syncDisabledByWifiPolicy = true;
+        }
+      }
+      else if (!settings.noSync && syncAlreadyDisabled && !settings.syncOnWifi) {
+        const wifiConnected = await this.electronService.isWifiConnected();
+  
+        if (!wifiConnected) {
+          console.log("Enabling sync ...");
+  
+          await this.daemonService.enableSync();
+          this.syncDisabledByWifiPolicy = false;
+        }
+        else {
+          this.syncDisabledByWifiPolicy = true;
+        }
       }
       else {
-        this.syncDisabledByWifiPolicy = true;
+        this.syncDisabledByWifiPolicy = false;
       }
+  
+      if (!syncAlreadyDisabled && !this.syncDisabledByWifiPolicy && !this.syncDisabledByPeriodPolicy && settings.syncPeriodEnabled && !TimeUtils.isInTimeRange(settings.syncPeriodFrom, settings.syncPeriodTo)) {
+        await this.daemonService.disableSync();
+        this.syncDisabledByPeriodPolicy = true;
+      }
+      else if (syncAlreadyDisabled && !this.syncDisabledByWifiPolicy && this.syncDisabledByPeriodPolicy && settings.syncPeriodEnabled && TimeUtils.isInTimeRange(settings.syncPeriodFrom, settings.syncPeriodTo)) {
+        await this.daemonService.enableSync();
+        this.syncDisabledByPeriodPolicy = false;
+      }
+      else if (syncAlreadyDisabled && !this.syncDisabledByWifiPolicy && settings.syncPeriodEnabled && !TimeUtils.isInTimeRange(settings.syncPeriodFrom, settings.syncPeriodTo)) {
+        this.syncDisabledByPeriodPolicy = true;
+      }
+      else {
+        this.syncDisabledByPeriodPolicy = false;
+      }
+  
     }
-    else {
-      this.syncDisabledByWifiPolicy = false;
+    catch(error: any) {
+      console.error(error);
     }
-
-    if (!syncAlreadyDisabled && !this.syncDisabledByWifiPolicy && !this.syncDisabledByPeriodPolicy && settings.syncPeriodEnabled && !TimeUtils.isInTimeRange(settings.syncPeriodFrom, settings.syncPeriodTo)) {
-      await this.daemonService.disableSync();
-      this.syncDisabledByPeriodPolicy = true;
-    }
-    else if (syncAlreadyDisabled && !this.syncDisabledByWifiPolicy && this.syncDisabledByPeriodPolicy && settings.syncPeriodEnabled && TimeUtils.isInTimeRange(settings.syncPeriodFrom, settings.syncPeriodTo)) {
-      await this.daemonService.enableSync();
-      this.syncDisabledByPeriodPolicy = false;
-    }
-    else if (syncAlreadyDisabled && !this.syncDisabledByWifiPolicy && settings.syncPeriodEnabled && !TimeUtils.isInTimeRange(settings.syncPeriodFrom, settings.syncPeriodTo)) {
-      this.syncDisabledByPeriodPolicy = true;
-    }
-    else {
-      this.syncDisabledByPeriodPolicy = false;
-    }
-
+    
     this.syncStart.emit({ first: this._firstRefresh });
 
     try {
@@ -507,7 +513,7 @@ export class DaemonDataService {
 
       this._lastRefreshHeight = this._daemonInfo.heightWithoutBootstrap;
       this._lastRefresh = Date.now();
-    } catch(error) {
+    } catch(error: any) {
       console.error(error);
       this._gettingDaemonInfo = false;
       this._gettingSyncInfo = false;
@@ -522,7 +528,7 @@ export class DaemonDataService {
       this._gettingPeerList = false;
       this._gettingTxPoolStats = false;
 
-      this.syncError.emit(<Error>error);
+      this.syncError.emit(error);
 
       if (!await this.daemonService.isRunning()) {
         this.stopLoop();

@@ -348,16 +348,7 @@ export class DaemonService {
     }
     catch (error: any) {
       if (error instanceof HttpErrorResponse) {
-        if (error.status == 0) {
-          const wasRunning = this.daemonRunning;
-          this.daemonRunning = false;
-  
-          if (wasRunning) {
-            this.onDaemonStatusChanged.emit(false);
-          }
-        }
-
-        const errorMessage: string = `${error.message}`;
+        const errorMessage: string = error.status == 0 ? `No connection` : `${error.message}`;
 
         throw new Error(errorMessage);
       }
