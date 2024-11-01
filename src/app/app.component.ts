@@ -4,6 +4,7 @@ import { APP_CONFIG } from '../environments/environment';
 import { DaemonService } from './core/services/daemon/daemon.service';
 import { DaemonDataService } from './core/services/daemon/daemon-data.service';
 import { LogsService } from './pages/logs/logs.service';
+import { DaemonTrayService } from './core/services/daemon/daemon-tray.service';
 
 @Component({
   selector: 'app-root',
@@ -22,7 +23,8 @@ export class AppComponent {
     private electronService: ElectronService,
     private daemonService: DaemonService,
     private daemonData: DaemonDataService,
-    private LogService: LogsService
+    private LogService: LogsService,
+    private trayService: DaemonTrayService
   ) {
     console.log('APP_CONFIG', APP_CONFIG);
 

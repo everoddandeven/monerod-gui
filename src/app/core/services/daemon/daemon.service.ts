@@ -143,6 +143,7 @@ export class DaemonService {
       console.debug(code);
       this.onClose();
     });
+
   }
 
   public async disableSync(): Promise<void> {

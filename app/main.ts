@@ -90,27 +90,62 @@ const args = process.argv.slice(1),
 
 // #region Window
 
-const onStartStopDaemon: () => void = () => {
-  console.log("onStartStopDaemon()");
+function updateTrayMenu(): void {
+  tray.setContextMenu(trayMenu); 
+}
 
-};
+function setTrayItemEnabled(id: string, enabled: boolean): void {
+  const item = trayMenu.getMenuItemById(id);
+
+  if (!item) {
+    throw new Error(`Item not found: ${id}`);
+  }
+
+  item.enabled = enabled;
+
+  updateTrayMenu();
+}
 
 function createTrayMenuTemplate(): MenuItemConstructorOptions[] {
   return [
     {
-      id: "startStopDaemon",
+      id: "startDaemon",
       label: "Start",
-      toolTip: "Start monero daemon",
-      click: onStartStopDaemon
+      toolTip: "Start Daemon",
+      click: () => {
+        win?.webContents.send('on-tray-start-daemon');
+      }
+    },
+    {
+      id: "stopDaemon",
+      label: "Stop",
+      toolTip: "Stop Daemon",
+      click: () => {
+        win?.webContents.send('on-tray-stop-daemon');
+      }
+    },
+    {
+      id: "startSync",
+      label: "Start Sync",
+      toolTip: "Start Daemon Sync",
+      click: () => {
+        win?.webContents.send('on-tray-start-sync');
+      }
+    },
+    {
+      id: "stopSync",
+      label: "Stop Sync",
+      toolTip: "Stop Daemon Sync",
+      click: () => {
+        win?.webContents.send('on-tray-stop-sync');
+      }
     },
     {
       id: "quitDaemon",
       label: "Quit",
-      toolTip: "Quit monero daemon",
+      toolTip: "Quit Daemon",
       click: () => {
-        isQuitting = true;
-        app.quit();
-        console.log("Quit monero daemon");
+        win?.webContents.send('on-tray-quit-daemon');
       }
     }
   ]
@@ -947,6 +982,14 @@ try {
   });
 
   // #endregion
+
+  ipcMain.handle('set-tray-item-enabled', (event: IpcMainInvokeEvent, id: string, enabled: boolean) => {
+    setTrayItemEnabled(id, enabled);
+  });
+
+  ipcMain.handle('set-tray-tool-tip', (event: IpcMainInvokeEvent, toolTip: string) => {
+    tray.setToolTip(toolTip);
+  });
 
   ipcMain.handle('is-app-image', (event: IpcMainInvokeEvent) => {
     const isAppImage: boolean = !!process.env.APPIMAGE;

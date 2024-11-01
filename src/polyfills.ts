@@ -144,6 +144,14 @@ declare global {
       isAutoLaunched: () => void;
       onIsAutoLaunched: (callback: (event: any, isAutoLaunched: boolean) => void) => void;
       unregisterOnIsAutoLaunched: () => void;
+
+      onTrayStartDaemon: (callback: (event: any) => void) => void;
+      onTrayStopDaemon: (callback: (event: any) => void) => void;
+      onTrayStartSync: (callback: (event: any) => void) => void;
+      onTrayStopSync: (callback: (event: any) => void) => void;
+      onTrayQuitDaemon: (callback: (event: any) => void) => void;
+      setTrayItemEnabled: (id: string, enabled: boolean) => void;
+      setTrayToolTip: (toolTip: string) => void;
     };
   }
 }

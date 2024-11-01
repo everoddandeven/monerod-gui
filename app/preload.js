@@ -2,6 +2,27 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
+  onTrayStartDaemon: (callback) => {
+    ipcRenderer.on('on-tray-start-daemon', callback);
+  },
+  onTrayStopDaemon: (callback) => {
+    ipcRenderer.on('on-tray-stop-daemon', callback);
+  },
+  onTrayQuitDaemon: (callback) => {
+    ipcRenderer.on('on-tray-quit-daemon', callback);
+  },
+  onTrayStartSync: (callback) => {
+    ipcRenderer.on('on-tray-start-sync', callback);
+  },
+  onTrayStopSync: (callback) => {
+    ipcRenderer.on('on-tray-stop-sync', callback);
+  },
+  setTrayItemEnabled: (id, enabled) => {
+    ipcRenderer.invoke('set-tray-item-enabled', id, enabled);
+  },
+  setTrayToolTip: (toolTip) => {
+    ipcRenderer.invoke('set-tray-tool-tip', toolTip);
+  },
   startMonerod: (args) => {
     ipcRenderer.invoke('start-monerod', args);
   },
@@ -50,7 +71,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   unregisterOnMoneroVersionError: () => {
     ipcRenderer.removeAllListeners('unregister-on-monero-version-error');
   },
-
   downloadMonerod: (downloadUrl, destination) => {
     ipcRenderer.invoke('download-monerod', downloadUrl, destination);
   },
