@@ -23,7 +23,9 @@
   },
   "msi": {
     "artifactName": "${productName}-${version}-setup.${ext}",
-    "createDesktopShortcut": "always"
+    "createDesktopShortcut": "always",
+    "shortcutName": "Monero Daemon",
+    "perMachine": true
   },
   "portable": {
     "artifactName": "${productName}-${version}-portable.${ext}"
@@ -31,7 +33,7 @@
   "mac": {
     "icon": "dist/assets/icons",
     "target": [
-      "dmg"
+      "dmg", "pkg"
     ]
   },
   "linux": {
