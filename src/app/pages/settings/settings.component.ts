@@ -183,7 +183,7 @@ export class SettingsComponent {
 
       this.originalSettings = this.currentSettings.clone();
 
-      const minimizedChanged: boolean = oldStartMinimized == this.originalSettings.startAtLoginMinimized;
+      const minimizedChanged: boolean = oldStartMinimized != this.originalSettings.startAtLoginMinimized;
 
       try {
         await this.refreshAutoLanch(minimizedChanged);

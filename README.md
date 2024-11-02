@@ -12,7 +12,7 @@
 [![Ubuntu noble x64 DEB Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_24_deb.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_24_deb.yml)
 
 [![MacOS Build][macos-build-badge]][macos-build]
-[![Windows Build][windows-build-badge]][windows-build]
+[![Windows Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/windows.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/windows.yml)
 
 [![Watch on GitHub][github-watch-badge]][github-watch]
 [![Star on GitHub][github-star-badge]][github-star]
@@ -87,7 +87,7 @@ https://github.com/user-attachments/assets/c4a50d2f-5bbb-48ac-9425-30ecc20ada7c
 - [X] Synchronization in a specific time slot
 - [ ] Installers
   - [X] Linux
-  - [ ] Windows
+  - [X] Windows
   - [ ] MacOS  
 - [ ] Remote node management
   - [ ] No CORS connection
