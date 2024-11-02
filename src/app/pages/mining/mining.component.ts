@@ -13,7 +13,7 @@ import { SimpleBootstrapCard } from '../../shared/utils';
 export class MiningComponent extends BasePageComponent implements AfterViewInit, AfterContentInit {
 
   public get coreBusy(): boolean {
-    return this.daemonData.info? !this.daemonData.info.synchronized : true;
+    return this.daemonData.info? !this.daemonData.info.coreSynchronized : true;
   }
 
   public get miningStatus(): MiningStatus | undefined {

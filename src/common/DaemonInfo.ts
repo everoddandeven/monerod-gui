@@ -62,6 +62,10 @@ export class DaemonInfo {
   public get gigaHashRate(): number {
     return this.hashRate / 1000;
   }
+
+  public get coreSynchronized(): boolean {
+    return this.wasBoostrapEverUsed ? this.heightWithoutBootstrap == this.targetHeight : this.synchronized;
+  }
   
   constructor(
       adjustedTime: number,
@@ -184,7 +188,7 @@ export class DaemonInfo {
     const untrusted: boolean = info.untrusted;
     const updateAvailable: boolean = info.update_available;
     const version: string = info.version;
-    const wasBoostrapEverUsed: boolean = info.was_boostrap_ever_used === true ? true : false;
+    const wasBoostrapEverUsed: boolean = info.was_bootstrap_ever_used === true ? true : false;
     const whitePeerlistSize: number = info.white_peerlist_size;
     const wideCumulativeDifficulty: string = info.wide_cumulative_difficulty;
     const wideDifficulty: string = info.wide_difficulty;

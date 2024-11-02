@@ -416,6 +416,7 @@ export class DaemonDataService {
 
     try {
       this._daemonRunning = await this.daemonService.isRunning();
+      const firstRefresh = this._firstRefresh;
       this._firstRefresh = false;
 
       if (!this._daemonRunning) {
@@ -425,6 +426,15 @@ export class DaemonDataService {
       }
 
       await this.refreshProcessStats();
+
+      if (firstRefresh) {
+        this._gettingIsBlockchainPruned = true;
+
+        const settings = await this.daemonService.getSettings();
+        this._isBlockchainPruned = settings.pruneBlockchain;
+  
+        this._gettingIsBlockchainPruned = false;
+      }
 
       this._gettingDaemonInfo = true;
       this._daemonInfo = await this.daemonService.getInfo();
@@ -451,24 +461,7 @@ export class DaemonDataService {
         this._gettingLastBlockHeader = false;
       }
 
-
-      this._gettingIsBlockchainPruned = true;
-
-      const settings = await this.daemonService.getSettings();
-      this._isBlockchainPruned = settings.pruneBlockchain;
-      /*
-      if (firstRefresh) {
-        this.daemonService.pruneBlockchain(true).then((info) => {
-          this._isBlockchainPruned = info.pruned;
-        }).catch((error) => {
-          console.error(error);
-        });
-      }
-      */
-
-      this._gettingIsBlockchainPruned = false;
-
-      if (this._daemonInfo.synchronized) await this.refreshAltChains();
+      if (this._daemonInfo.synchronized && this._daemonInfo.altBlocksCount > 0) await this.refreshAltChains();
 
       this._gettingNetStats = true;
       this.netStatsRefreshStart.emit();
@@ -477,9 +470,10 @@ export class DaemonDataService {
       this.netStatsRefreshEnd.emit();
       this._gettingNetStats = false;
 
-      if (this._daemonInfo.synchronized) await this.refreshMiningStatus();
-
-      if (this._daemonInfo.synchronized) await this.refreshMinerData();
+      if (this._daemonInfo.coreSynchronized) {
+        await this.refreshMiningStatus();
+        await this.refreshMinerData();
+      }
 
       this._gettingPeerList = true;
       this._peerList = await this.daemonService.getPeerList();

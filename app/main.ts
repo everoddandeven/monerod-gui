@@ -254,10 +254,7 @@ function createWindow(): BrowserWindow {
   return win;
 }
 
-const createSplashWindow = async (): Promise<BrowserWindow | undefined> => {
-  if (os.platform() == 'win32') {
-    return undefined;
-  }
+const createSplashWindow = async (): Promise<BrowserWindow> => {
 
   const window = new BrowserWindow({
     width: 480,
@@ -716,7 +713,7 @@ try {
       await new Promise<void>((resolve, reject) => {
         try {
           setTimeout(() => {
-            if (splash) splash.close();
+            splash.close();
             if (!minimized) win?.show();
             resolve();
           }, 2600);
@@ -1028,7 +1025,7 @@ try {
   });
 
   ipcMain.handle('is-app-image', (event: IpcMainInvokeEvent) => {
-    const isAppImage: boolean = !!process.env.APPIMAGE;
+    const isAppImage: boolean = (!!process.env.APPIMAGE) || (!!process.env.PORTABLE_EXECUTABLE_DIR);
 
     win?.webContents.send('on-is-app-image', isAppImage ? true : false);
   });

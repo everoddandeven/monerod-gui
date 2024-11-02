@@ -17,11 +17,16 @@
   "win": {
     "icon": "dist/assets/icons",
     "target": [
+      "msi",
       "portable"
     ]
   },
+  "msi": {
+    "artifactName": "${productName}-${version}-setup.${ext}",
+    "createDesktopShortcut": "always"
+  },
   "portable": {
-    "splashImage": "dist/assets/icons/electron.bmp"
+    "artifactName": "${productName}-${version}-portable.${ext}"
   },
   "mac": {
     "icon": "dist/assets/icons",
