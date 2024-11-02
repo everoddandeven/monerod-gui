@@ -51,8 +51,5 @@ jobs:
     - name: Install Dependencies
       run: brew upgrade python-setuptools && python3 -m pip install setuptools && npm install -g appdmg && npm i && npm i -D cli-truncate iconv-corefoundation
 
-    - name: Check lint
-      run: npm run lint
-
     - name: Build the app
       run: npm run electron:build:mac

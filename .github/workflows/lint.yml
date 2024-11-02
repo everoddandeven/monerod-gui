@@ -1,5 +1,5 @@
 # This is a basic workflow to help you get started with Actions
-name: 'Ubuntu 24.04 - x64 DEB Build'
+name: 'Lint Test'
 
 # Controls when the action will run.
 on:
@@ -53,11 +53,6 @@ jobs:
     - name: Install Dependencies
       run: npm i
 
-    - name: Build the app
-      run: npm run electron:build:deb
+    - name: Lint Test
+      run: npm run lint
 
-    - name: Upload deb package
-      uses: actions/upload-artifact@v4
-      with:
-        name: my-artifact
-        path: dist/installers/monerod-gui?.deb
