@@ -2,6 +2,9 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
+  copyToClipboard: (content) => {
+    ipcRenderer.invoke('copy-to-clipboard', content);
+  },
   onTrayStartDaemon: (callback) => {
     ipcRenderer.on('on-tray-start-daemon', callback);
   },

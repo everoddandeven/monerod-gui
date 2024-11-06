@@ -15,9 +15,11 @@
   <div class="tab-pane fade show active" id="pills-overview" role="tabpanel" aria-labelledby="pills-overview-tab" tabindex="0">
     <div class="container mt-5">
       <div class="card shadow-lg border-0">
+        
         <div class="card-header bg-primary text-white text-center">
           <h3 class="card-title mb-0">Monerod GUI</h3>
         </div>
+
         <div class="card-body">
           <h5 class="card-subtitle mb-2 text-muted">Version: {{ guiVersion }}</h5>
           <p class="card-text">
@@ -32,37 +34,24 @@
             <br>
             THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.          </p>
     
-          <div class="row mt-4">
-            <div class="col-md-12">
-              <h6>Donations</h6>
-              <div class="card">
-                <div class="card-body">
-                  <ul class="list-group">
-                    <li class="list-group-item text-center">
-                      <h4>XMR</h4>
-                      <br>
-                      <p class="text-center">
-                        <img src="assets/donations/xmr.png" width="200" height="200"/><br>
-                        <br>
-                        <code>84Q1SdQgFWaEWRn5KcvSPCQUa3NF39EJ3HPCTaiM86RHLLftqgTZpkP24jXrK5YpeedWbQAjHcFcDLpFJfr9TypfAU7pPjA</code>
-                      </p>
-                    </li>
-                    <li class="list-group-item text-center">
-                      <h4>BTC</h4>
-                      <br>
-                      <p class="text-center">
-                        <img src="assets/donations/btc.png" width="200" height="200"/><br>
-                        <br>
-                        <code>bc1qndc2lesy0sse9vj33a35pnfrqz4znlhhs58vfp</code>
-                      </p>
-
-                    </li>                    
-                  </ul>
-                </div>
-              </div>
-            </div>
+          <div class="card-footer text-muted d-flex justify-content-between align-items-center">
+            <span>&copy; 2024 Monerod GUI</span>
           </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
 
+  <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab" tabindex="0">
+    <div class="container mt-5">
+      <div class="card shadow-lg border-0">
+        
+        <div class="card-header bg-primary text-white text-center">
+          <h3 class="card-title mb-0">Contact</h3>
+        </div>
+
+        <div class="card-body">
           <ul class="list-group list-group-flush">
             <li class="list-group-item"><i class="bi bi-github fs-4 m-4"></i> <strong>GitHub:</strong> https://github.com/everoddandeven/monerod-gui</li>
             <li class="list-group-item"><i class="bi bi-chat-square-quote fs-4 m-4"></i> <strong>Matrix:</strong> &#64;everoddandeven:monero.social</li>
@@ -70,13 +59,51 @@
             <li class="list-group-item"><i class="bi bi-signal fs-4 m-4"></i><strong>Signal:</strong> &#64;everoddandeven.01</li>
           </ul>
         </div>
-        <div class="card-footer text-muted d-flex justify-content-between align-items-center">
-          <span>&copy; 2024 Monerod GUI</span>
-          <div>
-          </div>
-        </div>
+
       </div>
     </div>
     
   </div>
+
+  <div class="tab-pane fade" id="pills-donate" role="tabpanel" aria-labelledby="pills-donate-tab" tabindex="0">
+    <div class="container mt-5">
+      <div class="card shadow-lg border-0">
+        
+        <div class="card-header bg-primary text-white text-center">
+          <h3 class="card-title mb-0">Donate</h3>
+        </div>
+
+        <div class="card-body">
+          <ul class="list-group">
+            <li class="list-group-item text-center">
+                                      
+              <div class="col-md-2 mx-auto">
+                <select class="form-select" id="log-level" [(ngModel)]="donateCrypto" [ngModelOptions]="{standalone: true}">
+                  <option [ngValue]="'XMR'">XMR</option>
+                  <option [ngValue]="'BTC'">BTC</option>
+                </select>
+              </div>
+
+              <br>
+              <p *ngIf="donateCrypto === 'XMR'" class="text-center">
+                <img src="assets/donations/xmr.png" width="200" height="200"/><br>
+                <br>
+                <code>{{XMRAddress}}</code>
+              </p>
+              <p *ngIf="donateCrypto === 'BTC'" class="text-center">
+                <img src="assets/donations/btc.png" width="200" height="200"/><br>
+                <br>
+                <code>{{BTCAddress}}</code>
+              </p>
+              <button *ngIf="!addressCopied" type="button" class="btn btn-secondary btn-sm" (click)="copyAddressToClipboard()"><i class="bi bi-clipboard"></i> Copy to clipboard</button>
+              <button *ngIf="addressCopied" type="button" class="btn btn-success btn-sm" ><i class="bi bi-clipboard-check"></i> Copied to clipboard</button>
+            </li>                   
+          </ul>
+        </div>
+
+      </div>
+    </div>
+    
+  </div>
+
 </div>

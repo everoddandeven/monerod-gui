@@ -1,6 +1,6 @@
 import { EventEmitter, Injectable, NgZone } from '@angular/core';
 import { DaemonService } from './daemon.service';
-import { BlockCount, BlockHeader, Chain, Connection, CoreIsBusyError, DaemonInfo, MinerData, MiningStatus, NetStats, NetStatsHistory, PeerInfo, ProcessStats, PublicNode, SyncInfo, TimeUtils, TxBacklogEntry, TxPool, TxPoolStats } from '../../../../common';
+import { BlockCount, BlockHeader, Chain, Connection, CoreIsBusyError, DaemonInfo, MinerData, MiningStatus, NetHashRateHistory, NetStats, NetStatsHistory, PeerInfo, ProcessStats, PublicNode, SyncInfo, TimeUtils, TxBacklogEntry, TxPool, TxPoolStats } from '../../../../common';
 import { ElectronService } from '../electron/electron.service';
 
 @Injectable({
@@ -42,6 +42,8 @@ export class DaemonDataService {
   private _netStatsHistory: NetStatsHistory = new NetStatsHistory();
   private _gettingNetStats: boolean = false;
 
+  private _hashRateHistory: NetHashRateHistory = new NetHashRateHistory();
+
   private _miningStatus?: MiningStatus;
   private _gettingMiningStatus: boolean = false;
 
@@ -81,6 +83,7 @@ export class DaemonDataService {
 
     this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
       this.ngZone.run(() => {
+        this._hashRateHistory = new NetHashRateHistory();
         if (running) {
           this._daemonRunning = true;
           this.startLoop();
@@ -253,6 +256,10 @@ export class DaemonDataService {
     return this._gettingTxPoolStats;
   }
 
+  public get netHashRateHistory(): NetHashRateHistory {
+    return this._hashRateHistory;
+  }
+
   public setRefreshTimeout(ms: number = 5000): void {
     this.refreshTimeoutMs = ms;
   }
@@ -356,14 +363,7 @@ export class DaemonDataService {
 
     try {
       const settings = await this.daemonService.getSettings();
-    
-      const updateInfo = await this.daemonService.checkUpdate()
-  
-      if (updateInfo.update && settings.upgradeAutomatically) {
-        await this.daemonService.upgrade();
-        return;
-      }
-      
+
       const syncAlreadyDisabled = this.daemonService.settings.noSync;
   
       if (!settings.noSync && !syncAlreadyDisabled && !settings.syncOnWifi) {
@@ -440,9 +440,17 @@ export class DaemonDataService {
       this._daemonInfo = await this.daemonService.getInfo();
       this._gettingDaemonInfo = false;
 
+      if (this._daemonInfo.synchronized) {
+        this._hashRateHistory.add(this._daemonInfo.gigaHashRate);
+      }
+
       if (this.daemonService.settings.upgradeAutomatically && this._daemonInfo.updateAvailable) {
-        await this.daemonService.upgrade();
-        return;
+        const updateInfo = await this.daemonService.checkUpdate()
+  
+        if (updateInfo.update) {
+          await this.daemonService.upgrade();
+          return;
+        }
       }
 
       this._gettingSyncInfo = true;

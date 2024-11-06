@@ -53,12 +53,14 @@ import 'zone.js';  // Included with Angular CLI.
  */
 
 import 'jquery';
+import '@popperjs/core';
 import 'bootstrap-table';
 import { NotificationConstructorOptions } from 'electron';
 
 declare global {
   interface Window {
     electronAPI: {
+      copyToClipboard: (content: string) => void;
       startMonerod: (options: string[]) => void;
       
       monitorMonerod: () => void;

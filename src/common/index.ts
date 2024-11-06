@@ -40,6 +40,7 @@ export { SpentKeyImage } from './SpentKeyImage';
 export { TxPool } from './TxPool';
 export { TxPoolStats, TxPoolHisto } from './TxPoolStats';
 export { ProcessStats } from './ProcessStats';
+export { NetHashRateHistory, NetHashRateHistoryEntry } from './NetHashRateHistory';
 
 export * from './error';
 export * from './request';

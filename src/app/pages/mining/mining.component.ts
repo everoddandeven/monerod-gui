@@ -1,19 +1,25 @@
-import { AfterContentInit, AfterViewInit, Component, NgZone } from '@angular/core';
+import { AfterContentInit, AfterViewInit, Component, NgZone, OnDestroy } from '@angular/core';
 import { DaemonService, DaemonDataService } from '../../core/services';
 import { NavbarLink, NavbarService } from '../../shared/components';
-import { AddedAuxPow, AuxPoW, BlockTemplate, GeneratedBlocks, MiningStatus, MinerData, Chain } from '../../../common';
+import { AddedAuxPow, AuxPoW, BlockTemplate, GeneratedBlocks, MiningStatus, MinerData, Chain, NetHashRateHistoryEntry } from '../../../common';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { SimpleBootstrapCard } from '../../shared/utils';
+import { Chart, ChartData } from 'chart.js';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-mining',
   templateUrl: './mining.component.html',
   styleUrl: './mining.component.scss'
 })
-export class MiningComponent extends BasePageComponent implements AfterViewInit, AfterContentInit {
+export class MiningComponent extends BasePageComponent implements AfterViewInit, AfterContentInit, OnDestroy {
 
   public get coreBusy(): boolean {
     return this.daemonData.info? !this.daemonData.info.coreSynchronized : true;
+  }
+
+  public get synchronized(): boolean {
+    return this.daemonData.info ? this.daemonData.info.synchronized : false;
   }
 
   public get miningStatus(): MiningStatus | undefined {
@@ -98,6 +104,8 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     return parseFloat(origValue.toFixed(2));
   }
 
+  private netHashRateChart?: Chart;
+
   //private txBacklog: MineableTxBacklog[]
   public cards: SimpleBootstrapCard[];
 
@@ -147,19 +155,115 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
       new NavbarLink('pills-add-aux-pow-tab', '#pills-add-aux-pow', 'add-aux-pow', false, 'Add Aux PoW')
     ]);
     
-    this.daemonData.syncEnd.subscribe(() => {
+    const syncEndSub: Subscription = this.daemonData.syncEnd.subscribe(() => {
       this.refresh();
-    })
+    });
+
+    this.subscriptions.push(syncEndSub);
+  }
+
+  private initNetHashRateChart(): void {
+    setTimeout(() => {
+      this.ngZone.run(() => {
+        const ctx = <HTMLCanvasElement>document.getElementById('netHashRateChart');
+  
+        if (!ctx) {
+          console.warn("Could not find net hash rate chart");
+          return;
+        }
+    
+        this.netHashRateChart = new Chart(ctx, {
+          type: 'line',
+          data: this.buildNetHashRateData(),
+          options: {
+            animation: false,
+            plugins: {
+              legend: {
+                display: false
+              },
+              tooltip: {
+                boxPadding: 3
+              },
+              decimation: {
+                enabled: true,
+                algorithm: 'min-max'
+              }
+            }
+          }
+        });
+      });
+    }, 0);
+  }
+
+  private refreshNetHashRateHistory(): void {
+    if (!this.synchronized) {
+      return;
+    }
+
+    if (!this.netHashRateChart) {
+      this.initNetHashRateChart();
+    }
+
+    if (!this.netHashRateChart) {
+      console.warn("Net hash rate chart is not initiliazed");
+      return;
+    }
+
+    const last = this.daemonData.netHashRateHistory.last;
+
+    if (!last) {
+      return;
+    }
+
+    const label = `${last.date.toLocaleDateString()} ${last.date.toLocaleTimeString()}`;
+
+    this.netHashRateChart.data.labels?.push(label);
+    this.netHashRateChart.data.datasets.forEach((dataset) => {
+      dataset.data.push(last.gigaHashRate);
+    });
+
+    this.netHashRateChart.update();
+  }
+
+  private buildNetHashRateData(): ChartData {
+    const labels: string [] = [];
+    const data: number[] = [];
+    this.daemonData.netHashRateHistory.history.forEach((entry: NetHashRateHistoryEntry) => {
+      labels.push(`${entry.date.toLocaleTimeString()} ${entry.date.toLocaleDateString()}`);
+      data.push(entry.gigaHashRate);
+    });
+
+    return {
+      labels: labels,
+      datasets: [{
+        data: data,
+        backgroundColor: 'transparent',
+        borderColor: '#ff5733',
+        borderWidth: 4,
+        pointBackgroundColor: '#ff5733',
+        radius: 0
+      }]
+    };
   }
 
   public ngAfterViewInit(): void {
     this.loadTables();
+    this.initNetHashRateChart();
   }
 
   public override ngAfterContentInit(): void {
     super.ngAfterContentInit();
 
     this.cards = this.createCards();
+  }
+
+  public override ngOnDestroy(): void {
+    if (this.netHashRateChart) {
+      this.netHashRateChart.destroy();
+      this.netHashRateChart = undefined;
+    }
+
+    super.ngOnDestroy();
   }
 
   private loadTables(): void {
@@ -230,6 +334,7 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
 
   private refresh(): void {
     this.loadChainsTable();
+    this.refreshNetHashRateHistory();
     this.cards = this.createCards();
   }
 

@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain, screen, dialog, Tray, Menu, MenuItemConstructorOptions, 
-  IpcMainInvokeEvent, Notification, NotificationConstructorOptions 
+  IpcMainInvokeEvent, Notification, NotificationConstructorOptions, clipboard,
 } from 'electron';
 import { ChildProcessWithoutNullStreams, exec, ExecException, spawn } from 'child_process';
 import * as path from 'path';
@@ -254,7 +254,11 @@ function createWindow(): BrowserWindow {
   return win;
 }
 
-const createSplashWindow = async (): Promise<BrowserWindow> => {
+const createSplashWindow = async (): Promise<BrowserWindow | undefined> => {
+
+  if (os.platform() == 'win32') {
+    return undefined;
+  }
 
   const window = new BrowserWindow({
     width: 480,
@@ -713,8 +717,11 @@ try {
       await new Promise<void>((resolve, reject) => {
         try {
           setTimeout(() => {
-            splash.close();
-            if (!minimized) win?.show();
+            if (splash) splash.close();
+            if (!minimized) { 
+              win?.show();
+              win?.maximize();
+            }
             resolve();
           }, 2600);
         }
@@ -1028,6 +1035,10 @@ try {
     const isAppImage: boolean = (!!process.env.APPIMAGE) || (!!process.env.PORTABLE_EXECUTABLE_DIR);
 
     win?.webContents.send('on-is-app-image', isAppImage ? true : false);
+  });
+
+  ipcMain.handle('copy-to-clipboard', (event: IpcMainInvokeEvent, content: string) => {
+    clipboard.writeText(content, "selection");
   });
 
 } catch (e) {
