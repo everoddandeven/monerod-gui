@@ -54,8 +54,14 @@ jobs:
     - name: Build the app
       run: npm run electron:build
     
-    - name: Upload artifact
+    - name: Upload DMG artifact
       uses: actions/upload-artifact@v4
       with:
-        name: monerod-gui
-        path: release/
+        name: monerod-gui-darwin12.dmg
+        path: release/monerod-gui-?.dmg
+    
+    - name: Upload PKG artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: monerod-gui-darwin12.pkg
+        path: release/monerod-gui-?.pkg
