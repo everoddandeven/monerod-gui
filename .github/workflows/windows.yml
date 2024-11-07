@@ -57,11 +57,11 @@ jobs:
     - name: Upload EXE artifact
       uses: actions/upload-artifact@v4
       with:
-        name: monerod-gui-windows-portable.zip
+        name: monerod-gui-windows-portable
         path: release/*.exe
 
     - name: Upload MSI artifact
       uses: actions/upload-artifact@v4
       with:
-        name: monerod-gui-windows-installer.zip
+        name: monerod-gui-windows-installer
         path: release/*.msi
