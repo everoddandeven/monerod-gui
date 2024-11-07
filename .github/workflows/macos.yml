@@ -53,3 +53,9 @@ jobs:
 
     - name: Build the app
       run: npm run electron:build
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: monerod-gui
+        path: release/
