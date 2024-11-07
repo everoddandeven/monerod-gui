@@ -221,7 +221,7 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
       });
     });
 
-    const daemonStatusSub = this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
+    const daemonStatusSub: Subscription = this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
       if (!running) {
         this.destroyTables();
       }

@@ -125,7 +125,7 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
       
       queryResult.forEach((el) => tooltipTriggerList.push(el));
 
-      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl, {
+      const tooltipList: bootstrap.Tooltip[] = tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl, {
         placement: 'bottom'
       }));
   
