@@ -57,11 +57,11 @@ jobs:
     - name: Upload DMG artifact
       uses: actions/upload-artifact@v4
       with:
-        name: monerod-gui-darwin12.dmg
+        name: monerod-gui-darwin12-dmg.zip
         path: release/*.dmg
     
     - name: Upload PKG artifact
       uses: actions/upload-artifact@v4
       with:
-        name: monerod-gui-darwin12.pkg
+        name: monerod-gui-darwin12-pkg.zip
         path: release/*.pkg

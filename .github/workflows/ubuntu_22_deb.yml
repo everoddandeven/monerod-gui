@@ -55,3 +55,9 @@ jobs:
 
     - name: Build the app
       run: npm run electron:build:deb
+
+    - name: Upload DEB artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: monerod-gui-ubuntu-22-installer.zip
+        path: release/*.deb
