@@ -786,6 +786,9 @@ try {
 
   ipcMain.handle('quit', (event: IpcMainInvokeEvent) => {
     isQuitting = true;
+    tray.destroy();
+    win?.close();
+    win?.destroy();
     app.quit();
   });
 
