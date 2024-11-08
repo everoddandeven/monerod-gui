@@ -257,7 +257,9 @@ function createWindow(): BrowserWindow {
   return win;
 }
 
-const createSplashWindow = async (): Promise<BrowserWindow | undefined> => {    
+const createSplashWindow = async (): Promise<BrowserWindow | undefined> => {
+  return undefined;
+  
   if (os.platform() == 'win32' || isAppImage()) {
     return undefined;
   }
