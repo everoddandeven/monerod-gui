@@ -60,4 +60,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: monerod-gui-ubuntu-22-installer
-        path: release/*.deb
+        path: dist/installers/*.deb
