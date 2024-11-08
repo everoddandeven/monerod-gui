@@ -95,6 +95,11 @@
                 <br>
                 <code>{{BTCAddress}}</code>
               </p>
+              <p *ngIf="donateCrypto === 'WOW'" class="text-center">
+                <img src="assets/donations/wow.png" width="200" height="200"/><br>
+                <br>
+                <code>{{WOWAddress}}</code>
+              </p>
               <button *ngIf="!addressCopied" type="button" class="btn btn-secondary btn-sm" (click)="copyAddressToClipboard()"><i class="bi bi-clipboard"></i> Copy to clipboard</button>
               <button *ngIf="addressCopied" type="button" class="btn btn-success btn-sm" ><i class="bi bi-clipboard-check"></i> Copied to clipboard</button>
             </li>                   

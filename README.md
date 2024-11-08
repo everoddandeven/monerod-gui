@@ -213,3 +213,10 @@ Please consider donating to support the development of this project.
  <img src="donate_btc.png" width="115" height="115" alt="btcQrCode"/><br>
  <code>bc1qndc2lesy0sse9vj33a35pnfrqz4znlhhs58vfp</code>
 </p>
+
+### Wownero
+
+<p align="center">
+ <img src="donate_wow.png" width="115" height="115" alt="wowQrCode"/><br>
+ <code>WW33Zj3xu6EGTyKVWaz8EQZmqsTXKdK5eG7PDRaiPuJ1LyREhGHLCRDX3AaLx4r9NFCThRvsbq99KATbswJaxd3T1iwQLJ3Tw</code>
+</p>
