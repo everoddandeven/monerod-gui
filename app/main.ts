@@ -11,6 +11,8 @@ import * as os from 'os';
 import * as pidusage from 'pidusage';
 import AutoLaunch from './auto-launch';
 import * as AdmZip from 'adm-zip';
+
+const batteryLevel = require('battery-level');
 const network = require('network');
 
 interface Stats {
@@ -998,6 +1000,15 @@ try {
       console.error(error);
       win?.webContents.send('on-enable-auto-launch-error', `${error}`);
     });
+  });
+
+  ipcMain.handle('get-battery-level', (event: IpcMainInvokeEvent) => {
+    batteryLevel().then((level: number) => {
+      win?.webContents.send('on-get-battery-level', level);
+    }).catch((error: any) => {
+      console.error(error);
+      win?.webContents.send('on-get-battery-level', -1);
+    })
   });
 
   ipcMain.handle('disable-auto-launch', (event: IpcMainInvokeEvent) => {

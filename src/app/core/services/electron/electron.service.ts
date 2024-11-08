@@ -91,6 +91,19 @@ export class ElectronService {
     return false;
   }
 
+  public async getBatteryLevel(): Promise<number> {
+    const promise = new Promise<number>((resolve) => {
+      window.electronAPI.onGetBatteryLevel((event: any, level: number) => {
+        window.electronAPI.unregisterOnGetBatteryLevel();
+        resolve(level);
+      });
+    });
+
+    window.electronAPI.getBatteryLevel();
+
+    return await promise;
+  }
+
   public async isAutoLaunched(): Promise<boolean> {
     if (this._isAutoLaunched === undefined) {
       try {

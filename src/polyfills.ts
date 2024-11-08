@@ -151,6 +151,10 @@ declare global {
       onTrayQuitDaemon: (callback: (event: any) => void) => void;
       setTrayItemEnabled: (id: string, enabled: boolean) => void;
       setTrayToolTip: (toolTip: string) => void;
+
+      getBatteryLevel: () => void;
+      onGetBatteryLevel: (callback: (event: any, level: number) => void) => void;
+      unregisterOnGetBatteryLevel: () => void;
     };
   }
 }

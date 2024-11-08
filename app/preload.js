@@ -2,6 +2,15 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
+  getBatteryLevel: () => {
+    ipcRenderer.invoke('get-battery-level');
+  },
+  onGetBatteryLevel: (callback) => {
+    ipcRenderer.on('on-get-battery-level', callback);
+  },
+  unregisterOnGetBatteryLevel: () => {
+    ipcRenderer.removeAllListeners('on-get-battery-level');
+  },
   copyToClipboard: (content) => {
     ipcRenderer.invoke('copy-to-clipboard', content);
   },
