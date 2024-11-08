@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain, screen, dialog, Tray, Menu, MenuItemConstructorOptions, 
-  IpcMainInvokeEvent, Notification, NotificationConstructorOptions, clipboard,
+  IpcMainInvokeEvent, Notification, NotificationConstructorOptions, clipboard
 } from 'electron';
 import { ChildProcessWithoutNullStreams, exec, ExecException, spawn } from 'child_process';
 import * as path from 'path';
@@ -96,7 +96,9 @@ let trayMenu: Menu;
 const args = process.argv.slice(1),
   serve = args.some(val => val === '--serve');
 
-
+const isAppImage: () => boolean = () => {
+  return (!!process.env.APPIMAGE) || (!!process.env.PORTABLE_EXECUTABLE_DIR);
+}
 
 // #region Window
 
@@ -228,6 +230,7 @@ function createWindow(): BrowserWindow {
     }
 
     const url = new URL(path.join('file:', dirname, pathIndex));
+    console.log(`Main window url: ${url}`);
 
     win.loadURL(url.href);
   }
@@ -254,9 +257,8 @@ function createWindow(): BrowserWindow {
   return win;
 }
 
-const createSplashWindow = async (): Promise<BrowserWindow | undefined> => {
-
-  if (os.platform() == 'win32') {
+const createSplashWindow = async (): Promise<BrowserWindow | undefined> => {    
+  if (os.platform() == 'win32' || isAppImage()) {
     return undefined;
   }
 
@@ -281,8 +283,7 @@ const createSplashWindow = async (): Promise<BrowserWindow | undefined> => {
     pathIndex = '../dist/splash.html';
   }
 
-  const cdir = dirname.replace('/app/', '/src/');
-  const url = new URL(path.join('file:', cdir, pathIndex));
+  const url = new URL(path.join('file:', dirname, pathIndex));
 
   await window.loadURL(url.href);
 
@@ -290,7 +291,7 @@ const createSplashWindow = async (): Promise<BrowserWindow | undefined> => {
     setTimeout(() => {
       window.show();
       resolve();
-    }, 1000);
+    }, 400);
   });
 
   return window;
@@ -1035,17 +1036,17 @@ try {
   });
 
   ipcMain.handle('is-app-image', (event: IpcMainInvokeEvent) => {
-    const isAppImage: boolean = (!!process.env.APPIMAGE) || (!!process.env.PORTABLE_EXECUTABLE_DIR);
-
-    win?.webContents.send('on-is-app-image', isAppImage ? true : false);
+    win?.webContents.send('on-is-app-image', isAppImage());
   });
 
   ipcMain.handle('copy-to-clipboard', (event: IpcMainInvokeEvent, content: string) => {
     clipboard.writeText(content, "selection");
   });
 
+
 } catch (e) {
   // Catch Error
   console.error(e);
   // throw e;
 }
+

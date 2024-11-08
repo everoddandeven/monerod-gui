@@ -38,14 +38,13 @@
             ],
             "scripts": [
               "node_modules/jquery/dist/jquery.min.js",
-              "node_modules/@popperjs/core/dist/umd/popper.min.js",
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js",
               "node_modules/bootstrap-table/dist/bootstrap-table.min.js"
             ],
             "styles": [
+              "src/styles.scss",
               "node_modules/bootstrap-icons/font/bootstrap-icons.css",
-              "node_modules/bootstrap-table/dist/bootstrap-table.min.css",
-              "src/styles.scss"
+              "node_modules/bootstrap-table/dist/bootstrap-table.min.css"
             ],
             "customWebpackConfig": {
               "path": "./angular.webpack.js",

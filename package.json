@@ -3,16 +3,31 @@
   "version": "0.1.2",
   "description": "Monero daemon GUI",
   "icon": "./assets/icons/favicon.ico",
-  "homepage": "https://github.com/everoddandeven/monerod-gui",
+  "homepage": "https://github.com/everoddandeven/monerod-gui#readme",
   "author": {
     "name": "everoddandeven",
     "email": "everoddandeven@protonmail.com"
   },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/everoddandeven/monerod-gui/issues",
+    "email": "everoddandeven@protonmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/everoddandeven/monerod-gui.git"
+  },
+  "funding": [
+    {
+      "type": "individual",
+      "url": "https://github.com/everoddandeven/monerod-gui?tab=readme-ov-file#donating"
+    }
+  ],
   "keywords": [
     "angular",
     "angular 17",
     "electron",
-    "electron 30",
+    "electron 33",
     "nodejs",
     "typescript",
     "jest",
@@ -25,7 +40,8 @@
     "monero",
     "monerod",
     "monerod gui",
-    "monerod-gui"
+    "monerod-gui",
+    "monero node manager"
   ],
   "main": "app/main.js",
   "private": true,
@@ -69,7 +85,6 @@
     "@angular/platform-browser": "17.3.12",
     "@angular/platform-browser-dynamic": "17.3.12",
     "@angular/router": "17.3.12",
-    "@popperjs/core": "2.11.8",
     "bootstrap": "5.3.3",
     "bootstrap-icons": "1.11.3",
     "bootstrap-table": "1.23.5",
@@ -109,7 +124,7 @@
     "@typescript-eslint/eslint-plugin": "7.7.1",
     "@typescript-eslint/parser": "7.7.1",
     "conventional-changelog-cli": "5.0.0",
-    "electron": "33.1.0",
+    "electron": "33.2.0",
     "electron-builder": "25.1.8",
     "electron-debug": "4.1.0",
     "electron-installer-dmg": "5.0.1",
@@ -136,6 +151,6 @@
     "node": ">= 16.14.0 || >= 18.10.0"
   },
   "browserslist": [
-    "chrome 114"
+    "chrome 130"
   ]
 }

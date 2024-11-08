@@ -5,7 +5,7 @@ import { DaemonService } from '../../../core/services/daemon/daemon.service';
 import { DaemonDataService, MoneroInstallerService } from '../../../core/services';
 import { DaemonSettings } from '../../../../common';
 import { Subscription } from 'rxjs';
-import * as bootstrap from 'bootstrap';
+import { Tooltip } from 'bootstrap';
 
 @Component({
   selector: 'app-navbar',
@@ -104,7 +104,7 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
     this.subscriptions.push(onSavedSettingsSub, onStatusChangedSub);
   }
 
-  private lastTooltips: bootstrap.Tooltip[] = [];
+  private lastTooltips: Tooltip[] = [];
 
   private disposeTooltips(): void {
     this.lastTooltips.forEach((tooltip) => {
@@ -125,7 +125,7 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
       
       queryResult.forEach((el) => tooltipTriggerList.push(el));
 
-      const tooltipList: bootstrap.Tooltip[] = tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl, {
+      const tooltipList: Tooltip[] = tooltipTriggerList.map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl, {
         placement: 'bottom'
       }));
   
