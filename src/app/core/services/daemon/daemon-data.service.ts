@@ -509,9 +509,11 @@ export class DaemonDataService {
         this._txPoolStats = undefined;
       }
 
-      this._gettingConnections = true;
-      this._connections = await this.daemonService.getConnections();
-      this._gettingConnections = false;
+      if (!this.daemonService.settings.offline) {
+        this._gettingConnections = true;
+        this._connections = await this.daemonService.getConnections();
+        this._gettingConnections = false;
+      }
 
       this._lastRefreshHeight = this._daemonInfo.heightWithoutBootstrap;
       this._lastRefresh = Date.now();

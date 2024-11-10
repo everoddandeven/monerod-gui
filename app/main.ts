@@ -8,10 +8,10 @@ import * as https from 'https';
 import { createHash } from 'crypto';
 import * as tar from 'tar';
 import * as os from 'os';
-import * as pidusage from 'pidusage';
 import AutoLaunch from './auto-launch';
-import * as AdmZip from 'adm-zip';
+import AdmZip from 'adm-zip';
 
+const pidusage = require('pidusage');
 const batteryLevel = require('battery-level');
 const network = require('network');
 
@@ -205,7 +205,7 @@ function createWindow(): BrowserWindow {
       allowRunningInsecureContent: (serve),
       contextIsolation: true,
       devTools: !app.isPackaged,
-      sandbox: false
+      sandbox: true
     },
     show: false,
     autoHideMenuBar: true,
@@ -495,7 +495,6 @@ function monitorMonerod(): void {
     }
 
     win?.webContents.send('on-monitor-monerod', stats);
-
   });
 }
 

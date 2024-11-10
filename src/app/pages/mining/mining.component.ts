@@ -327,8 +327,7 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
 
       return true;
 
-    } catch (error: any) {
-      console.debug(error);
+    } catch {
       return false;
     }
   }
