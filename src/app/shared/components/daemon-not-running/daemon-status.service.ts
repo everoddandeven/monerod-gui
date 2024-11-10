@@ -78,45 +78,44 @@ export class DaemonStatusService {
     private daemonService: DaemonService, private electronService: ElectronService,
     private ngZone: NgZone
   ) {
-    const onSavedSettingsSub: Subscription = this.daemonService.onSavedSettings.subscribe((settings) => {
-      this.refresh().then().catch((error: any) => console.error(error));
+    const onSavedSettingsSub: Subscription = this.daemonService.onSavedSettings.subscribe(() => {
+      this.refresh();
     });
 
     const onDaemonStatusSub: Subscription = this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
-      this.refresh().then().catch((error: any) => console.error(error));
+      if (running) return;
+      this.refresh();
     });
 
     const onAcPower: Subscription = this.electronService.onAcPower.subscribe(() => {
-      this.refresh().then().catch((error: any) => console.error(error));
+      this.refresh();
     });
 
     const onBatteryPower: Subscription = this.electronService.onBatteryPower.subscribe(() => {
-      this.refresh().then().catch((error: any) => console.error(error));
+      this.refresh();
     });
 
-    this.refresh().then().catch((error: any) => console.error(error));
+    this.refresh();
 
     this.subscriptions.push(onSavedSettingsSub, onDaemonStatusSub, onAcPower, onBatteryPower);
   }
 
-  public async refresh(): Promise<void> {
+  public refresh(): void {
     //await this.daemonService.isRunning();
-    this.ngZone.run(() => {
-      setTimeout(async () => {
-        this.settings = await this.daemonService.getSettings();
-        this._runningOnBattery = await this.electronService.isOnBatteryPower();
+    this.ngZone.run(async () => {
+      this.settings = await this.daemonService.getSettings();
+      this._runningOnBattery = await this.electronService.isOnBatteryPower();
 
-        if (this._runningOnBattery) this._batteryLevel = await this.electronService.getBatteryLevel();
+      if (this._runningOnBattery) this._batteryLevel = await this.electronService.getBatteryLevel();
 
-        if (this.settings.runOnBattery && this._runningOnBattery && this.settings.batteryLevelThreshold > 0) {
-          const batteryLevel = await this.electronService.getBatteryLevel();
-          this._batteryTooLow = batteryLevel <= this.settings.batteryLevelThreshold;
-          console.log(`battery level: ${batteryLevel}, threshold: ${this.settings.batteryLevelThreshold}, too low: ${this._batteryTooLow}`);
-        }
-        else if (!this.settings.runOnBattery) {
-          this._batteryTooLow = false;
-        }
-      }, 0);
+      if (this.settings.runOnBattery && this._runningOnBattery && this.settings.batteryLevelThreshold > 0) {
+        const batteryLevel = await this.electronService.getBatteryLevel();
+        this._batteryTooLow = batteryLevel <= this.settings.batteryLevelThreshold;
+        console.log(`battery level: ${batteryLevel}, threshold: ${this.settings.batteryLevelThreshold}, too low: ${this._batteryTooLow}`);
+      }
+      else if (!this.settings.runOnBattery) {
+        this._batteryTooLow = false;
+      }
     });
   }
 

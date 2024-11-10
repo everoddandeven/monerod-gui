@@ -1,8 +1,5 @@
 import { Component, OnDestroy } from '@angular/core';
-import { DaemonService } from '../../../core/services/daemon/daemon.service';
-import { DaemonDataService, MoneroInstallerService } from '../../../core/services';
 import { Subscription } from 'rxjs';
-import { DaemonSettings } from '../../../../common';
 import { DaemonStatusService } from './daemon-status.service';
 
 @Component({
