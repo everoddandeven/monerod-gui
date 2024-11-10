@@ -85,8 +85,8 @@ export class PeersComponent extends BasePageComponent implements AfterViewInit {
               this.loadPeerListTable();
               resolve();
             }
-            catch(error) {
-              reject(error);
+            catch(error: any) {
+              reject(new Error(`${error}`));
             }
           });
         }, 1000);

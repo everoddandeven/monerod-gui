@@ -97,7 +97,7 @@ export class DaemonNotRunningComponent implements OnDestroy {
         this.daemonService.startDaemon().then(() => {
           resolve();
         }).catch((error: any) => {
-          reject(error);
+          reject(new Error(`${error}`));
         });
       }, 500)});
   }
@@ -108,7 +108,7 @@ export class DaemonNotRunningComponent implements OnDestroy {
         this.daemonService.restartDaemon().then(() => {
           resolve();
         }).catch((error: any) => {
-          reject(error);
+          reject(new Error(`${error}`));
         });
       }, 500)});
   }

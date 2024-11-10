@@ -416,7 +416,7 @@ export class DaemonService {
               this.onDaemonStatusChanged.emit(false);
               this.startedAt = undefined;
               this.starting = false;
-              reject(error);
+              reject(new Error(`${error}`));
             });
           }).catch((error: any) => {
             this.startedAt = undefined;
@@ -432,7 +432,7 @@ export class DaemonService {
           this.onDaemonStatusChanged.emit(false);
           this.startedAt = undefined;
           this.starting = false;
-          reject('Could not start daemon');
+          reject(new Error('Could not start daemon'));
         }
       })
     });
@@ -757,7 +757,7 @@ export class DaemonService {
         window.electronAPI.onMoneroVersionError((event: any, error: string) => {
           window.electronAPI.unregisterOnMoneroVersion();
           window.electronAPI.unregisterOnMoneroVersionError();
-          reject(error);
+          reject(new Error(error));
         });
       });
 
@@ -1193,7 +1193,7 @@ export class DaemonService {
       window.electronAPI.onMonitorMonerodError((event: any, error: string) => {
         window.electronAPI.unregisterOnMonitorMonerod();
         window.electronAPI.unregisterOnMonitorMonerodError();
-        reject(error);
+        reject(new Error(error));
       });
 
       window.electronAPI.onMonitorMonerod((event: any, stats: ProcessStats) => {

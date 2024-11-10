@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { CoreModule } from './core/core.module';
 import { SharedModule } from './shared/shared.module';
 
@@ -32,40 +32,33 @@ import { AboutModule } from './pages/about/about.module';
 // AoT requires an exported function for factories
 const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new TranslateHttpLoader(http, './assets/i18n/', '.json');
 
-@NgModule({
-  declarations: [AppComponent],
-  imports: [
-    BrowserModule,
-    FormsModule,
-    HttpClientModule,
-    CoreModule,
-    SharedModule,
-    HomeModule,
-    DetailModule,
-    BlockchainModule,
-    BansModule,
-    MiningModule,
-    TransactionsModule,
-    OutputsModule,
-    LogsModule,
-    SettingsModule,
-    HardForkInfoModule,
-    PeersModule,
-    VersionModule,
-    NetworkModule,
-    AboutModule,
-    TranslateModule,
-    AppRoutingModule,
-    TranslateModule.forRoot({
-        loader: {
-            provide: TranslateLoader,
-            useFactory: httpLoaderFactory,
-            deps: [HttpClient]
-        }
-    }),
-    LoadComponent
-],
-  providers: [],
-  bootstrap: [AppComponent]
-})
+@NgModule({ declarations: [AppComponent],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        FormsModule,
+        CoreModule,
+        SharedModule,
+        HomeModule,
+        DetailModule,
+        BlockchainModule,
+        BansModule,
+        MiningModule,
+        TransactionsModule,
+        OutputsModule,
+        LogsModule,
+        SettingsModule,
+        HardForkInfoModule,
+        PeersModule,
+        VersionModule,
+        NetworkModule,
+        AboutModule,
+        TranslateModule,
+        AppRoutingModule,
+        TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useFactory: httpLoaderFactory,
+                deps: [HttpClient]
+            }
+        }),
+        LoadComponent], providers: [provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule {}

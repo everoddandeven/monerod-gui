@@ -52,7 +52,7 @@ export class MoneroInstallerService {
           });
 
           if (progress.status.includes('Error')) {
-            reject(progress.status);
+            reject(new Error(progress.status));
           }
 
           if (progress.progress == 200) {

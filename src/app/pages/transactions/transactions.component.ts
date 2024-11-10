@@ -165,7 +165,7 @@ export class TransactionsComponent extends BasePageComponent implements AfterVie
 
       return true;
     }
-    catch(error) {
+    catch {
       return false;
     }
   }

@@ -76,7 +76,7 @@ export class ElectronService {
           });
         }
         catch(error: any) {
-          reject(error);
+          reject(new Error(`${error}`));
         }
       });
 
@@ -160,7 +160,7 @@ export class ElectronService {
         console.debug(event);
         window.electronAPI.unregisterOnEnableAutoLaunchError();
         window.electronAPI.unregisterOnEnableAutoLaunchSuccess();
-        reject(error);
+        reject(new Error(error));
       });
 
       window.electronAPI.onEnableAutoLaunchSuccess((event: any) => {
@@ -193,7 +193,7 @@ export class ElectronService {
         console.debug(event);
         window.electronAPI.unregisterOnDisableAutoLaunchError();
         window.electronAPI.unregisterOnDisableAutoLaunchSuccess();
-        reject(error);
+        reject(new Error(error));
       });
 
       window.electronAPI.onDisableAutoLaunchSuccess((event: any) => {
@@ -244,7 +244,7 @@ export class ElectronService {
     const promise = new Promise<string>((resolve, reject) => {
       window.electronAPI.onReadFileError((event: any, error: string) => {
         window.electronAPI.unregisterOnReadFile();
-        reject(error);
+        reject(new Error(error));
       });
 
       window.electronAPI.onReadFile((event: any, data: string) => {
@@ -262,7 +262,7 @@ export class ElectronService {
     const promise = new Promise<string>((resolve, reject) => {
       window.electronAPI.onSaveFileError((event: any, error: string) => {
         window.electronAPI.unregisterOnSaveFile();
-        reject(error);
+        reject(new Error(error));
       });
 
       window.electronAPI.onSaveFile((event: any, filePath: string) => {

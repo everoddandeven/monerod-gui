@@ -44,7 +44,8 @@ export class BansComponent extends BasePageComponent implements AfterViewInit {
 
       return true;
     }
-    catch(error) {
+    catch(error: any) {
+      console.error(error);
       return false;
     }
   }

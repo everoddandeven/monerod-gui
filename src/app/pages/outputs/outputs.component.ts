@@ -51,7 +51,7 @@ export class OutputsComponent extends BasePageComponent {
       });
 
       return true;
-    } catch(error) {
+    } catch {
       return false;
     }
   }
@@ -117,7 +117,7 @@ export class OutputsComponent extends BasePageComponent {
 
       return outs;
     }
-    catch(error) {
+    catch {
       return []
     }
   }
@@ -137,7 +137,7 @@ export class OutputsComponent extends BasePageComponent {
       _outs.forEach((_out) => Output.parse(_out));
 
       return true;
-    } catch(error) {
+    } catch {
       return false;
     }
   }
@@ -178,7 +178,7 @@ export class OutputsComponent extends BasePageComponent {
 
       return true;
     }
-    catch(error) {
+    catch {
       return false;
     }
   }
@@ -197,7 +197,7 @@ export class OutputsComponent extends BasePageComponent {
 
       return true;
     }
-    catch(error) {
+    catch {
       return false;
     }
   }
