@@ -111,12 +111,11 @@ export class DaemonStatusService {
       if (this.settings.runOnBattery && this._runningOnBattery && this.settings.batteryLevelThreshold > 0) {
         const batteryLevel = await this.electronService.getBatteryLevel();
         this._batteryTooLow = batteryLevel <= this.settings.batteryLevelThreshold;
-        console.log(`battery level: ${batteryLevel}, threshold: ${this.settings.batteryLevelThreshold}, too low: ${this._batteryTooLow}`);
       }
       else if (!this.settings.runOnBattery) {
         this._batteryTooLow = false;
       }
-    });
+    }).then().catch((error: any) => console.error(error));
   }
 
   public Dispose(): void {
