@@ -53,6 +53,9 @@ jobs:
 
     - name: Build the app
       run: npm run electron:build
+
+    - name: List artifacts
+      run: ls release/
     
     - name: Upload DMG artifact
       uses: actions/upload-artifact@v4

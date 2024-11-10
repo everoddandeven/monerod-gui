@@ -69,6 +69,11 @@ export class DaemonDataService {
   private _txPoolStats?: TxPoolStats;
   private _gettingTxPoolStats: boolean = false;
 
+  private _runningOnBattery?: boolean;
+  public get runningOnBattery(): boolean {
+    return this._runningOnBattery === true;
+  }
+
   public readonly syncStart: EventEmitter<{ first: boolean }> = new EventEmitter<{ first: boolean }>();
   public readonly syncEnd: EventEmitter<void> = new EventEmitter<void>();
   public readonly syncError: EventEmitter<any> = new EventEmitter<any>();
@@ -92,8 +97,12 @@ export class DaemonDataService {
           this.stopLoop();
         }
       });
-      
     });
+
+    this.electronService.onAcPower.subscribe(() => this._runningOnBattery = false);
+    this.electronService.onBatteryPower.subscribe(() => this._runningOnBattery = true);
+
+    this.electronService.isOnBatteryPower().then((value: boolean) => this._runningOnBattery = value).catch((error: any) => console.error(error));
   }
 
   public get initializing(): boolean {
@@ -350,6 +359,8 @@ export class DaemonDataService {
 
   }
 
+  public batteryLevel: number = 0;
+
   public syncDisabledByWifiPolicy: boolean = false;
   public syncDisabledByPeriodPolicy: boolean = false;
 
@@ -359,10 +370,29 @@ export class DaemonDataService {
       return;
     }
 
+    if (this._runningOnBattery === undefined) {
+      this._runningOnBattery = await this.electronService.isOnBatteryPower();
+    }
+
     this._refreshing = true;
 
     try {
       const settings = await this.daemonService.getSettings();
+
+      if (this._runningOnBattery && !settings.runOnBattery) {
+        await this.daemonService.stopDaemon();
+        return;
+      }
+      else if (this._runningOnBattery && settings.batteryLevelThreshold > 0) {
+        const batteryLevel = await this.electronService.getBatteryLevel();
+        
+        if (batteryLevel <= settings.batteryLevelThreshold) {
+          await this.daemonService.stopDaemon();
+          return;
+        }
+
+        this.batteryLevel = batteryLevel;
+      }
 
       const syncAlreadyDisabled = this.daemonService.settings.noSync;
   
@@ -406,7 +436,6 @@ export class DaemonDataService {
       else {
         this.syncDisabledByPeriodPolicy = false;
       }
-  
     }
     catch(error: any) {
       console.error(error);

@@ -8,6 +8,21 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onGetBatteryLevel: (callback) => {
     ipcRenderer.on('on-get-battery-level', callback);
   },
+  isOnBatteryPower: () => {
+    ipcRenderer.invoke('is-on-battery-power');
+  },
+  onIsOnBatteryPower: (callback) => {
+    ipcRenderer.on('on-is-on-battery-power', callback);
+  },
+  unregisterOnIsOnBatteryPower: () => {
+    ipcRenderer.removeAllListeners('on-is-on-battery-power');
+  },
+  onAc: (callback) => {
+    ipcRenderer.on('on-ac', callback);
+  },
+  onBattery: (callback) => {
+    ipcRenderer.on('on-battery', callback);
+  },
   unregisterOnGetBatteryLevel: () => {
     ipcRenderer.removeAllListeners('on-get-battery-level');
   },

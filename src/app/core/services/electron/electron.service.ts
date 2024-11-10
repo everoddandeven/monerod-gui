@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable } from '@angular/core';
 // If you import a module but never use any of the imported values other than as TypeScript types,
 // the resulting javascript file will look as if you never imported the module at all.
 import * as childProcess from 'child_process';
@@ -17,6 +17,9 @@ export class ElectronService {
   private _online: boolean = false;
   private _isProduction: boolean = false;
 
+  public readonly onAcPower: EventEmitter<void> = new EventEmitter<void>();
+  public readonly onBatteryPower: EventEmitter<void> = new EventEmitter<void>();
+
   public get isProduction(): boolean {
     return this._isProduction;
   }
@@ -26,6 +29,9 @@ export class ElectronService {
     window.addEventListener('online', () => this._online = true);
     window.addEventListener('offline', () => this._online = false);
     this._isProduction = APP_CONFIG.production;
+
+    window.electronAPI.onBattery((event: any) => this.onBatteryPower.emit());
+    window.electronAPI.onAc((event: any) => this.onAcPower.emit());
   }
 
   public get online(): boolean {
@@ -62,6 +68,19 @@ export class ElectronService {
     return false;
   }
 
+  public async isOnBatteryPower(): Promise<boolean> {
+    const promise = new Promise<boolean>((resolve) => {
+      window.electronAPI.onIsOnBatteryPower((event: any, onBattery: boolean) => {
+        window.electronAPI.unregisterOnIsOnBatteryPower();
+        resolve(onBattery);
+      });
+    });
+
+    window.electronAPI.isOnBatteryPower();
+
+    return await promise;
+  }
+
   public async getBatteryLevel(): Promise<number> {
     const promise = new Promise<number>((resolve) => {
       window.electronAPI.onGetBatteryLevel((event: any, level: number) => {
@@ -72,7 +91,7 @@ export class ElectronService {
 
     window.electronAPI.getBatteryLevel();
 
-    return await promise;
+    return (await promise)*100;
   }
 
   public async isAutoLaunched(): Promise<boolean> {

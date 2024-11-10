@@ -44,7 +44,7 @@
 
   <ul class="navbar-nav flex-row">
     <li *ngIf="!quitting && !running && !stopping && !restarting && !installing && !upgrading && daemonConfigured" class="nav-item text-nowrap">
-      <button [disabled]="starting || enablingSync || disablingSync" class="btn btn-outline-secondary px-3 text-white" type="button" data-bs-toggle="tooltip" data-bs-placement="bottom"  data-bs-title="Start Daemon" aria-expanded="false" aria-label="Start daemon" (click)="startDaemon()">
+      <button [disabled]="starting || enablingSync || disablingSync || cannotStart" class="btn btn-outline-secondary px-3 text-white" type="button" data-bs-toggle="tooltip" data-bs-placement="bottom"  data-bs-title="Start Daemon" aria-expanded="false" aria-label="Start daemon" (click)="startDaemon()">
         <i class="bi bi-play-fill"></i>
       </button>
       &nbsp;

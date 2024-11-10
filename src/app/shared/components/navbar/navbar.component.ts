@@ -6,6 +6,7 @@ import { DaemonDataService, MoneroInstallerService } from '../../../core/service
 import { DaemonSettings } from '../../../../common';
 import { Subscription } from 'rxjs';
 import { Tooltip } from 'bootstrap';
+import { DaemonStatusService } from '../daemon-not-running/daemon-status.service';
 
 @Component({
   selector: 'app-navbar',
@@ -70,7 +71,11 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
   private daemonSettings: DaemonSettings = new DaemonSettings();
   private subscriptions: Subscription[] = [];
 
-  constructor(private navbarService: NavbarService, private daemonService: DaemonService, private daemonData: DaemonDataService, private installerService: MoneroInstallerService, private ngZone: NgZone) {
+  public get cannotStart(): boolean {
+    return this.statusService.cannotRunBecauseBatteryPolicy;
+  }
+
+  constructor(private navbarService: NavbarService, private daemonService: DaemonService, private daemonData: DaemonDataService, private installerService: MoneroInstallerService, private statusService: DaemonStatusService, private ngZone: NgZone) {
     const onSavedSettingsSub: Subscription = this.daemonService.onSavedSettings.subscribe((settings: DaemonSettings) => {
       this.daemonSettings = settings;
     });

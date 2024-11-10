@@ -155,6 +155,12 @@ declare global {
       getBatteryLevel: () => void;
       onGetBatteryLevel: (callback: (event: any, level: number) => void) => void;
       unregisterOnGetBatteryLevel: () => void;
+
+      isOnBatteryPower: () => void;
+      onIsOnBatteryPower: (callback: (event: any, onBattery: boolean) => void) => void;
+      unregisterOnIsOnBatteryPower: () => void;
+      onBattery: (callback: (event: any) => void) => void;
+      onAc: (callback: (event: any) => void) => void;
     };
   }
 }

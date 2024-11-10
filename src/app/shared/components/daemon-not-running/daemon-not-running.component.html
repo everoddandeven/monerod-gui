@@ -1,5 +1,5 @@
 <div *ngIf="!daemonRunning || stoppingDaemon || restartingDaemon || enablingSync || disablingSync || installing" class="h-100 p-5 text-bg-dark rounded-3 m-4 text-center">
-  <h2 *ngIf="!installing && !enablingSync && !disablingSync && !daemonRunning && !startingDaemon && !stoppingDaemon && !restartingDaemon && !upgrading && daemonConfigured && !quittingDaemon"><i class="bi bi-exclamation-diamond m-4"></i> Daemon not running</h2>
+  <h2 *ngIf="!installing && !enablingSync && !disablingSync && !daemonRunning && !startingDaemon && !stoppingDaemon && !restartingDaemon && !upgrading && daemonConfigured && !quittingDaemon"><i class="bi bi-exclamation-diamond m-4"></i> {{ cannotRunBecauseBatteryPolicy ? batteryTooLow ? 'Battery power is too low' : 'Cannot run on battery power' : 'Daemon not running' }}</h2>
   <h2 *ngIf="!installing && !enablingSync && !disablingSync && !daemonRunning && !startingDaemon && !stoppingDaemon && !restartingDaemon && !upgrading && !daemonConfigured && !quittingDaemon"><i class="bi bi-exclamation-diamond m-4"></i> Daemon not configured or installed</h2>
   <h2 *ngIf="!installing && !enablingSync && !disablingSync && restartingDaemon && !upgrading"><i class="bi bi-arrow-clockwise m-4"></i> Daemon restarting</h2>
   <h2 *ngIf="!installing && !enablingSync && !disablingSync && stoppingDaemon && !upgrading && !quittingDaemon"><i class="bi bi-stop-fill m-4"></i> Daemon is stopping</h2>
@@ -9,7 +9,7 @@
   <h2 *ngIf="!installing && enablingSync"><i class="bi bi-repeat m-4"></i>Daemon is enabling sync</h2>
   <h2 *ngIf="!installing && disablingSync"><i class="bi bi-slash-circle m-4"></i>Daemon is disabling sync</h2>
 
-  <p *ngIf="!installing && !enablingSync && !disablingSync && !daemonRunning && !startingDaemon && !stoppingDaemon && !restartingDaemon && daemonConfigured && !upgrading && !quittingDaemon">Start monero daemon</p>
+  <p *ngIf="!installing && !enablingSync && !disablingSync && !daemonRunning && !startingDaemon && !stoppingDaemon && !restartingDaemon && daemonConfigured && !upgrading && !quittingDaemon"> {{ cannotRunBecauseBatteryPolicy ? 'Configure monero daemon' : 'Start monero daemon' }} </p>
   <p *ngIf="!installing && !enablingSync && !disablingSync && !startingDaemon && !startingDaemon && !stoppingDaemon && !restartingDaemon  && !daemonConfigured && !upgrading && !quittingDaemon">Configure or install monero daemon</p>
 
   <h2 *ngIf="!installing && !enablingSync && !disablingSync && startingDaemon"><i class="bi bi-play-fill m-4"></i> Daemon is starting</h2>
@@ -21,7 +21,7 @@
   <p *ngIf="!installing && enablingSync">Enabling monero daemon blockchain sync</p>
   <p *ngIf="!installing && disablingSync">Disabling monero daemon blokchain sync</p>
 
-  <button *ngIf="!installing && !enablingSync && !disablingSync && !startingDaemon && !stoppingDaemon && !restartingDaemon && !upgrading && daemonConfigured && !quittingDaemon" class="btn btn-outline-light" type="button" (click)="startDaemon()"><i class="bi bi-play-fill"></i> Start</button>
+  <button *ngIf="!cannotRunBecauseBatteryPolicy && !installing && !enablingSync && !disablingSync && !startingDaemon && !stoppingDaemon && !restartingDaemon && !upgrading && daemonConfigured && !quittingDaemon" class="btn btn-outline-light" type="button" (click)="startDaemon()"><i class="bi bi-play-fill"></i> Start</button>
   <button *ngIf="!installing && !enablingSync && !disablingSync && startingDaemon" class="btn btn-outline-light" type="button" disabled>
     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
     Starting monerod
@@ -53,7 +53,6 @@
     Enabling sync
   </button>
 
-        
   <button *ngIf="!installing && disablingSync" class="btn btn-outline-light" type="button" disabled>
     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
     Disabling sync

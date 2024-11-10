@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain, screen, dialog, Tray, Menu, MenuItemConstructorOptions, 
-  IpcMainInvokeEvent, Notification, NotificationConstructorOptions, clipboard
+  IpcMainInvokeEvent, Notification, NotificationConstructorOptions, clipboard, powerMonitor
 } from 'electron';
 import { ChildProcessWithoutNullStreams, exec, ExecException, spawn } from 'child_process';
 import * as path from 'path';
@@ -781,6 +781,13 @@ try {
     })
   })
   // #endregion
+
+  ipcMain.handle('is-on-battery-power', (event: IpcMainInvokeEvent) => {
+    win?.webContents.send('on-is-on-battery-power', powerMonitor.isOnBatteryPower());
+  });
+
+  powerMonitor.on('on-ac', () => win?.webContents.send('on-ac'));
+  powerMonitor.on('on-battery', () => win?.webContents.send('on-battery'));
 
   ipcMain.handle('is-auto-launched', (event: IpcMainInvokeEvent) => {
     console.debug(event);

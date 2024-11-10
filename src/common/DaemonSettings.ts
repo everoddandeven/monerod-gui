@@ -9,6 +9,9 @@ export class DaemonSettings {
   public syncPeriodFrom: string = '00:00';
   public syncPeriodTo: string = '00:00';
 
+  public runOnBattery: boolean = true;
+  public batteryLevelThreshold: number = 0;
+
   public upgradeAutomatically: boolean = false;
   public downloadUpgradePath: string = '';
 

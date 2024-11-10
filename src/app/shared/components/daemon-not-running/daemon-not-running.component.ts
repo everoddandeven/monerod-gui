@@ -2,6 +2,8 @@ import { Component, OnDestroy } from '@angular/core';
 import { DaemonService } from '../../../core/services/daemon/daemon.service';
 import { DaemonDataService, MoneroInstallerService } from '../../../core/services';
 import { Subscription } from 'rxjs';
+import { DaemonSettings } from '../../../../common';
+import { DaemonStatusService } from './daemon-status.service';
 
 @Component({
   selector: 'app-daemon-not-running',
@@ -11,70 +13,59 @@ import { Subscription } from 'rxjs';
 export class DaemonNotRunningComponent implements OnDestroy {
 
   public get upgrading(): boolean {
-    return this.installer.upgrading && !this.quittingDaemon;
+    return this.statusService.upgrading;
   }
 
   public get installing(): boolean {
-    return this.installer.installing;
+    return this.statusService.installing;
   }
 
   public get daemonRunning(): boolean {
-    return this.daemonData.running && !this.startingDaemon && !this.stoppingDaemon && !this.restartingDaemon && !this.upgrading && !this.quittingDaemon;
+    return this.statusService.daemonRunning;
   }
 
   public daemonConfigured: boolean = true;
 
   public get disablingSync(): boolean {
-    return this.daemonService.disablingSync;
+    return this.statusService.disablingSync;
   }
 
   public get enablingSync(): boolean {
-    return this.daemonService.enablingSync;
+    return this.statusService.enablingSync;
   }
 
   public get startingDaemon(): boolean {
-    return this.daemonService.starting && !this.restartingDaemon && !this.stoppingDaemon && !this.upgrading && !this.quittingDaemon;
+    return this.statusService.startingDaemon;
   }
 
   public get stoppingDaemon(): boolean{
-    return this.daemonData.stopping && !this.restartingDaemon && !this.startingDaemon && !this.upgrading && !this.quittingDaemon;
+    return this.statusService.stoppingDaemon;
   }
 
   public get restartingDaemon(): boolean {
-    return this.daemonService.restarting && ! this.upgrading && !this.quittingDaemon;
+    return this.statusService.restartingDaemon;
+  }
+
+  public get cannotRunBecauseBatteryPolicy(): boolean {
+    return this.statusService.cannotRunBecauseBatteryPolicy;
   }
 
   public get progressStatus(): string {
-    const progress = this.installer.progress;
-
-    if (progress.status == 'Downloading') {
-      return `${progress.status} ${progress.progress.toFixed(2)} %`;
-    }
-
-    return progress.status;
+    return this.statusService.progressStatus;
   }
 
   public get quittingDaemon(): boolean {
-    return this.daemonService.quitting;
+    return this.statusService.quittingDaemon;
+  }
+
+  public get batteryTooLow(): boolean {
+    return this.statusService.batteryTooLow;
   }
 
   private subscriptions: Subscription[] = [];
 
-  constructor(private installer: MoneroInstallerService, private daemonData: DaemonDataService, private daemonService: DaemonService) {
-    const onSavedSettingsSub: Subscription = this.daemonService.onSavedSettings.subscribe((settings) => {
-      this.daemonConfigured = settings.monerodPath != '';
-    });
-    
-    this.daemonService.getSettings().then((settings) => {
-      this.daemonConfigured = settings.monerodPath != '';
-    }).catch((error: any) => {
-      console.error(error);
-      this.daemonConfigured = false;
-    });
+  constructor(private statusService: DaemonStatusService) {
 
-    this.daemonService.isRunning().then().catch((error: any) => console.error(error));
-
-    this.subscriptions.push(onSavedSettingsSub);
   }
 
   public ngOnDestroy(): void {
@@ -83,34 +74,11 @@ export class DaemonNotRunningComponent implements OnDestroy {
   }
 
   public async startDaemon(): Promise<void> {
-    if (this.daemonRunning) {
-      console.warn("Daemon already running");
-      return;
-    }
-
-    if (this.startingDaemon || this.stoppingDaemon) {
-      return;
-    }
-
-    await new Promise<void>((resolve, reject) => {
-      setTimeout(() => {
-        this.daemonService.startDaemon().then(() => {
-          resolve();
-        }).catch((error: any) => {
-          reject(new Error(`${error}`));
-        });
-      }, 500)});
+    await this.statusService.startDaemon();
   }
 
   public async restartDaemon(): Promise<void> {
-    await new Promise<void>((resolve, reject) => {
-      setTimeout(() => {
-        this.daemonService.restartDaemon().then(() => {
-          resolve();
-        }).catch((error: any) => {
-          reject(new Error(`${error}`));
-        });
-      }, 500)});
+    await this.statusService.restartDaemon();
   }
 
 }
