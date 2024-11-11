@@ -330,13 +330,18 @@ export class DaemonDataService {
   public syncDisabledByWifiPolicy: boolean = false;
   public syncDisabledByPeriodPolicy: boolean = false;
 
+  private osType?: { platform: string };
 
   private async refresh(): Promise<void> {
     if (this.refreshing || this.tooEarlyForRefresh || this.daemonService.stopping) {
       return;
     }
 
-    if (this._runningOnBattery === undefined) {
+    if (this.osType === undefined) {
+      this.osType = await this.electronService.getOsType();
+    }
+
+    if (this._runningOnBattery === undefined || this.osType.platform == 'linux') {
       this._runningOnBattery = await this.electronService.isOnBatteryPower();
     }
 

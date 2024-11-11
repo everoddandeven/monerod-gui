@@ -306,22 +306,28 @@ const createSplashWindow = async (): Promise<BrowserWindow | undefined> => {
 // #region WiFi 
 
 function isConnectedToWiFi(): Promise<boolean> {
-  return new Promise<boolean>((resolve, reject) => {
-    network.get_active_interface((err: any | null, obj: { name: string, ip_address: string, mac_address: string, type: string, netmask: string, gateway_ip: string }) => {
-      if (err) {
-        console.error("Errore durante il controllo della connessione Wi-Fi:", err);
-        reject(err);
-      }
-      else {
-        console.log('isConnectedToWifi:');
-        console.log(obj);
-        resolve(obj.type == 'Wireless');
-      }
-    })
-  });
+  try {
+
+    return new Promise<boolean>((resolve, reject) => {
+      network.get_active_interface((err: any | null, obj: { name: string, ip_address: string, mac_address: string, type: string, netmask: string, gateway_ip: string }) => {
+        if (err) {
+          console.error("Errore durante il controllo della connessione Wi-Fi:", err);
+          reject(err);
+        }
+        else {
+          console.log('isConnectedToWifi:');
+          console.log(obj);
+          resolve(obj.type == 'Wireless');
+        }
+      })
+    });
+  }
+  catch(error: any) {
+    return isConnectedToWiFiV2();
+  }
 }
 
-function isConnectedToWiFiOld(): Promise<boolean> {
+function isConnectedToWiFiV2(): Promise<boolean> {
   return new Promise((resolve, reject) => {
     const platform = os.platform();  // Use os to get the platform
 
