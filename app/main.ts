@@ -67,7 +67,7 @@ let autoLauncher = new AutoLaunch({
     ],
     linux: {
       comment: 'Monerod GUI startup script',
-      version: '0.1.2'
+      version: '1.0.0'
     }
   }
 });
