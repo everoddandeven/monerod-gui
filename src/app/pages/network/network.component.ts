@@ -3,7 +3,7 @@ import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { DaemonDataService, DaemonService } from '../../core/services';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { Chart, ChartData } from 'chart.js/auto'
-import { NetStats, NetStatsHistoryEntry } from '../../../common';
+import { Connection, NetStats, NetStatsHistoryEntry } from '../../../common';
 import { Subscription } from 'rxjs';
 import { BasePageComponent } from '../base-page/base-page.component';
 
@@ -14,6 +14,7 @@ import { BasePageComponent } from '../base-page/base-page.component';
 })
 export class NetworkComponent extends BasePageComponent implements AfterViewInit, OnDestroy {
 
+  private connections?: Connection[];
   private netStatsBytesInChart?: Chart;
   private netStatsBytesOutChart?: Chart;
 
@@ -33,6 +34,8 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
   public setLimitError: string = '';
 
   public currentNetStats: NetStats;
+  public getConnectionsError: string = '';
+  public refreshingConnectionsTable: boolean = false;
 
   constructor(navbarService: NavbarService, private daemonService: DaemonService, private daemonData: DaemonDataService) {
     super(navbarService);
@@ -47,10 +50,6 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
 
     const netStatsRefreshStartSub: Subscription = this.daemonData.netStatsRefreshEnd.subscribe(() => {
       this.refreshNetStatsHistory();
-    });
-
-    const syncEndSub: Subscription = this.daemonData.syncEnd.subscribe(() => {
-      this.loadConnectionsTable();
     });
 
     const daemonStatusSub: Subscription = this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
@@ -72,16 +71,31 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
       }
     });
 
-    this.subscriptions.push(netStatsRefreshStartSub, syncEndSub, daemonStatusSub);
+    this.subscriptions.push(netStatsRefreshStartSub, daemonStatusSub);
   }
 
   public ngAfterViewInit(): void {
     this.initNetStatsHistoryChart();
+    this.refreshConnectionsTable().then().catch((error: any) => console.error(error));
+  }
+
+  public async refreshConnectionsTable(): Promise<void> {
+    this.refreshingConnectionsTable = true;
+
+    try {
+      this.connections = await this.daemonService.getConnections();
+    }
+    catch(error: any) {
+      console.error(error);
+      this.connections = undefined;
+    }
+
     this.loadConnectionsTable();
+    this.refreshingConnectionsTable = false;
   }
 
   private loadConnectionsTable(): void {
-    this.loadTable('connectionsTable', this.daemonData.connections);
+    this.loadTable('connectionsTable', this.connections ? this.connections : [], this.connections === undefined && this.getConnectionsError == '');
   }
 
   private buildChartBytesInData(): ChartData {

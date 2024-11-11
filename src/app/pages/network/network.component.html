@@ -59,6 +59,13 @@
         </thead>
       </table>
     </div>
+
+
+    <hr class="my-4">
+
+    <button *ngIf="!refreshingConnectionsTable" class="w-100 btn btn-primary btn-lg" type="button" (click)="refreshConnectionsTable()">Refresh Connections</button>
+    <button *ngIf="refreshingConnectionsTable" class="w-100 btn btn-primary btn-lg" type="button" disabled>Refreshing Connections ...</button>
+  
   </div>
 
   <div class="tab-pane fade" id="pills-limit" role="tabpanel" aria-labelledby="pills-limit-tab" tabindex="0">

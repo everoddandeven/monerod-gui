@@ -22,7 +22,7 @@ export class DaemonStatusService {
 
   public get daemonConfigured(): boolean {
     return this.settings ? this.settings.monerodPath != '' : true;
-  };
+  }
 
   public get disablingSync(): boolean {
     return this.daemonService.disablingSync;

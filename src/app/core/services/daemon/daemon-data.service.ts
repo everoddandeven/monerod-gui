@@ -1,6 +1,6 @@
 import { EventEmitter, Injectable, NgZone } from '@angular/core';
 import { DaemonService } from './daemon.service';
-import { BlockCount, BlockHeader, Chain, Connection, CoreIsBusyError, DaemonInfo, MinerData, MiningStatus, NetHashRateHistory, NetStats, NetStatsHistory, PeerInfo, ProcessStats, PublicNode, SyncInfo, TimeUtils, TxBacklogEntry, TxPool, TxPoolStats } from '../../../../common';
+import { BlockCount, BlockHeader, Chain, CoreIsBusyError, DaemonInfo, MinerData, MiningStatus, NetHashRateHistory, NetStats, NetStatsHistory, ProcessStats, SyncInfo, TimeUtils, TxBacklogEntry, TxPool, TxPoolStats } from '../../../../common';
 import { ElectronService } from '../electron/electron.service';
 
 @Injectable({
@@ -13,7 +13,6 @@ export class DaemonDataService {
   private _refreshing: boolean = false;
   private _firstRefresh: boolean = true;
   private _lastRefresh: number = Date.now();
-  private _lastRefreshHeight: number = -1;
 
   private _daemonRunning: boolean = false;
 
@@ -51,17 +50,8 @@ export class DaemonDataService {
   private _minerDataCoreBusyError: boolean = false;
   private _gettingMinerData: boolean = false;
 
-  private _publicNodes: PublicNode[] = [];
-  private _gettingPublicNodes: boolean = false;
-
   private _transactionPool?: TxPool;
   private _gettingTransactionPool: boolean = false;
-
-  private _connections: Connection[] = [];
-  private _gettingConnections: boolean = false;
-
-  private _peerList: PeerInfo[] = [];
-  private _gettingPeerList: boolean = false;
 
   private _txPoolBacklog: TxBacklogEntry[] = [];
   private _gettingTxPoolBackLog: boolean = false;
@@ -217,36 +207,12 @@ export class DaemonDataService {
     return this._gettingMinerData;
   }
 
-  public get publicNodes(): PublicNode[] {
-    return this._publicNodes;
-  }
-
-  public get gettingPublicNodes(): boolean {
-    return this._gettingPublicNodes;
-  }
-
   public get transactionPool(): TxPool | undefined {
     return this._transactionPool;
   }
 
   public get gettingTransactionPool(): boolean {
     return this._gettingTransactionPool;
-  }
-
-  public get connections(): Connection[] {
-    return this._connections;
-  }
-
-  public get gettingConnections(): boolean {
-    return this._gettingConnections;
-  }
-
-  public get peerList(): PeerInfo[] {
-    return this._peerList;
-  }
-
-  public get gettingPeerList(): boolean {
-    return this._gettingPeerList;
   }
 
   public get txPoolBacklog(): TxBacklogEntry[] {
@@ -512,14 +478,6 @@ export class DaemonDataService {
         await this.refreshMinerData();
       }
 
-      this._gettingPeerList = true;
-      this._peerList = await this.daemonService.getPeerList();
-      this._gettingPeerList = false;
-
-      this._gettingPublicNodes = true;
-      this._publicNodes = await this.daemonService.getPublicNodes(true, true);
-      this._gettingPublicNodes = false;
-
       if (this._daemonInfo.synchronized && this._daemonInfo.txPoolSize > 0) {
         this._gettingTransactionPool = true;
         this._transactionPool = await this.daemonService.getTransactionPool();
@@ -538,13 +496,6 @@ export class DaemonDataService {
         this._txPoolStats = undefined;
       }
 
-      if (!this.daemonService.settings.offline) {
-        this._gettingConnections = true;
-        this._connections = await this.daemonService.getConnections();
-        this._gettingConnections = false;
-      }
-
-      this._lastRefreshHeight = this._daemonInfo.heightWithoutBootstrap;
       this._lastRefresh = Date.now();
     } catch(error: any) {
       console.error(error);
@@ -555,10 +506,7 @@ export class DaemonDataService {
       this._gettingIsBlockchainPruned = false;
       this._gettingAltChains = false;
       this._gettingNetStats = false;
-      this._gettingPublicNodes = false;
       this._gettingTransactionPool = false;
-      this._gettingConnections = false;
-      this._gettingPeerList = false;
       this._gettingTxPoolStats = false;
 
       this.syncError.emit(error);

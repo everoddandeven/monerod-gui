@@ -4,6 +4,7 @@ import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { Subscription } from 'rxjs';
 import { BasePageComponent } from '../base-page/base-page.component';
+import { PeerInfo, PublicNode } from '../../../common';
 
 @Component({
   selector: 'app-peers',
@@ -25,6 +26,10 @@ export class PeersComponent extends BasePageComponent implements AfterViewInit {
   public limitOutPeersResult: number = 0;
 
   public refreshingPeerList: boolean = false;
+  public refreshingPublicNodes: boolean = false;
+
+  public getPeerListError: string = '';
+  public getPublicNodesError: string = '';
 
   public get daemonRunning(): boolean {
     return this.daemonData.running;
@@ -33,6 +38,9 @@ export class PeersComponent extends BasePageComponent implements AfterViewInit {
   public get daemonStopping(): boolean {
     return this.daemonData.stopping;
   }
+
+  private peerList?: PeerInfo[];
+  private publicNodes?: PublicNode[];
 
   constructor(private daemonService: DaemonService, private daemonData: DaemonDataService, navbarService: NavbarService, private ngZone: NgZone) {
     super(navbarService);
@@ -48,16 +56,15 @@ export class PeersComponent extends BasePageComponent implements AfterViewInit {
     this.ngZone.run(() => {
       this.loadTables();
 
-      const sub: Subscription = this.daemonData.syncEnd.subscribe(() => {
-        this.loadPublicNodesTable();
-      });
+      this.refreshPeerListTable().then().catch((error: any) => console.error(error));
+      this.refreshPublicNodesTable().then().catch((error: any) => console.error(error));
 
       const statusSub: Subscription = this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
         if (running) this.loadTables();
         else this.destroyTables();
       });
   
-      this.subscriptions.push(sub, statusSub);
+      this.subscriptions.push(statusSub);
     });
   }
 
@@ -67,36 +74,45 @@ export class PeersComponent extends BasePageComponent implements AfterViewInit {
   }
 
   private loadPeerListTable(): void {
-    this.loadTable('peerListTable', this.daemonData.peerList);
+    const loading = this.peerList === undefined;
+
+    this.loadTable('peerListTable', this.peerList ? this.peerList : [], loading);
   }
 
   private loadPublicNodesTable(): void {
-    this.loadTable('publicNodesTable', this.daemonData.publicNodes);
+    this.loadTable('publicNodesTable', this.publicNodes ? this.publicNodes : [], this.publicNodes === undefined);
   }
 
   public async refreshPeerListTable(): Promise<void> {
     this.refreshingPeerList = true;
     
     try {
-      await new Promise<void>((resolve, reject) => {
-        setTimeout(() => {
-          this.ngZone.run(() => {
-            try {
-              this.loadPeerListTable();
-              resolve();
-            }
-            catch(error: any) {
-              reject(new Error(`${error}`));
-            }
-          });
-        }, 1000);
-      });
+      this.peerList = await this.daemonService.getPeerList();
     }
-    catch(error) {
+    catch(error: any) {
       console.error(error);
+      this.getPeerListError = `${error}`;
+      this.peerList = undefined;
     }
 
+    this.loadPeerListTable();
     this.refreshingPeerList = false;
+  }
+
+  public async refreshPublicNodesTable(): Promise<void> {
+    this.refreshingPublicNodes = true;
+    
+    try {
+      this.publicNodes = await this.daemonService.getPublicNodes();
+    }
+    catch(error: any) {
+      console.error(error);
+      this.publicNodes = undefined;
+      this.getPublicNodesError = `${error}`;
+    }
+
+    this.loadPublicNodesTable();
+    this.refreshingPublicNodes = false;
   }
 
   public async inPeers(): Promise<void> {
