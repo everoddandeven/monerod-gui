@@ -419,7 +419,7 @@ export class DaemonSettings {
     if (this.padTransactions) options.push(`--pad-transactions`);
     if (this.maxConnectionsPerIp >= 0) options.push(`--max-connections-per-ip`, `${this.maxConnectionsPerIp}`);
     if (this.rpcBindIp != '') options.push(`--rpc-bind-ip`, `${this.rpcBindIp}`);
-    if (this.rpcBindPort) options.push(`--rpc-bind-ip`, `${this.rpcBindIp}`);
+    if (this.rpcBindPort) options.push(`--rpc-bind-port`, `${this.rpcBindPort}`);
     if (this.restrictedBindPort) options.push(`--restricted-bind-port`, `${this.restrictedBindPort}`);
     if (this.restrictedRpc) options.push(`--restricted-rpc`);
     if (this.bootstrapDaemonAddress != '') options.push(`--bootstrap-daemon-address`, this.bootstrapDaemonAddress);

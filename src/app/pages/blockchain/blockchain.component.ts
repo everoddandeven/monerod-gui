@@ -1,7 +1,7 @@
 import { Component, NgZone } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
-import { Block, BlockHeader } from '../../../common';
+import { Block, BlockHeader, SyncInfo } from '../../../common';
 import { DaemonDataService } from '../../core/services';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { BasePageComponent } from '../base-page/base-page.component';
@@ -36,6 +36,10 @@ export class BlockchainComponent extends BasePageComponent {
   public get getLastBlockError(): string {
     return this.daemonSynchronized ? '' : 'Last block header not available, blockchain is not synchronized';
   }
+
+  public get syncInfo(): SyncInfo | undefined {
+    return this.daemonData.syncInfo;
+  }
   
   public block?: Block;
   public getBlockByHash: boolean = false;
@@ -67,9 +71,14 @@ export class BlockchainComponent extends BasePageComponent {
   public pruneBlockchainError: string = '';
   public blockchainPruned: boolean = false;
 
+  public get overviewArray(): string[] {
+    return this.daemonData.syncInfo ? this.daemonData.syncInfo.overview.split('').filter((status: string) => status != '[' && status != ']') : [];
+  }
+
   constructor(private daemonService: DaemonService, private daemonData: DaemonDataService, navbarService: NavbarService, private ngZone: NgZone) {
     super(navbarService);
     this.setLinks([
+      new NavbarLink('pills-block-queue-tab', '#pills-block-queue', 'pills-block-queue', true, 'Block Queue'),
       new NavbarLink('pills-last-block-header-tab', '#pills-last-block-header', 'pills-last-block-header', false, 'Last Block Header'),
       new NavbarLink('pills-get-block-tab', '#pills-get-block', 'pills-get-block', false, 'Get Block'),
       new NavbarLink('pills-get-block-header-tab', '#pills-get-block-header', 'pills-get-block-header', false, 'Get Block Header'),
@@ -79,6 +88,22 @@ export class BlockchainComponent extends BasePageComponent {
     ]);
   }
 
+  public getBlockClass(block: string): string {
+    switch (block) {
+      case '.':
+        return 'requested';
+      case 'o':
+        return 'received';
+      case 'm':
+        return 'matched';
+      case '<':
+        return 'target';
+      case '_':
+        return 'future';
+      default:
+        return '';
+    }
+  }
   public async getBlock(): Promise<void> {
     this.gettingLastBlock = true;
     try {
