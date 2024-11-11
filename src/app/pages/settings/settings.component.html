@@ -519,26 +519,25 @@
             <small class="text-body-secondary">External port for p2p network protocol (if port forwarding used with NAT)</small>
           </div>
 
-        <hr class="my-4">
+          <hr class="my-4">
 
-        <div class="row g-3">
-          <h4 class="mb-3">IPv6</h4>
+          <div class="row g-3">
+            <h4 class="mb-3">IPv6</h4>
 
-          <div class="col-md-6">
-            <label for="p2p-bind-ipv6-address" class="form-label">Bind IPv6 address</label>
-            <input type="text" class="form-control" id="p2p-bind-ipv6-address" placeholder="::1" [(ngModel)]="currentSettings.p2pBindIpv6Address" [ngModelOptions]="{standalone: true}">
-            <small class="text-body-secondary">Specify IPv6 address to bind RPC server</small>
+            <div class="col-md-6">
+              <label for="p2p-bind-ipv6-address" class="form-label">Bind IPv6 address</label>
+              <input type="text" class="form-control" id="p2p-bind-ipv6-address" placeholder="::1" [(ngModel)]="currentSettings.p2pBindIpv6Address" [ngModelOptions]="{standalone: true}">
+              <small class="text-body-secondary">Specify IPv6 address to bind RPC server</small>
+            </div>
+
+            <div class="col-md-6">
+              <label for="p2p-bind-port-ipv6" class="form-label">Bind IPv6 port</label>
+              <input type="number" min="0" class="form-control" id="p2p-bind-port-ipv6" placeholder="18080" [(ngModel)]="currentSettings.p2pBindPortIpv6" [ngModelOptions]="{standalone: true}">
+              <small class="text-body-secondary">18080 for mainnet, 28080 for testnet, 38080 for stagenet</small>
+            </div>
+
           </div>
 
-          <div class="col-md-6">
-            <label for="p2p-bind-port-ipv6" class="form-label">Bind IPv6 port</label>
-            <input type="number" min="0" class="form-control" id="p2p-bind-port-ipv6" placeholder="18080" [(ngModel)]="currentSettings.p2pBindPortIpv6" [ngModelOptions]="{standalone: true}">
-            <small class="text-body-secondary">18080 for mainnet, 28080 for testnet, 38080 for stagenet</small>
-          </div>
-
-        </div>
-
-        <hr class="my-4">
       </div>
     </div>
   </div>

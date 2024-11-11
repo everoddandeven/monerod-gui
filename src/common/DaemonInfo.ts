@@ -60,7 +60,7 @@ export class DaemonInfo {
   }
 
   public get gigaHashRate(): number {
-    return this.hashRate / 1000;
+    return this.megaHashRate / 1000;
   }
 
   public get coreSynchronized(): boolean {
