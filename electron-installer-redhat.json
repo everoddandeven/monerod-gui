@@ -10,5 +10,10 @@
   ],
   "lintianOverrides": [
     "changelog-file-missing-in-native-package"
+  ],
+  "depends": [
+    "net-tools",
+    "upower",
+    "dbus"
   ]
 }

@@ -15,6 +15,21 @@ const pidusage = require('pidusage');
 const batteryLevel = require('battery-level');
 const network = require('network');
 
+function isOnBatteryPower(): Promise<boolean> {
+  return new Promise<boolean>((resolve) => {
+    exec("upower -i $(upower -e | grep 'battery') | grep 'state'", (error, stdout) => {
+      if (error) {
+        console.error(`isOnBatteryPower(): ${error.message}`);
+        resolve(false); // Ritorna false se non riesce a rilevare lo stato della batteria
+        return;
+      }
+
+      const isOnBattery = stdout.includes("discharging");
+      resolve(isOnBattery);
+    });
+  });
+}
+
 interface Stats {
   /**
    * percentage (from 0 to 100*vcore)
@@ -787,7 +802,22 @@ try {
   // #endregion
 
   ipcMain.handle('is-on-battery-power', (event: IpcMainInvokeEvent) => {
-    win?.webContents.send('on-is-on-battery-power', powerMonitor.isOnBatteryPower());
+    const onBattery = powerMonitor.isOnBatteryPower();
+
+    if (!onBattery && os.platform() == 'linux') {
+      isOnBatteryPower().then((value) => {
+        win?.webContents.send('on-is-on-battery-power', value);
+      }).catch((error: any) => {
+        console.error(`${error}`);
+        win?.webContents.send('on-is-on-battery-power', false);
+      });
+
+      return;
+    }
+    else {
+      win?.webContents.send('on-is-on-battery-power', onBattery);
+    }
+
   });
 
   powerMonitor.on('on-ac', () => win?.webContents.send('on-ac'));

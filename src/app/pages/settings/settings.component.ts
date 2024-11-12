@@ -71,7 +71,9 @@ export class SettingsComponent {
   public isAppImage: boolean = true;
 
   public refreshSyncMode(): void {
-    this.currentSettings.dbSyncMode = this.dbSyncMode;
+    setTimeout(() => {
+      this.currentSettings.dbSyncMode = this.dbSyncMode;
+    }, 100);
   }
 
   private initSyncMode(): void {
