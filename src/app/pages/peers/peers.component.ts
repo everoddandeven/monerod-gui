@@ -84,6 +84,10 @@ export class PeersComponent extends BasePageComponent implements AfterViewInit {
   }
 
   public async refreshPeerListTable(): Promise<void> {
+    if (!await this.daemonService.isRunning()) {
+      return;
+    }
+
     this.refreshingPeerList = true;
     
     try {
@@ -100,6 +104,10 @@ export class PeersComponent extends BasePageComponent implements AfterViewInit {
   }
 
   public async refreshPublicNodesTable(): Promise<void> {
+    if (!await this.daemonService.isRunning()) {
+      return;
+    }
+    
     this.refreshingPublicNodes = true;
     
     try {

@@ -59,7 +59,7 @@ export class DaemonTrayService {
       console.debug(event);
       this.disableAllItems();
 
-      this.daemonService.quit().then(() => this.disableAllItems()).catch((error: any) => console.error(error));
+      this.daemonService.quit().then().catch((error: any) => console.error(error));
     });
 
     window.electronAPI.onTrayStartSync((event: any) => {

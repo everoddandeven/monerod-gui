@@ -98,10 +98,32 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     return this.daemonData.altChains;
   }
 
-  public get networkHashRate(): number {
-    const origValue = this.daemonData.info ? this.daemonData.info.gigaHashRate : 0;
-    
-    return parseFloat(origValue.toFixed(2));
+  public get networkHashRate(): string {
+    const info = this.daemonData.info;
+
+    if (!info) {
+      return "0 GH/s";
+    }
+
+    const origGHs = parseFloat(info.gigaHashRate.toFixed(2));
+    const origMHs = parseFloat(info.megaHashRate.toFixed(2));
+    const origKHs = parseFloat(info.kiloHashRate.toFixed(2));
+    const origHs = parseFloat(info.hashRate.toFixed(2));
+
+    if (origGHs >= 1) {
+      return `${origGHs} GH/s`;
+    }
+    else if (origMHs >= 1) {
+      return `${origMHs} MH/s`;
+    }
+    else if (origKHs >= 1) {
+      return `${origKHs} KH/s`;
+    }
+    else if (origHs >= 1) {
+      return `${origHs} H/s`;
+    }
+
+    return "0 GH/s";
   }
 
   private netHashRateChart?: Chart;

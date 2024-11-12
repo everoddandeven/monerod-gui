@@ -26,6 +26,15 @@ export class SettingsComponent {
   public networkType: 'mainnet' | 'testnet' | 'stagenet' = 'mainnet';
 
   public successMessage: string = '';
+  
+  public databaseSyncSpeed: 'safe' | 'fast' | 'fastest' = 'fast';
+  public databaseSyncMode: 'sync' | 'async' = 'async';
+  public databaseSyncNBytesOrBlocks: number = 250000000;
+  public databaseSyncNPerMode: 'bytes' | 'blocks' = 'bytes';
+
+  private get dbSyncMode(): string {
+    return `${this.databaseSyncSpeed}:${this.databaseSyncMode}:${this.databaseSyncNBytesOrBlocks}${this.databaseSyncNPerMode}`;
+  }
 
   constructor(private daemonService: DaemonService, private electronService: ElectronService, private ngZone: NgZone) {
     this.loading = true;
@@ -61,14 +70,46 @@ export class SettingsComponent {
 
   public isAppImage: boolean = true;
 
+  public refreshSyncMode(): void {
+    this.currentSettings.dbSyncMode = this.dbSyncMode;
+  }
+
+  private initSyncMode(): void {
+    if (!this.currentSettings) {
+      return;
+    }
+
+    const dbSyncMode = this.currentSettings.dbSyncMode;
+
+    if (dbSyncMode == '') {
+      return;
+    }
+
+    const cmps = dbSyncMode.split(":");
+
+    if (cmps.length != 3) {
+      return;
+    }
+
+    const speed: 'safe' | 'fast' | 'fastest' = (cmps[0] == 'safe' || cmps[0] == 'fast' || cmps[0] == 'fastest') ? cmps[0] : 'fast';
+    const mode: 'sync' | 'async' = (cmps[1] == 'sync' || cmps[1] == 'async') ? cmps[1] : 'async';
+    const nPerMode: 'bytes' | 'blocks' = cmps[2].endsWith('blocks') ? 'blocks' : 'bytes';
+    const n: number = parseInt(cmps[2].replace(nPerMode, ''));
+
+    this.databaseSyncSpeed = speed;
+    this.databaseSyncMode = mode;
+    this.databaseSyncNPerMode = nPerMode;
+    this.databaseSyncNBytesOrBlocks = n;
+  }
+
   private async load(): Promise<void> {
-    console.log("getting settings");
     this.originalSettings = await this.daemonService.getSettings();
     this.currentSettings = this.originalSettings.clone();
+    this.initSyncMode();
+    
     this.loading = false;
 
     this.isAppImage = await this.electronService.isAppImage();
-
     this.networkType = this.currentSettings.mainnet ? 'mainnet' : this.currentSettings.testnet ? 'testnet' : this.currentSettings.stagenet ? 'stagenet' : 'mainnet';
   }
 

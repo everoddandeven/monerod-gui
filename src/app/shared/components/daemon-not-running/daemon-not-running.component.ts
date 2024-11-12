@@ -21,7 +21,9 @@ export class DaemonNotRunningComponent implements OnDestroy {
     return this.statusService.daemonRunning;
   }
 
-  public daemonConfigured: boolean = true;
+  public get daemonConfigured(): boolean {
+    return this.statusService.daemonConfigured;
+  }
 
   public get disablingSync(): boolean {
     return this.statusService.disablingSync;

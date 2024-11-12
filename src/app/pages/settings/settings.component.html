@@ -670,11 +670,6 @@
                   <input type="number" min="0" class="form-control" id="block-download-max-size" placeholder="" [(ngModel)]="currentSettings.blockDownloadMaxSize" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">Set maximum size of block download queue in bytes (0 for default)</small>
               </div>
-    
-              <div class="col-md-4">
-                  <label for="db-sync-mode" class="form-label">Database sync mode</label>
-                  <input type="text" class="form-control" id="db-sync-mode" placeholder="fast:async:250000000bytes" [(ngModel)]="currentSettings.dbSyncMode" [ngModelOptions]="{standalone: true}">
-              </div>
 
               <div class="form-check form-switch col-md-12">
                 <label for="sync-period-enabled" class="form-check-label">Sync Period Enabled</label>
@@ -696,6 +691,44 @@
                   <input id="sync-period-to" type="time" class="form-control" value="10:05 AM" [disabled]="!currentSettings.syncPeriodEnabled" [(ngModel)]="currentSettings.syncPeriodTo" [ngModelOptions]="{standalone: true}"/>
                 </div>
               </div>
+
+          </div>
+
+          <hr class="my-4">
+
+          <div class="row g-3">
+            <h4 class="mb-3">Database Sync Mode</h4>
+            
+            <div class="col-md-2">
+              <label for="db-sync-mode-speed" class="form-label"></label>
+              <select class="form-select" id="db-sync-mode-speed" (ngModelChange)="refreshSyncMode()" [(ngModel)]="databaseSyncSpeed" [ngModelOptions]="{standalone: true}">
+                <option [ngValue]="'safe'" [selected]="databaseSyncSpeed === 'safe'">Safe</option>
+                <option [ngValue]="'fast'" [selected]="databaseSyncSpeed === 'fast'">Fast</option>
+                <option [ngValue]="'fastest'" [selected]="databaseSyncSpeed === 'fastest'">Fastest</option>
+              </select>
+            </div>
+            
+            <div class="col-md-2">
+              <label for="db-sync-mode" class="form-label"></label>
+              <select class="form-select" id="db-sync-mode" (ngModelChange)="refreshSyncMode()" [(ngModel)]="databaseSyncMode" [ngModelOptions]="{standalone: true}">
+                <option [ngValue]="'sync'" [selected]="databaseSyncMode === 'sync'">Sync</option>
+                <option [ngValue]="'async'" [selected]="databaseSyncMode === 'async'">Async</option>
+              </select>
+            </div>
+
+            <div class="col-md-4">
+              <label for="db-sync-mode-n-bytes-or-blocks" class="form-label"></label>
+              <input type="number" min="0" class="form-control" id="db-sync-mode-n-bytes-or-blocks" placeholder="" (ngModelChange)="refreshSyncMode()" [(ngModel)]="databaseSyncNBytesOrBlocks" [ngModelOptions]="{standalone: true}">
+              <small class="text-body-secondary">Number of bytes/blocks</small>
+            </div>
+
+            <div class="col-md-2">
+              <label for="db-sync-n-per-mode" class="form-label"></label>
+              <select class="form-select" id="db-sync-n-per-mode" (ngModelChange)="refreshSyncMode()" [(ngModel)]="databaseSyncNPerMode" [ngModelOptions]="{standalone: true}">
+                <option [ngValue]="'bytes'" [selected]="databaseSyncNPerMode === 'bytes'">Bytes</option>
+                <option [ngValue]="'blocks'" [selected]="databaseSyncNPerMode === 'blocks'">Blocks</option>
+              </select>
+            </div>
 
           </div>
 

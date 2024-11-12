@@ -311,12 +311,10 @@ function isConnectedToWiFi(): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
       network.get_active_interface((err: any | null, obj: { name: string, ip_address: string, mac_address: string, type: string, netmask: string, gateway_ip: string }) => {
         if (err) {
-          console.error("Errore durante il controllo della connessione Wi-Fi:", err);
+          console.error(err);
           reject(err);
         }
         else {
-          console.log('isConnectedToWifi:');
-          console.log(obj);
           resolve(obj.type == 'Wireless');
         }
       })

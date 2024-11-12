@@ -37,13 +37,7 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
 
     const $table = $(`#${id}`);
 
-    $table.bootstrapTable({
-      search: true,
-      showSearchButton: true,
-      showColumnsSearch: true,
-      showColumns: true,
-      pagination: true
-    });
+    $table.bootstrapTable({});
     $table.bootstrapTable('refreshOptions', {
       classes: 'table table-bordered table-hover table-dark table-striped'
     });

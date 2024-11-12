@@ -9,7 +9,6 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NavbarComponent } from './components/navbar/navbar.component';
 
-import 'jquery';
 import 'bootstrap';
 import 'bootstrap-table';
 

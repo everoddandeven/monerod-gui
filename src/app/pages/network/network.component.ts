@@ -80,6 +80,10 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
   }
 
   public async refreshConnectionsTable(): Promise<void> {
+    if (!await this.daemonService.isRunning()) {
+      return;
+    }
+    
     this.refreshingConnectionsTable = true;
 
     try {
