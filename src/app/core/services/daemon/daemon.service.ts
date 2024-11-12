@@ -1182,7 +1182,7 @@ export class DaemonService {
   }
 
   public getGuiVersion(): string {
-    return "1.0.0-main";
+    return "1.0.0-tenacity";
   }
 
   public async getProcessStats(): Promise<ProcessStats> {
