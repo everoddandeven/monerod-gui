@@ -11,6 +11,7 @@
 [![Ubuntu jammy x64 DEB Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_22_deb.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_22_deb.yml)
 [![Ubuntu noble x64 DEB Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_24_deb.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_24_deb.yml)
 
+[![RedHat - x86_64 RPM Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/redhat_rpm.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/redhat_rpm.yml)
 [![MacOS Build][macos-build-badge]][macos-build]
 [![Windows Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/windows.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/windows.yml)
 
