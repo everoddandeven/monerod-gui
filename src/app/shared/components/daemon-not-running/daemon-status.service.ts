@@ -45,7 +45,23 @@ export class DaemonStatusService {
   }
 
   public get cannotRunBecauseBatteryPolicy(): boolean {
-    return this.settings ? (this._runningOnBattery && !this.settings.runOnBattery) || (this.settings.runOnBattery && this.settings.batteryLevelThreshold > 0 && this._batteryLevel <= this.settings.batteryLevelThreshold) : false;
+    if (!this.settings) {
+      return false;
+    }
+
+    if (!this._runningOnBattery) {
+      return false;
+    }
+
+    if (!this.settings.runOnBattery) {
+      return true;
+    }
+
+    if (this.settings.runOnBattery && this.settings.batteryLevelThreshold > 0 && this._batteryLevel <= this.settings.batteryLevelThreshold) {
+      return true;
+    }
+
+    return false;
   }
 
   public get progressStatus(): string {
@@ -112,7 +128,7 @@ export class DaemonStatusService {
         const batteryLevel = await this.electronService.getBatteryLevel();
         this._batteryTooLow = batteryLevel <= this.settings.batteryLevelThreshold;
       }
-      else if (!this.settings.runOnBattery) {
+      else if (!this.settings.runOnBattery || !this._runningOnBattery) {
         this._batteryTooLow = false;
       }
     }).then().catch((error: any) => console.error(error));

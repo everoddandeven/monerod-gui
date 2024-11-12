@@ -421,6 +421,7 @@ export class DaemonService {
           }).catch((error: any) => {
             this.startedAt = undefined;
             console.error(error);
+            this.starting = false;
           });
         }
         else {
