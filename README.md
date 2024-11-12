@@ -86,10 +86,10 @@ https://github.com/user-attachments/assets/c4a50d2f-5bbb-48ac-9425-30ecc20ada7c
   - [X] MacOS
 - [X] Import/export `monerod.conf` node configuration
 - [X] Synchronization in a specific time slot
-- [ ] Installers
+- [X] Installers
   - [X] Linux
   - [X] Windows
-  - [ ] MacOS  
+  - [X] MacOS  
 - [ ] Remote node management
   - [ ] No CORS connection
 

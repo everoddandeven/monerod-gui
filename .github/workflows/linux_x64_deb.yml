@@ -1,5 +1,5 @@
 # This is a basic workflow to help you get started with Actions
-name: 'RedHat - x86_64 RPM Build'
+name: 'Linux - x64 DEB Build'
 
 # Controls when the action will run.
 on:
@@ -22,7 +22,7 @@ jobs:
         node-version: [20]
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -48,16 +48,16 @@ jobs:
     - name: Install linux dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf fakeroot dpkg rpm
+        sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf fakeroot dpkg 
 
     - name: Install Dependencies
       run: npm i
 
     - name: Build the app
-      run: npm run electron:build:rpm
+      run: npm run electron:build:deb
 
-    - name: Upload RPM artifact
+    - name: Upload DEB artifact
       uses: actions/upload-artifact@v4
       with:
-        name: monerod-gui-redhat-x86_64-installer
-        path: dist/installers/*.rpm
+        name: monerod-gui-linux-installer-deb
+        path: dist/installers/*.deb
