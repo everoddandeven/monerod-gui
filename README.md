@@ -7,12 +7,11 @@
 [![Make a pull request][prs-badge]][prs]
 [![License][license-badge]](LICENSE.md)
 
-[![Ubuntu jammy AppImage Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_22_appimage.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_22_appimage.yml)
-[![Ubuntu jammy x64 DEB Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_22_deb.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_22_deb.yml)
-[![Ubuntu noble x64 DEB Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_24_deb.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/ubuntu_24_deb.yml)
+[![Linux - AppImage Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/linux_appimage.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/linux_appimage.yml)
+[![Linux - x64 DEB Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/linux_x64_deb.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/linux_x64_deb.yml)
+[![Linux - x86_64 RPM Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/linux_rpm.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/linux_rpm.yml)
 
-[![RedHat - x86_64 RPM Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/redhat_rpm.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/redhat_rpm.yml)
-[![MacOS Build][macos-build-badge]][macos-build]
+[![MacOS - x64 DMG Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/darwin_dmg.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/darwin_dmg.yml)
 [![Windows Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/windows.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/windows.yml)
 
 [![Watch on GitHub][github-watch-badge]][github-watch]
