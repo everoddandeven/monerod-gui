@@ -64,7 +64,9 @@ export class DaemonInfo {
   }
 
   public get coreSynchronized(): boolean {
-    return this.wasBoostrapEverUsed ? this.heightWithoutBootstrap == this.targetHeight : this.synchronized;
+    const targetHeight = this.targetHeight == 0 ? this.height : this.targetHeight;
+    
+    return this.wasBoostrapEverUsed ? this.heightWithoutBootstrap == targetHeight : this.synchronized;
   }
   
   constructor(
