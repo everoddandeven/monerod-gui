@@ -6,6 +6,7 @@
 .placeholder-glow .placeholder {
   background-color: rgba(0, 0, 0, 10%);
 }
+
 .block-queue {
   display: flex;
   flex-wrap: wrap;
@@ -23,7 +24,7 @@
   border-radius: 4px;
   font-weight: bold;
   color: #fff;
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 30%);
   position: relative;
 }
 
@@ -46,7 +47,7 @@
   border-radius: 2px;
   position: relative;
   top: -5px; /* Align with the blocks */
-  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 30%);
 }
 
 /* Block marker for current target */
