@@ -16,6 +16,22 @@ export class SettingsComponent {
   private originalSettings: DaemonSettings;
   public currentSettings: DaemonSettings;
 
+  public banListUrl: string = '';
+
+  public get validBanListUrl(): boolean {
+    if (this.banListUrl == '') {
+      return false;
+    }
+
+    try {
+      new URL(this.banListUrl);
+      return true;
+    }
+    catch {
+      return false;
+    }
+  }
+
   public savingChanges: boolean = false;
   public savingChangesError = ``;
   public savingChangesSuccess: boolean = false;
@@ -337,6 +353,50 @@ export class SettingsComponent {
     this.ngZone.run(() => {
       this.currentSettings.monerodPath = file;
     });
+  }
+
+  public async chooseBanListFile(): Promise<void> {
+    const file = await this.electronService.selectFile(['txt']);
+
+    if (file == '') {
+      return;
+    }
+
+    this.ngZone.run(() => {
+      this.currentSettings.banList = file;
+    });
+  }
+
+  public removeBanListFile(): void {
+    this.currentSettings.banList = '';
+  }
+
+  public downloadingBanListFile: boolean = false;
+
+  public async downloadBanListFile(): Promise<void> {
+    if (!this.currentSettings.remoteBanList) {
+      return;
+    }
+
+    this.downloadingBanListFile = true;
+
+    try {
+      const destination = await this.electronService.selectFolder();
+      const filePath = await this.electronService.downloadFile(this.banListUrl, destination);
+
+      if (!filePath.endsWith('.txt')) {
+        throw new Error("Downloaded file doesn't seem to be a valid ban list txt file");
+      }
+
+      this.currentSettings.banList = filePath;
+      this.currentSettings.remoteBanList = false;
+    }
+    catch (error: any) {
+      console.error(error);
+      window.electronAPI.showErrorBox('', `${error}`.replace('Error:', ''));
+    }
+
+    this.downloadingBanListFile = false;
   }
 
   private async choosePemFile(): Promise<string> {

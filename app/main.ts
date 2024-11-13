@@ -889,10 +889,34 @@ try {
       });
       
     } catch (error) {
-      event.sender.send('download-progress', { progress: 0, status: `Error: ${error}` });
+      event.sender.send('download-progress', { progress: 0, status: `${error}` });
       win?.setProgressBar(0, {
         mode: 'error'
       });
+    }
+  });
+
+  ipcMain.handle('download-file', async (event: IpcMainInvokeEvent, url: string, destination: string) => {
+    try {
+      event.sender.send('download-file-progress', { progress: 0, status: 'Starting download' });
+
+      const fileName = await downloadFile(url, destination, (progress) => {
+        win?.setProgressBar(progress, {
+          mode: 'normal'
+        });
+  
+        event.sender.send('download-file-progress', { progress, status: 'Downloading' });
+      });
+      
+      win?.setProgressBar(0, {
+        mode: 'none'
+      });
+      
+      event.sender.send('download-file-complete', `${destination}${separator}${fileName}`);
+    }
+    catch(error: any) {
+      console.error(error);
+      event.sender.send('download-file-error', `${error}`);
     }
   });
 
@@ -1080,6 +1104,10 @@ try {
 
   // #endregion
 
+  ipcMain.handle('show-error-box', (event: IpcMainInvokeEvent, title: string, content: string) => {
+    dialog.showErrorBox(title, content);
+  });
+
   ipcMain.handle('set-tray-item-enabled', (event: IpcMainInvokeEvent, id: string, enabled: boolean) => {
     setTrayItemEnabled(id, enabled);
   });
@@ -1096,10 +1124,13 @@ try {
     clipboard.writeText(content, "selection");
   });
 
-
-} catch (e) {
+} catch (e: any) {
   // Catch Error
   console.error(e);
+
+  dialog.showErrorBox('', `${e}`);
+
+  app.quit();
   // throw e;
 }
 

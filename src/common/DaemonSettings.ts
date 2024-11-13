@@ -98,6 +98,7 @@ export class DaemonSettings {
   public anonymousInbound: string = '';
 
   public banList: string = '';
+  public remoteBanList: boolean = false;
   public hideMyPort: boolean = false;
 
   public noSync: boolean = false;
@@ -145,6 +146,10 @@ export class DaemonSettings {
   public rpcPaymentCredits: number = 100;
   public rpcPaymentAllowFreeLoopback: boolean = false;
   public disableRpcBan: boolean = false;
+
+  public get banListArray(): string[] {
+    return this.banList.split('\n');
+  }
 
   public equals(settings: DaemonSettings): boolean {
     //return this.toCommandOptions().join('') == settings.toCommandOptions().join('');

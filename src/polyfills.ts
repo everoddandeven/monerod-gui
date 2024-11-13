@@ -161,6 +161,14 @@ declare global {
       unregisterOnIsOnBatteryPower: () => void;
       onBattery: (callback: (event: any) => void) => void;
       onAc: (callback: (event: any) => void) => void;
+
+      downloadFile: (url: string, destination: string) => void;
+      onDownloadFileProgress: (callback: (event: any, info: { progress: number, status: string }) => void) => void;
+      onDownloadFileError: (callback: (event: any, error: string) => void) => void;
+      onDownloadFileComplete: (callback: (event: any, fileName: string) => void) => void;
+      unregisterOnDownloadFile: () => void;
+
+      showErrorBox: (title: string, content: string) => void;
     };
   }
 }
