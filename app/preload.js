@@ -244,5 +244,25 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   unregisterOnIsAutoLaunched: () => {
     ipcRenderer.removeAllListeners('on-is-auto-launched');
+  },
+  downloadFile: (url, destination) => {
+    ipcRenderer.invoke('download-file', url, destination);
+  },
+  onDownloadFileProgress: (callback) => {
+    ipcRenderer.on('download-file-progress', callback);
+  },
+  onDownloadFileError: (callback) => {
+    ipcRenderer.on('download-file-error', callback);
+  },
+  onDownloadFileComplete: (callback) => {
+    ipcRenderer.on('download-file-complete', callback);
+  },
+  unregisterOnDownloadFile: () => {
+    ipcRenderer.removeAllListeners('download-file-progress');
+    ipcRenderer.removeAllListeners('download-file-error');
+    ipcRenderer.removeAllListeners('download-file-complete');
+  },
+  showErrorBox: (title, content) => {
+    ipcRenderer.invoke('show-error-box', title, content);
   }
 });
