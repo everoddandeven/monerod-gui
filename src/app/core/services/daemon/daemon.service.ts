@@ -141,6 +141,14 @@ export class DaemonService {
     window.electronAPI.onMoneroClose((event: any, code: number) => {
       console.debug(event);
       console.debug(code);
+
+      if (code != 0) {
+        window.electronAPI.showNotification({
+          title: 'Daemon Error',
+          body: 'Monero daemon exited with code: ' + code,
+          closeButtonText: 'Dismiss'
+        });
+      }
       this.onClose();
     });
 
@@ -220,6 +228,7 @@ export class DaemonService {
 
   private onClose(): void {
     this.daemonRunning = false;
+    this.starting = false;
     this.stopping = false;
     this.onDaemonStatusChanged.emit(false);
     this.onDaemonStopEnd.emit();

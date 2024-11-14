@@ -541,7 +541,19 @@ const downloadFile = (url: string, destinationDir: string, onProgress: (progress
           }
 
           const destination = `${destinationDir}/${finalFilename}`;
-          const file = fs.createWriteStream(destination);
+          let file: fs.WriteStream;
+
+          try {
+            file = fs.createWriteStream(destination);
+            file.on('error', (error: Error) => {
+              console.log("file error: " + error);
+              reject(error);
+            });
+          }
+          catch (error: any) {
+            reject(error);
+            return;
+          }
 
           const totalBytes = parseInt(response.headers['content-length'] || '0', 10);
           let downloadedBytes = 0;
