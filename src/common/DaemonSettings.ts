@@ -98,7 +98,6 @@ export class DaemonSettings {
   public anonymousInbound: string = '';
 
   public banList: string = '';
-  public remoteBanList: boolean = false;
   public hideMyPort: boolean = false;
 
   public noSync: boolean = false;

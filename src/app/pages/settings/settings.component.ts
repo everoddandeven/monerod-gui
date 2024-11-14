@@ -17,6 +17,7 @@ export class SettingsComponent {
   public currentSettings: DaemonSettings;
 
   public banListUrl: string = '';
+  public remoteBanList: boolean = false;
 
   public get validBanListUrl(): boolean {
     if (this.banListUrl == '') {
@@ -374,7 +375,7 @@ export class SettingsComponent {
   public downloadingBanListFile: boolean = false;
 
   public async downloadBanListFile(): Promise<void> {
-    if (!this.currentSettings.remoteBanList) {
+    if (!this.remoteBanList) {
       return;
     }
 
@@ -382,14 +383,17 @@ export class SettingsComponent {
 
     try {
       const destination = await this.electronService.selectFolder();
-      const filePath = await this.electronService.downloadFile(this.banListUrl, destination);
 
-      if (!filePath.endsWith('.txt')) {
-        throw new Error("Downloaded file doesn't seem to be a valid ban list txt file");
+      if (destination != '') {
+        const filePath = await this.electronService.downloadFile(this.banListUrl, destination);
+
+        if (!filePath.endsWith('.txt')) {
+          throw new Error("Downloaded file doesn't seem to be a valid ban list txt file");
+        }
+  
+        this.currentSettings.banList = filePath;
+        this.remoteBanList = false;
       }
-
-      this.currentSettings.banList = filePath;
-      this.currentSettings.remoteBanList = false;
     }
     catch (error: any) {
       console.error(error);
