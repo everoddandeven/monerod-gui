@@ -71,7 +71,7 @@
         <div class="col-md-12">
           <div class="form-check form-switch col-md-6">
             <label for="general-remote-ban-list" class="form-check-label">Remote ban list</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="general-remote-ban-list" [checked]="currentSettings.remoteBanList" [(ngModel)]="currentSettings.remoteBanList" [ngModelOptions]="{standalone: true}">
+            <input class="form-control form-check-input" type="checkbox" role="switch" id="general-remote-ban-list" [checked]="remoteBanList" [(ngModel)]="remoteBanList" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Specify a remote URL for download ban list</small>
           </div>
@@ -79,7 +79,7 @@
         
         <br>
 
-        <div *ngIf="!currentSettings.remoteBanList" class="col-md-12">
+        <div *ngIf="!remoteBanList" class="col-md-12">
           <label for="general-ban-list-file" class="form-label">Ban list file</label>
           <div class="input-group mb-3">
             <input id="general-ban-list-file" type="text" class="form-control form-control-sm" placeholder="" aria-label="Ban list file path" aria-describedby="basic-addon3" [value]="currentSettings.banList" readonly>
@@ -89,7 +89,7 @@
           <small class="text-body-secondary">Specify ban list file, one IP address per line. It is <strong>not recommended</strong> to statically ban any IP addresses unless you absolutely need to. Banning IPs often excludes the most vulnerable users who are forced to operate entirely behind Tor or other anonymity networks</small>
         </div>
 
-        <div *ngIf="currentSettings.remoteBanList" class="col-md-12">
+        <div *ngIf="remoteBanList" class="col-md-12">
           <label for="general-ban-list-url" class="form-label">Ban list URL</label>
           <div class="input-group mb-3">
             <input id="general-ban-list-url" type="text" class="form-control form-control-sm" placeholder="https://gui.xmr.pm/files/block.txt" aria-label="Ban list file url" aria-describedby="basic-addon3" [(ngModel)]="banListUrl"  [ngModelOptions]="{standalone: true}">
