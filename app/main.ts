@@ -9,8 +9,8 @@ import { createHash } from 'crypto';
 import * as tar from 'tar';
 import * as os from 'os';
 import AutoLaunch from './auto-launch';
-import AdmZip from 'adm-zip';
 
+const AdmZip = require('adm-zip');
 const pidusage = require('pidusage');
 const batteryLevel = require('battery-level');
 const network = require('network');
