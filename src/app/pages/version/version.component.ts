@@ -5,6 +5,7 @@ import { SimpleBootstrapCard } from '../../shared/utils';
 import { DaemonVersion } from '../../../common/DaemonVersion';
 import { DaemonDataService, ElectronService, MoneroInstallerService } from '../../core/services';
 import { DaemonSettings } from '../../../common';
+import { StringUtils } from '../../core/utils';
 
 @Component({
   selector: 'app-version',
@@ -165,7 +166,17 @@ export class VersionComponent implements AfterViewInit {
       
       console.error(error);
       this.upgradeSuccess = false;
-      this.upgradeError = `${error}`;
+      let err = StringUtils.replaceAll(`${error}`, 'Error: ','');
+
+      if (err.includes('permission denied')) {
+        const settings = await this.daemonService.getSettings();
+        
+        this.upgradeError = 'Cannot download monerod to ' + settings.downloadUpgradePath;
+      }
+      else {
+        this.upgradeError = err;
+      }
+
     }
   }
 }
