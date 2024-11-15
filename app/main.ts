@@ -402,18 +402,27 @@ function isWifiConnected() {
 function getMonerodVersion(monerodFilePath: string): void {
   const monerodProcess = spawn(monerodFilePath, [ '--version' ]);
 
+  monerodProcess.on('error', (err: Error) => {
+    win?.webContents.send('monero-version-error', `${err.message}`);
+  });
+
   monerodProcess.stdout.on('data', (data) => {
     win?.webContents.send('monero-version', `${data}`);
-  })
+  });
 
   monerodProcess.stderr.on('data', (data) => {
     win?.webContents.send('monero-version-error', `${data}`);
-  })
+  });
+
 }
 
 function checkValidMonerodPath(monerodPath: string): void {
   let foundUsage: boolean = false;
   const monerodProcess = spawn(monerodPath, ['--help']);
+
+  monerodProcess.on('error', (err: Error) => {
+    win?.webContents.send('on-check-valid-monerod-path', false);
+  });
 
   monerodProcess.stderr.on('data', (data) => {
     win?.webContents.send('on-check-valid-monerod-path', false);
@@ -427,7 +436,7 @@ function checkValidMonerodPath(monerodPath: string): void {
 
   monerodProcess.on('close', (code: number) => {
     win?.webContents.send('on-check-valid-monerod-path', foundUsage);
-  })
+  });
 
 }
 
@@ -486,6 +495,11 @@ function startMoneroDaemon(commandOptions: string[]): ChildProcessWithoutNullStr
   });
 
   // Gestisci la chiusura del processo
+
+  monerodProcess.on('error', (err: Error) => {
+    win?.webContents.send('monero-stderr', `${err.message}`);
+  });
+
   monerodProcess.on('close', (code: number) => {
     console.log(`monerod exited with code: ${code}`);
     win?.webContents.send('monero-stdout', `monerod exited with code: ${code}`);
