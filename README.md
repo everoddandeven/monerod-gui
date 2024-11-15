@@ -6,6 +6,7 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c705f535eebe4ba8b7a5789f6b409933)](https://app.codacy.com/gh/everoddandeven/monerod-gui/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![Make a pull request][prs-badge]][prs]
 [![License][license-badge]](LICENSE.md)
+[![Lint Test](https://github.com/everoddandeven/monerod-gui/actions/workflows/lint.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/lint.yml)
 
 [![Linux - AppImage Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/linux_appimage.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/linux_appimage.yml)
 [![Linux - x64 DEB Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/linux_x64_deb.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/linux_x64_deb.yml)
@@ -17,7 +18,7 @@
 [![Watch on GitHub][github-watch-badge]][github-watch]
 [![Star on GitHub][github-star-badge]][github-star]
 
-[![XMR Donated](https://img.shields.io/badge/donated-0.188011974017_XMR-blue?logo=monero)](https://github.com/everoddandeven/monerod-gui?tab=readme-ov-file#monero)
+[![XMR Donated](https://img.shields.io/badge/donated-0.257431974017_XMR-blue?logo=monero)](https://github.com/everoddandeven/monerod-gui?tab=readme-ov-file#monero)
 [![BTC Donated][bitcoin-donated-badge]][bitcoin-donated]
 
 </div>
