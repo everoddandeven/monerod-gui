@@ -17,6 +17,14 @@ export class AppChildProcess {
     protected _command: string;
     protected readonly _args?: string[];
 
+    public get pid(): number {
+        if (!this._process || this._process.pid == null) {
+            return -1;
+        }
+
+        return this._process.pid;
+    }
+
     protected readonly _handlers: {
         'stdout': ((data: string) => void)[],
         'stderr': ((err: string) => void)[],
