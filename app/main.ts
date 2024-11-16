@@ -13,6 +13,11 @@ import { BatteryUtils, FileUtils, NetworkUtils } from './utils';
 
 app.setName('Monero Daemon');
 
+if (process.platform === 'win32')
+{
+  app.setAppUserModelId(app.name);
+}
+
 let win: BrowserWindow | null = null;
 let isHidden: boolean = false;
 let isQuitting: boolean = false;
@@ -121,7 +126,7 @@ function createTray(): Tray {
   return tray;
 }
 
-function createWindow(): BrowserWindow {
+async function createWindow(): Promise<BrowserWindow> {
   const size = screen.getPrimaryDisplay().workAreaSize;
   
   tray = createTray();
@@ -167,7 +172,7 @@ function createWindow(): BrowserWindow {
     const url = new URL(path.join('file:', dirname, pathIndex));
     console.log(`Main window url: ${url}`);
 
-    win.loadURL(url.href);
+    await win.loadURL(url.href);
   }
 
   win.on('close', (event) => {
@@ -192,12 +197,8 @@ function createWindow(): BrowserWindow {
   return win;
 }
 
-const createSplashWindow = async (): Promise<BrowserWindow | undefined> => {
-  return undefined;
-  
-  if (os.platform() == 'win32' || AppMainProcess.isPortable) {
-    return undefined;
-  }
+const createSplashWindow = async (): Promise<BrowserWindow | undefined> => {  
+  console.log("createSplashWindow()");
 
   const window = new BrowserWindow({
     width: 480,
@@ -209,7 +210,12 @@ const createSplashWindow = async (): Promise<BrowserWindow | undefined> => {
     icon: wdwIcon,
     minimizable: false,
     maximizable: false,
-    fullscreen: false
+    fullscreen: false,
+    fullscreenable: false,
+    movable: false,
+    resizable: false,
+    closable: true,
+    center: true
   });
 
   // Path when running electron executable
@@ -220,7 +226,15 @@ const createSplashWindow = async (): Promise<BrowserWindow | undefined> => {
     pathIndex = '../dist/splash.html';
   }
 
-  const url = new URL(path.join('file:', dirname, pathIndex));
+  if (!fs.existsSync(path.join(dirname, pathIndex))) {
+    console.error("createSplashScreen(): path doesn't exists: " + path.join(dirname, pathIndex));
+    window.close();
+    return undefined;
+  }
+
+  const indexPath = path.join('file:', dirname, pathIndex);
+
+  const url = new URL(indexPath);
 
   await window.loadURL(url.href);
 
@@ -297,31 +311,35 @@ async function startMoneroDaemon(commandOptions: string[]): Promise<MonerodProce
   
   commandOptions.push('--non-interactive');
 
-  monerodProcess = new MonerodProcess({
+  const monerodProc = new MonerodProcess({
     monerodCmd: monerodPath,
     flags: commandOptions,
     isExe: true
   });
 
-  monerodProcess.onStdOut((data) => {
+  monerodProc.onStdOut((data) => {
     win?.webContents.send('monero-stdout', `${data}`);
   });
 
-  monerodProcess.onStdErr((data) => {
+  monerodProc.onStdErr((data) => {
     win?.webContents.send('monero-stderr', `${data}`);
   });
 
-  monerodProcess.onError((err: Error) => {
+  monerodProc.onError((err: Error) => {
     win?.webContents.send('monero-stderr', `${err.message}`);
   });
 
-  monerodProcess.onClose((_code: number | null) => {
+  monerodProc.onClose((_code: number | null) => {
     const code = _code != null ? _code : -Number.MAX_SAFE_INTEGER;
-    console.log(`monerod exited with code: ${code}`);
-    win?.webContents.send('monero-stdout', `monerod exited with code: ${code}`);
+    const msg = `Process monerod ${monerodProc.pid} exited with code: ${code}`;
+    console.log(msg);
+    win?.webContents.send('monero-stdout', msg);
     win?.webContents.send('monero-close', code);
     monerodProcess = null;
   });
+
+  monerodProcess = null;
+  monerodProcess = monerodProc;
 
   try {
     await monerodProcess.start();
@@ -427,14 +445,14 @@ try {
     const gotInstanceLock = app.requestSingleInstanceLock();
 
     if (!gotInstanceLock) {
-      dialog.showErrorBox('', 'Another instance of monerod GUI is running');
+      dialog.showErrorBox('', 'Another instance of Monerod GUI is running');
       app.quit();
       return;
     }
 
     setTimeout(async () => {
       const splash = await createSplashWindow();
-      createWindow();
+      await createWindow();
 
       await new Promise<void>((resolve, reject) => {
         try {
@@ -463,11 +481,11 @@ try {
     }
   });
 
-  app.on('activate', () => {
+  app.on('activate', async () => {
     // On OS X it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (win === null) {
-      createWindow();
+      await createWindow();
     }
   });
 

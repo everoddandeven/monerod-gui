@@ -44,12 +44,12 @@ export class MonerodProcess extends AppChildProcess {
             let foundUsage: boolean = false;
 
             proc.onError((err: Error) => {
-                console.log(`MonerodProcess.isValidMonerodPath(): '${err.message}'`);
+                console.log(`MonerodProcess.isValidMonerodPath(): Error: '${err.message}'`);
                 resolve(false);
             });
 
             proc.onStdErr((err: string) => {
-                console.log(`MonerodProcess.isValidMonerodPath(): '${err}'`);
+                console.log(`MonerodProcess.isValidMonerodPath(): Std Error: '${err}'`);
                 resolve(false);
             });
 
@@ -57,8 +57,6 @@ export class MonerodProcess extends AppChildProcess {
                 if (foundUsage) {
                     return;
                 }
-
-                console.log(`MonerodProcess.isValidMonerodPath(): '${data}'`);
 
                 if (
                     `${data}`.includes('monerod [options|settings] [daemon_command...]') ||
@@ -70,7 +68,7 @@ export class MonerodProcess extends AppChildProcess {
 
             proc.onClose((code: number | null) => {
                 console.log(`MonerodProcess.isValidMonerodPath(): exit code '${code}', found usage: ${foundUsage}`);
-                resolve(foundUsage);
+                resolve(foundUsage && code == 0);
             });
         });
 
@@ -104,6 +102,7 @@ export class MonerodProcess extends AppChildProcess {
         console.log(message);
 
         let firstPatternFound = false;
+        const waitForPattern = this._args ? !this._args.includes('--version') && !this.args.includes('--help') : true;
 
         const patternPromise = new Promise<void>((resolve, reject) => {
             let firstStdout = true;
@@ -112,12 +111,18 @@ export class MonerodProcess extends AppChildProcess {
             const onStdOut = (out: string) => {
                 if (firstStdout) {
                     firstStdout = false;
+
+                    if (!waitForPattern) {
+                        return;
+                    }
+
                     timeout = setTimeout(() => {
                         if (this._process && this._process.exitCode == null) {
                             this._process.kill();
                         }
                         timeout = undefined;
-                        reject(new Error("Timeout out"));
+
+                        reject(new Error("MonerodProcess.start(): Timed out"));
                     }, 90*1000);
                 }
 
@@ -128,7 +133,14 @@ export class MonerodProcess extends AppChildProcess {
                 }
 
                 if (firstPatternFound) {
-                    if(timeout !== undefined) clearTimeout(timeout);
+                    if(timeout !== undefined) {
+                        clearTimeout(timeout);
+                        console.log("MonerodProcess.start(): Cleared timeout");
+                    }
+                    else {
+                        console.log("MonerodProcess.start(): No timeout found");
+                    }
+                    
                     resolve();
                 }
                 else {
@@ -144,9 +156,9 @@ export class MonerodProcess extends AppChildProcess {
         if (!this._process || !this._process.pid) {
             throw new Error("Monerod process did not start!");
         }
-        try {
-            const waitForPattern = this._args ? !this._args.includes('--version') && !this.args.includes('--help') : true;
-            
+        try {            
+            console.log(`MonerodProcess.start(): wait for pattern: ${waitForPattern}`);
+
             if (waitForPattern) await patternPromise;
 
             console.log("Started monerod process pid: " + this._process.pid);    
@@ -175,27 +187,31 @@ export class MonerodProcess extends AppChildProcess {
 
         const promise = new Promise<string>((resolve, reject) => {
             proc.onError((err: Error) => {
-                console.log("proc.onError():");
+                console.log("MonerodProcess.getVersion(): proc.onError():");
                 console.error(err);
                 reject(err)
             });
             
             proc.onStdErr((err: string) => {
-                console.log("proc.onStdErr()");
+                console.log("MonerodProcess.getVersion(): proc.onStdErr()");
                 console.error(err);
                 reject(new Error(err));
             });
 
             proc.onStdOut((version: string) => {
-                console.log("proc.onStdOut():");
+                if (version == '') {
+                    return;
+                }
+
+                console.log("MonerodProcess.getVersion(): proc.onStdOut():");
                 console.log(version);
                 resolve(version);
             });
         });
 
-        console.log("Before proc.start()");
+        console.log("MonerodProcess.getVersion(): Before proc.start()");
         await proc.start();
-        console.log("After proc.start()");
+        console.log("MonerodProcess.getVersion(): After proc.start()");
 
         return await promise;
     }
