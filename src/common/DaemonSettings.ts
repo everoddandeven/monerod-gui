@@ -70,7 +70,7 @@ export class DaemonSettings {
   public extraMessagesFile: string = '';
 
   public startMining: string = '';
-  public miningThreds: number = 0;
+  public miningThreads: number = 0;
   
   public bgMiningEnable: boolean = false;
   public bgMiningIgnoreBattery: boolean = false;
@@ -325,7 +325,7 @@ export class DaemonSettings {
             case 'add-exclusive-node': settings.addExclusiveNode = value; break;
             case 'no-sync': settings.noSync = boolValue; break;
             case 'start-mining': settings.startMining = value; break;
-            case 'mining-threads': settings.miningThreds = parseInt(value, 10); break;
+            case 'mining-threads': settings.miningThreads = parseInt(value, 10); break;
             case 'bg-mining-enable': settings.bgMiningEnable = boolValue; break;
             case 'bg-mining-ignore-battery': settings.bgMiningIgnoreBattery = boolValue; break;
             case 'bg-mining-idle-threshold': settings.bgMiningIdleThreshold = parseInt(value, 10); break;
@@ -405,7 +405,7 @@ export class DaemonSettings {
     if (this.keepAltBlocks) options.push(`--keep-alt-blocks`);
     if (this.extraMessagesFile != '') options.push(`--extra-messages-file`, this.extraMessagesFile);
     if (this.startMining != '') options.push(`--start-mining`, this.startMining);
-    if (this.miningThreds) options.push(`--mining-threads`, `${this.miningThreds}`);
+    if (this.miningThreads) options.push(`--mining-threads`, `${this.miningThreads}`);
     if (this.bgMiningEnable) options.push(`--bg-mining-enable`);
     if (this.bgMiningIgnoreBattery) options.push(`--bg-mining-ignore-battery`);
     if (this.bgMiningIdleThreshold) options.push(`--bg-mining-idle-threshold`, `${this.bgMiningIdleThreshold}`);

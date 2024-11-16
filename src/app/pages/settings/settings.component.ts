@@ -491,4 +491,36 @@ export class SettingsComponent {
 
     input.click();
   }
+
+  public async chooseExtraMessagesFile(): Promise<void> {
+    const file = await this.electronService.selectFile(['txt']);
+
+    if (file == '') {
+      return;
+    }
+
+    this.ngZone.run(() => {
+      this.currentSettings.extraMessagesFile = file;
+    });
+  }
+
+  public removeExtraMessagesFile(): void {
+    this.currentSettings.extraMessagesFile = '';
+  }
+
+  public async chooseLogFile(): Promise<void> {
+    const file = await this.electronService.selectFile(['txt']);
+
+    if (file == '') {
+      return;
+    }
+
+    this.ngZone.run(() => {
+      this.currentSettings.logFile = file;
+    });
+  }
+
+  public removeLogFile(): void {
+    this.currentSettings.logFile = '';
+  }
 }
