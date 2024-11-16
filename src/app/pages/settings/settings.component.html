@@ -780,7 +780,36 @@
     <div class="row g-5 p-2">
       <div class="col-md-12 col-lg-12">
         <form class="needs-validation" novalidate="">
-    
+
+          <div class="row g-3">
+            <h4 class="mb-3">Mining</h4>
+            
+            <div class="col-md-12">
+              <label for="mining-address" class="form-label">Address</label>
+              <input type="text" class="form-control" id="mining-address" [(ngModel)]="currentSettings.startMining" [ngModelOptions]="{standalone: true}">
+              <small class="text-body-secondary">Specify wallet address to mining for. This must be a <strong>standard address</strong>! (aka primary address) It can be neither a subaddress nor integrated address.</small>
+            </div>
+
+            <div class="col-md-6">
+              <label for="mining-threads" class="form-label">Threads</label>
+              <input type="number" min="0" class="form-control" id="mining-threds" placeholder="1" [(ngModel)]="currentSettings.miningThreads" [ngModelOptions]="{standalone: true}">
+              <small class="text-body-secondary">Specify mining threads count. By default only one thread will be used.</small>
+            </div>
+            
+            <div class="col-md-12">
+              <label for="extra-messages-file" class="form-label">Extra messages file</label>
+              <div class="input-group mb-3">
+                <input id="extra-messages-file" type="text" class="form-control form-control-sm" placeholder="" aria-label="Monerod path" aria-describedby="basic-addon2" [value]="currentSettings.extraMessagesFile" readonly>
+                <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseExtraMessagesFile()"><i class="bi bi-filetype-txt"></i> Choose file</button></span>            
+                <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeExtraMessagesFile()" [disabled]="currentSettings.extraMessagesFile === ''"><i class="bi bi-file-x"></i> Remove</button></span>
+              </div>
+              <small class="text-body-secondary">Specify file for extra messages to include into coinbase transactions.</small>
+            </div>
+
+          </div>
+
+          <hr class="my-4">
+
           <div class="row g-3">
               <h4 class="mb-3">Background mining</h4>
               
@@ -788,14 +817,14 @@
                 <label for="bg-mining-enable" class="form-check-label">Enabled</label>
                 <input class="form-control form-check-input" type="checkbox" role="switch" id="bg-mining-enable" [checked]="currentSettings.bgMiningEnable" [(ngModel)]="currentSettings.bgMiningEnable" [ngModelOptions]="{standalone: true}">
                 <br>
-                <small class="text-body-secondary">Enable background mining</small>
+                <small class="text-body-secondary">If enabled, mining will use a small percentage of your system resources to never noticeably slow down your computer. This is intended to encourage people to mine to improve decentralization</small>
               </div>
 
               <div class="form-check form-switch col-md-6">
                 <label for="bg-mining-ignore-battery" class="form-check-label">Ignore battery</label>
                 <input class="form-control form-check-input" type="checkbox" role="switch" id="bg-mining-ignore-battery" [checked]="currentSettings.bgMiningIgnoreBattery" [(ngModel)]="currentSettings.bgMiningIgnoreBattery" [ngModelOptions]="{standalone: true}">
                 <br>
-                <small class="text-body-secondary">Reduce blockchain disk usage</small>
+                <small class="text-body-secondary">If enabled, assumes plugged in when unable to query system power status</small>
               </div>
     
               <div class="col-md-4">
@@ -831,6 +860,16 @@
           <div class="row g-3">
               <h4 class="mb-3">General</h4>
               
+              <div class="col-md-12">
+                <label for="log-file" class="form-label">Log file</label>
+                <div class="input-group mb-3">
+                  <input id="extra-messages-file" type="text" class="form-control form-control-sm" placeholder="/var/log/monero/mainnet/monerod.log" aria-label="Log file" aria-describedby="basic-addon2" [value]="currentSettings.logFile" readonly>
+                  <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseLogFile()"><i class="bi bi-filetype-txt"></i> Choose file</button></span>            
+                  <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeLogFile()" [disabled]="currentSettings.logFile === ''"><i class="bi bi-file-x"></i> Remove</button></span>
+                </div>
+                <small class="text-body-secondary"><strong>Full path</strong> to the log file (mind file permissions).</small>
+              </div>
+
               <div class="col-md-4">
                 <label for="log-level" class="form-label">Log level</label>
                 <select class="form-select" id="log-level" [(ngModel)]="currentSettings.logLevel" [ngModelOptions]="{standalone: true}">
