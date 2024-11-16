@@ -75,7 +75,10 @@ https://github.com/user-attachments/assets/c4a50d2f-5bbb-48ac-9425-30ecc20ada7c
 
 ## To Do
 
+- [X] Upgrade Electron to latest version
+- [X] Upgrade Angular to latest version
 - [X] Detect wired/Wi-Fi connection
+- [X] Detect battery/ac power
 - [ ] Detect preinstalled `monerod`
   - [ ] Linux
   - [ ] Windows
@@ -84,12 +87,28 @@ https://github.com/user-attachments/assets/c4a50d2f-5bbb-48ac-9425-30ecc20ada7c
   - [X] Linux
   - [X] Windows
   - [X] MacOS
-- [X] Import/export `monerod.conf` node configuration
-- [X] Synchronization in a specific time slot
 - [X] Installers
   - [X] Linux
   - [X] Windows
-  - [X] MacOS  
+  - [X] MacOS 
+- [ ] Packages
+  - [X] deb
+  - [X] rpm
+  - [X] exe
+  - [X] msi
+  - [X] dmg
+  - [ ] pkg
+  - [ ] flatpack
+  - [ ] snap
+- [X] Import/export `monerod.conf` node configuration
+- [X] Synchronization in a specific time slot
+- [ ] Prompt user access control for administration operation
+- [ ] Blockchain tools
+  - [ ] Import blockchain
+  - [ ] Export blockchain
+- [ ] Mining tools
+  - [ ] XMRig integration
+  - [ ] P2Pool integration
 - [ ] Remote node management
   - [ ] No CORS connection
 
@@ -109,13 +128,6 @@ npm install
 
 There is an issue with `yarn` and `node_modules` when the application is built by the packager. Please use `npm` as dependencies manager.
 
-If you want to generate Angular components with Angular-cli , you **MUST** install `@angular/cli` in npm global context.
-Please follow [Angular-cli documentation](https://github.com/angular/angular-cli) if you had installed a previous version of `angular-cli`.
-
-``` bash
-npm install -g @angular/cli
-```
-
 *Install NodeJS dependencies with npm (used by Electron main process):*
 
 ``` bash
@@ -125,16 +137,6 @@ npm install
 
 Why two package.json ? This project follow [Electron Builder two package.json structure](https://www.electron.build/tutorials/two-package-structure) in order to optimize final bundle and be still able to use Angular `ng add` feature.
 
-## To build for development
-
-- **in a terminal window** -> npm start
-
-Voila! You can use your Angular + Electron app in a local development environment with hot reload!
-
-The application code is managed by `app/main.ts`. In this sample, the app runs with a simple Angular App (`http://localhost:4200`), and an Electron window. \
-The Angular component contains an example of Electron and NodeJS native lib import. \
-You can disable "Developer Tools" by commenting `win.webContents.openDevTools();` in `app/main.ts`.
-
 ## Project structure
 
 | Folder | Description                                      |
@@ -142,19 +144,30 @@ You can disable "Developer Tools" by commenting `win.webContents.openDevTools();
 | app    | Electron main process folder (NodeJS)            |
 | src    | Electron renderer process folder (Web / Angular) |
 
-## Browser mode
+## To build for development
 
-Maybe you only want to execute the application in the browser with hot reload? Just run `npm run ng:serve:web`.
+| Command                      | Description                                                                                           |
+|------------------------------|-------------------------------------------------------------------------------------------------------|
+| `npm run electron:local:dev` | Builds your application and start electron locally (DEV MODE)                                         |
 
-## Included Commands
 
-| Command                  | Description                                                                                           |
-|--------------------------|-------------------------------------------------------------------------------------------------------|
-| `npm run ng:serve`       | Execute the app in the web browser (DEV mode)                                                         |
-| `npm run web:build`      | Build the app that can be used directly in the web browser. Your built files are in the /dist folder. |
-| `npm run electron:local` | Builds your application and start electron locally                                                    |
-| `npm run electron:local:dev` | Builds your application and start electron locally (DEV MODE)                                     |
-| `npm run electron:build` | Builds your application and creates an app consumable based on your operating system                  |
+If you want to generate Angular components with Angular-cli , you **MUST** install `@angular/cli` in npm global context.
+Please follow [Angular-cli documentation](https://github.com/angular/angular-cli) if you had installed a previous version of `angular-cli`.
+
+``` bash
+npm install -g @angular/cli
+```
+
+## To build for production
+
+| Command                      | Description                                                                                           |
+|------------------------------|-------------------------------------------------------------------------------------------------------|
+| `npm run electron:local`     | Builds your application and start electron locally                                                    |
+| `npm run electron:build`     | Builds your application and creates an app and installer for Windows                                  |
+| `npm run electron:build:deb` | Builds your application and creates an installer consumable for debian based operating systems        |
+| `npm run electron:build:rpm` | Builds your application and creates an installer consumable for redhat based operating systems        |
+| `npm run electron:build:mac` | Builds your application and creates an installer consumable for MacOS                                 |
+
 
 **Your application is optimised. Only /dist folder and NodeJS dependencies are included in the final bundle.**
 
@@ -178,24 +191,6 @@ Then set some breakpoints in your application's source code.
 Finally from VsCode press **Ctrl+Shift+D** and select **Application Debug** and press **F5**.
 
 Please note that Hot reload is only available in Renderer process.
-
-[maintained-badge]: https://img.shields.io/badge/maintained-yes-brightgreen
-[license-badge]: https://img.shields.io/badge/license-MIT-blue.svg
-[prs-badge]: https://img.shields.io/badge/PRs-welcome-red.svg
-[prs]: http://makeapullrequest.com
-
-[macos-build-badge]: https://github.com/everoddandeven/monerod-gui/workflows/MacOS%20Build/badge.svg
-[macos-build]: https://github.com/everoddandeven/monerod-gui/actions?query=workflow%3A%22MacOS+Build%22
-[windows-build-badge]: https://github.com/everoddandeven/monerod-gui/workflows/Windows%20Build/badge.svg
-[windows-build]: https://github.com/everoddandeven/monerod-gui/actions?query=workflow%3A%22Windows+Build%22
-
-[github-watch-badge]: https://img.shields.io/github/watchers/everoddandeven/monerod-gui.svg?style=social
-[github-watch]: https://github.com/everoddandeven/monerod-gui/watchers
-[github-star-badge]: https://img.shields.io/github/stars/everoddandeven/monerod-gui.svg?style=social
-[github-star]: https://github.com/everoddandeven/monerod-gui/stargazers
-
-[bitcoin-donated]: https://github.com/everoddandeven/monerod-gui?tab=readme-ov-file#bitcoin
-[bitcoin-donated-badge]: https://img.shields.io/badge/dynamic/json?url=https://explorer.viawallet.com/res/btc/addresses/bc1qndc2lesy0sse9vj33a35pnfrqz4znlhhs58vfp&query=$.data.balance&suffix=%20BTC&logo=bitcoin&label=donated
 
 ## Donating
 
@@ -221,3 +216,21 @@ Please consider donating to support the development of this project.
  <img src="donate_wow.png" width="115" height="115" alt="wowQrCode"/><br>
  <code>WW33Zj3xu6EGTyKVWaz8EQZmqsTXKdK5eG7PDRaiPuJ1LyREhGHLCRDX3AaLx4r9NFCThRvsbq99KATbswJaxd3T1iwQLJ3Tw</code>
 </p>
+
+[maintained-badge]: https://img.shields.io/badge/maintained-yes-brightgreen
+[license-badge]: https://img.shields.io/badge/license-MIT-blue.svg
+[prs-badge]: https://img.shields.io/badge/PRs-welcome-red.svg
+[prs]: http://makeapullrequest.com
+
+[macos-build-badge]: https://github.com/everoddandeven/monerod-gui/workflows/MacOS%20Build/badge.svg
+[macos-build]: https://github.com/everoddandeven/monerod-gui/actions?query=workflow%3A%22MacOS+Build%22
+[windows-build-badge]: https://github.com/everoddandeven/monerod-gui/workflows/Windows%20Build/badge.svg
+[windows-build]: https://github.com/everoddandeven/monerod-gui/actions?query=workflow%3A%22Windows+Build%22
+
+[github-watch-badge]: https://img.shields.io/github/watchers/everoddandeven/monerod-gui.svg?style=social
+[github-watch]: https://github.com/everoddandeven/monerod-gui/watchers
+[github-star-badge]: https://img.shields.io/github/stars/everoddandeven/monerod-gui.svg?style=social
+[github-star]: https://github.com/everoddandeven/monerod-gui/stargazers
+
+[bitcoin-donated]: https://github.com/everoddandeven/monerod-gui?tab=readme-ov-file#bitcoin
+[bitcoin-donated-badge]: https://img.shields.io/badge/dynamic/json?url=https://explorer.viawallet.com/res/btc/addresses/bc1qndc2lesy0sse9vj33a35pnfrqz4znlhhs58vfp&query=$.data.balance&suffix=%20BTC&logo=bitcoin&label=donated
