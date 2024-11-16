@@ -12,7 +12,7 @@ export class ElectronService {
   childProcess!: typeof childProcess;
   fs!: typeof fs;
 
-  private _isAppImage?: boolean;
+  private _isPortable?: boolean;
   private _isAutoLaunched?: boolean;
   private _online: boolean = false;
   private _isProduction: boolean = false;
@@ -124,7 +124,7 @@ export class ElectronService {
   }
 
   public async isAutoLaunchEnabled(): Promise<boolean> {
-    if (await this.isAppImage()) {
+    if (await this.isPortable()) {
       return false;
     }
 
@@ -141,7 +141,7 @@ export class ElectronService {
   }
 
   public async enableAutoLaunch(minimized: boolean): Promise<void> {
-    if (await this.isAppImage()) {
+    if (await this.isPortable()) {
       throw new Error("Cannot enable auto launch");
     }
 
@@ -174,7 +174,7 @@ export class ElectronService {
 
 
   public async disableAutoLaunch(): Promise<void> {
-    if (await this.isAppImage()) {
+    if (await this.isPortable()) {
       throw new Error("Cannot disable auto launch");
     }
 
@@ -205,21 +205,21 @@ export class ElectronService {
     await promise;
   }
 
-  public async isAppImage(): Promise<boolean> {
-    if (this._isAppImage === undefined) {
+  public async isPortable(): Promise<boolean> {
+    if (this._isPortable === undefined) {
       const promise = new Promise<boolean>((resolve) => {
-        window.electronAPI.onIsAppImage((event: any, value: boolean) => {
-          window.electronAPI.unregisterOnIsAppImage();
+        window.electronAPI.onIsPortable((event: any, value: boolean) => {
+          window.electronAPI.unregisterIsPortable();
           resolve(value);
         });
       });
   
-      window.electronAPI.isAppImage();
+      window.electronAPI.isPortable();
   
-      this._isAppImage = await promise;
+      this._isPortable = await promise;
     }
 
-    return this._isAppImage;
+    return this._isPortable;
   }
 
   public async selectFile(extensions?: string[]): Promise<string> {

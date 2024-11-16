@@ -9,6 +9,8 @@
 main.js
 src/**/*.js
 app/auto-launch/**/*.js
+app/process/**/*.js
+app/utils/**/*.js
 *.js.map
 
 # dependencies

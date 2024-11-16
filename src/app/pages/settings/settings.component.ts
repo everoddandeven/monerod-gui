@@ -85,7 +85,7 @@ export class SettingsComponent {
     });
   }
 
-  public isAppImage: boolean = true;
+  public isPortable: boolean = true;
 
   public refreshSyncMode(): void {
     setTimeout(() => {
@@ -128,7 +128,7 @@ export class SettingsComponent {
     
     this.loading = false;
 
-    this.isAppImage = await this.electronService.isAppImage();
+    this.isPortable = await this.electronService.isPortable();
     this.networkType = this.currentSettings.mainnet ? 'mainnet' : this.currentSettings.testnet ? 'testnet' : this.currentSettings.stagenet ? 'stagenet' : 'mainnet';
   }
 
@@ -203,7 +203,7 @@ export class SettingsComponent {
   }
 
   private async refreshAutoLanch(minimizeChanged: boolean): Promise<void> {
-    if (await this.electronService.isAppImage()) {
+    if (await this.electronService.isPortable()) {
       return;
     }
 
@@ -232,11 +232,7 @@ export class SettingsComponent {
 
     this.savingChanges = true;
 
-    try {
-      if (this.currentSettings.upgradeAutomatically && this.currentSettings.downloadUpgradePath == '') {
-        throw new Error('You must set a download path for monerod updates when enabling automatic upgrade');
-      }
-      
+    try {      
       const oldStartMinimized: boolean = this.originalSettings.startAtLoginMinimized;
 
       await this.daemonService.saveSettings(this.currentSettings);
@@ -343,6 +339,10 @@ export class SettingsComponent {
     }
   }
 
+  public removeMonerodFile(): void {
+    this.currentSettings.monerodPath = '';
+  }
+
   public async chooseMonerodFile(): Promise<void> {
     const spec = await this.getMonerodFileSpec();
     const file = await this.electronService.selectFile(spec.extensions);
@@ -417,6 +417,10 @@ export class SettingsComponent {
     });
   }
 
+  public removeSslPrivateKey(): void {
+    this.currentSettings.rpcSslPrivateKey = '';
+  }
+
   public async selectSslCertificate(): Promise<void> {
     const cert = await this.choosePemFile();
 
@@ -427,6 +431,10 @@ export class SettingsComponent {
     });
   }
 
+  public removeSslCertificate(): void {
+    this.currentSettings.rpcSslCertificate = '';
+  }
+
   public async selectSslCACertificates(): Promise<void> {
     const cert = await this.choosePemFile();
 
@@ -435,6 +443,10 @@ export class SettingsComponent {
     this.ngZone.run(() => {
       this.currentSettings.rpcSslCACertificates = cert;
     });
+  }
+  
+  public removeSslCACertificates(): void {
+    this.currentSettings.rpcSslCACertificates = '';
   }
 
   public async chooseMoneroDownloadPath(): Promise<void> {
@@ -450,6 +462,10 @@ export class SettingsComponent {
     });
   }
 
+  public removeMoneroDownloadPath(): void {
+    this.currentSettings.downloadUpgradePath = '';
+  }
+
   public async chooseDataDir(): Promise<void> {
     const folder = await this.electronService.selectFolder();
 
@@ -460,6 +476,10 @@ export class SettingsComponent {
     this.ngZone.run(() => {
       this.currentSettings.dataDir = folder;
     });
+  }
+
+  public removeDataDir(): void {
+    this.currentSettings.dataDir = '';
   }
 
   public chooseXmrigFile(): void {

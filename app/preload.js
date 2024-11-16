@@ -93,10 +93,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('monero-version-error', callback);
   },
   unregisterOnMoneroVersion: () => {
-    ipcRenderer.removeAllListeners('on-monero-version');
+    ipcRenderer.removeAllListeners('monero-version');
   },
   unregisterOnMoneroVersionError: () => {
-    ipcRenderer.removeAllListeners('unregister-on-monero-version-error');
+    ipcRenderer.removeAllListeners('monero-version-error');
   },
   downloadMonerod: (downloadUrl, destination) => {
     ipcRenderer.invoke('download-monerod', downloadUrl, destination);
@@ -109,6 +109,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   onCheckValidMonerodPath: (callback) => {
     ipcRenderer.on('on-check-valid-monerod-path', callback);
+  },
+  unregisterOnCheckValidMonerodPath: () => {
+    ipcRenderer.removeAllListeners('on-check-valid-monerod-path');
   },
   selectFolder: () => {
     ipcRenderer.invoke('select-folder')
@@ -227,14 +230,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
   unregisterOnDisableAutoLaunchSuccess: () => {
     ipcRenderer.removeAllListeners('on-disable-auto-launch-success')
   },
-  isAppImage: () => {
-    ipcRenderer.invoke('is-app-image');
+  isPortable: () => {
+    ipcRenderer.invoke('is-portable');
   },
-  onIsAppImage: (callback) => {
-    ipcRenderer.on('on-is-app-image', callback);
+  onIsPortable: (callback) => {
+    ipcRenderer.on('on-is-portable', callback);
   },
-  unregisterOnIsAppImage: () => {
-    ipcRenderer.removeAllListeners('on-is-app-image');
+  unregisterIsPortable: () => {
+    ipcRenderer.removeAllListeners('on-is-portable');
   },
   isAutoLaunched: () => {
     ipcRenderer.invoke('is-auto-launched');

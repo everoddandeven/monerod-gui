@@ -1,4 +1,4 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { SimpleBootstrapCard } from '../../shared/utils';
@@ -52,7 +52,7 @@ export class VersionComponent implements AfterViewInit {
     return 'Upgrade';
   }
 
-  constructor(private daemonData: DaemonDataService, private daemonService: DaemonService, private electronService: ElectronService, private moneroInstaller: MoneroInstallerService) {
+  constructor(private daemonData: DaemonDataService, private daemonService: DaemonService, private electronService: ElectronService, private moneroInstaller: MoneroInstallerService, private ngZone: NgZone) {
     this.links = [
       new NavbarLink('pills-monero-tab', '#pills-monero', 'pills-monero', true, 'Monero')
     ];
@@ -62,7 +62,7 @@ export class VersionComponent implements AfterViewInit {
   private createCards(): SimpleBootstrapCard[] {
     return [
       new SimpleBootstrapCard('GUI Version', this.daemonService.getGuiVersion()),
-      new SimpleBootstrapCard('Current Monerod version', this.currentVersion ? this.currentVersion.fullname : 'Not found', this.loading),
+      new SimpleBootstrapCard('Current Monerod version', this.currentVersion ? this.currentVersion.fullname : 'Not found', this.loading || this.installing),
       new SimpleBootstrapCard('Latest Monerod version', this.latestVersion ? this.latestVersion.fullname : 'Error', this.loading)
     ];
   }
@@ -109,19 +109,21 @@ export class VersionComponent implements AfterViewInit {
   }
 
   public async load(): Promise<void> {
-    this.loading = true;
+    await this.ngZone.run(async () => {
+      this.loading = true;
   
-    try {
-      this.settings = await this.daemonService.getSettings();
-      await this.refreshLatestVersion();
-      await this.refreshCurrentVersion();
-    }
-    catch(error: any) {
-      console.error(error);
-      this.cards = this.createErrorCards();
-    }
-
-    this.loading = false;
+      try {
+        this.settings = await this.daemonService.getSettings();
+        await this.refreshLatestVersion();
+        await this.refreshCurrentVersion();
+      }
+      catch(error: any) {
+        console.error(error);
+        this.cards = this.createErrorCards();
+      }
+  
+      this.loading = false;
+    });
   }
 
   public get upgrading(): boolean {
@@ -134,7 +136,13 @@ export class VersionComponent implements AfterViewInit {
 
   public upgradeSuccess: boolean = false;
   public upgradeError: string = '';
-  public downloadProgress: number = 100;
+  
+  public get downloadProgress(): string {
+    const ratio = this.moneroInstaller.installing ? this.moneroInstaller.progress.progress : 0;
+
+    return `${ratio <= 100 ? ratio.toFixed(2) : 100} %`;
+  }
+
   public downloadStatus : string = '';
 
   public async upgrade(): Promise<void> {
@@ -161,17 +169,23 @@ export class VersionComponent implements AfterViewInit {
 
       this.upgradeError = '';
       this.upgradeSuccess = true;
+
+      await this.load();
     }
     catch(error: any) {
       
       console.error(error);
       this.upgradeSuccess = false;
-      let err = StringUtils.replaceAll(`${error}`, 'Error: ','');
+      const err = StringUtils.replaceAll(`${error}`, 'Error: ','');
 
-      if (err.includes('permission denied')) {
+      if (err.includes('permission denied') || err.includes('operation not permitted')) {
         const settings = await this.daemonService.getSettings();
         
-        this.upgradeError = 'Cannot download monerod to ' + settings.downloadUpgradePath;
+        this.upgradeError = `Cannot download monerod to <strong>${settings.downloadUpgradePath}</strong> due to insufficient permissions`;
+
+        settings.downloadUpgradePath = '';
+
+        await this.daemonService.saveSettings(settings);
       }
       else {
         this.upgradeError = err;

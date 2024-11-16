@@ -1,94 +1,17 @@
 import { app, BrowserWindow, ipcMain, screen, dialog, Tray, Menu, MenuItemConstructorOptions, 
-  IpcMainInvokeEvent, Notification, NotificationConstructorOptions, clipboard, powerMonitor
+  IpcMainInvokeEvent, Notification, NotificationConstructorOptions, clipboard, powerMonitor,
+  WebContents,
+  HandlerDetails,
+  Event,
+  WebContentsWillNavigateEventParams
 } from 'electron';
-import { ChildProcessWithoutNullStreams, exec, ExecException, spawn } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as https from 'https';
-import { createHash } from 'crypto';
-import * as tar from 'tar';
 import * as os from 'os';
-import AutoLaunch from './auto-launch';
-
-const AdmZip = require('adm-zip');
-const pidusage = require('pidusage');
-const batteryLevel = require('battery-level');
-const network = require('network');
-
-function isOnBatteryPower(): Promise<boolean> {
-  return new Promise<boolean>((resolve) => {
-    exec("upower -i $(upower -e | grep 'battery') | grep 'state'", (error, stdout) => {
-      if (error) {
-        console.error(`isOnBatteryPower(): ${error.message}`);
-        resolve(false); // Ritorna false se non riesce a rilevare lo stato della batteria
-        return;
-      }
-
-      const isOnBattery = stdout.includes("discharging");
-      resolve(isOnBattery);
-    });
-  });
-}
-
-interface Stats {
-  /**
-   * percentage (from 0 to 100*vcore)
-   */
-  cpu: number;
-
-  /**
-   * bytes
-   */
-  memory: number;
-
-  /**
-   * PPID
-   */
-  ppid: number;
-
-  /**
-   * PID
-   */
-  pid: number;
-
-  /**
-   * ms user + system time
-   */
-  ctime: number;
-
-  /**
-   * ms since the start of the process
-   */
-  elapsed: number;
-
-  /**
-   * ms since epoch
-   */
-  timestamp: number;
-}
-
-//import bz2 from 'unbzip2-stream';
-//import * as bz2 from 'unbzip2-stream';
-const bz2 = require('unbzip2-stream');
+import { AppMainProcess, MonerodProcess } from './process';
+import { BatteryUtils, FileUtils, NetworkUtils } from './utils';
 
 app.setName('Monero Daemon');
-
-let autoLauncher = new AutoLaunch({
-	name: 'monerod-gui',
-  path: process.execPath,
-  options: {
-    extraArguments: [
-      '--auto-launch'
-    ],
-    linux: {
-      comment: 'Monerod GUI startup script',
-      version: '1.0.1'
-    }
-  }
-});
-
-const isAutoLaunched: boolean = process.argv.includes('--auto-launch');
-const minimized: boolean = process.argv.includes('--hidden');
 
 let win: BrowserWindow | null = null;
 let isHidden: boolean = false;
@@ -102,20 +25,15 @@ const dirname = (__dirname.endsWith(appApp) ? __dirname.replace(appApp, appSrc) 
 
 console.log('dirname: ' + dirname);
 
-let monerodProcess: ChildProcessWithoutNullStreams | null = null;
+//let monerodProcess: ChildProcessWithoutNullStreams | null = null;
+let monerodProcess: MonerodProcess | null = null;
+
 const iconRelPath: string = 'assets/icons/monero-symbol-on-white-480.png';
 //const wdwIcon = `${dirname}/${iconRelPath}`;
 const wdwIcon = path.join(dirname, iconRelPath);
 
 let tray: Tray;
 let trayMenu: Menu;
-
-const args = process.argv.slice(1),
-  serve = args.some(val => val === '--serve');
-
-const isAppImage: () => boolean = () => {
-  return (!!process.env.APPIMAGE) || (!!process.env.PORTABLE_EXECUTABLE_DIR);
-}
 
 // #region Window
 
@@ -217,7 +135,7 @@ function createWindow(): BrowserWindow {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
-      allowRunningInsecureContent: (serve),
+      allowRunningInsecureContent: (AppMainProcess.serve),
       contextIsolation: true,
       devTools: !app.isPackaged,
       sandbox: true
@@ -227,11 +145,11 @@ function createWindow(): BrowserWindow {
     icon: wdwIcon
   });
 
-  isHidden = minimized;
+  isHidden = AppMainProcess.startMinized;
 
   if (!app.isPackaged) win.webContents.openDevTools();
 
-  if (serve) {
+  if (AppMainProcess.serve) {
     const debug = require('electron-debug');
     debug();
 
@@ -277,7 +195,7 @@ function createWindow(): BrowserWindow {
 const createSplashWindow = async (): Promise<BrowserWindow | undefined> => {
   return undefined;
   
-  if (os.platform() == 'win32' || isAppImage()) {
+  if (os.platform() == 'win32' || AppMainProcess.isPortable) {
     return undefined;
   }
 
@@ -320,129 +238,49 @@ const createSplashWindow = async (): Promise<BrowserWindow | undefined> => {
 
 // #region WiFi 
 
-function isConnectedToWiFi(): Promise<boolean> {
+async function isWifiConnected() {
+  let connected: boolean = false;
+
   try {
-
-    return new Promise<boolean>((resolve, reject) => {
-      network.get_active_interface((err: any | null, obj: { name: string, ip_address: string, mac_address: string, type: string, netmask: string, gateway_ip: string }) => {
-        if (err) {
-          console.error(err);
-          reject(err);
-        }
-        else {
-          resolve(obj.type == 'Wireless');
-        }
-      })
-    });
+    connected = await NetworkUtils.isConnectedToWiFi();
   }
-  catch(error: any) {
-    return isConnectedToWiFiV2();
-  }
-}
-
-function isConnectedToWiFiV2(): Promise<boolean> {
-  return new Promise((resolve, reject) => {
-    const platform = os.platform();  // Use os to get the platform
-
-    let command = '';
-    if (platform === 'win32') {
-      // Windows: Use 'netsh' command to check the Wi-Fi status
-      command = 'netsh wlan show interfaces';
-    } else if (platform === 'darwin') {
-      // macOS: Use 'airport' command to check the Wi-Fi status
-      command = "/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -I | grep 'state: running'";
-    } else if (platform === 'linux') {
-      // Linux: Use 'nmcli' to check for Wi-Fi connectivity
-      command = 'nmcli dev status';
-    } else {
-      resolve(false);  // Unsupported platform
-    }
-
-    // Execute the platform-specific command
-    if (command) {
-      exec(command, (error: ExecException | null, stdout: string, stderr: string) => {
-        if (error) {
-          console.error(error);
-          reject(stderr);
-          resolve(false);  // In case of error, assume not connected to Wi-Fi
-        } else {
-          // Check if the output indicates a connected status
-          if (stdout) {
-            const components: string[] = stdout.split("\n");
-
-            components.forEach((component: string) => {
-              if (component.includes('wifi') && !component.includes('--')) {
-                resolve(true);
-              }
-            });
-
-            resolve(false);
-          } else {
-            resolve(false);
-          }
-        }
-      });
-    }
-  });
-}
-
-function isWifiConnected() {
-  isConnectedToWiFi().then((connected: boolean) => {
-    win?.webContents.send('is-wifi-connected-result', connected);
-  }).catch((error: any) => {
+  catch (error: any) {
     console.error(error);
-    win?.webContents.send('is-wifi-connected-result', false);
-  });
+    connected = false;
+  }
+
+  win?.webContents.send('is-wifi-connected-result', connected);
 }
 
 // #endregion
 
 // #region monerod 
 
-function getMonerodVersion(monerodFilePath: string): void {
-  const monerodProcess = spawn(monerodFilePath, [ '--version' ]);
-
-  monerodProcess.on('error', (err: Error) => {
-    win?.webContents.send('monero-version-error', `${err.message}`);
+async function getMonerodVersion(monerodFilePath: string): Promise<void> {
+  const proc = new MonerodProcess({
+    monerodCmd: monerodFilePath,
+    isExe: true
   });
 
-  monerodProcess.stdout.on('data', (data) => {
-    win?.webContents.send('monero-version', `${data}`);
-  });
-
-  monerodProcess.stderr.on('data', (data) => {
-    win?.webContents.send('monero-version-error', `${data}`);
-  });
-
+  try {
+    console.log("Before proc.getVersion()");
+    const version = await proc.getVersion();
+    console.log("After proc.getVersion()");
+    win?.webContents.send('monero-version', version);
+  }
+  catch(error: any) {
+    const err = (error instanceof Error) ? error.message : `${error}`;
+    win?.webContents.send('monero-version-error', err);
+  }
 }
 
-function checkValidMonerodPath(monerodPath: string): void {
-  let foundUsage: boolean = false;
-  const monerodProcess = spawn(monerodPath, ['--help']);
-
-  monerodProcess.on('error', (err: Error) => {
-    win?.webContents.send('on-check-valid-monerod-path', false);
-  });
-
-  monerodProcess.stderr.on('data', (data) => {
-    win?.webContents.send('on-check-valid-monerod-path', false);
-  });
-
-  monerodProcess.stdout.on('data', (data) => {
-    if (`${data}`.includes('monerod [options|settings] [daemon_command...]')) {
-      foundUsage = true;
-    }
-  });
-
-  monerodProcess.on('close', (code: number) => {
-    win?.webContents.send('on-check-valid-monerod-path', foundUsage);
-  });
-
+async function checkValidMonerodPath(monerodPath: string): Promise<void> {
+  const valid = await MonerodProcess.isValidMonerodPath(monerodPath);
+  
+  win?.webContents.send('on-check-valid-monerod-path', valid);
 }
 
-let moneroFirstStdout: boolean = true;
-
-function startMoneroDaemon(commandOptions: string[]): ChildProcessWithoutNullStreams {
+async function startMoneroDaemon(commandOptions: string[]): Promise<MonerodProcess> {
   const monerodPath = commandOptions.shift();
 
   if (!monerodPath) {
@@ -456,162 +294,78 @@ function startMoneroDaemon(commandOptions: string[]): ChildProcessWithoutNullStr
     win?.webContents.send('monero-stderr', error);
     throw new Error("Monerod already started");
   }
-
-  const message: string = "Starting monerod daemon with options: " + commandOptions.join(" ");
   
-  console.log(message);
-  
-  moneroFirstStdout = true;
-
   commandOptions.push('--non-interactive');
 
-  // Avvia il processo usando spawn
-  monerodProcess = spawn(monerodPath, commandOptions);
-
-  // Gestisci l'output di stdout in streaming
-  monerodProcess.stdout.on('data', (data) => {
-    //console.log(`monerod stdout: ${data}`);
-    const pattern = '**********************************************************************';
-
-    if (moneroFirstStdout && data.includes(pattern)) {
-      win?.webContents.send('monerod-started', true);
-      moneroFirstStdout = false;
-    }
-
-    win?.webContents.send('monero-stdout', `${data}`);
-    // Puoi anche inviare i log all'interfaccia utente tramite IPC
+  monerodProcess = new MonerodProcess({
+    monerodCmd: monerodPath,
+    flags: commandOptions,
+    isExe: true
   });
 
-  // Gestisci gli errori in stderr
-  monerodProcess.stderr.on('data', (data) => {
-    console.error(`monerod error: ${data}`);
+  monerodProcess.onStdOut((data) => {
+    win?.webContents.send('monero-stdout', `${data}`);
+  });
 
-    if (moneroFirstStdout) {
-      win?.webContents.send('monerod-started', false);
-      moneroFirstStdout = false;
-    }
-
+  monerodProcess.onStdErr((data) => {
     win?.webContents.send('monero-stderr', `${data}`);
   });
 
-  // Gestisci la chiusura del processo
-
-  monerodProcess.on('error', (err: Error) => {
+  monerodProcess.onError((err: Error) => {
     win?.webContents.send('monero-stderr', `${err.message}`);
   });
 
-  monerodProcess.on('close', (code: number) => {
+  monerodProcess.onClose((_code: number | null) => {
+    const code = _code != null ? _code : -Number.MAX_SAFE_INTEGER;
     console.log(`monerod exited with code: ${code}`);
     win?.webContents.send('monero-stdout', `monerod exited with code: ${code}`);
     win?.webContents.send('monero-close', code);
     monerodProcess = null;
   });
 
+  try {
+    await monerodProcess.start();
+    win?.webContents.send('monerod-started', true);
+  }
+  catch(error: any) {
+    win?.webContents.send('monerod-started', false);
+  }
+
   return monerodProcess;
 }
 
-function monitorMonerod(): void {
+async function monitorMonerod(): Promise<void> {
   if (!monerodProcess) {
     win?.webContents.send('on-monitor-monerod-error', 'Monerod not running');
     return;
   }
 
-  if (!monerodProcess.pid) {
-    win?.webContents.send('on-monitor-monerod-error', 'Unknown monero pid');
-    return;
+  try {
+    const stats = await monerodProcess.getStats();
+    win?.webContents.send('on-monitor-monerod', stats);
   }
+  catch(error: any) {
+    let message: string;
 
-  pidusage(monerodProcess.pid, (error: Error | null, stats: Stats) => {
-    if (error) {
-      win?.webContents.send('on-monitor-monerod-error', `${error}`);
-      return;
+    if (error instanceof Error) {
+      message = error.message;
+    }
+    else {
+      message = `${error}`;
     }
 
-    win?.webContents.send('on-monitor-monerod', stats);
-  });
+    win?.webContents.send('on-monitor-monerod-error', message);
+  }
 }
 
 // #endregion
 
 // #region Download Utils 
 
-const downloadFile = (url: string, destinationDir: string, onProgress: (progress: number) => void): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const request = (url: string) => {
-      https.get(url, (response) => {
-        if (response.statusCode === 200) {
-          const contentDisposition = response.headers['content-disposition'];
-          let finalFilename = '';
-
-          // Estrai il nome del file dall'URL o dal content-disposition
-          if (contentDisposition && contentDisposition.includes('filename')) {
-            const match = contentDisposition.match(/filename="(.+)"/);
-            if (match) {
-              finalFilename = match[1];
-            }
-          } else {
-            // Se non c'è content-disposition, prendiamo il nome dall'URL
-            finalFilename = url.split('/').pop() || 'downloaded-file';
-          }
-
-          const destination = `${destinationDir}/${finalFilename}`;
-          let file: fs.WriteStream;
-
-          try {
-            file = fs.createWriteStream(destination);
-            file.on('error', (error: Error) => {
-              console.log("file error: " + error);
-              reject(error);
-            });
-          }
-          catch (error: any) {
-            reject(error);
-            return;
-          }
-
-          const totalBytes = parseInt(response.headers['content-length'] || '0', 10);
-          let downloadedBytes = 0;
-
-          response.on('data', (chunk) => {
-            downloadedBytes += chunk.length;
-            const progress = (downloadedBytes / totalBytes) * 100;
-            onProgress(progress); // Notifica il progresso
-          });
-
-          response.pipe(file);
-
-          file.on('finish', () => {
-            file.close(() => resolve(finalFilename)); // Restituisci il nome del file finale
-          });
-        } else if (response.statusCode === 301 || response.statusCode === 302) {
-          // Se è un redirect, effettua una nuova richiesta verso il location header
-          const newUrl = response.headers.location;
-          if (newUrl) {
-            request(newUrl); // Ripeti la richiesta con il nuovo URL
-          } else {
-            reject(new Error('Redirection failed without a location header'));
-          }
-        } else {
-          reject(new Error(`Failed to download: ${response.statusCode}`));
-        }
-      }).on('error', (err) => {
-        reject(err);
-      });
-    };
-
-    request(url); // Inizia la richiesta
-  });
-};
-
-// Funzione per scaricare e verificare l'hash
-const downloadAndVerifyHash = async (hashUrl: string, fileName: string, filePath: string): Promise<boolean> => {
-  //const hashFilePath = path.join(app.getPath('temp'), 'monero_hashes.txt');
-
-  // Scarica il file di hash
-  const hashFileName = await downloadFile(hashUrl, app.getPath('temp'), () => {});
+async function downloadAndVerifyHash(hashUrl: string, fileName: string, filePath: string): Promise<boolean> {
+  const hashFileName = await FileUtils.downloadFile(hashUrl, app.getPath('temp'), () => {});
   const hashFilePath = `${app.getPath('temp')}/${hashFileName}`;
 
-  // Leggi il file di hash e cerca l'hash corrispondente
   const hashContent = fs.readFileSync(hashFilePath, 'utf8');
   const hashLines = hashContent.split('\n');
   let expectedHash: string | null = null;
@@ -629,106 +383,10 @@ const downloadAndVerifyHash = async (hashUrl: string, fileName: string, filePath
   }
 
   // Verifica l'hash del file scaricato
-  const calculatedHash = await verifyFileHash(`${filePath}/${fileName}`);
-  return calculatedHash === expectedHash;
+  return await FileUtils.checkFileHash(`${filePath}/${fileName}`, expectedHash);
 };
 
 // Funzione per verificare l'hash del file
-const verifyFileHash = (filePath: string): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const hash = createHash('sha256');
-    const fileStream = fs.createReadStream(filePath);
-
-    fileStream.on('data', (data) => {
-      hash.update(data);
-    });
-
-    fileStream.on('end', () => {
-      resolve(hash.digest('hex'));
-    });
-
-    fileStream.on('error', (err) => {
-      reject(err);
-    });
-  });
-};
-
-const extractTarBz2 = (filePath: string, destination: string): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    // Crea il file decomprimendo il .bz2 in uno .tar temporaneo
-    const tarPath = path.join(destination, 'temp.tar');
-    const fileStream = fs.createReadStream(filePath);
-    const decompressedStream = fileStream.pipe(bz2());
-
-    const writeStream = fs.createWriteStream(tarPath);
-
-    decompressedStream.pipe(writeStream);
-
-    let extractedDir: string = '';
-
-    writeStream.on('finish', () => {
-      // Una volta che il file .tar è stato creato, estrailo
-      tar.extract({ cwd: destination, file: tarPath, onReadEntry: (entry: tar.ReadEntry) => {
-        if (extractedDir == '') {
-          const topLevelDir = entry.path.split('/')[0];
-          extractedDir = topLevelDir; // Salva la prima directory
-        }
-      } })
-        .then(() => {
-          // Elimina il file .tar temporaneo dopo l'estrazione
-          fs.unlink(tarPath, (err) => {
-            if (err) reject(err);
-            else if (extractedDir == '') reject('Extraction failed')
-            else resolve(extractedDir);
-          });
-        })
-        .catch(reject);
-    });
-
-    writeStream.on('error', reject);
-  });
-};
-
-const extractZip = (filePath: string, destination: string): Promise<string> => {
-  return new Promise<string>((resolve, reject) => {
-    try {
-      const zip = new AdmZip(filePath);
-
-      // Ensure destination exists
-      if (!fs.existsSync(destination)) {
-        fs.mkdirSync(destination, { recursive: true });
-      }
-
-      // Extract the ZIP file
-      zip.extractAllTo(destination, true);
-
-      // Get the name of the extracted folder
-      const extractedEntries = zip.getEntries();
-      const folderName = extractedEntries[0]?.entryName.split('/')[0];
-
-      // Ensure folder name exists
-      if (!folderName) {
-        reject(new Error("Could not determine the extracted folder name"));
-        return;
-      }
-
-      resolve(path.join(destination, folderName));
-    } catch (error) {
-      reject(error);
-    }
-  });
-};
-
-const extract = (filePath: string, destination: string): Promise<string> => {
-  if (filePath.endsWith('.zip')) {
-    return extractZip(filePath, destination);
-  }
-  else if (filePath.endsWith('.tar.bz2')) {
-    return extractTarBz2(filePath, destination);
-  }
-
-  throw new Error("Unknown file type " + filePath);
-}
 
 // #endregion
 
@@ -742,6 +400,21 @@ function showNotification(options?: NotificationConstructorOptions): void {
   }
   
   new Notification(options).show();
+}
+
+function showSecurityWarning(msg: string): void {
+  if (win) {
+    dialog.showMessageBoxSync(win, {
+      type: 'warning',
+      title: 'Security Warning',
+      message: msg
+    });
+  }
+  else {
+    dialog.showErrorBox('Security Warning', msg);
+  }
+
+  console.warn(msg);
 }
 
 try {
@@ -767,7 +440,7 @@ try {
         try {
           setTimeout(() => {
             if (splash) splash.close();
-            if (!minimized) { 
+            if (!AppMainProcess.startMinized) { 
               win?.show();
               win?.maximize();
             }
@@ -804,59 +477,43 @@ try {
 
   // #region Security 
 
-  app.on('web-contents-created', (event, webContents) => {
-    webContents.setWindowOpenHandler((details) => {
-      console.warn("Prevented unsafe window creation");
+  app.on('web-contents-created', (event, webContents: WebContents) => {
+    webContents.setWindowOpenHandler((details: HandlerDetails) => {
+      const msg = `Prevented unsafe content: ${details.url}`;
+      showSecurityWarning(msg);      
       console.warn(details);
+
       return { action: 'deny' };
+    });
+
+    webContents.on('will-navigate', (event: Event<WebContentsWillNavigateEventParams>, navigationUrl: string) => {
+      event.preventDefault();
+      const msg = `Prevented unsage window navigation to ${navigationUrl}`;
+      showSecurityWarning(msg);
     });
   });
 
-  app.on('web-contents-created', (event, contents) => {
-    contents.on('will-navigate', (event, navigationUrl) => {
-      event.preventDefault();
-      console.warn(`Prevented unsage window navigation to ${navigationUrl}`);
-      /*
-      const parsedUrl = new URL(navigationUrl)
-  
-      if (parsedUrl.origin !== 'https://example.com') {
-        event.preventDefault()
-      }
-      */
-    })
-  })
   // #endregion
 
-  ipcMain.handle('is-on-battery-power', (event: IpcMainInvokeEvent) => {
-    const onBattery = powerMonitor.isOnBatteryPower();
-
-    if (!onBattery && os.platform() == 'linux') {
-      isOnBatteryPower().then((value) => {
-        win?.webContents.send('on-is-on-battery-power', value);
-      }).catch((error: any) => {
-        console.error(`${error}`);
-        win?.webContents.send('on-is-on-battery-power', false);
-      });
-
-      return;
-    }
-    else {
-      win?.webContents.send('on-is-on-battery-power', onBattery);
-    }
-
+  ipcMain.handle('is-on-battery-power', async (event: IpcMainInvokeEvent) => {
+    const onBattery = await BatteryUtils.isOnBatteryPower();
+    win?.webContents.send('on-is-on-battery-power', onBattery);
   });
 
   powerMonitor.on('on-ac', () => win?.webContents.send('on-ac'));
   powerMonitor.on('on-battery', () => win?.webContents.send('on-battery'));
 
-  ipcMain.handle('is-auto-launched', (event: IpcMainInvokeEvent) => {
-    console.debug(event);
-    
-    win?.webContents.send('on-is-auto-launched', isAutoLaunched);
+  ipcMain.handle('is-auto-launched', (event: IpcMainInvokeEvent) => {    
+    win?.webContents.send('on-is-auto-launched', AppMainProcess.autoLaunched);
   });
 
-  ipcMain.handle('quit', (event: IpcMainInvokeEvent) => {
+  ipcMain.handle('quit', async (event: IpcMainInvokeEvent) => {
     isQuitting = true;
+
+    if (monerodProcess) {
+      await monerodProcess.stop();
+    }
+
     tray.destroy();
     win?.close();
     win?.destroy();
@@ -886,7 +543,7 @@ try {
       });
 
       // Scarica il file Monero
-      const fileName = await downloadFile(downloadUrl, destination, (progress) => {
+      const fileName = await FileUtils.downloadFile(downloadUrl, destination, (progress) => {
         win?.setProgressBar(progress, {
           mode: 'normal'
         });
@@ -905,7 +562,7 @@ try {
       // Estrai il file
       const fPath = `${destination}/${fileName}`;
       event.sender.send('download-progress', { progress: 100, status: 'Extracting' });
-      const extractedDir = await extract(fPath, destination);
+      const extractedDir = await FileUtils.extract(fPath, destination);
 
       event.sender.send('download-progress', { progress: 100, status: 'Download and extraction completed successfully' });
       event.sender.send('download-progress', { progress: 200, status: os.platform() == 'win32' ? extractedDir : `${destination}/${extractedDir}` });
@@ -926,7 +583,7 @@ try {
     try {
       event.sender.send('download-file-progress', { progress: 0, status: 'Starting download' });
 
-      const fileName = await downloadFile(url, destination, (progress) => {
+      const fileName = await FileUtils.downloadFile(url, destination, (progress) => {
         win?.setProgressBar(progress, {
           mode: 'normal'
         });
@@ -1045,87 +702,36 @@ try {
 
   // #region Auto Launch 
 
-  ipcMain.handle('is-auto-launch-enabled', (event: IpcMainInvokeEvent) => {
-    autoLauncher.isEnabled().then((enabled: boolean) => {
-      win?.webContents.send('on-is-auto-launch-enabled', enabled);
-    }).catch((error: any) => {
-      console.error(error);
-      win?.webContents.send('on-is-auto-launch-enabled', false);
-    });
+  ipcMain.handle('is-auto-launch-enabled', async (event: IpcMainInvokeEvent) => {    
+    const enabled = await AppMainProcess.isAutoLaunchEnabled();
+    win?.webContents.send('on-is-auto-launch-enabled', enabled);
   });
 
-  ipcMain.handle('enable-auto-launch', (event: IpcMainInvokeEvent, minimized: boolean) => {
-    autoLauncher.isEnabled().then((enabled: boolean) => {
-      if (enabled) {
-        win?.webContents.send('on-enable-auto-launch-error', 'already enabled');
-        return;
-      }
+  ipcMain.handle('enable-auto-launch', async (event: IpcMainInvokeEvent, minimized: boolean) => {
+    try {
+      await AppMainProcess.enableAutoLaunch(minimized);
+      win?.webContents.send('on-enable-auto-launch-success');
+    }
+    catch(error: any) {
+      const err = (error instanceof Error) ? error.message : `${error}`;
 
-      autoLauncher = new AutoLaunch({
-        name: 'monerod-gui',
-        path: process.execPath,
-        options: {
-          launchInBackground: minimized,
-          extraArguments: [
-            '--auto-launch'
-          ]
-        }
-      });
-      
-      autoLauncher.enable().then(() => {
-        autoLauncher.isEnabled().then((enabled: boolean) => {
-          if (enabled) {
-            win?.webContents.send('on-enable-auto-launch-success');
-          }
-          win?.webContents.send('on-enable-auto-launch-error', `Could not enabled auto launch`);
-        }).catch((error: any) => {
-          win?.webContents.send('on-enable-auto-launch-error', `${error}`);
-        });
-
-      }).catch((error: any) => {
-        console.error(error);
-        win?.webContents.send('on-enable-auto-launch-error', `${error}`);
-      });
-    }).catch((error: any) => {
-      console.error(error);
-      win?.webContents.send('on-enable-auto-launch-error', `${error}`);
-    });
+      win?.webContents.send('on-enable-auto-launch-error', err);
+    }
   });
 
-  ipcMain.handle('get-battery-level', (event: IpcMainInvokeEvent) => {
-    batteryLevel().then((level: number) => {
-      win?.webContents.send('on-get-battery-level', level);
-    }).catch((error: any) => {
-      console.error(error);
-      win?.webContents.send('on-get-battery-level', -1);
-    })
+  ipcMain.handle('get-battery-level', async (event: IpcMainInvokeEvent) => {
+    win?.webContents.send('on-get-battery-level', await BatteryUtils.getLevel());
   });
 
-  ipcMain.handle('disable-auto-launch', (event: IpcMainInvokeEvent) => {
-    autoLauncher.isEnabled().then((enabled: boolean) => {
-      if (!enabled) {
-        win?.webContents.send('on-disable-auto-launch-error', 'already disabled');
-        return;
-      }
-
-      autoLauncher.disable().then(() => {
-        autoLauncher.isEnabled().then((enabled: boolean) => {
-          if (!enabled) {
-            win?.webContents.send('on-disable-auto-launch-success');
-          }
-          win?.webContents.send('on-disable-auto-launch-error', `Could not disable auto launch`);
-        }).catch((error: any) => {
-          win?.webContents.send('on-disable-auto-launch-error', `${error}`);
-        });
-
-      }).catch((error: any) => {
-        console.error(error);
-        win?.webContents.send('on-disable-auto-launch-error', `${error}`);
-      });
-    }).catch((error: any) => {
-      console.error(error);
-      win?.webContents.send('on-disable-auto-launch-error', `${error}`);
-    });
+  ipcMain.handle('disable-auto-launch', async (event: IpcMainInvokeEvent) => {
+    try {
+      await AppMainProcess.disableAutoLaunch();
+      win?.webContents.send('on-disable-auto-launch-success');
+    }
+    catch(error: any) {
+      const err = (error instanceof Error) ? error.message : `${error}`;
+      win?.webContents.send('on-disable-auto-launch-error', err);
+    }
   });
 
   // #endregion
@@ -1142,8 +748,8 @@ try {
     tray.setToolTip(toolTip);
   });
 
-  ipcMain.handle('is-app-image', (event: IpcMainInvokeEvent) => {
-    win?.webContents.send('on-is-app-image', isAppImage());
+  ipcMain.handle('is-portable', (event: IpcMainInvokeEvent) => {
+    win?.webContents.send('on-is-portable', AppMainProcess.isPortable);
   });
 
   ipcMain.handle('copy-to-clipboard', (event: IpcMainInvokeEvent, content: string) => {
@@ -1157,6 +763,5 @@ try {
   dialog.showErrorBox('', `${e}`);
 
   app.quit();
-  // throw e;
 }
 

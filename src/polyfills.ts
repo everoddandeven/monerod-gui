@@ -87,6 +87,7 @@ declare global {
       onDownloadProgress: (callback: (event: any, progress: { progress: number, status: string }) => void) => void;
       checkValidMonerodPath: (path: string) => void;
       onCheckValidMonerodPath: (callback: (event: any, valid: boolean) => void) => void;
+      unregisterOnCheckValidMonerodPath: () => void;
       unsubscribeOnMonerodStarted: () => void;
       onMoneroClose: (callback: (event: any, code: number) => void) => void;
       onMoneroStdout: (callbak: (event: any, out: string) => void) => void;
@@ -120,9 +121,9 @@ declare global {
       showNotification: (options: NotificationConstructorOptions) => void;
       quit: () => void;
 
-      isAppImage: () => void;
-      onIsAppImage: (callback: (event: any, value: boolean) => void) => void;
-      unregisterOnIsAppImage: () => void;
+      isPortable: () => void;
+      onIsPortable: (callback: (event: any, value: boolean) => void) => void;
+      unregisterIsPortable: () => void;
 
       isAutoLaunchEnabled: () => void;
       onIsAutoLaunchEnabled: (callback: (event: any, enabled: boolean) => void) => void;
