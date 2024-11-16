@@ -150,6 +150,24 @@ export class DaemonSettings {
     return this.banList.split('\n');
   }
 
+  public assertValid(): void {
+    if (this.upgradeAutomatically && this.downloadUpgradePath == '') {
+      throw new Error('You must set a download path for monerod updates when enabling automatic upgrade');
+    }
+
+    if (this.monerodPath != '' && this.downloadUpgradePath != '') {
+      const separator: '\\' | '/' = this.monerodPath.includes('\\') ? '\\' : '/';
+      const monerodDirComponents = this.monerodPath.split(separator);
+
+      monerodDirComponents.pop();
+
+      if (monerodDirComponents.join(separator) == this.downloadUpgradePath || this.monerodPath == this.downloadUpgradePath) {
+        throw new Error("You must choose a download path other than the monerod path")
+      }
+
+    }
+  }
+
   public equals(settings: DaemonSettings): boolean {
     //return this.toCommandOptions().join('') == settings.toCommandOptions().join('');
     return this.deepEqual(this, settings);

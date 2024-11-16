@@ -249,8 +249,19 @@ export class DaemonService {
   }
 
   public async saveSettings(settings: DaemonSettings, restartDaemon: boolean = true): Promise<void> {
+    settings.assertValid();
+
+    if (settings.monerodPath != '') {
+      const valid = await this.checkValidMonerodPath(settings.monerodPath);
+
+      if (!valid) {
+        throw new Error("Invalid monerod path provided");
+      }
+    }
+
     const db = await this.openDbPromise;
     await db.put(this.storeName, { id: 1, ...settings });
+    
     this.onSavedSettings.emit(settings);
 
     if (restartDaemon) {
@@ -276,6 +287,7 @@ export class DaemonService {
 
     const checkPromise = new Promise<boolean>((resolve) => {
       window.electronAPI.onCheckValidMonerodPath((event: any, valid: boolean) => {
+        window.electronAPI.unregisterOnCheckValidMonerodPath();
         resolve(valid);
       });
     });

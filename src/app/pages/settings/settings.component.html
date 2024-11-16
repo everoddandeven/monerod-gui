@@ -30,7 +30,7 @@
 
   <div class="tab-pane fade show active" id="pills-general" role="tabpanel" aria-labelledby="pills-general-tab" tabindex="0">
     <div class="row g-5 p-2">
-      <div class="col-md-7 col-lg-12">
+      <div class="col-md-12 col-lg-12">
         <h4 class="mb-3">Monerod</h4>
 
         <div class="col-md-12">
@@ -38,6 +38,7 @@
           <div class="input-group mb-3">
             <input id="general-monerod-path-control" type="text" class="form-control form-control-sm" placeholder="" aria-label="Monerod path" aria-describedby="basic-addon2" [value]="currentSettings.monerodPath" readonly>
             <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseMonerodFile()"><i class="bi bi-filetype-exe"></i> Choose executable</button></span>            
+            <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeMonerodFile()" [disabled]="currentSettings.monerodPath === ''"><i class="bi bi-file-x"></i> Remove</button></span>
           </div>
           <small class="text-body-secondary">Path to monerod executable</small>
         </div>
@@ -105,7 +106,7 @@
 
   <div class="tab-pane fade" id="pills-node" role="tabpanel" aria-labelledby="pills-node-tab" tabindex="0">
     <div class="row g-5 p-2">
-      <div class="col-md-7 col-lg-12">
+      <div class="col-md-12 col-lg-12">
         <h4 class="mb-3">Node</h4>
 
         <div class="row gy-3">
@@ -121,14 +122,14 @@
             <small class="text-body-secondary">Maximum number of connections allowed from the same IP address</small>
           </div>
 
-          <div *ngIf="!isAppImage" class="form-check form-switch col-md-6">
+          <div *ngIf="!isPortable" class="form-check form-switch col-md-6">
             <label for="start-at-login" class="form-check-label">Start at login</label>
             <input class="form-control form-check-input" type="checkbox" role="switch" id="start-at-login" [checked]="currentSettings.startAtLogin" [(ngModel)]="currentSettings.startAtLogin" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Start monero daemon at login</small>
           </div>
 
-          <div *ngIf="!isAppImage" class="form-check form-switch col-md-6">
+          <div *ngIf="!isPortable" class="form-check form-switch col-md-6">
             <label for="start-minimized" class="form-check-label">Start minimized</label>
             <input class="form-control form-check-input" type="checkbox" role="switch" id="start-minimized" [checked]="currentSettings.startAtLoginMinimized" [(ngModel)]="currentSettings.startAtLoginMinimized" [ngModelOptions]="{standalone: true}">
             <br>
@@ -147,6 +148,7 @@
             <div class="input-group mb-3">
               <input id="data-dir" type="text" class="form-control form-control-sm" placeholder="" aria-label="Data dir" aria-describedby="basic-addon2" [value]="currentSettings.dataDir" readonly>
               <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseDataDir()"><i class="bi bi-folder"></i> Choose folder</button></span>            
+              <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeDataDir()" [disabled]="currentSettings.dataDir === ''"><i class="bi bi-folder-x"></i> Remove</button></span>
             </div>
             <small class="text-body-secondary">Specify data directory</small>
           </div>
@@ -271,6 +273,7 @@
             <div class="input-group mb-3">
               <input id="upgrade-download-path=" type="text" class="form-control form-control-sm" placeholder="" aria-label="Monerod path" aria-describedby="basic-addon2" [value]="currentSettings.downloadUpgradePath" readonly>
               <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseMoneroDownloadPath()"><i class="bi bi-folder"></i> Choose folder</button></span>            
+              <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeMoneroDownloadPath()" [disabled]="currentSettings.downloadUpgradePath === ''"><i class="bi bi-folder-x"></i> Remove</button></span>
             </div>
             <small class="text-body-secondary">Folder where to save updates</small>
           </div>
@@ -283,7 +286,7 @@
 
   <div class="tab-pane fade" id="pills-rpc" role="tabpanel" aria-labelledby="pills-rpc-tab" tabindex="0">
     <div class="row g-5 p-2">
-      <div class="col-md-7 col-lg-12">
+      <div class="col-md-12 col-lg-12">
         <h4 class="mb-3">General</h4>
         <div class="row gy-3">
 
@@ -484,7 +487,8 @@
             <label for="rpc-ssl-private-key" class="form-label">Private key</label>
             <div class="input-group mb-3">
               <input id="rpc-ssl-private-key" type="text" class="form-control form-control-sm" placeholder="" aria-label="Monerod path" aria-describedby="basic-addon2" [value]="currentSettings.rpcSslPrivateKey" readonly>
-              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="selectSslPrivateKey()"><i class="bi bi-filetype-key"></i> Choose file</button></span>            
+              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="selectSslPrivateKey()"><i class="bi bi-filetype-key"></i> Choose file</button></span>
+              <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeSslPrivateKey()" [disabled]="currentSettings.rpcSslPrivateKey === ''"><i class="bi bi-file-x"></i> Remove</button></span>        
             </div>
             <small class="text-body-secondary">Path to a PEM format private key</small>
           </div>
@@ -494,7 +498,8 @@
             <label for="rpc-ssl-certificate" class="form-label">Certificate</label>
             <div class="input-group mb-3">
               <input id="rpc-ssl-certificate" type="text" class="form-control form-control-sm" placeholder="" aria-label="RPC SSL Certificate" aria-describedby="basic-addon2" [value]="currentSettings.rpcSslCertificate" readonly>
-              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="selectSslCertificate()"><i class="bi bi-postcard"></i> Choose file</button></span>            
+              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="selectSslCertificate()"><i class="bi bi-postcard"></i> Choose file</button></span>
+              <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeSslCertificate()" [disabled]="currentSettings.rpcSslCertificate === ''"><i class="bi bi-file-x"></i> Remove</button></span>
             </div>
             <small class="text-body-secondary">Path to a PEM format certificate</small>
           </div>
@@ -504,7 +509,8 @@
             <label for="rpc-ssl-ca-certificates" class="form-label">CA Certificates</label>
             <div class="input-group mb-3">
               <input id="rpc-ssl-ca-certificates" type="text" class="form-control form-control-sm" placeholder="" aria-label="RPC SSL CA Certificates" aria-describedby="basic-addon2" [value]="currentSettings.rpcSslCACertificates" readonly>
-              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="selectSslCACertificates()"><i class="bi bi-postcard"></i> Choose file</button></span>            
+              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="selectSslCACertificates()"><i class="bi bi-postcard"></i> Choose file</button></span>
+              <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeSslCACertificates()" [disabled]="currentSettings.rpcSslCACertificates === ''"><i class="bi bi-file-x"></i> Remove</button></span>
             </div>
             <small class="text-body-secondary">Path to file containing concatenated PEM format certificate(s) to replace system CA(s)</small>
           </div>
@@ -517,7 +523,7 @@
 
   <div class="tab-pane fade" id="pills-p2p" role="tabpanel" aria-labelledby="pills-p2p-tab" tabindex="0">
     <div class="row g-5 p-2">
-      <div class="col-md-7 col-lg-12">
+      <div class="col-md-12 col-lg-12">
         <h4 class="mb-3">General</h4>
         <div class="row gy-3">
 
@@ -580,7 +586,7 @@
   <div class="tab-pane fade" id="pills-blockchain" role="tabpanel" aria-labelledby="pills-blockchain-tab" tabindex="0">
     
     <div class="row g-5 p-2">
-      <div class="col-md-7 col-lg-12">
+      <div class="col-md-12 col-lg-12">
         <form class="needs-validation" novalidate="">
                 
           <h4 class="mb-3">Network type</h4>
@@ -772,7 +778,7 @@
 
   <div class="tab-pane fade" id="pills-mining" role="tabpanel" aria-labelledby="pills-mining-tab" tabindex="0">
     <div class="row g-5 p-2">
-      <div class="col-md-7 col-lg-12">
+      <div class="col-md-12 col-lg-12">
         <form class="needs-validation" novalidate="">
     
           <div class="row g-3">
@@ -819,7 +825,7 @@
 
   <div class="tab-pane fade" id="pills-logs" role="tabpanel" aria-labelledby="pills-logs-tab" tabindex="0">
     <div class="row g-5 p-2">
-      <div class="col-md-7 col-lg-12">
+      <div class="col-md-12 col-lg-12">
         <form class="needs-validation" novalidate="">
     
           <div class="row g-3">
