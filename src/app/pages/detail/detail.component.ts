@@ -344,4 +344,37 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
     this.settingBootstrapDaemon = false;
   }
 
+  public removingBootstrapDaemon: boolean = false;
+  public removeBootstrapDaemonSuccess: boolean = false;
+  public get canRemoveBootstrapDaemon(): boolean {
+    return this.daemonData.info ? this.daemonData.info.bootstrapDaemonAddress != '' : false;
+  }
+
+  public async removeBootstrapDaemon(): Promise<void> {
+    this.removingBootstrapDaemon = true;
+
+    try {
+      if (!this.canRemoveBootstrapDaemon) {
+        throw new Error("Bootstrap daemon not set");
+      }
+
+      await this.daemonService.removeBootstrapDaemon();
+      this.setBootstrapDaemonError = '';
+      this.removeBootstrapDaemonSuccess = true;
+    }
+
+    catch(error: any) {
+      console.error(error);
+
+      if (error instanceof Error) {
+        this.setBootstrapDaemonError = error.message;
+      }
+      else {
+        this.setBootstrapDaemonError = `${error}`;
+      }
+    }
+
+    this.removingBootstrapDaemon = false;
+  }
+
 }

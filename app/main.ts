@@ -143,7 +143,9 @@ async function createWindow(): Promise<BrowserWindow> {
       allowRunningInsecureContent: (AppMainProcess.serve),
       contextIsolation: true,
       devTools: !app.isPackaged,
-      sandbox: true
+      sandbox: true,
+      defaultFontSize: process.platform == 'win32' ? 12 : 16,
+      defaultMonospaceFontSize: process.platform == 'win32' ? 11 : 13
     },
     show: false,
     autoHideMenuBar: true,
@@ -755,6 +757,14 @@ try {
   // #endregion
 
   ipcMain.handle('show-error-box', (event: IpcMainInvokeEvent, title: string, content: string) => {
+    if (win) {
+      dialog.showMessageBoxSync(win, {
+        message: content,
+        type: 'error',
+        title: title != '' ? title : 'Error'
+      });
+      return;
+    }
     dialog.showErrorBox(title, content);
   });
 
