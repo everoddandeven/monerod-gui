@@ -20,6 +20,7 @@ export class HardForkInfoComponent extends BasePageComponent implements AfterVie
   private votes: number;
   private voting: number;
   private window: number;
+  private state?: number;
 
   public get daemonRunning(): boolean {
     return this.daemonData.running;
@@ -27,6 +28,19 @@ export class HardForkInfoComponent extends BasePageComponent implements AfterVie
 
   public get daemonStopping(): boolean {
     return this.daemonService.stopping;
+  }
+
+  public get hardForkState(): string {
+    const state = this.state;
+
+    if (state == 0) {
+      return 'There is likely a hard fork';
+    }
+    else if (state == 1) {
+      return 'An update is needed to fork properly';
+    }
+
+    return '';
   }
 
   public loading: boolean = false;
@@ -72,6 +86,8 @@ export class HardForkInfoComponent extends BasePageComponent implements AfterVie
       this.votes = info.votes;
       this.voting = info.voting;
       this.window = info.window;
+      this.enabled = info.enabled;
+      this.state = info.state;
     }
     catch(error) {
       console.error(error);

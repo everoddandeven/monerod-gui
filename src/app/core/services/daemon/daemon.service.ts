@@ -884,6 +884,14 @@ export class DaemonService {
     }
   }
 
+  public async removeBootstrapDaemon(): Promise<void> {
+    const response = await this.callRpc(new SetBootstrapDaemonRequest('', '', '', ''));
+
+    if (typeof response.status == 'string' && response.status != 'OK') {
+      throw new Error(`Could not remove bootstrap daemon: ${response.status}`);
+    }
+  }
+
   public async saveBc(): Promise<void> {
     const response = await this.callRpc(new SaveBcRequest());
 

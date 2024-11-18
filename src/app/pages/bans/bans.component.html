@@ -14,7 +14,6 @@
 <div [hidden]="!daemonRunning || daemonStopping" class="tab-content" id="pills-tabContent">
   <div class="tab-pane fade show active" id="pills-overview" role="tabpanel" aria-labelledby="pills-overview-tab" tabindex="0">
     <h4 class="mb-3">List of banned IPs</h4>
-    <br>
     <table
       id="bansTable"
       data-toggle="bansTable"
@@ -80,7 +79,7 @@
   'seconds': <number>
 }
 ]" 
-                rows="15" cols="15" ></textarea>
+                rows="10" cols="15" ></textarea>
                 <div class="invalid-feedback">
                   Invalid bans provided.
                 </div>

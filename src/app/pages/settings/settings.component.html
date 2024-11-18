@@ -560,23 +560,21 @@
           </div>
 
           <hr class="my-4">
+          
+          <h4 class="mb-3">IPv6</h4>
 
-          <div class="row g-3">
-            <h4 class="mb-3">IPv6</h4>
-
-            <div class="col-md-6">
-              <label for="p2p-bind-ipv6-address" class="form-label">Bind IPv6 address</label>
-              <input type="text" class="form-control" id="p2p-bind-ipv6-address" placeholder="::1" [(ngModel)]="currentSettings.p2pBindIpv6Address" [ngModelOptions]="{standalone: true}">
-              <small class="text-body-secondary">Specify IPv6 address to bind RPC server</small>
-            </div>
-
-            <div class="col-md-6">
-              <label for="p2p-bind-port-ipv6" class="form-label">Bind IPv6 port</label>
-              <input type="number" min="0" class="form-control" id="p2p-bind-port-ipv6" placeholder="18080" [(ngModel)]="currentSettings.p2pBindPortIpv6" [ngModelOptions]="{standalone: true}">
-              <small class="text-body-secondary">18080 for mainnet, 28080 for testnet, 38080 for stagenet</small>
-            </div>
-
+          <div class="col-md-6">
+            <label for="p2p-bind-ipv6-address" class="form-label">Bind IPv6 address</label>
+            <input type="text" class="form-control" id="p2p-bind-ipv6-address" placeholder="::1" [(ngModel)]="currentSettings.p2pBindIpv6Address" [ngModelOptions]="{standalone: true}">
+            <small class="text-body-secondary">Specify IPv6 address to bind RPC server</small>
           </div>
+
+          <div class="col-md-6">
+            <label for="p2p-bind-port-ipv6" class="form-label">Bind IPv6 port</label>
+            <input type="number" min="0" class="form-control" id="p2p-bind-port-ipv6" placeholder="18080" [(ngModel)]="currentSettings.p2pBindPortIpv6" [ngModelOptions]="{standalone: true}">
+            <small class="text-body-secondary">18080 for mainnet, 28080 for testnet, 38080 for stagenet</small>
+          </div>
+
 
       </div>
     </div>
@@ -593,16 +591,16 @@
   
           <div class="my-3">
             <div class="form-check">
-              <input id="credit" name="paymentMethod" type="radio" class="form-check-input" [value]="'mainnet'" [(ngModel)]="networkType" [ngModelOptions]="{standalone: true}" (change)="OnNetworkTypeChange()">
-              <label class="form-check-label" for="credit">mainnet</label>
+              <input id="net-type-mainnet" name="networkType" type="radio" class="form-check-input" [value]="'mainnet'" [(ngModel)]="networkType" [ngModelOptions]="{standalone: true}" (change)="OnNetworkTypeChange()">
+              <label class="form-check-label" for="net-type-mainnet">mainnet</label>
             </div>
             <div class="form-check">
-              <input id="debit" name="paymentMethod" type="radio" class="form-check-input" [value]="'testnet'" [(ngModel)]="networkType" [ngModelOptions]="{standalone: true}" (change)="OnNetworkTypeChange()">
-              <label class="form-check-label" for="debit">testnet</label>
+              <input id="net-type-testnet" name="networkType" type="radio" class="form-check-input" [value]="'testnet'" [(ngModel)]="networkType" [ngModelOptions]="{standalone: true}" (change)="OnNetworkTypeChange()">
+              <label class="form-check-label" for="net-type-testnet">testnet</label>
             </div>
             <div class="form-check">
-              <input id="paypal" name="paymentMethod" type="radio" class="form-check-input" [value]="'stagenet'" [(ngModel)]="networkType" [ngModelOptions]="{standalone: true}" (change)="OnNetworkTypeChange()">
-              <label class="form-check-label" for="paypal">stagenet</label>
+              <input id="net-type-stagenet" name="networkType" type="radio" class="form-check-input" [value]="'stagenet'" [(ngModel)]="networkType" [ngModelOptions]="{standalone: true}" (change)="OnNetworkTypeChange()">
+              <label class="form-check-label" for="net-type-stagenet">stagenet</label>
             </div>
           </div>
           
@@ -873,11 +871,12 @@
               <div class="col-md-4">
                 <label for="log-level" class="form-label">Log level</label>
                 <select class="form-select" id="log-level" [(ngModel)]="currentSettings.logLevel" [ngModelOptions]="{standalone: true}">
-                  <option [ngValue]="0">Info</option>
-                  <option [ngValue]="1">Warning</option>
-                  <option [ngValue]="2">Debug</option>
-                  <option [ngValue]="3">Error</option>
-                  <option [ngValue]="4">Trace</option>
+                  <option [ngValue]="0">0</option>
+                  <option [ngValue]="1">1</option>
+                  <option [ngValue]="2">2</option>
+                  <option [ngValue]="3">3</option>
+                  <option [ngValue]="4">4</option>
+                  <small class="text-body-secondary">	0-4 with 0 being minimal logging and 4 being full tracing. Defaults to 0. These are general presets and do not directly map to severity levels. For example, even with minimal 0, you may see some most important INFO entries</small>
                 </select>
               </div>
     

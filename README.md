@@ -109,6 +109,9 @@ https://github.com/user-attachments/assets/c4a50d2f-5bbb-48ac-9425-30ecc20ada7c
 - [ ] Mining tools
   - [ ] XMRig integration
   - [ ] P2Pool integration
+- [ ] Anonymous network tools
+  - [ ] Tor integration
+  - [ ] I2P integration
 - [ ] Remote node management
   - [ ] No CORS connection
 

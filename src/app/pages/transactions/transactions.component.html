@@ -155,7 +155,7 @@
   ... ,
   'tx_hash_n'
 ]" 
-                  rows="15" cols="15" ></textarea>
+                  rows="10" cols="15" ></textarea>
                   <div class="invalid-feedback">
                     Invalid transaction IDs.
                   </div>
@@ -196,7 +196,7 @@
               <div class="col-12">
                   <label for="send-raw-tx-tx-as-hex" class="form-label">Tx as hex</label>
                   <textarea [(ngModel)]="rawTxJsonString" [ngModelOptions]="{standalone: true}" type="text" class="form-control" id="send-raw-tx-tx-as-hex" placeholder="de6a3..." 
-                  rows="15" cols="15" ></textarea>
+                  rows="10" cols="15" ></textarea>
                   <div class="invalid-feedback">
                     Invalid transaction hex.
                   </div>
@@ -359,7 +359,7 @@
   ... ,
   'tx_hash_n'
 ]" 
-                    rows="15" cols="15" [(ngModel)]="flushTxIdsJsonString" [ngModelOptions]="{ standalone: true }"></textarea>
+                    rows="10" cols="15" [(ngModel)]="flushTxIdsJsonString" [ngModelOptions]="{ standalone: true }"></textarea>
                   <small class="text-body-secondary">List of transaction IDs to flush in tx pool</small>
               </div>
       

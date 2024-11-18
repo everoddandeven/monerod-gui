@@ -351,9 +351,15 @@ export class SettingsComponent {
       return;
     }
 
-    this.ngZone.run(() => {
-      this.currentSettings.monerodPath = file;
-    });
+    const valid = await this.daemonService.checkValidMonerodPath(file);
+    if (valid) {
+      this.ngZone.run(() => {
+        this.currentSettings.monerodPath = file;
+      });
+    }
+    else {
+      window.electronAPI.showErrorBox('Invalid monerod path', `Invalid monerod path provided: ${file}`);
+    }
   }
 
   public async chooseBanListFile(): Promise<void> {

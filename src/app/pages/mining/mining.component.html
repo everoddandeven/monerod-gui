@@ -86,7 +86,7 @@
     </div>
 
     <div *ngIf="!coreBusy && miningStatus && !miningStatus.active" class="row g-5 p-2">
-      <div class="cold-md-7 col-lg-12">
+      <div class="col-md-12 col-lg-12">
         <div class="row gy-3">
           <h4 class="mb-3">Start mining on the daemon</h4>
           <div class="col-sm-12">
@@ -258,7 +258,7 @@
     <hr *ngIf="blockTemplate" class="my-4">
 
     <div class="row g-5 p-2">
-      <div class="cold-md-7 col-lg-12">
+      <div class="col-md-12 col-lg-12">
         <div class="row gy-3">
 
           <div class="col-sm-9">
@@ -296,7 +296,7 @@
     </div>
 
     <div class="row g-5 p-2">
-      <div class="cold-md-7 col-lg-12">
+      <div class="col-md-12 col-lg-12">
         <div class="row gy-3">
           <h4 class="mb-3">Calculate PoW hash for a block candidate</h4>
           <div class="col-sm-6">
@@ -313,7 +313,7 @@
           <div class="col-sm-12">
             <label for="calc-pow-blob-data" class="form-label">Blob data</label>
             <textarea [(ngModel)]="calcPowBlobData" [ngModelOptions]="{standalone: true}" type="text" class="form-control" id="calc-pow-blob-data" placeholder="" 
-            rows="15" cols="15" ></textarea>
+            rows="10" cols="15" ></textarea>
             <div class="invalid-feedback">
               Invalid blob data.
             </div>
@@ -421,14 +421,14 @@
     <hr *ngIf="addAuxPowResult !== undefined" class="my-4">
 
     <div *ngIf="!coreBusy" class="row g-5 p-2">
-      <div class="cold-md-7 col-lg-12">
+      <div class="col-md-12 col-lg-12">
         <div class="row gy-3">
           <h4 class="mb-3">Easily enable merge mining with Monero without requiring software that manually alters the extra field in the coinbase tx to include the merkle root of the aux blocks</h4>
 
           <div class="col-sm-12">
             <label for="add-aux-pow-block-template-blob" class="form-label">Block Template Blob</label>
             <textarea [(ngModel)]="addAuxPowBlockTemplateBlob" [ngModelOptions]="{standalone: true}" type="text" class="form-control" id="calc-pow-blob-data" placeholder="" 
-            rows="15" cols="15" ></textarea>
+            rows="10" cols="15" ></textarea>
             <div class="invalid-feedback">
               Invalid blob data.
             </div>
@@ -448,7 +448,7 @@
   }
 ]
             " 
-            rows="15" cols="15" ></textarea>
+            rows="10" cols="15" ></textarea>
             <div class="invalid-feedback">
               Invalid blob data.
             </div>
@@ -481,7 +481,7 @@
     </div>
 
     <div class="row g-5 p-2">
-      <div class="cold-md-7 col-lg-12">
+      <div class="col-md-12 col-lg-12">
         <div class="col-md-12 col-lg-12">
 
           <h4 class="mb-3">Submit a mined block to the network</h4>
@@ -493,7 +493,7 @@
                   <textarea [(ngModel)]="submitBlockBlobDataJsonString" [ngModelOptions]="{standalone: true}" type="text" [class]="!modifiedSubmitBlockBlobData ? 'form-control' : validBlobData() ? 'form-control' : 'form-control is-invalid'" id="tx_ids" placeholder="[
   '0707e6bdfedc053771512f1bc27c62731ae9e8f2443db64ce742f4e57f5cf8d393de28551e441a0000000002fb830a01ffbf830a018cfe88bee283060274c0aae2ef5730e680308d9c00b6da59187ad0352efe3c71d36eeeb28782f29f2501bd56b952c3ddc3e350c2631d3a5086cac172c56893831228b17de296ff4669de020200000000'
 ]" 
-                  rows="15" cols="15" ></textarea>
+                  rows="10" cols="15" ></textarea>
                   <div class="invalid-feedback">
                     Invalid blob data.
                   </div>
@@ -564,7 +564,7 @@
     <hr *ngIf="generatedBlocks" class="my-4">
 
     <div class="row g-5 p-2">
-      <div class="cold-md-7 col-lg-12">
+      <div class="col-md-12 col-lg-12">
         <div class="row gy-3">
           <h4 class="mb-3">Generate a block and specify the address to receive the coinbase reward</h4>
           <div class="col-sm-6">
