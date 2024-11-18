@@ -103,17 +103,28 @@ https://github.com/user-attachments/assets/c4a50d2f-5bbb-48ac-9425-30ecc20ada7c
 - [X] Import/export `monerod.conf` node configuration
 - [X] Synchronization in a specific time slot
 - [ ] Prompt user access control for administration operation
+- [ ] Check for new versions of the GUI
 - [ ] Blockchain tools
   - [ ] Import blockchain
   - [ ] Export blockchain
+  - [ ] Prune blockchain
+  - [ ] Blockchain ancestry
+  - [ ] Blockchain stats
+  - [ ] Blockchain usage
 - [ ] Mining tools
   - [ ] XMRig integration
   - [ ] P2Pool integration
-- [ ] Anonymous network tools
+- [ ] Network tools
+  - [ ] Generate SSL certificate
   - [ ] Tor integration
   - [ ] I2P integration
+  - [ ] Automatic malicious node detection
 - [ ] Remote node management
   - [ ] No CORS connection
+  - [ ] SSH connection
+- [ ] Move to Tauri
+- [ ] Port and upgrade `battery-level` dependency
+- [ ] Light Wallet Server integration
 
 ## Getting Started
 
