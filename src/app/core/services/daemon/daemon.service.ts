@@ -1214,7 +1214,7 @@ export class DaemonService {
   }
 
   public getGuiVersion(): string {
-    return "1.0.1-tenacity";
+    return "1.0.2-tenacity";
   }
 
   public async getProcessStats(): Promise<ProcessStats> {

@@ -12,7 +12,7 @@ export abstract class AppMainProcess {
             ],
             linux: {
                 comment: 'Monerod GUI startup script',
-                version: '1.0.1'
+                version: '1.0.2'
             }
         }
     });
