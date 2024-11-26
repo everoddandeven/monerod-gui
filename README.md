@@ -18,7 +18,7 @@
 [![Watch on GitHub][github-watch-badge]][github-watch]
 [![Star on GitHub][github-star-badge]][github-star]
 
-[![XMR Donated](https://img.shields.io/badge/donated-0.257431974017_XMR-blue?logo=monero)](https://github.com/everoddandeven/monerod-gui?tab=readme-ov-file#monero)
+[![XMR Donated](https://img.shields.io/badge/donated-8.757300489601_XMR-blue?logo=monero)](https://github.com/everoddandeven/monerod-gui?tab=readme-ov-file#monero)
 [![BTC Donated][bitcoin-donated-badge]][bitcoin-donated]
 
 </div>
@@ -76,7 +76,8 @@ https://github.com/user-attachments/assets/c4a50d2f-5bbb-48ac-9425-30ecc20ada7c
 ## To Do
 
 - [X] Upgrade Electron to latest version
-- [X] Upgrade Angular to latest version
+- [ ] Upgrade Angular to latest version
+- [ ] Implement e2e tests
 - [X] Detect wired/Wi-Fi connection
 - [X] Detect battery/ac power
 - [ ] Detect preinstalled `monerod`
@@ -104,14 +105,19 @@ https://github.com/user-attachments/assets/c4a50d2f-5bbb-48ac-9425-30ecc20ada7c
 - [X] Synchronization in a specific time slot
 - [ ] Prompt user access control for administration operation
 - [ ] Check for new versions of the GUI
+- [ ] Wallet RPC management
 - [ ] Blockchain tools
+  - [ ] Private testnet
   - [ ] Import blockchain
   - [ ] Export blockchain
   - [ ] Prune blockchain
+  - [ ] Blockchain explorer
   - [ ] Blockchain ancestry
   - [ ] Blockchain stats
   - [ ] Blockchain usage
+  - [ ] Blockchain depth
 - [ ] Mining tools
+  - [ ] Calculator
   - [ ] XMRig integration
   - [ ] P2Pool integration
 - [ ] Network tools
