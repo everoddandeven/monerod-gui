@@ -1,3 +1,5 @@
+import { DaemonSettingsInvalidNetworkError, InvalidDaemonSettingsKeyError } from "./error";
+
 export class DaemonSettings {
   public monerodPath: string = '';
 
@@ -45,7 +47,7 @@ export class DaemonSettings {
   
   public keepFakeChain: boolean = false;
   public fixedDifficulty: number = 0;
-  public enforceDnsCheckpoint: boolean = false;
+  public enforceDnsCheckpointing: boolean = false;
   public prepBlocksThreads: number = 0;
   public fastBlockSync: boolean = false;
   public showTimeStats: boolean = false;
@@ -266,14 +268,15 @@ export class DaemonSettings {
             case 'p2p-bind-ip': settings.p2pBindIp = value; break;
             case 'p2p-bind-ipv6-address': settings.p2pBindIpv6Address = value; break;
             case 'p2p-bind-port': settings.p2pBindPort = parseInt(value, 10); break;
+            case 'p2p-bind-port-ipv6': settings.p2pBindPortIpv6 = parseInt(value, 10); break;
             case 'p2p-use-ipv6': settings.p2pUseIpv6 = boolValue; break;
+            case 'p2p-ignore-ipv4': settings.p2pIgnoreIpv4 = boolValue; break;
+            case 'p2p-external-port': settings.p2pExternalPort = parseInt(value, 10); break;
             case 'add-peer': settings.addPeer = value; break;
             case 'add-priority-node': settings.addPriorityNode = value; break;
             case 'bootstrap-daemon-address': settings.bootstrapDaemonAddress = value; break;
             case 'bootstrap-daemon-login': settings.bootstrapDaemonLogin = value; break;
             case 'bootstrap-daemon-proxy': settings.bootstrapDaemonProxy = value; break;
-            case 'rpc-bind-ip': settings.rpcBindIp = value; break;
-            case 'rpc-bind-port': settings.rpcBindPort = parseInt(value, 10); break;
             case 'confirm-external-bind': settings.confirmExternalBind = boolValue; break;
             case 'disable-dns-checkpoints': settings.disableDnsCheckpoints = boolValue; break;
             case 'sync-pruned-blocks': settings.syncPrunedBlocks = boolValue; break;
@@ -293,6 +296,8 @@ export class DaemonSettings {
             case 'tos-flag': settings.tosFlag = parseInt(value, 10); break;
             case 'max-connections-per-ip': settings.maxConnectionsPerIp = parseInt(value, 10); break;
             case 'disable-rpc-ban': settings.disableRpcBan = boolValue; break;
+            case 'rpc-bind-ip': settings.rpcBindIp = value; break;
+            case 'rpc-bind-port': settings.rpcBindPort = parseInt(value, 10); break;
             case 'rpc-access-control-origins': settings.rpcAccessControlOrigins = value; break;
             case 'rpc-ssl': settings.rpcSsl = value as 'autodetect' | 'enabled' | 'disabled'; break;
             case 'rpc-ssl-private-key': settings.rpcSslPrivateKey = value; break;
@@ -304,12 +309,13 @@ export class DaemonSettings {
             case 'rpc-payment-allow-free-loopback': settings.rpcPaymentAllowFreeLoopback = boolValue; break;
             case 'rpc-payment-difficulty': settings.rpcPaymentDifficuly = parseInt(value, 10); break;
             case 'rpc-payment-credits': settings.rpcPaymentCredits = parseInt(value, 10); break;
+            case 'rpc-payment-address': settings.rpcPaymentAddress = value; break;
+            case 'restricted-rpc': settings.restrictedRpc = boolValue; break;
             case 'extra-messages-file': settings.extraMessagesFile = value; break;
             case 'seed-node': settings.seedNode = value; break;
             case 'zmq-rpc-bind-ip': settings.zmqRpcBindIp = value; break;
             case 'zmq-rpc-bind-port': settings.zmqRpcBindPort = parseInt(value, 10); break;
             case 'zmq-pub': settings.zmqPub = value; break;
-            case 'rpc-payment-address': settings.rpcPaymentAddress = value; break;
             case 'no-zmq': settings.noZmq = boolValue; break;
             case 'fixed-difficulty': settings.fixedDifficulty = parseInt(value, 10); break;
             case 'prep-blocks-threads': settings.prepBlocksThreads = parseInt(value, 10); break;
@@ -318,10 +324,11 @@ export class DaemonSettings {
             case 'show-time-stats': settings.showTimeStats = boolValue; break;
             case 'block-sync-size': settings.blockSyncSize = parseInt(value, 10); break;
             case 'block-rate-notify': settings.blockRateNotify = value; break;
+            case 'block-download-max-size': settings.blockDownloadMaxSize = parseInt(value, 10); break;
             case 'reorg-notify': settings.reorgNotify = value; break;
             case 'prune-blockchain': settings.pruneBlockchain = boolValue; break;
             case 'keep-alt-blocks': settings.keepAltBlocks = boolValue; break;
-            case 'keep-fake-chain': settings.keepFakeChain = boolValue; break;
+            case 'keep-fakechain': settings.keepFakeChain = boolValue; break;
             case 'add-exclusive-node': settings.addExclusiveNode = value; break;
             case 'no-sync': settings.noSync = boolValue; break;
             case 'start-mining': settings.startMining = value; break;
@@ -329,16 +336,17 @@ export class DaemonSettings {
             case 'bg-mining-enable': settings.bgMiningEnable = boolValue; break;
             case 'bg-mining-ignore-battery': settings.bgMiningIgnoreBattery = boolValue; break;
             case 'bg-mining-idle-threshold': settings.bgMiningIdleThreshold = parseInt(value, 10); break;
+            case 'bg-mining-min-idle-interval': settings.bgMiningMinIdleInterval = parseInt(value, 10); break;
             case 'bg-mining-miner-target': settings.bgMiningMinerTarget = parseInt(value, 10); break;
             case 'hide-my-port': settings.hideMyPort = boolValue; break;
-            case 'enforce-dns-checkpoint': settings.enforceDnsCheckpoint = boolValue; break;
+            case 'enforce-dns-checkpointing': settings.enforceDnsCheckpointing = boolValue; break;
             case 'test-drop-download': settings.testDropDownload = boolValue; break;
             case 'test-drop-download-height': settings.testDropDownloadHeight = parseInt(value, 10); break;
             case 'test-dbg-lock-sleep': settings.testDbgLockSleep = parseInt(value, 10); break;
             case 'in-peers': settings.inPeers = parseInt(value, 10); break;
             case 'out-peers': settings.outPeers = parseInt(value, 10); break;
 
-            default: throw new Error(`Invalid setting: ${key}`);
+            default: throw new InvalidDaemonSettingsKeyError(key);
         }
     });
 
@@ -364,7 +372,7 @@ export class DaemonSettings {
     if (this.testnet) options.push(`--testnet`);
     else if (this.stagenet) options.push(`--stagenet`);
     else if (!this.mainnet) {
-      throw new Error("Invalid daemon settings");
+      throw new DaemonSettingsInvalidNetworkError();
     }
 
     if (this.logFile != '') options.push('--log-file', this.logFile);
@@ -382,11 +390,11 @@ export class DaemonSettings {
     if (!this.noZmq && this.zmqPub != '') options.push(`--zmq-pub`, this.zmqPub);
     if (this.testDropDownload) options.push(`--test-drop-download`);
     if (this.testDropDownload && this.testDropDownloadHeight) options.push(`--test-drop-download-height`);
-    if (this.testDbgLockSleep) options.push(`--tet-dbg-lock-sleep`, `${this.testDbgLockSleep}`);
+    if (this.testDbgLockSleep) options.push(`--test-dbg-lock-sleep`, `${this.testDbgLockSleep}`);
     if (this.regtest) options.push(`--regtest`);
     if (this.keepFakeChain) options.push(`--keep-fakechain`);
     if (this.fixedDifficulty) options.push(`--fixed-difficulty`, `${this.fixedDifficulty}`);
-    if (this.enforceDnsCheckpoint) options.push(`--enforce-dns-checkpoint`);
+    if (this.enforceDnsCheckpointing) options.push(`--enforce-dns-checkpointing`);
     if (this.prepBlocksThreads) options.push(`--prep-blocks-threads`, `${this.prepBlocksThreads}`);
     if (!this.noSync && this.fastBlockSync) options.push(`--fast-block-sync`, `1`);
     if (this.showTimeStats) options.push(`--show-time-stats`);
@@ -409,7 +417,7 @@ export class DaemonSettings {
     if (this.bgMiningEnable) options.push(`--bg-mining-enable`);
     if (this.bgMiningIgnoreBattery) options.push(`--bg-mining-ignore-battery`);
     if (this.bgMiningIdleThreshold) options.push(`--bg-mining-idle-threshold`, `${this.bgMiningIdleThreshold}`);
-    if (this.bgMiningMinIdleInterval) options.push(`--bg-mining-idle-interval`, `${this.bgMiningMinIdleInterval}`);
+    if (this.bgMiningMinIdleInterval) options.push(`--bg-mining-min-idle-interval`, `${this.bgMiningMinIdleInterval}`);
     if (this.bgMiningMinerTarget) options.push(`--bg-mining-miner-target`, `${this.bgMiningMinerTarget}`);
     if (!this.noSync && this.dbSyncMode != '') options.push(`--db-sync-mode`, `${this.dbSyncMode}`);
     if (this.dbSalvage) options.push(`--db-salvage`);
