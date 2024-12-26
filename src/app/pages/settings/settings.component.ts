@@ -3,7 +3,7 @@ import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonSettings } from '../../../common/DaemonSettings';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { ElectronService } from '../../core/services';
-import { InvalidDaemonSettingsKeyError } from '../../../common';
+import { DaemonSettingsError, DaemonSettingsUnknownKeyError } from '../../../common';
 
 @Component({
   selector: 'app-settings',
@@ -308,13 +308,13 @@ export class SettingsComponent {
         this.successMessage = 'Succesfully imported settings';
       }
       catch(error: any) {
-        console.error(error);
         this.successMessage = '';
 
-        if (error instanceof InvalidDaemonSettingsKeyError) {
+        if (error instanceof DaemonSettingsError) {
           throw error;
         }
 
+        console.error(error);
         throw new Error("Could not parse monerod config file");
       }
     }

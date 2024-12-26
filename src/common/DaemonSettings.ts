@@ -1,4 +1,4 @@
-import { DaemonSettingsInvalidNetworkError, InvalidDaemonSettingsKeyError } from "./error";
+import { DaemonSettingsDuplicateExclusiveNodeError, DaemonSettingsDuplicatePriorityNodeError, DaemonSettingsInvalidNetworkError, DaemonSettingsInvalidValueError, DaemonSettingsUnknownKeyError } from "./error";
 
 export class DaemonSettings {
   public monerodPath: string = '';
@@ -92,8 +92,10 @@ export class DaemonSettings {
   public p2pExternalPort: number = 0;
   public allowLocalIp: boolean = false;
   public addPeer: string = '';
-  public addPriorityNode: string = '';
-  public addExclusiveNode: string = '';
+  //public addPriorityNode: string = '';
+  //public addExclusiveNode: string = '';
+  public exlusiveNodes: string[] = [];
+  public priorityNodes: string[] = [];
 
   public seedNode: string = '';
   public txProxy: string = '';
@@ -106,7 +108,7 @@ export class DaemonSettings {
 
   public enableDnsBlocklist: boolean = false;
   public noIgd: boolean = false;
-  public igd: 'disable' | 'enabled' | 'delayed' = 'delayed';
+  public igd: 'disabled' | 'enabled' | 'delayed' = 'delayed';
   public outPeers: number = -1;
   public inPeers: number = -1;
   public tosFlag: number = -1;
@@ -150,6 +152,38 @@ export class DaemonSettings {
 
   public get banListArray(): string[] {
     return this.banList.split('\n');
+  }
+
+  public get hasExclusiveNodes(): boolean {
+    return this.exlusiveNodes.length > 0;
+  }
+
+  public get hasPriorityNodes(): boolean {
+    return this.priorityNodes.length > 0;
+  }
+
+  public addExclusiveNode(node: string): void {
+    if (this.exlusiveNodes.includes(node)) {
+      throw new DaemonSettingsDuplicateExclusiveNodeError(node);
+    }
+
+    this.exlusiveNodes.push(node);
+  }
+
+  public removeExclusiveNode(node: string): void {
+    this.exlusiveNodes = this.exlusiveNodes.filter((n) => n !== node);
+  }
+
+  public addPriorityNode(node: string): void {
+    if (this.priorityNodes.includes(node)) {
+      throw new DaemonSettingsDuplicatePriorityNodeError(node);
+    }
+
+    this.exlusiveNodes.push(node);
+  }
+
+  public removePriorityNode(node: string): void {
+    this.priorityNodes = this.priorityNodes.filter((n) => n !== node);
   }
 
   public assertValid(): void {
@@ -255,6 +289,14 @@ export class DaemonSettings {
             case 'max-log-files': settings.maxLogFileSize = parseInt(value, 10); break;
             case 'max-log-file-size': settings.maxLogFileSize = parseInt(value, 10); break;
             case 'no-igd': settings.noIgd = boolValue; break;
+            case `igd`: {
+              if (value === 'enabled' || value === 'disabled' || value === 'delayed') {
+                settings.igd = value; break;
+              }
+              else {
+                throw new DaemonSettingsInvalidValueError(key, value);
+              }
+            }
             case 'enable-dns-blocklist': settings.enableDnsBlocklist = boolValue; break;
             case 'testnet': settings.testnet = boolValue; break;
             case 'mainnet': settings.mainnet = boolValue; break;
@@ -273,7 +315,7 @@ export class DaemonSettings {
             case 'p2p-ignore-ipv4': settings.p2pIgnoreIpv4 = boolValue; break;
             case 'p2p-external-port': settings.p2pExternalPort = parseInt(value, 10); break;
             case 'add-peer': settings.addPeer = value; break;
-            case 'add-priority-node': settings.addPriorityNode = value; break;
+            case 'add-priority-node': settings.addPriorityNode(value); break;
             case 'bootstrap-daemon-address': settings.bootstrapDaemonAddress = value; break;
             case 'bootstrap-daemon-login': settings.bootstrapDaemonLogin = value; break;
             case 'bootstrap-daemon-proxy': settings.bootstrapDaemonProxy = value; break;
@@ -329,7 +371,7 @@ export class DaemonSettings {
             case 'prune-blockchain': settings.pruneBlockchain = boolValue; break;
             case 'keep-alt-blocks': settings.keepAltBlocks = boolValue; break;
             case 'keep-fakechain': settings.keepFakeChain = boolValue; break;
-            case 'add-exclusive-node': settings.addExclusiveNode = value; break;
+            case 'add-exclusive-node': settings.addExclusiveNode(value); break;
             case 'no-sync': settings.noSync = boolValue; break;
             case 'start-mining': settings.startMining = value; break;
             case 'mining-threads': settings.miningThreads = parseInt(value, 10); break;
@@ -345,8 +387,7 @@ export class DaemonSettings {
             case 'test-dbg-lock-sleep': settings.testDbgLockSleep = parseInt(value, 10); break;
             case 'in-peers': settings.inPeers = parseInt(value, 10); break;
             case 'out-peers': settings.outPeers = parseInt(value, 10); break;
-
-            default: throw new InvalidDaemonSettingsKeyError(key);
+            default: throw new DaemonSettingsUnknownKeyError(key);
         }
     });
 
@@ -430,8 +471,8 @@ export class DaemonSettings {
     if (this.p2pExternalPort > 0) options.push(`--p2p-external-port`, `${this.p2pExternalPort}`);
     if (this.allowLocalIp) options.push(`--allow-local-ip`);
     if (this.addPeer != '') options.push('--add-peer', this.addPeer);
-    if (this.addPriorityNode != '') options.push(`--add-priority-node`, this.addPriorityNode);
-    if (this.addExclusiveNode != '') options.push(`--add-exlcusive-node`, this.addExclusiveNode);
+    if (this.hasPriorityNodes) this.priorityNodes.forEach((node) => options.push(`--add-priority-node`, node));
+    if (this.hasExclusiveNodes) this.exlusiveNodes.forEach((node) => options.push(`--add-exlcusive-node`, node));
     if (this.seedNode != '') options.push(`--seed-node`, this.seedNode);
     if (this.txProxy != '') options.push(`--tx-proxy`, this.txProxy);
     if (this.anonymousInbound != '') options.push(`--anonymous-inbound`, this.anonymousInbound);
@@ -440,6 +481,7 @@ export class DaemonSettings {
     if (this.noSync) options.push(`--no-sync`);
     if (this.enableDnsBlocklist) options.push(`--enable-dns-blocklist`);
     if (this.noIgd) options.push(`--no-igd`);
+    if (!this.noIgd && this.igd) options.push(`--igd`, this.igd);
     if (this.outPeers >= 0) options.push(`--out-peers`, `${this.outPeers}`);
     if (this.inPeers >= 0) options.push(`--in-peers`, `${this.inPeers}`);
     if (this.tosFlag >= 0) options.push(`--tos-flag`, `${this.tosFlag}`);
