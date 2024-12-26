@@ -283,6 +283,7 @@ export class DaemonSettings {
         const boolValue = value === '1'; // Interpret 1 as true, 0 as false
 
         switch (key) {
+            case 'ban-list': settings.banList = value; break;
             case 'data-dir': settings.dataDir = value; break;
             case 'log-file': settings.logFile = value; break;
             case 'log-level': settings.logLevel = parseInt(value, 10); break;
