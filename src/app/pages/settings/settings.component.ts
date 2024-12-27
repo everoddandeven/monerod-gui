@@ -3,7 +3,7 @@ import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonSettings } from '../../../common/DaemonSettings';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { ElectronService } from '../../core/services';
-import { DaemonSettingsError, DaemonSettingsUnknownKeyError } from '../../../common';
+import { DaemonSettingsError } from '../../../common';
 
 @Component({
   selector: 'app-settings',
