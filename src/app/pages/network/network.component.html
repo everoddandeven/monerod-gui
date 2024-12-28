@@ -11,7 +11,7 @@
   </div>
 </div>
 
-<div *ngIf="daemonRunning && !daemonStopping" class="tab-content" id="pills-tabContent">
+<div *ngIf="daemonRunning && !daemonStopping" class="tab-content tab-grow" id="pills-tabContent">
 
   <div class="tab-pane fade show active" id="pills-net-stats" role="tabpanel" aria-labelledby="pills-net-stats-tab" tabindex="0">
     <h2><i class="bi bi-cloud-arrow-down m-4"></i> Download ({{ currentNetStats.totalGigaBytesIn.toFixed(2) }} GB)</h2>

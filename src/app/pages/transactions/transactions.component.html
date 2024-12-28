@@ -11,7 +11,7 @@
   </div>
 </div>
 
-<div *ngIf="daemonRunning && !daemonStopping" class="tab-content" id="pills-tabContent">
+<div *ngIf="daemonRunning && !daemonStopping" class="tab-content tab-grow" id="pills-tabContent">
 
   <div class="tab-pane fade show active" id="pills-tx-pool" role="tabpanel" aria-labelledby="pills-tx-pool-tab" tabindex="0">
     <h4 class="mb-3">Information about valid transactions seen by the node but not yet mined into a block, as well as spent key image information for the txpool in the node's memory</h4>

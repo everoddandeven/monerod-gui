@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { EventEmitter, Injectable, NgZone } from '@angular/core';
 import { NavbarLink } from './navbar.model';
 import { DaemonService } from '../../../core/services';
 
@@ -11,6 +11,10 @@ export class NavbarService {
 
   public get links(): NavbarLink[] {
     return this._navbarLinks;
+  }
+
+  public get onDaemonStatusChanged(): EventEmitter<boolean> {
+    return this.daemonService.onDaemonStatusChanged;
   }
 
   constructor(private daemonService: DaemonService, private zone: NgZone) {

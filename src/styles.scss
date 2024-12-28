@@ -9,6 +9,11 @@ $primary: #ff5733;
   height: 1rem;
 }
 
+.tab-grow {
+  overflow: hidden;
+  overflow-y: auto;
+}
+
 /*
  * Sidebar
  */

@@ -16,7 +16,15 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
 
   protected subscriptions: Subscription[] = [];
 
-  constructor(private navbarService: NavbarService) { }
+  private readonly mResizeHandler: (event: Event) => void = (event: Event) => setTimeout(() => this.updateTableContentHeight(), 100);
+
+  constructor(private navbarService: NavbarService) {
+    this.subscriptions.push(this.navbarService.onDaemonStatusChanged.subscribe((running) => {
+      if (running) setTimeout(() => this.updateTableContentHeight(), 100);
+    }));
+
+    window.addEventListener('resize', this.mResizeHandler);
+   }
 
   protected setLinks(links: NavbarLink[] = []): void {
     this._links = links;
@@ -169,6 +177,8 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
 
   public ngAfterContentInit(): void {
     this.navbarService.setLinks(this._links);
+
+    setTimeout(() => this.updateTableContentHeight(), 100);
   }
 
   public ngOnDestroy(): void {
@@ -176,7 +186,53 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
 
     this.subscriptions.forEach((sub: Subscription) => sub.unsubscribe());
     this.subscriptions = [];
+    
+    window.removeEventListener('resize', this.mResizeHandler);
 
     this.destroyTables();
+  }
+
+  public updateTableContentHeight(): void {
+    if (!visualViewport) {
+      return;
+    }
+
+    const viewHeight = visualViewport?.height;
+
+    if (!viewHeight) {
+      return;
+    }
+
+    console.log(`view height: ${viewHeight}`);
+
+    const elements = document.getElementsByClassName('tab-content tab-grow');
+
+    if (!elements || elements.length === 0) {
+      return;
+    }
+
+    const offset = 35;
+    const tab = elements[0] as HTMLElement;
+    const rect = tab.getBoundingClientRect();
+    const left = viewHeight - rect.bottom;
+    const currentHeight = tab.clientHeight;
+    let newHeight: number;
+
+    if (left > 0) {
+      if (left < offset) {
+        newHeight = parseInt(`${currentHeight}`);
+      }
+      else {
+        const offsetLeft = left - offset;
+        newHeight = parseInt(`${ currentHeight + offsetLeft }`);
+      }
+    }
+    else {
+      newHeight = currentHeight + left - offset;
+    }
+
+    tab.style.height = `${newHeight}px`;
+
+    console.log(`old height: ${currentHeight}, left: ${left} new height: ${newHeight}`);
   }
 }
