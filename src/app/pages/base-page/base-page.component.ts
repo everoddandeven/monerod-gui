@@ -16,9 +16,7 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
 
   protected subscriptions: Subscription[] = [];
 
-  constructor(private navbarService: NavbarService) {
-     
-  }
+  constructor(private navbarService: NavbarService) { }
 
   protected setLinks(links: NavbarLink[] = []): void {
     this._links = links;
@@ -111,6 +109,62 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
     }
 
     return false;
+  }
+
+  protected getTable(id: string): JQuery<HTMLElement> | undefined {
+    const initalized: JQuery<HTMLElement> | undefined = this.initializedTables[id];
+
+    return initalized;
+  }
+
+  protected getTableSelection<TRow extends { [key: string]: any }>(id: string): TRow[] {
+    const table = this.getTable(id);
+
+    if (!table) {
+      return [];
+    }
+
+    const result = table.bootstrapTable('getSelections') as TRow[];
+
+    if (!result) {
+      return [];
+    }
+
+    return result;
+  }
+
+  protected removeTableSelection<TRow extends { [key: string]: any }>(id: string, key: string): TRow[] {
+    const table = this.getTable(id);
+
+    if (!table || key === '') {
+      return [];
+    }
+
+    const selection = this.getTableSelection<TRow>(id);
+
+    if (selection.length === 0) {
+      return [];
+    }
+
+    const firstRow = selection[0];
+
+    if (!firstRow[key]) {
+      console.warn("Cannote remove selection by key: " + key);
+      return [];
+    }
+
+    const ids: any[] = [];
+
+    selection.forEach((s) => {
+      ids.push(s[key]);
+    });
+
+    table.bootstrapTable('remove', {
+      field: key,
+      values: ids
+    });
+
+    return selection;
   }
 
   public ngAfterContentInit(): void {

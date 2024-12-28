@@ -1,38 +1,31 @@
-import { Component, NgZone } from '@angular/core';
+import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonSettings } from '../../../common/DaemonSettings';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { ElectronService } from '../../core/services';
 import { DaemonSettingsError } from '../../../common';
+import { BasePageComponent } from '../base-page/base-page.component';
+import { NavbarService } from '../../shared/components';
 
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss'
 })
-export class SettingsComponent {
+export class SettingsComponent extends BasePageComponent implements AfterViewInit {
 
   public readonly navbarLinks: NavbarLink[];
 
+  private removingExclusiveNodes: boolean = false;
+  private removingPriorityNodes: boolean = false;
+
+  private addingExclusiveNode: boolean = false;
+  private addingPriorityNode: boolean = false;
   private originalSettings: DaemonSettings;
   public currentSettings: DaemonSettings;
 
   public banListUrl: string = '';
   public remoteBanList: boolean = false;
-
-  public get validBanListUrl(): boolean {
-    if (this.banListUrl == '') {
-      return false;
-    }
-
-    try {
-      new URL(this.banListUrl);
-      return true;
-    }
-    catch {
-      return false;
-    }
-  }
 
   public savingChanges: boolean = false;
   public savingChangesError = ``;
@@ -49,12 +42,150 @@ export class SettingsComponent {
   public databaseSyncMode: 'sync' | 'async' = 'async';
   public databaseSyncNBytesOrBlocks: number = 250000000;
   public databaseSyncNPerMode: 'bytes' | 'blocks' = 'bytes';
+  public isPortable: boolean = true;
+  public downloadingBanListFile: boolean = false;
+
+  public exclusiveNodeAddress: string = '';
+  public exclusiveNodePort: number = 0;
+
+  public priorityNodeAddress: string = '';
+  public priorityNodePort: number = 0;
+
+  public seedNodeAddress: string = '';
+  public seedNodePort: number = 0;
+
+  private get seedNode(): string {
+    return `${this.seedNodeAddress}:${this.seedNodePort}`;
+  }
+
+  private get exclusiveNodes(): NodeInfo[] {
+    const result: { address: string, port: number }[] = [];
+
+    this.currentSettings.exclusiveNodes.forEach((en) => {
+      const components = en.split(":");
+
+      if (components.length !== 2) {
+        return;
+      }
+
+      const [ address, strPort ] = components;
+
+      try {
+        const port = parseInt(strPort);
+
+        result.push({ address: address, port: port });
+      }
+      catch {
+        return;
+      }
+
+    });
+
+    return result;
+  }
+
+  private get priorityNodes(): NodeInfo[] {
+    const result: { address: string, port: number }[] = [];
+
+    this.currentSettings.priorityNodes.forEach((en) => {
+      const components = en.split(":");
+
+      if (components.length !== 2) {
+        return;
+      }
+
+      const [ address, strPort ] = components;
+
+      try {
+        const port = parseInt(strPort);
+
+        result.push({ address: address, port: port });
+      }
+      catch {
+        return;
+      }
+
+    });
+
+    return result;
+  }
 
   private get dbSyncMode(): string {
     return `${this.databaseSyncSpeed}:${this.databaseSyncMode}:${this.databaseSyncNBytesOrBlocks}${this.databaseSyncNPerMode}`;
   }
 
-  constructor(private daemonService: DaemonService, private electronService: ElectronService, private ngZone: NgZone) {
+  public get validBanListUrl(): boolean {
+    if (this.banListUrl == '') {
+      return false;
+    }
+
+    try {
+      new URL(this.banListUrl);
+      return true;
+    }
+    catch {
+      return false;
+    }
+  }
+
+  public get canAddExclusiveNode(): boolean {
+    if (this.addingExclusiveNode) {
+      return false;
+    }
+
+    if (this.exclusiveNodePort <= 0) {
+      return false;
+    }
+
+    if (this.exclusiveNodeAddress.trim().replace(' ', '') === '' || this.exclusiveNodeAddress.includes(":")) {
+      return false;
+    }
+
+    if (this.exclusiveNodes.find((en) => en.address === this.exclusiveNodeAddress && en.port === this.exclusiveNodePort)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public get canRemoveExclusiveNodes(): boolean {
+    if (this.removingExclusiveNodes || this.exclusiveNodes.length === 0) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public get canRemovePriorityNodes(): boolean {
+    if (this.removingPriorityNodes || this.priorityNodes.length === 0) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public get canAddPriorityNode(): boolean {
+    if (this.addingPriorityNode) {
+      return false;
+    }
+
+    if (this.priorityNodePort <= 0) {
+      return false;
+    }
+
+    if (this.priorityNodeAddress.trim().replace(' ', '') === '' || this.priorityNodeAddress.includes(":")) {
+      return false;
+    }
+
+    if (this.priorityNodes.find((en) => en.address === this.priorityNodeAddress && en.port === this.priorityNodePort)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  constructor(private daemonService: DaemonService, private electronService: ElectronService, navbarService: NavbarService, private ngZone: NgZone) {
+    super(navbarService);
     this.loading = true;
 
     this.navbarLinks = [
@@ -86,7 +217,9 @@ export class SettingsComponent {
     });
   }
 
-  public isPortable: boolean = true;
+  public ngAfterViewInit(): void {
+    this.loadTables();
+  }
 
   public refreshSyncMode(): void {
     setTimeout(() => {
@@ -125,12 +258,45 @@ export class SettingsComponent {
   private async load(): Promise<void> {
     this.originalSettings = await this.daemonService.getSettings();
     this.currentSettings = this.originalSettings.clone();
+
+    if (this.seedNode !== '') {
+      const components = this.seedNode.split(":");
+
+      if (components.length >= 2) {
+        const [node, strPort] = components;
+
+        this.seedNodeAddress = node;
+        this.seedNodePort = parseInt(strPort);
+      }
+      else if (components.length === 1) 
+      {
+        this.seedNodeAddress = components[0];
+      }
+    }
+
     this.initSyncMode();
     
     this.loading = false;
 
     this.isPortable = await this.electronService.isPortable();
     this.networkType = this.currentSettings.mainnet ? 'mainnet' : this.currentSettings.testnet ? 'testnet' : this.currentSettings.stagenet ? 'stagenet' : 'mainnet';
+  }
+
+  private loadTables(): void {
+    setTimeout(() => {
+      this.ngZone.run(() => {
+        this.loadExclusiveNodesTable();
+        this.loadPriorityNodesTable();
+      });
+    }, 500);
+  }
+
+  private loadExclusiveNodesTable(loading: boolean = false): void {
+    this.loadTable('exclusiveNodesTable', this.exclusiveNodes, loading);
+  }
+
+  private loadPriorityNodesTable(loading: boolean = false): void {
+    this.loadTable('priorityNodesTable', this.priorityNodes, loading);
   }
 
   public get modified(): boolean {
@@ -143,6 +309,15 @@ export class SettingsComponent {
 
   public get saveDisabled(): boolean {
     return !this.modified || this.daemonService.restarting || this.daemonService.starting || this.daemonService.stopping;
+  }
+
+  public onSeedNodeChange() {
+    if (this.seedNodePort >= 0) {
+      this.currentSettings.seedNode = `${this.seedNodeAddress}:${this.seedNodePort}`;
+    }
+    else {
+      this.currentSettings.seedNode = this.seedNodeAddress;
+    }
   }
 
   public OnOfflineChange() {
@@ -384,8 +559,6 @@ export class SettingsComponent {
     this.currentSettings.banList = '';
   }
 
-  public downloadingBanListFile: boolean = false;
-
   public async downloadBanListFile(): Promise<void> {
     if (!this.remoteBanList) {
       return;
@@ -535,4 +708,85 @@ export class SettingsComponent {
   public removeLogFile(): void {
     this.currentSettings.logFile = '';
   }
+
+  public addExclusiveNode(): void {
+    if (!this.canAddExclusiveNode) {
+      return;
+    }
+
+    this.addingExclusiveNode = true;
+
+    try {
+      const node = `${this.exclusiveNodeAddress}:${this.exclusiveNodePort}`;
+    
+      this.currentSettings.addExclusiveNode(node);
+
+      this.loadExclusiveNodesTable();
+    }
+    catch (error: any) {
+      console.error(error);
+    }
+
+    this.addingExclusiveNode = false;
+  }
+
+  public removeSelectedExclusiveNodes(): void {
+    if (!this.canRemoveExclusiveNodes) {
+      return;
+    }
+
+    this.removingExclusiveNodes = true;
+
+    const removed = this.removeTableSelection<NodeInfo>('exclusiveNodesTable', 'address');
+    
+    removed.forEach((r) => {
+      const node = r.port >= 0 ? `${r.address}:${r.port}` : r.address;
+      this.currentSettings.removeExclusiveNode(node);
+    });
+    
+    this.loadExclusiveNodesTable();
+
+    this.removingExclusiveNodes = false;
+  }
+
+  public addPriorityNode(): void {
+    if (!this.canAddPriorityNode) {
+      return;
+    }
+
+    this.addingPriorityNode = true;
+
+    try {
+      const node = `${this.priorityNodeAddress}:${this.priorityNodePort}`;
+    
+      this.currentSettings.addPriorityNode(node);
+      this.loadPriorityNodesTable();
+    }
+    catch (error: any) {
+      console.error(error);
+    }
+
+    this.addingPriorityNode = false;
+  }
+
+  public removeSelectedPriorityNodes(): void {
+    if (!this.canRemovePriorityNodes) {
+      return;
+    }
+
+    this.removingPriorityNodes = true;
+
+    const removed = this.removeTableSelection<NodeInfo>('priorityNodesTable', 'address');
+    
+    removed.forEach((r) => {
+      const node = r.port >= 0 ? `${r.address}:${r.port}` : r.address;
+      this.currentSettings.removePriorityNode(node);
+    });
+    
+    this.loadPriorityNodesTable();
+
+    this.removingPriorityNodes = false;
+  }
 }
+
+interface NodeInfo { address: string, port: number };

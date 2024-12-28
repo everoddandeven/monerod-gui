@@ -94,7 +94,7 @@ export class DaemonSettings {
   public addPeer: string = '';
   //public addPriorityNode: string = '';
   //public addExclusiveNode: string = '';
-  public exlusiveNodes: string[] = [];
+  public exclusiveNodes: string[] = [];
   public priorityNodes: string[] = [];
 
   public seedNode: string = '';
@@ -155,7 +155,7 @@ export class DaemonSettings {
   }
 
   public get hasExclusiveNodes(): boolean {
-    return this.exlusiveNodes.length > 0;
+    return this.exclusiveNodes.length > 0;
   }
 
   public get hasPriorityNodes(): boolean {
@@ -163,15 +163,15 @@ export class DaemonSettings {
   }
 
   public addExclusiveNode(node: string): void {
-    if (this.exlusiveNodes.includes(node)) {
+    if (this.exclusiveNodes.includes(node)) {
       throw new DaemonSettingsDuplicateExclusiveNodeError(node);
     }
 
-    this.exlusiveNodes.push(node);
+    this.exclusiveNodes.push(node);
   }
 
   public removeExclusiveNode(node: string): void {
-    this.exlusiveNodes = this.exlusiveNodes.filter((n) => n !== node);
+    this.exclusiveNodes = this.exclusiveNodes.filter((n) => n !== node);
   }
 
   public addPriorityNode(node: string): void {
@@ -179,7 +179,7 @@ export class DaemonSettings {
       throw new DaemonSettingsDuplicatePriorityNodeError(node);
     }
 
-    this.exlusiveNodes.push(node);
+    this.priorityNodes.push(node);
   }
 
   public removePriorityNode(node: string): void {
@@ -230,15 +230,40 @@ export class DaemonSettings {
         // Se una chiave di obj1 non esiste in obj2, non sono uguali
         if (!keys2.includes(key)) return false;
 
+        if (key == 'exclusiveNodes' && obj1 instanceof DaemonSettings && obj2 instanceof DaemonSettings) {
+          if (obj1.exclusiveNodes.length !== obj2.exclusiveNodes.length) return false;
+          else {
+            for(const en of obj1.exclusiveNodes) {
+              if (!obj2.exclusiveNodes.includes(en)) return false;
+            }
+          }
+        }
+        else if (key == 'priorityNodes' && obj1 instanceof DaemonSettings && obj2 instanceof DaemonSettings) {
+          if (obj1.priorityNodes.length !== obj2.priorityNodes.length) return false;
+          else {
+            for(const en of obj1.priorityNodes) {
+              if (!obj2.priorityNodes.includes(en)) return false;
+            }
+          }
+        }
+        else if (!this.deepEqual(obj1[key], obj2[key])) return false;
+
         // Se il valore della proprietà non è uguale, effettua un confronto ricorsivo
-        if (!this.deepEqual(obj1[key], obj2[key])) return false;
     }
 
     return true;
   }
 
   public clone(): DaemonSettings {
-    return Object.assign(new DaemonSettings(), this);
+    const result = Object.assign(new DaemonSettings(), this);
+
+    result.exclusiveNodes = [];
+    result.priorityNodes = [];
+
+    this.exclusiveNodes.forEach((en) => result.addExclusiveNode(en));
+    this.priorityNodes.forEach((pn) => result.addPriorityNode(pn));
+
+    return result;
   }
 
   public static parse(data: any): DaemonSettings {
@@ -473,7 +498,7 @@ export class DaemonSettings {
     if (this.allowLocalIp) options.push(`--allow-local-ip`);
     if (this.addPeer != '') options.push('--add-peer', this.addPeer);
     if (this.hasPriorityNodes) this.priorityNodes.forEach((node) => options.push(`--add-priority-node`, node));
-    if (this.hasExclusiveNodes) this.exlusiveNodes.forEach((node) => options.push(`--add-exlcusive-node`, node));
+    if (this.hasExclusiveNodes) this.exclusiveNodes.forEach((node) => options.push(`--add-exlcusive-node`, node));
     if (this.seedNode != '') options.push(`--seed-node`, this.seedNode);
     if (this.txProxy != '') options.push(`--tx-proxy`, this.txProxy);
     if (this.anonymousInbound != '') options.push(`--anonymous-inbound`, this.anonymousInbound);

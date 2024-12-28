@@ -590,6 +590,100 @@
             <input type="number" min="0" class="form-control" id="p2p-bind-port-ipv6" placeholder="18080" [(ngModel)]="currentSettings.p2pBindPortIpv6" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">18080 for mainnet, 28080 for testnet, 38080 for stagenet</small>
           </div>
+          
+          <hr class="my-4">
+          
+          <h4 class="mb-3">Seed Node</h4>
+
+          <div class="col-md-6">
+            <label for="seed-node-address" class="form-label">Node address</label>
+            <input type="text" class="form-control" id="seed-node-address" [(ngModel)]="seedNodeAddress" (change)="onSeedNodeChange()" [ngModelOptions]="{standalone: true}">
+            <small class="text-body-secondary">Connect to a node to retrieve other nodes' addresses, and disconnect</small>
+          </div>
+
+          <div class="col-md-4">
+            <label for="seed-node-port" class="form-label">Node port</label>
+            <input type="number" min="0" class="form-control" id="seed-node-port" placeholder="18080" (change)="onSeedNodeChange()" [(ngModel)]="seedNodePort" [ngModelOptions]="{standalone: true}">
+            <small class="text-body-secondary">Specify node port</small>
+          </div>
+
+          <hr class="my-4">
+          
+          <h4 class="mb-3">Exclusive Nodes</h4>
+
+          <div class="col-md-12">
+            <button [disabled]="!canRemoveExclusiveNodes" id="remove-selected-exclusive-node" type="button" class="btn btn-primary" (click)="removeSelectedExclusiveNodes()"><i class="bi bi-trash-fill"></i></button>
+            <br><br>
+            <table
+              id="exclusiveNodesTable"
+              data-toggle="exclusiveNodesTable"
+              data-height="300"
+              data-card-view="true">
+              <thead>
+                <tr>
+                  <th data-field="state" data-checkbox="true">ID</th>
+                  <th data-field="address">Address</th>
+                  <th data-field="port">Port</th>
+                </tr>
+              </thead>
+            </table>
+          </div>
+
+          <div class="col-md-6">
+            <label for="add-exlcusive-node-address" class="form-label">Node address</label>
+            <input type="text" class="form-control" id="add-exlcusive-node-address" [(ngModel)]="exclusiveNodeAddress" [ngModelOptions]="{standalone: true}">
+            <small class="text-body-secondary">Specify a node to connect to only</small>
+          </div>
+
+          <div class="col-md-4">
+            <label for="add-exlcusive-node-port" class="form-label">Node port</label>
+            <input type="number" min="0" class="form-control" id="add-exlcusive-node-port" placeholder="18080" [(ngModel)]="exclusiveNodePort" [ngModelOptions]="{standalone: true}">
+            <small class="text-body-secondary">Specify node port</small>
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label">Add</label>
+            <button [disabled]="!canAddExclusiveNode" type="button" class="form-control btn btn-primary" (click)="addExclusiveNode()"><i class="bi bi-plus-square"></i></button>
+          </div>
+
+          <hr class="my-4">
+          
+          <h4 class="mb-3">Priority Nodes</h4>
+
+          <div class="col-md-12">
+            <button [disabled]="!canRemovePriorityNodes" id="remove-selected-priority-node" type="button" class="btn btn-primary" (click)="removeSelectedPriorityNodes()"><i class="bi bi-trash-fill"></i></button>
+            <br><br>
+            <table
+              id="priorityNodesTable"
+              data-toggle="priorityNodesTable"
+              data-height="300"
+              data-card-view="true">
+              <thead>
+                <tr>
+                  <th data-field="state" data-checkbox="true">ID</th>
+                  <th data-field="address">Address</th>
+                  <th data-field="port">Port</th>
+                </tr>
+              </thead>
+            </table>
+          </div>
+
+          <div class="col-md-6">
+            <label for="add-priority-node-address" class="form-label">Node address</label>
+            <input type="text" class="form-control" id="add-priority-node-address" placeholder="" [(ngModel)]="priorityNodeAddress" [ngModelOptions]="{standalone: true}">
+            <small class="text-body-secondary">Specify a node to connect to only</small>
+          </div>
+
+          <div class="col-md-4">
+            <label for="add-priority-node-port" class="form-label">Node port</label>
+            <input type="number" min="0" class="form-control" id="add-priority-node-port" placeholder="18080" [(ngModel)]="priorityNodePort" [ngModelOptions]="{standalone: true}">
+            <small class="text-body-secondary">Specify node port</small>
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label">Add</label>
+            <button [disabled]="!canAddPriorityNode" type="button" class="form-control btn btn-primary" (click)="addPriorityNode()"><i class="bi bi-plus-square"></i></button>
+          </div>
 
 
       </div>
