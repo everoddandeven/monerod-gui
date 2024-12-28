@@ -800,22 +800,28 @@
                 <small class="text-body-secondary">Sync when node is connected to Wi-Fi</small>
               </div>
     
-              <div class="col-md-4">
+              <div class="col-md-3">
                 <label for="prep-block-threads" class="form-label">Prep blocks threads</label>
                 <input type="number" min="0" class="form-control" id="prep-block-threds" placeholder="4" [(ngModel)]="currentSettings.prepBlocksThreads" [ngModelOptions]="{standalone: true}">
                 <small class="text-body-secondary">Max number of threads to use when preparing block hashes in groups</small>
               </div>
     
-              <div class="col-md-4">
+              <div class="col-md-3">
                   <label for="block-sync-size" class="form-label">Block sync size</label>
                   <input type="number" min="0" class="form-control" id="block-sync-size" placeholder="" [(ngModel)]="currentSettings.blockSyncSize" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">How many blocks to sync at once during chain synchronization (0 = adaptive)</small>
               </div>
       
-              <div class="col-md-4">
+              <div class="col-md-3">
                   <label for="block-download-max-size" class="form-label">Block download max size</label>
                   <input type="number" min="0" class="form-control" id="block-download-max-size" placeholder="" [(ngModel)]="currentSettings.blockDownloadMaxSize" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">Set maximum size of block download queue in bytes (0 for default)</small>
+              </div>
+
+              <div class="col-md-3">
+                <label for="fixed-difficulty" class="form-label">Fixed difficulty</label>
+                <input type="number" min="0" class="form-control" id="fixed-difficulty" placeholder="" [(ngModel)]="currentSettings.fixedDifficulty" [ngModelOptions]="{standalone: true}">
+                  <small class="text-body-secondary">Fixed difficulty used for testing (0 for default)</small>
               </div>
 
               <div class="form-check form-switch col-md-12">
