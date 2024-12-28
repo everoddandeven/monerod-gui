@@ -24,9 +24,15 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
         hours: '00'
       };
     }
-
     const now = new Date();
-    const elapsedMilliseconds = now.getTime() - startedAt.getTime();
+
+    let elapsedMilliseconds = now.getTime() - startedAt.getTime();
+
+    if (elapsedMilliseconds < 0) {
+      console.warn("Elapsed time is negative");
+      this.daemonService.startedAt = now;
+      elapsedMilliseconds = 0;
+    }
 
     const seconds = Math.floor((elapsedMilliseconds / 1000) % 60);
     const minutes = Math.floor((elapsedMilliseconds / (1000 * 60)) % 60);
