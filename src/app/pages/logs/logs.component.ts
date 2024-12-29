@@ -32,7 +32,7 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, O
 
   public scrolling: boolean = false;
 
-  private readonly mScrollHandler: (ev: Event) => void = (ev: Event) => {
+  private readonly scrollHandler: (ev: Event) => void = (ev: Event) => {
     this.scrolling = ev.type === 'scroll';
   };
   
@@ -85,8 +85,8 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, O
       return;
     }
 
-    tab.addEventListener('scroll', this.mScrollHandler);
-    tab.addEventListener('scrollend', this.mScrollHandler);
+    tab.addEventListener('scroll', this.scrollHandler);
+    tab.addEventListener('scrollend', this.scrollHandler);
   }
 
   private unregisterScrollEvents(): void {
@@ -102,8 +102,8 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, O
       return;
     }
 
-    tab.removeEventListener('scroll', this.mScrollHandler);
-    tab.removeEventListener('scrollend', this.mScrollHandler);
+    tab.removeEventListener('scroll', this.scrollHandler);
+    tab.removeEventListener('scrollend', this.scrollHandler);
   }
 
   public trackByFn(index: number, item: string): number {
