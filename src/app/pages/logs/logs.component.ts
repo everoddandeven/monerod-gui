@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, NgZone, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { LogsService } from './logs.service';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
@@ -13,19 +13,14 @@ import { Subscription } from 'rxjs';
   styleUrl: './logs.component.scss'
 })
 export class LogsComponent extends BasePageComponent implements AfterViewInit {
-  @ViewChild('logTerminal', { read: ElementRef }) public logTerminal?: ElementRef<any>;
+  private initing: boolean = false;
+  private scrollEventsRegistered: boolean = false;
   
   public setLogLevelLevel: number = 0;
   public settingLogLevel: boolean = false;
   public setLogLevelError: string = '';
   public setLogLevelSuccess: boolean = false;
 
-  //public readonly setLogCategoriesCategories: LogCategories = new LogCategories();
-  
-  public get setLogCategoriesCategories(): LogCategories {
-    return this.logsService.categories;
-  }
-  
   public settingLogCategories: boolean = false;
   public setLogCategoriesError: string = '';
   public setLogCategoriesSuccess: boolean = false;
@@ -35,6 +30,16 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit {
   public setLogHashRateError: string = '';
   public setLogHashRateSuccess: boolean = false;
 
+  public scrolling: boolean = false;
+
+  private readonly mScrollHandler: (ev: Event) => void = (ev: Event) => {
+    this.scrolling = ev.type === 'scroll';
+  };
+  
+  public get setLogCategoriesCategories(): LogCategories {
+    return this.logsService.categories;
+  }
+  
   constructor(navbarService: NavbarService, private logsService: LogsService, private daemonService: DaemonService, private ngZone: NgZone) {
     super(navbarService);
 
@@ -62,28 +67,48 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit {
   }
 
   private onLog(): void {
-    if (this.logTerminal) this.logTerminal.nativeElement.scrollTop = this.logTerminal.nativeElement.scrollHeight;
-    // Scorri automaticamente in basso
+    if (this.scrolling) return;
+
     this.scrollTableContentToBottom();
+  }
+
+  private registerScrollEvents(): void {
+    if (this.scrollEventsRegistered) {
+      console.warn("Scroll events already registered");
+      return;
+    }
+
+    const tab = this.getTableContent();
+
+    if (!tab) {
+      console.warn("Coult not find table content");
+      return;
+    }
+
+    tab.addEventListener('scroll', this.mScrollHandler);
+    tab.addEventListener('scrollend', this.mScrollHandler);
+  }
+
+  private unregisterScrollEvents(): void {
+    if (!this.scrollEventsRegistered) {
+      console.warn("Scroll events already unregistered");
+      return;
+    }
+
+    const tab = this.getTableContent();
+
+    if (!tab) {
+      console.warn("Coult not find table content");
+      return;
+    }
+
+    tab.removeEventListener('scroll', this.mScrollHandler);
+    tab.removeEventListener('scrollend', this.mScrollHandler);
   }
 
   public trackByFn(index: number, item: string): number {
     console.debug(`trackByFn(index: ${index}, ${item})`);
     return index;  // usa l'indice per tracciare gli elementi
-  }
-
-  private initing: boolean = false;
-
-  public ngAfterViewInit(): void {
-    this.initing = true;  
-    setTimeout(() => {
-      this.scrollTableContentToBottom();
-      this.initing = false;
-      
-      setTimeout(() => {
-        this.scrollTableContentToBottom();
-      }, 500);
-    }, 500);  
   }
 
   public async setLogLevel(): Promise<void> {
@@ -138,6 +163,24 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit {
     }
 
     this.settingLogCategories = false;
+  }
+
+  public ngAfterViewInit(): void {
+    this.initing = true;  
+    setTimeout(() => {
+      this.registerScrollEvents();
+      this.scrollTableContentToBottom();
+      this.initing = false;
+      
+      setTimeout(() => {
+        this.scrollTableContentToBottom();
+      }, 500);
+    }, 500);  
+  }
+
+  public override ngOnDestroy(): void {
+    this.unregisterScrollEvents();
+    super.ngOnDestroy();
   }
 }
 

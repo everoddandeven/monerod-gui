@@ -195,6 +195,22 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
     this.destroyTables();
   }
 
+  public getTableContent(): HTMLElement | undefined {
+    const elements = document.getElementsByClassName('tab-content tab-grow');
+
+    if (!elements || elements.length === 0) {
+      return undefined;
+    }
+
+    const element = elements[0];
+
+    if (!(element instanceof HTMLElement)) {
+      return undefined;
+    }
+
+    return element;
+  }
+
   public updateTableContentHeight(): void {
     if (!visualViewport) {
       return;
@@ -208,14 +224,14 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
 
     console.log(`view height: ${viewHeight}`);
 
-    const elements = document.getElementsByClassName('tab-content tab-grow');
+    const offset = 35;
+    const tab = this.getTableContent();
 
-    if (!elements || elements.length === 0) {
+    if (!tab) {
+      console.warn("table content not found");
       return;
     }
 
-    const offset = 35;
-    const tab = elements[0] as HTMLElement;
     const rect = tab.getBoundingClientRect();
     const left = viewHeight - rect.bottom;
     const currentHeight = tab.clientHeight;
@@ -241,14 +257,12 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
 
   public scrollTableContentToBottom(): void {
     setTimeout(() => {
-      const elements = document.getElementsByClassName('tab-content tab-grow');
+      const tabContent = this.getTableContent();
   
-      if (elements.length === 0) {
+      if (!tabContent) {
         console.warn("Could not find logs tab");
         return;
       }
-
-      let tabContent: HTMLDivElement = elements[0] as HTMLDivElement;
       
       if (tabContent) {
         tabContent.scrollTo(0, tabContent.scrollHeight);
