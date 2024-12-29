@@ -1026,7 +1026,7 @@ export class DaemonService {
         
         return;
       } 
-      await this.delay(5000);
+      await this.delay(15000);
     }
 
     window.electronAPI.showNotification({
