@@ -238,4 +238,21 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
 
     console.log(`old height: ${currentHeight}, left: ${left} new height: ${newHeight}`);
   }
+
+  public scrollTableContentToBottom(): void {
+    setTimeout(() => {
+      const elements = document.getElementsByClassName('tab-content tab-grow');
+  
+      if (elements.length === 0) {
+        console.warn("Could not find logs tab");
+        return;
+      }
+
+      let tabContent: HTMLDivElement = elements[0] as HTMLDivElement;
+      
+      if (tabContent) {
+        tabContent.scrollTo(0, tabContent.scrollHeight);
+      }
+    }, 100);
+  }
 }

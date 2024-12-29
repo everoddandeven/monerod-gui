@@ -61,23 +61,10 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit {
     return this.initing ? '' : this.lines.join("\n");
   }
 
-  private scrollToBottom(): void {
-    this.ngZone.run(() => {
-      setTimeout(() => {
-        const terminalOutput = <HTMLDivElement | null>document.getElementById('terminalOutput');
-        if (terminalOutput) {
-          terminalOutput.style.width = `${window.innerWidth}`;
-          //console.log(`scrolling from ${terminalOutput.offsetTop} to ${terminalOutput.scrollHeight}`)
-          terminalOutput.scrollBy(0, terminalOutput.scrollHeight)
-        }
-      }, 100);
-    });
-  }
-
   private onLog(): void {
     if (this.logTerminal) this.logTerminal.nativeElement.scrollTop = this.logTerminal.nativeElement.scrollHeight;
     // Scorri automaticamente in basso
-    this.scrollToBottom();
+    this.scrollTableContentToBottom();
   }
 
   public trackByFn(index: number, item: string): number {
@@ -90,11 +77,11 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit {
   public ngAfterViewInit(): void {
     this.initing = true;  
     setTimeout(() => {
-      this.scrollToBottom();
+      this.scrollTableContentToBottom();
       this.initing = false;
       
       setTimeout(() => {
-        this.scrollToBottom();
+        this.scrollTableContentToBottom();
       }, 500);
     }, 500);  
   }
