@@ -2,9 +2,8 @@ import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { SimpleBootstrapCard } from '../../shared/utils';
-import { DaemonVersion } from '../../../common/DaemonVersion';
 import { DaemonDataService, ElectronService, MoneroInstallerService } from '../../core/services';
-import { DaemonSettings } from '../../../common';
+import { DaemonSettings, DaemonVersion } from '../../../common';
 import { StringUtils } from '../../core/utils';
 
 @Component({

@@ -1,6 +1,5 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { EventEmitter, Injectable } from '@angular/core';
-import { BlockCount } from '../../../../common/BlockCount';
 import { firstValueFrom } from 'rxjs';
 import { 
   GetBlockCountRequest, GetBlockHashRequest, GetBlockTemplateRequest, JsonRPCRequest, 
@@ -8,79 +7,27 @@ import {
   GetBlockHeaderByHashRequest, GetBlockHeaderByHeightRequest, GetBlockHeadersRangeRequest, 
   GetConnectionsRequest, GetInfoRequest, HardForkInfoRequest, SetBansRequest, GetBansRequest, 
   BannedRequest, FlushTxPoolRequest, GetOutputHistogramRequest, GetCoinbaseTxSumRequest,
-  SyncInfoRequest, GetOutsRequest,
-  GetVersionRequest,
-  GetFeeEstimateRequest,
-  GetAlternateChainsRequest,
-  GetTxPoolBacklogRequest,
-  PruneBlockchainRequest,
-  CalculatePoWHashRequest,
-  FlushCacheRequest,
-  GetMinerDataRequest,
-  EmptyRpcRequest, RPCRequest,
-  AddAuxPoWRequest,
-  GetOutputDistributionRequest,
-  GetBlockRequest,
-  UpdateRequest,
-  PopBlocksRequest,
-  GetTransactionPoolHashesRequest,
-  GetTransactionPoolHashesBinaryRequest,
-  GetPublicNodesRequest,
-  GetNetStatsRequest,
-  InPeersRequest,
-  OutPeersRequest,
-  SetLimitRequest,
-  StopDaemonRequest,
-  MiningStatusRequest,
-  StopMiningRequest,
-  StartMiningRequest,
-  SendRawTransactionRequest,
-  IsKeyImageSpentRequest,
-  GetAltBlockHashesRequest,
-  SaveBcRequest,
-  SetBootstrapDaemonRequest,
-  SetLogLevelRequest,
-  SetLogHashRateRequest,
-  SetLogCategoriesRequest,
-  GetTransactionPoolRequest,
-  GetPeerListRequest,
-  GetTransactionPoolStatsRequest
-} from '../../../../common/request';
-import { BlockTemplate } from '../../../../common/BlockTemplate';
-import { GeneratedBlocks } from '../../../../common/GeneratedBlocks';
-import { BlockHeader } from '../../../../common/BlockHeader';
-import { Connection } from '../../../../common/Connection';
-import { DaemonInfo } from '../../../../common/DaemonInfo';
-import { HardForkInfo } from '../../../../common/HardForkInfo';
-import { Ban } from '../../../../common/Ban';
-import { HistogramEntry } from '../../../../common/HistogramEntry';
-import { SyncInfo } from '../../../../common/SyncInfo';
-import { DaemonVersion } from '../../../../common/DaemonVersion';
-import { FeeEstimate } from '../../../../common/FeeEstimate';
-import { Chain } from '../../../../common/Chain';
-import { RelayTxRequest } from '../../../../common/request/RelayTxRequest';
-import { TxBacklogEntry } from '../../../../common/TxBacklogEntry';
-import { BlockchainPruneInfo } from '../../../../common/BlockchainPruneInfo';
-import { MinerData } from '../../../../common/MinerData';
-import { CoreIsBusyError } from '../../../../common/error';
-import { ElectronService } from '../electron/electron.service';
-import { AddedAuxPow } from '../../../../common/AddedAuxPow';
-import { AuxPoW } from '../../../../common/AuxPoW';
-import { OutputDistribution } from '../../../../common/OutputDistribution';
-import { CoinbaseTxSum } from '../../../../common/CoinbaseTxSum';
-import { Block } from '../../../../common/Block';
-import { Output } from '../../../../common/Output';
-import { OutKey } from '../../../../common/OutKey';
-import { UpdateInfo } from '../../../../common/UpdateInfo';
-import { PublicNode } from '../../../../common/PublicNode';
-import { NetStats } from '../../../../common/NetStats';
-import { MiningStatus } from '../../../../common/MiningStatus';
-import { TxInfo } from '../../../../common/TxInfo';
-import { DaemonSettings } from '../../../../common/DaemonSettings';
-import { MethodNotFoundError } from '../../../../common/error/MethodNotFoundError';
-import { openDB, IDBPDatabase } from "idb"
-import { PeerInfo, ProcessStats, TimeUtils, TxPool, TxPoolStats } from '../../../../common';
+  SyncInfoRequest, GetOutsRequest, GetVersionRequest, GetFeeEstimateRequest,
+  GetAlternateChainsRequest, GetTxPoolBacklogRequest, PruneBlockchainRequest,
+  CalculatePoWHashRequest, FlushCacheRequest, GetMinerDataRequest, EmptyRpcRequest, RPCRequest,
+  AddAuxPoWRequest, GetOutputDistributionRequest, GetBlockRequest, UpdateRequest,
+  PopBlocksRequest, GetTransactionPoolHashesRequest, GetTransactionPoolHashesBinaryRequest,
+  GetPublicNodesRequest, GetNetStatsRequest, InPeersRequest, OutPeersRequest,
+  SetLimitRequest, StopDaemonRequest, MiningStatusRequest, StopMiningRequest,
+  StartMiningRequest, SendRawTransactionRequest, IsKeyImageSpentRequest,
+  GetAltBlockHashesRequest, SaveBcRequest, SetBootstrapDaemonRequest, MethodNotFoundError,
+  SetLogLevelRequest, SetLogHashRateRequest, SetLogCategoriesRequest, DaemonSettings,
+  GetTransactionPoolRequest, GetPeerListRequest, GetTransactionPoolStatsRequest, MiningStatus,
+  BlockTemplate, GeneratedBlocks, BlockHeader, Connection, DaemonInfo, HardForkInfo,
+  Ban, HistogramEntry, SyncInfo, DaemonVersion, FeeEstimate, Chain, AddedAuxPow, TxInfo,
+  RelayTxRequest, TxBacklogEntry, BlockchainPruneInfo, MinerData, CoreIsBusyError, NetStats,
+  AuxPoW, OutputDistribution, CoinbaseTxSum, Block, Output, OutKey, UpdateInfo, PublicNode,
+  PeerInfo, ProcessStats, TimeUtils, TxPool, TxPoolStats, BlockCount
+} from '../../../../common';
+
 import { MoneroInstallerService } from '../monero-installer/monero-installer.service';
+import { ElectronService } from '../electron/electron.service';
+import { openDB, IDBPDatabase } from "idb"
 
 @Injectable({
   providedIn: 'root'

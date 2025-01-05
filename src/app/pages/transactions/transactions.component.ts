@@ -2,7 +2,7 @@ import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
-import { TxBacklogEntry } from '../../../common/TxBacklogEntry';
+import { TxBacklogEntry } from '../../../common';
 import { SimpleBootstrapCard } from '../../shared/utils';
 import { DaemonDataService } from '../../core/services';
 import { FeeEstimate, SpentKeyImage, TxPoolHisto, TxPoolStats, UnconfirmedTx } from '../../../common';

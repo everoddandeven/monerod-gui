@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
-import { DaemonSettings } from '../../../common/DaemonSettings';
+import { DaemonSettings } from '../../../common';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { ElectronService } from '../../core/services';
 import { DaemonSettingsError } from '../../../common';
