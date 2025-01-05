@@ -207,7 +207,7 @@ export class DaemonService {
     }
 
     this.version = undefined;
-    
+
     const db = await this.openDbPromise;
     await db.put(this.storeName, { id: 1, ...settings });
     
@@ -1177,7 +1177,7 @@ export class DaemonService {
   }
 
   public getGuiVersion(): string {
-    return "1.0.0-main";
+    return "1.1.0-main";
   }
 
   public async getProcessStats(): Promise<ProcessStats> {
