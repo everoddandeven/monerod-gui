@@ -18,6 +18,10 @@ export class VersionComponent implements AfterViewInit {
   public latestVersion?: DaemonVersion;
   public settings: DaemonSettings = new DaemonSettings();
 
+  public get configured(): boolean {
+    return this.settings.monerodPath != '';
+  }
+
   public get buttonDisabled(): boolean {
     const title = this.buttonTitle;
     
@@ -48,7 +52,7 @@ export class VersionComponent implements AfterViewInit {
       return 'Install';
     }
 
-    return 'Upgrade';
+    return 'Check Updates';
   }
 
   constructor(private daemonData: DaemonDataService, private daemonService: DaemonService, private electronService: ElectronService, private moneroInstaller: MoneroInstallerService, private ngZone: NgZone) {
@@ -97,14 +101,23 @@ export class VersionComponent implements AfterViewInit {
     }
   }
 
-  private async refreshLatestVersion(): Promise<void> {
+  private async refreshLatestVersion(force: boolean = false): Promise<void> {
     try {
-      this.latestVersion = await this.daemonService.getLatestVersion();
+      this.latestVersion = await this.daemonService.getLatestVersion(force);
     }
     catch(error: any) {
       console.error(error);
       this.latestVersion = undefined;
     }
+  }
+
+  private refreshCards(error: boolean = false): void {
+    if (error) {
+      this.cards = this.createErrorCards();
+      return;
+    }
+
+    this.cards = this.createCards();
   }
 
   public async load(): Promise<void> {
@@ -123,6 +136,17 @@ export class VersionComponent implements AfterViewInit {
   
       this.loading = false;
     });
+  }
+
+  public checkingLatestVersion: boolean = false;
+
+  public async checkLatestVersion(): Promise<void> {
+    if (this.checkingLatestVersion) return;
+
+    this.checkingLatestVersion = true;
+    await this.refreshLatestVersion(true);
+
+    setTimeout(() => { this.checkingLatestVersion = false; this.refreshCards() }, 500);
   }
 
   public get upgrading(): boolean {

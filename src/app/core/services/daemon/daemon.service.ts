@@ -206,6 +206,8 @@ export class DaemonService {
       }
     }
 
+    this.version = undefined;
+    
     const db = await this.openDbPromise;
     await db.put(this.storeName, { id: 1, ...settings });
     
@@ -331,6 +333,8 @@ export class DaemonService {
       console.warn("Daemon already running");
       return;
     }
+
+    this.version = undefined;
 
     this.starting = true;
 
@@ -682,7 +686,13 @@ export class DaemonService {
     return SyncInfo.parse(response.result);
   }
 
-  public async getLatestVersion(): Promise<DaemonVersion> {
+  private mLatestVersion?: DaemonVersion;
+
+  public async getLatestVersion(force: boolean = false): Promise<DaemonVersion> {
+    if (!force && this.mLatestVersion) {
+      return this.mLatestVersion;
+    }
+    
     const response = await this.get(this.versionApiUrl);
 
     if (typeof response.tag_name != 'string') {
@@ -701,8 +711,12 @@ export class DaemonService {
 
     const name = nameComponents[0];
 
-    return new DaemonVersion(0, true, `Monero '${name}' (${response.tag_name}-release)`);
+    this.mLatestVersion = new DaemonVersion(0, true, `Monero '${name}' (${response.tag_name}-release)`);
+
+    return this.mLatestVersion;
   }
+
+  public version?: DaemonVersion;
 
   public async getVersion(dontUseRpc: boolean = false): Promise<DaemonVersion> {
     if(!dontUseRpc && this.daemonRunning) {
@@ -710,6 +724,7 @@ export class DaemonService {
 
       return DaemonVersion.parse(response.result);
     }
+    else if (this.version) return this.version;
     else if (dontUseRpc) {
       const monerodPath: string = (await this.getSettings()).monerodPath;
 
@@ -732,7 +747,8 @@ export class DaemonService {
 
       window.electronAPI.getMoneroVersion(monerodPath);
 
-      return await promise;
+      this.version = await promise;
+      return this.version;
     }
 
     throw new Error("Daemon not running");

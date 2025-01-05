@@ -57,10 +57,15 @@
     
     <hr class="my-4">
     
-    <button *ngIf="!loading && !upgrading && !installing" class="w-100 btn btn-primary btn-lg" type="submit" (click)="upgrade()" [disabled]="buttonDisabled">{{ buttonTitle }}</button>
+    <button *ngIf="!loading && !upgrading && !installing && !buttonDisabled" class="w-100 btn btn-primary btn-lg" type="submit" (click)="upgrade()" [disabled]="buttonDisabled">{{ buttonTitle }}</button>
+    <button *ngIf="!loading && !upgrading && !installing && buttonDisabled && !checkingLatestVersion" class="w-100 btn btn-primary btn-lg" type="submit" (click)="checkLatestVersion()">{{ buttonTitle }}</button>
     <button *ngIf="!loading && upgrading || installing" class="w-100 btn btn-primary btn-lg" type="button" disabled>
       <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
       {{ upgrading ? 'Upgrading' : 'Installing' }} monerod {{ downloadProgress }}
+    </button>
+    <button *ngIf="!loading && !upgrading && !installing && checkingLatestVersion" class="w-100 btn btn-primary btn-lg" type="button" disabled>
+      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      Checking Updates
     </button>
   </div>
 </div>
