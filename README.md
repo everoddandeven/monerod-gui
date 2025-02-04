@@ -76,7 +76,7 @@ https://github.com/user-attachments/assets/c4a50d2f-5bbb-48ac-9425-30ecc20ada7c
 ## To Do
 
 - [X] Upgrade Electron to latest version
-- [ ] Upgrade Angular to latest version
+- [X] Upgrade Angular to latest version
 - [ ] Implement e2e tests
 - [X] Detect wired/Wi-Fi connection
 - [X] Detect battery/ac power
