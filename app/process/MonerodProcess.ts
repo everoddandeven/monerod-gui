@@ -4,6 +4,8 @@ export class MonerodProcess extends AppChildProcess {
 
     protected static readonly stdoutPattern: string = '**********************************************************************';
 
+    public privnet: boolean = false;
+
     public get interactive(): boolean {
         return this.args ? !this.args.includes('--non-interactive') : true;
     }
@@ -102,13 +104,14 @@ export class MonerodProcess extends AppChildProcess {
         console.log(message);
 
         let firstPatternFound = false;
-        const waitForPattern = this._args ? !this._args.includes('--version') && !this.args.includes('--help') : true;
+        const waitForPattern = this._args ? !this.privnet && !this._args.includes('--version') && !this.args.includes('--help') : true;
 
         const patternPromise = new Promise<void>((resolve, reject) => {
             let firstStdout = true;
             let timeout: NodeJS.Timeout | undefined = undefined;
 
             const onStdOut = (out: string) => {
+                console.log(out);
                 if (firstStdout) {
                     firstStdout = false;
 
@@ -148,7 +151,8 @@ export class MonerodProcess extends AppChildProcess {
                 }
             };
 
-            this.onStdOut(onStdOut);
+            if (waitForPattern) this.onStdOut(onStdOut);
+            else resolve();
         });
 
         await super.start();

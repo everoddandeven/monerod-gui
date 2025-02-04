@@ -59,7 +59,7 @@ declare global {
     electronAPI: {
       copyToClipboard: (content: string) => void;
       startMonerod: (options: string[]) => void;
-      
+      stopMonerod: () => void;
       monitorMonerod: () => void;
       onMonitorMonerod: (callback: (event: any, stats: {
         cpu: number;

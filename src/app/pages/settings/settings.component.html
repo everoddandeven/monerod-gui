@@ -712,6 +712,10 @@
               <input id="net-type-stagenet" name="networkType" type="radio" class="form-check-input" [value]="'stagenet'" [(ngModel)]="networkType" [ngModelOptions]="{standalone: true}" (change)="OnNetworkTypeChange()">
               <label class="form-check-label" for="net-type-stagenet">stagenet</label>
             </div>
+            <div class="form-check">
+              <input id="net-type-privnet" name="networkType" type="radio" class="form-check-input" [value]="'privnet'" [(ngModel)]="networkType" [ngModelOptions]="{standalone: true}" (change)="OnNetworkTypeChange()">
+              <label class="form-check-label" for="net-type-privnet">privnet</label>
+            </div>
           </div>
           
           <hr class="my-4">

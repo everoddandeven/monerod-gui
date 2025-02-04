@@ -35,7 +35,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   public rpcLoginPassword: string = '';
   public loading: boolean;
 
-  public networkType: 'mainnet' | 'testnet' | 'stagenet' = 'mainnet';
+  public networkType: 'mainnet' | 'testnet' | 'stagenet' | 'privnet' = 'mainnet';
 
   public successMessage: string = '';
   
@@ -370,16 +370,25 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
       this.currentSettings.mainnet = true;
       this.currentSettings.testnet = false;
       this.currentSettings.stagenet = false;
+      this.currentSettings.privnet = false;
     }
     else if (this.networkType == 'testnet') {
       this.currentSettings.mainnet = false;
       this.currentSettings.testnet = true;
       this.currentSettings.stagenet = false;
+      this.currentSettings.privnet = false;
     }
     else if (this.networkType == 'stagenet') {
       this.currentSettings.mainnet = false;
       this.currentSettings.testnet = false;
       this.currentSettings.stagenet = true;
+      this.currentSettings.privnet = false;
+    }
+    else if (this.networkType == 'privnet') {
+      this.currentSettings.mainnet = false;
+      this.currentSettings.testnet = false;
+      this.currentSettings.stagenet = false;
+      this.currentSettings.privnet = true;
     }
   }
 

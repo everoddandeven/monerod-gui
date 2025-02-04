@@ -995,6 +995,11 @@ export class DaemonService {
     this.stopping = true;
     this.onDaemonStopStart.emit();
 
+    if (this.settings.privnet) {
+      window.electronAPI.stopMonerod();
+      return;
+    }
+
     const response = await this.callRpc(new StopDaemonRequest());
 
     if (typeof response.status == 'string' && response.status != 'OK') {

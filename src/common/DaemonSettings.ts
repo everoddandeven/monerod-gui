@@ -40,6 +40,7 @@ export class DaemonSettings {
   public testnet: boolean = false;
   public mainnet: boolean = true;
   public stagenet: boolean = false;
+  public privnet: boolean = false;
 
   public regtest: boolean = false;
 
@@ -436,6 +437,10 @@ export class DaemonSettings {
   public toCommandOptions(): string[] {
     const options: string[] = [];
     if (this.monerodPath != '') options.push(this.monerodPath);
+    if (this.privnet) {
+      options.push('--privnet');
+      return options;
+    }
 
     if (this.testnet) options.push(`--testnet`);
     else if (this.stagenet) options.push(`--stagenet`);

@@ -8,7 +8,7 @@ import { app, BrowserWindow, ipcMain, screen, dialog, Tray, Menu, MenuItemConstr
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
-import { AppMainProcess, MonerodProcess } from './process';
+import { AppMainProcess, MonerodProcess, PrivateTestnet } from './process';
 import { BatteryUtils, FileUtils, NetworkUtils } from './utils';
 
 app.setName('Monero Daemon');
@@ -310,14 +310,23 @@ async function startMoneroDaemon(commandOptions: string[]): Promise<void> {
     win?.webContents.send('monero-stderr', error);
     throw new Error("Monerod already started");
   }
-  
-  commandOptions.push('--non-interactive');
 
-  const monerodProc = new MonerodProcess({
-    monerodCmd: monerodPath,
-    flags: commandOptions,
-    isExe: true
-  });
+  let monerodProc: MonerodProcess;
+  const privnet: boolean = commandOptions.includes('--privnet');
+
+  if (privnet) {
+    PrivateTestnet.init(monerodPath);
+    monerodProc = PrivateTestnet.node2 as MonerodProcess;    
+  }
+  else {
+    commandOptions.push('--non-interactive');
+    monerodProc = new MonerodProcess({
+      monerodCmd: monerodPath,
+      flags: commandOptions,
+      isExe: true
+    });
+
+  }
 
   monerodProc.onStdOut((data) => {
     win?.webContents.send('monero-stdout', `${data}`);
@@ -344,7 +353,8 @@ async function startMoneroDaemon(commandOptions: string[]): Promise<void> {
   monerodProcess = monerodProc;
 
   try {
-    await monerodProcess.start();
+    if (privnet) await PrivateTestnet.start();
+    else await monerodProcess.start();
     win?.webContents.send('monerod-started', true);
   }
   catch(error: any) {
@@ -532,7 +542,11 @@ try {
     isQuitting = true;
 
     if (monerodProcess) {
-      await monerodProcess.stop();
+      if (PrivateTestnet.started) {
+        await PrivateTestnet.stop();
+      }
+      else await monerodProcess.stop();
+      monerodProcess = null;
     }
 
     tray.destroy();
@@ -543,7 +557,20 @@ try {
 
   ipcMain.handle('start-monerod', (event: IpcMainInvokeEvent, configFilePath: string[]) => {
     startMoneroDaemon(configFilePath);
-  })
+  });
+
+  ipcMain.handle('stop-monerod', async (event: IpcMainInvokeEvent) => {
+    let stopped: boolean = false;
+
+    if (monerodProcess) {
+      if (PrivateTestnet.started) await PrivateTestnet.stop();
+      else await monerodProcess.stop();
+      stopped = true;
+      monerodProcess = null;
+    }
+
+    win?.webContents.send('monero-close', 0);
+  });
 
   ipcMain.handle('get-monero-version', (event: IpcMainInvokeEvent, configFilePath: string) => {
     getMonerodVersion(configFilePath);
