@@ -31,8 +31,8 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   public savingChanges: boolean = false;
   public savingChangesError = ``;
   public savingChangesSuccess: boolean = false;
-  public rpcLoginUser: string;
-  public rpcLoginPassword: string;
+  public rpcLoginUser: string = '';
+  public rpcLoginPassword: string = '';
   public loading: boolean;
 
   public networkType: 'mainnet' | 'testnet' | 'stagenet' = 'mainnet';
@@ -201,21 +201,24 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     
     this.originalSettings = new DaemonSettings();
     this.currentSettings = this.originalSettings.clone();
-    const loginArgs = this.currentSettings.rpcLogin.split(":");
-    if (loginArgs.length == 2) {
-      this.rpcLoginPassword = loginArgs[0];
-      this.rpcLoginUser = loginArgs[1];
-    }
-    else {
-      this.rpcLoginUser = '';
-      this.rpcLoginPassword = '';
-    }
 
     this.load().then(() => {
       console.debug("Settings loaded");
     }).catch((error: any) => {
       console.error(error);
     });
+  }
+
+  private refreshLogin(): void {
+    const loginArgs = this.currentSettings.rpcLogin.split(":");
+    if (loginArgs.length == 2) {
+      this.rpcLoginPassword = loginArgs[1];
+      this.rpcLoginUser = loginArgs[0];
+    }
+    else {
+      this.rpcLoginUser = '';
+      this.rpcLoginPassword = '';
+    }
   }
 
   public ngAfterViewInit(): void {
@@ -281,6 +284,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
 
     this.isPortable = await this.electronService.isPortable();
     this.networkType = this.currentSettings.mainnet ? 'mainnet' : this.currentSettings.testnet ? 'testnet' : this.currentSettings.stagenet ? 'stagenet' : 'mainnet';
+    this.refreshLogin();
   }
 
   private loadTables(): void {
@@ -788,6 +792,11 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
 
     this.removingPriorityNodes = false;
   }
+
+  public onRpcLoginChange(): void {
+    this.currentSettings.rpcLogin = `${this.rpcLoginUser}:${this.rpcLoginPassword}`;
+  }
+
 }
 
 interface NodeInfo { address: string, port: number };

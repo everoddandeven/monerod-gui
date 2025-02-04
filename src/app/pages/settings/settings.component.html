@@ -346,13 +346,13 @@
 
           <div class="col-sm-6">
             <label for="rpc-login-user" class="form-label">Username</label>
-            <input type="text" class="form-control" id="rpc-login-user" placeholder="" [(ngModel)]="rpcLoginUser" [ngModelOptions]="{standalone: true}">
+            <input type="text" class="form-control" id="rpc-login-user" placeholder="" [(ngModel)]="rpcLoginUser" [ngModelOptions]="{standalone: true}" (change)="onRpcLoginChange()">
             <small class="text-body-secondary">Specify username required for RPC server</small>
           </div>
   
           <div class="col-sm-6">
             <label for="rpc-login-password" class="form-label">Password</label>
-            <input type="password" class="form-control" id="rpc-login-password" placeholder="" [(ngModel)]="rpcLoginPassword" [ngModelOptions]="{standalone: true}">
+            <input type="password" class="form-control" id="rpc-login-password" placeholder="" [(ngModel)]="rpcLoginPassword" [ngModelOptions]="{standalone: true}" (change)="onRpcLoginChange()">
             <small class="text-body-secondary">Specify password required for RPC server</small>
           </div>
 

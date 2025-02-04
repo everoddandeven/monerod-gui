@@ -308,6 +308,7 @@ export class DaemonSettings {
         const boolValue = value === '1'; // Interpret 1 as true, 0 as false
 
         switch (key) {
+            case 'rpc-login': settings.rpcLogin = value; break;
             case 'ban-list': settings.banList = value; break;
             case 'data-dir': settings.dataDir = value; break;
             case 'log-file': settings.logFile = value; break;
@@ -442,6 +443,7 @@ export class DaemonSettings {
       throw new DaemonSettingsInvalidNetworkError();
     }
 
+    if (this.rpcLogin != '') options.push('--rpc-login', this.rpcLogin);
     if (this.logFile != '') options.push('--log-file', this.logFile);
     if (this.logLevel >= 0 && this.logLevel <= 4) options.push('--log-level', `${this.logLevel}`);
     if (this.maxLogFileSize >= 0) options.push(`--max-log-file-size=${this.maxLogFileSize}`);

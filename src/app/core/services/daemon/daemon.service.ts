@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { EventEmitter, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { 
@@ -77,6 +77,7 @@ export class DaemonService {
   private isRunningPromise?: Promise<boolean>;
 
   private readonly headers: { [key: string]: string } = {
+    "Content-Type": "application/json",
     "Access-Control-Allow-Headers": "*", // this will allow all CORS requests
     "Access-Control-Allow-Methods": 'POST,GET' // this states the allowed methods
   };
@@ -294,8 +295,46 @@ export class DaemonService {
     return await firstValueFrom<{ [key: string]: any }>(this.httpClient.get(`${uri}`,this.headers));
   }
 
+  private getLogin(): { 'username': string; 'password': string; } | undefined {
+    if (this.settings.rpcLogin != '') {
+      try {
+        const components = this.settings.rpcLogin.split(":");
+
+        if (components.length == 2) {
+          return {
+            'username': components[0],
+            'password': components[1]
+          }
+        }
+      }
+      catch {
+        return undefined;
+      }
+    }
+
+    return undefined;
+  }
+
   private async post(uri: string, params: {[key: string]: any} = {}): Promise<{[key: string]: any}> {
-    return await firstValueFrom<{ [key: string]: any }>(this.httpClient.post(`${uri}`, params, this.headers));
+    let headers: HttpHeaders;
+    let withCredentials: boolean = false;
+
+    const login = this.getLogin();
+
+    if (login) {
+      const _headers = { ...this.headers };
+      _headers['Authorization'] = "Basic " + btoa(unescape(encodeURIComponent(`${login.username}:${login.password}`)));
+      headers = new HttpHeaders(_headers);
+      withCredentials = true;
+    }
+    else {
+      headers = new HttpHeaders(this.headers);
+    }
+
+    console.log("DaemonService.post(): headers:");
+    console.log(headers);
+
+    return await firstValueFrom<{ [key: string]: any }>(this.httpClient.post(`${uri}`, params, { headers, withCredentials }));
   }
 
   private async callRpc(request: RPCRequest): Promise<{ [key: string]: any }> {
