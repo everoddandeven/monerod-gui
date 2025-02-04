@@ -296,7 +296,7 @@ async function checkValidMonerodPath(monerodPath: string): Promise<void> {
   win?.webContents.send('on-check-valid-monerod-path', valid);
 }
 
-async function startMoneroDaemon(commandOptions: string[]): Promise<MonerodProcess> {
+async function startMoneroDaemon(commandOptions: string[]): Promise<void> {
   const monerodPath = commandOptions.shift();
 
   if (!monerodPath) {
@@ -348,10 +348,11 @@ async function startMoneroDaemon(commandOptions: string[]): Promise<MonerodProce
     win?.webContents.send('monerod-started', true);
   }
   catch(error: any) {
+    console.error(error);
+    win?.webContents.send('monero-stderr', `${error}`);
     win?.webContents.send('monerod-started', false);
+    monerodProcess = null;
   }
-
-  return monerodProcess;
 }
 
 async function monitorMonerod(): Promise<void> {
