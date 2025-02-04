@@ -10,9 +10,10 @@ import { Subscription } from 'rxjs';
 import { BasePageComponent } from '../base-page/base-page.component';
 
 @Component({
-  selector: 'app-transactions',
-  templateUrl: './transactions.component.html',
-  styleUrl: './transactions.component.scss'
+    selector: 'app-transactions',
+    templateUrl: './transactions.component.html',
+    styleUrl: './transactions.component.scss',
+    standalone: false
 })
 export class TransactionsComponent extends BasePageComponent implements AfterViewInit {
 

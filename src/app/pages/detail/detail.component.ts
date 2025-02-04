@@ -8,9 +8,10 @@ import { SimpleBootstrapCard } from '../../shared/utils';
 import { BasePageComponent } from '../base-page/base-page.component';
 
 @Component({
-  selector: 'app-detail',
-  templateUrl: './detail.component.html',
-  styleUrls: ['./detail.component.scss']
+    selector: 'app-detail',
+    templateUrl: './detail.component.html',
+    styleUrls: ['./detail.component.scss'],
+    standalone: false
 })
 export class DetailComponent extends BasePageComponent implements AfterViewInit {
 

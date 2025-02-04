@@ -7,9 +7,10 @@ import { BasePageComponent } from '../base-page/base-page.component';
 import { PeerInfo, PublicNode } from '../../../common';
 
 @Component({
-  selector: 'app-peers',
-  templateUrl: './peers.component.html',
-  styleUrl: './peers.component.scss'
+    selector: 'app-peers',
+    templateUrl: './peers.component.html',
+    styleUrl: './peers.component.scss',
+    standalone: false
 })
 export class PeersComponent extends BasePageComponent implements AfterViewInit {
 

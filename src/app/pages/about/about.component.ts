@@ -3,9 +3,10 @@ import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services';
 
 @Component({
-  selector: 'app-about',
-  templateUrl: './about.component.html',
-  styleUrl: './about.component.scss'
+    selector: 'app-about',
+    templateUrl: './about.component.html',
+    styleUrl: './about.component.scss',
+    standalone: false
 })
 export class AboutComponent {
   public readonly links: NavbarLink[] = [

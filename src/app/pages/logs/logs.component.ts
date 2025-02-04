@@ -8,9 +8,10 @@ import { BasePageComponent } from '../base-page/base-page.component';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-logs',
-  templateUrl: './logs.component.html',
-  styleUrl: './logs.component.scss'
+    selector: 'app-logs',
+    templateUrl: './logs.component.html',
+    styleUrl: './logs.component.scss',
+    standalone: false
 })
 export class LogsComponent extends BasePageComponent implements AfterViewInit, OnDestroy {
   private initing: boolean = false;

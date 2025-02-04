@@ -8,9 +8,10 @@ import { Subscription } from 'rxjs';
 import { BasePageComponent } from '../base-page/base-page.component';
 
 @Component({
-  selector: 'app-network',
-  templateUrl: './network.component.html',
-  styleUrl: './network.component.scss'
+    selector: 'app-network',
+    templateUrl: './network.component.html',
+    styleUrl: './network.component.scss',
+    standalone: false
 })
 export class NetworkComponent extends BasePageComponent implements AfterViewInit, OnDestroy {
 

@@ -8,9 +8,10 @@ import { BasePageComponent } from '../base-page/base-page.component';
 import { NavbarService } from '../../shared/components';
 
 @Component({
-  selector: 'app-settings',
-  templateUrl: './settings.component.html',
-  styleUrl: './settings.component.scss'
+    selector: 'app-settings',
+    templateUrl: './settings.component.html',
+    styleUrl: './settings.component.scss',
+    standalone: false
 })
 export class SettingsComponent extends BasePageComponent implements AfterViewInit {
 

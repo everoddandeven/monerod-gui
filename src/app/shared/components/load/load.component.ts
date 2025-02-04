@@ -2,11 +2,10 @@ import { NgIf } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'app-load',
-  standalone: true,
-  imports: [NgIf],
-  templateUrl: './load.component.html',
-  styleUrl: './load.component.scss'
+    selector: 'app-load',
+    imports: [NgIf],
+    templateUrl: './load.component.html',
+    styleUrl: './load.component.scss'
 })
 export class LoadComponent {
 

@@ -7,9 +7,10 @@ import { DaemonDataService } from '../../core/services';
 import { BasePageComponent } from '../base-page/base-page.component';
 
 @Component({
-  selector: 'app-outputs',
-  templateUrl: './outputs.component.html',
-  styleUrl: './outputs.component.scss'
+    selector: 'app-outputs',
+    templateUrl: './outputs.component.html',
+    styleUrl: './outputs.component.scss',
+    standalone: false
 })
 export class OutputsComponent extends BasePageComponent {
 

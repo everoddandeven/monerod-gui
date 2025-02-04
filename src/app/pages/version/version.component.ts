@@ -7,9 +7,10 @@ import { DaemonSettings, DaemonVersion } from '../../../common';
 import { StringUtils } from '../../core/utils';
 
 @Component({
-  selector: 'app-version',
-  templateUrl: './version.component.html',
-  styleUrl: './version.component.scss'
+    selector: 'app-version',
+    templateUrl: './version.component.html',
+    styleUrl: './version.component.scss',
+    standalone: false
 })
 export class VersionComponent implements AfterViewInit {
   public readonly links: NavbarLink[];

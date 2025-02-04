@@ -3,7 +3,8 @@ import { NavbarLink, NavbarService } from '../../shared/components';
 import { Subscription } from 'rxjs';
 
 @Component({
-  template: '',
+    template: '',
+    standalone: false
 })
 export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
 

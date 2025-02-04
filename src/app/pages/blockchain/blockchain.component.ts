@@ -7,9 +7,10 @@ import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { BasePageComponent } from '../base-page/base-page.component';
 
 @Component({
-  selector: 'app-blockchain',
-  templateUrl: './blockchain.component.html',
-  styleUrl: './blockchain.component.scss'
+    selector: 'app-blockchain',
+    templateUrl: './blockchain.component.html',
+    styleUrl: './blockchain.component.scss',
+    standalone: false
 })
 export class BlockchainComponent extends BasePageComponent {
   

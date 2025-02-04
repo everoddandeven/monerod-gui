@@ -7,9 +7,10 @@ import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { BasePageComponent } from '../base-page/base-page.component';
 
 @Component({
-  selector: 'app-hard-fork-info',
-  templateUrl: './hard-fork-info.component.html',
-  styleUrl: './hard-fork-info.component.scss'
+    selector: 'app-hard-fork-info',
+    templateUrl: './hard-fork-info.component.html',
+    styleUrl: './hard-fork-info.component.scss',
+    standalone: false
 })
 export class HardForkInfoComponent extends BasePageComponent implements AfterViewInit {
   public cards: SimpleBootstrapCard[];

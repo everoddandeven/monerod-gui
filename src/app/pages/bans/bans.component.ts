@@ -8,9 +8,10 @@ import { BasePageComponent } from '../base-page/base-page.component';
 
 
 @Component({
-  selector: 'app-bans',
-  templateUrl: './bans.component.html',
-  styleUrl: './bans.component.scss'
+    selector: 'app-bans',
+    templateUrl: './bans.component.html',
+    styleUrl: './bans.component.scss',
+    standalone: false
 })
 export class BansComponent extends BasePageComponent implements AfterViewInit {  
   public refreshingBansTable: boolean = false;

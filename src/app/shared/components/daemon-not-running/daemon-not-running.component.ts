@@ -3,9 +3,10 @@ import { Subscription } from 'rxjs';
 import { DaemonStatusService } from './daemon-status.service';
 
 @Component({
-  selector: 'app-daemon-not-running',
-  templateUrl: './daemon-not-running.component.html',
-  styleUrl: './daemon-not-running.component.scss'
+    selector: 'app-daemon-not-running',
+    templateUrl: './daemon-not-running.component.html',
+    styleUrl: './daemon-not-running.component.scss',
+    standalone: false
 })
 export class DaemonNotRunningComponent implements OnDestroy {
 

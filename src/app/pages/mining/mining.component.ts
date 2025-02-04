@@ -8,9 +8,10 @@ import { Chart, ChartData } from 'chart.js';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-mining',
-  templateUrl: './mining.component.html',
-  styleUrl: './mining.component.scss'
+    selector: 'app-mining',
+    templateUrl: './mining.component.html',
+    styleUrl: './mining.component.scss',
+    standalone: false
 })
 export class MiningComponent extends BasePageComponent implements AfterViewInit, AfterContentInit, OnDestroy {
 

@@ -3,9 +3,10 @@ import { Router } from '@angular/router';
 import { DaemonService } from '../../../core/services/daemon/daemon.service';
 
 @Component({
-  selector: 'app-sidebar',
-  templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.scss'
+    selector: 'app-sidebar',
+    templateUrl: './sidebar.component.html',
+    styleUrl: './sidebar.component.scss',
+    standalone: false
 })
 export class SidebarComponent {
   @Input() public isDaemonRunning: boolean = false;
