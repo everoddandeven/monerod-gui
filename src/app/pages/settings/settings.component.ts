@@ -31,11 +31,32 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   public savingChanges: boolean = false;
   public savingChangesError = ``;
   public savingChangesSuccess: boolean = false;
+
   public rpcLoginUser: string = '';
   public rpcLoginPassword: string = '';
+  
+  public get rpcLoginError(): string | undefined {
+    const userEmpty = this.rpcLoginUser.length === 0;
+    const passwordEmpty = this.rpcLoginPassword.length === 0;
+    const empty = userEmpty && passwordEmpty;
+    if (empty) return undefined;
+    if (userEmpty) return 'Must setup RPC user';
+    else if (passwordEmpty) return 'Must setup RPC password';
+
+    return undefined;
+  }
+
+  public get isValidRpcLogin(): boolean {
+    return this.rpcLoginError === undefined;
+  }
+
   public loading: boolean;
 
   public networkType: 'mainnet' | 'testnet' | 'stagenet' | 'privnet' = 'mainnet';
+  
+  public get isPrivnet(): boolean {
+    return this.currentSettings.privnet;
+  }
 
   public successMessage: string = '';
   
@@ -283,7 +304,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     this.loading = false;
 
     this.isPortable = await this.electronService.isPortable();
-    this.networkType = this.currentSettings.mainnet ? 'mainnet' : this.currentSettings.testnet ? 'testnet' : this.currentSettings.stagenet ? 'stagenet' : 'mainnet';
+    this.networkType = this.currentSettings.mainnet ? 'mainnet' : this.currentSettings.testnet ? 'testnet' : this.currentSettings.stagenet ? 'stagenet' : this.currentSettings.privnet ? 'privnet' : 'mainnet';
     this.refreshLogin();
   }
 
@@ -422,7 +443,11 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
 
     this.savingChanges = true;
 
-    try {      
+    try {
+      if (this.rpcLoginError) {
+        throw new Error(this.rpcLoginError);
+      }
+
       const oldStartMinimized: boolean = this.originalSettings.startAtLoginMinimized;
 
       await this.daemonService.saveSettings(this.currentSettings);
@@ -803,7 +828,9 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   }
 
   public onRpcLoginChange(): void {
-    this.currentSettings.rpcLogin = `${this.rpcLoginUser}:${this.rpcLoginPassword}`;
+    const empty: boolean = this.rpcLoginUser.length === 0 && this.rpcLoginPassword.length === 0;
+    if (empty) this.currentSettings.rpcLogin = '';
+    else this.currentSettings.rpcLogin = `${this.rpcLoginUser}:${this.rpcLoginPassword}`;
   }
 
 }

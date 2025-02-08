@@ -111,7 +111,7 @@ export class MonerodProcess extends AppChildProcess {
             let timeout: NodeJS.Timeout | undefined = undefined;
 
             const onStdOut = (out: string) => {
-                console.log(out);
+                //console.log(out);
                 if (firstStdout) {
                     firstStdout = false;
 
