@@ -122,7 +122,7 @@ declare global {
       gotOsType: (callback: (event: any, osType: { platform: string, arch: string }) => void) => void;
       unregisterGotOsType: () => void;
       showNotification: (options: NotificationConstructorOptions) => void;
-      quit: () => void;
+      quit: (callback: (error?: string) => void) => void;
 
       isPortable: () => void;
       onIsPortable: (callback: (event: any, value: boolean) => void) => void;

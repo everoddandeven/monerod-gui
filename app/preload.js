@@ -219,7 +219,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   showNotification: (options) => {
     ipcRenderer.invoke('show-notification', options);
   },
-  quit: () => {
+  quit: (callback) => {
+    const handler = (event, result) => {
+      ipcRenderer.off('on-quit', handler);
+      callback(result);
+    };
+
+    ipcRenderer.on('on-quit', handler);
     ipcRenderer.invoke('quit');
   },
   enableAutoLaunch: (minimized) => {

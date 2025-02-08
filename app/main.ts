@@ -505,6 +505,7 @@ try {
 
   app.on('before-quit', () => {
     isQuitting = true;
+    win?.webContents.send('on-quit', undefined);
   });
 
   // #region Security 
@@ -548,7 +549,7 @@ try {
     isQuitting = true;
 
     try {
-      if (monerodProcess) {
+      if (monerodProcess && monerodProcess.running) {
         if (PrivateTestnet.started) {
           await PrivateTestnet.stop();
         }
@@ -558,6 +559,8 @@ try {
     }
     catch (error: any) {
       console.error("An error occured while stopping monerod on quit handler", error);
+      win?.webContents.send('on-quit', `${error}`);
+      return;
     }
 
     try {
@@ -568,6 +571,7 @@ try {
     }
     catch(error: any) {
       console.error("An error occurred on quit handler: ", error);
+      win?.webContents.send('on-quit', `${error}`);
     }
   });
 

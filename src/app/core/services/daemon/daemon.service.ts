@@ -1304,7 +1304,14 @@ export class DaemonService {
     
     this._quitting = true;
 
-    window.electronAPI.quit();
+    await new Promise<void>((resolve, reject) => {
+      window.electronAPI.quit((error?: string) => {
+        if (error) reject(new Error(error));
+        else resolve();
+      });
+    });
+
+    this._quitting = false;
   }
 
 }
