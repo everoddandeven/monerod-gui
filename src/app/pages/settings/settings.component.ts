@@ -89,7 +89,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   private get exclusiveNodes(): NodeInfo[] {
     const result: { address: string, port: number }[] = [];
 
-    this._currentSettings.exclusiveNodes.forEach((en) => {
+    this.currentSettings.exclusiveNodes.forEach((en) => {
       const components = en.split(":");
 
       if (components.length !== 2) {
@@ -115,7 +115,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   private get priorityNodes(): NodeInfo[] {
     const result: { address: string, port: number }[] = [];
 
-    this._currentSettings.priorityNodes.forEach((en) => {
+    this.currentSettings.priorityNodes.forEach((en) => {
       const components = en.split(":");
 
       if (components.length !== 2) {
@@ -414,6 +414,8 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   }
 
   public OnNetworkTypeChange(): void {
+    const wasPrivnet = this._currentSettings.privnet;
+
     if (this.networkType == 'mainnet') {
       this._currentSettings.mainnet = true;
       this._currentSettings.testnet = false;
@@ -437,7 +439,10 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
       this._currentSettings.testnet = false;
       this._currentSettings.stagenet = false;
       this._currentSettings.privnet = true;
+      this.loadTables();
     }
+
+    if (wasPrivnet) this.loadTables();
   }
 
   private async refreshAutoLanch(minimizeChanged: boolean): Promise<void> {
