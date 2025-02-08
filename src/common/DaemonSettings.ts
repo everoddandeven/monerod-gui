@@ -163,6 +163,10 @@ export class DaemonSettings {
     return this.priorityNodes.length > 0;
   }
 
+  public get isPrivnet(): boolean {
+    return this.privnet;
+  }
+
   public addExclusiveNode(node: string): void {
     if (this.exclusiveNodes.includes(node)) {
       throw new DaemonSettingsDuplicateExclusiveNodeError(node);

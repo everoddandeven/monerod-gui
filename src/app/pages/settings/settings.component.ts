@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
-import { DaemonSettings } from '../../../common';
+import { DaemonSettings, DefaultPrivnetNode2Settings } from '../../../common';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { ElectronService } from '../../core/services';
 import { DaemonSettingsError } from '../../../common';
@@ -23,7 +23,8 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   private addingExclusiveNode: boolean = false;
   private addingPriorityNode: boolean = false;
   private originalSettings: DaemonSettings;
-  public currentSettings: DaemonSettings;
+  private _currentSettings: DaemonSettings;
+  private readonly _privnetSettings: DefaultPrivnetNode2Settings = new DefaultPrivnetNode2Settings();
 
   public banListUrl: string = '';
   public remoteBanList: boolean = false;
@@ -54,8 +55,13 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
 
   public networkType: 'mainnet' | 'testnet' | 'stagenet' | 'privnet' = 'mainnet';
   
+  public get currentSettings(): DaemonSettings {
+    if (this.isPrivnet) return this._privnetSettings;
+    return this._currentSettings;
+  }
+
   public get isPrivnet(): boolean {
-    return this.currentSettings.privnet;
+    return this._currentSettings.isPrivnet;
   }
 
   public successMessage: string = '';
@@ -83,7 +89,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   private get exclusiveNodes(): NodeInfo[] {
     const result: { address: string, port: number }[] = [];
 
-    this.currentSettings.exclusiveNodes.forEach((en) => {
+    this._currentSettings.exclusiveNodes.forEach((en) => {
       const components = en.split(":");
 
       if (components.length !== 2) {
@@ -109,7 +115,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   private get priorityNodes(): NodeInfo[] {
     const result: { address: string, port: number }[] = [];
 
-    this.currentSettings.priorityNodes.forEach((en) => {
+    this._currentSettings.priorityNodes.forEach((en) => {
       const components = en.split(":");
 
       if (components.length !== 2) {
@@ -135,6 +141,8 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   private get dbSyncMode(): string {
     return `${this.databaseSyncSpeed}:${this.databaseSyncMode}:${this.databaseSyncNBytesOrBlocks}${this.databaseSyncNPerMode}`;
   }
+
+  // #region Validation
 
   public get validBanListUrl(): boolean {
     if (this.banListUrl == '') {
@@ -206,6 +214,24 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     return true;
   }
 
+  public get canEditNodeSettings(): boolean {
+    return !this.isPrivnet;
+  }
+
+  public get canAddBanList(): boolean {
+    return !this.isPrivnet;
+  }
+
+  public get canImportConfigFile(): boolean {
+    return !this.isPrivnet;
+  }
+
+  public get canExportConfigFile(): boolean {
+    return !this.isPrivnet;
+  }
+
+  // #endregion
+
   constructor(private daemonService: DaemonService, private electronService: ElectronService, navbarService: NavbarService, private ngZone: NgZone) {
     super(navbarService);
     this.loading = true;
@@ -221,7 +247,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     ];
     
     this.originalSettings = new DaemonSettings();
-    this.currentSettings = this.originalSettings.clone();
+    this._currentSettings = this.originalSettings.clone();
 
     this.load().then(() => {
       console.debug("Settings loaded");
@@ -231,7 +257,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   }
 
   private refreshLogin(): void {
-    const loginArgs = this.currentSettings.rpcLogin.split(":");
+    const loginArgs = this._currentSettings.rpcLogin.split(":");
     if (loginArgs.length == 2) {
       this.rpcLoginPassword = loginArgs[1];
       this.rpcLoginUser = loginArgs[0];
@@ -248,16 +274,16 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
 
   public refreshSyncMode(): void {
     setTimeout(() => {
-      this.currentSettings.dbSyncMode = this.dbSyncMode;
+      this._currentSettings.dbSyncMode = this.dbSyncMode;
     }, 100);
   }
 
   private initSyncMode(): void {
-    if (!this.currentSettings) {
+    if (!this._currentSettings) {
       return;
     }
 
-    const dbSyncMode = this.currentSettings.dbSyncMode;
+    const dbSyncMode = this._currentSettings.dbSyncMode;
 
     if (dbSyncMode == '') {
       return;
@@ -282,7 +308,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
 
   private async load(): Promise<void> {
     this.originalSettings = await this.daemonService.getSettings();
-    this.currentSettings = this.originalSettings.clone();
+    this._currentSettings = this.originalSettings.clone();
 
     if (this.seedNode !== '') {
       const components = this.seedNode.split(":");
@@ -304,7 +330,8 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     this.loading = false;
 
     this.isPortable = await this.electronService.isPortable();
-    this.networkType = this.currentSettings.mainnet ? 'mainnet' : this.currentSettings.testnet ? 'testnet' : this.currentSettings.stagenet ? 'stagenet' : this.currentSettings.privnet ? 'privnet' : 'mainnet';
+    this.networkType = this._currentSettings.mainnet ? 'mainnet' : this._currentSettings.testnet ? 'testnet' : this._currentSettings.stagenet ? 'stagenet' : this._currentSettings.privnet ? 'privnet' : 'mainnet';
+    if (this._privnetSettings.monerodPath == '') this._privnetSettings.monerodPath = this._currentSettings.monerodPath;
     this.refreshLogin();
   }
 
@@ -326,7 +353,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   }
 
   public get modified(): boolean {
-    if (!this.currentSettings.equals(this.originalSettings)) {
+    if (!this._currentSettings.equals(this.originalSettings)) {
       return true;
     }
 
@@ -339,77 +366,77 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
 
   public onSeedNodeChange() {
     if (this.seedNodePort >= 0) {
-      this.currentSettings.seedNode = `${this.seedNodeAddress}:${this.seedNodePort}`;
+      this._currentSettings.seedNode = `${this.seedNodeAddress}:${this.seedNodePort}`;
     }
     else {
-      this.currentSettings.seedNode = this.seedNodeAddress;
+      this._currentSettings.seedNode = this.seedNodeAddress;
     }
   }
 
   public OnOfflineChange() {
-    this.currentSettings.offline = !this.currentSettings.offline;
+    this._currentSettings.offline = !this._currentSettings.offline;
   }
 
   public OnPublicNodeChange() {
-    this.currentSettings.publicNode = !this.currentSettings.publicNode;
+    this._currentSettings.publicNode = !this._currentSettings.publicNode;
   }
 
   public OnRestrictedRPCChange() {
-    this.currentSettings.restrictedRpc = !this.currentSettings.restrictedRpc;
+    this._currentSettings.restrictedRpc = !this._currentSettings.restrictedRpc;
   }
 
   public OnConfirmExternalBindChange() {
-    this.currentSettings.confirmExternalBind = !this.currentSettings.confirmExternalBind;
+    this._currentSettings.confirmExternalBind = !this._currentSettings.confirmExternalBind;
   }
 
   public OnIgnoreIPv4Change() {
-    this.currentSettings.rpcIgnoreIpv4 = !this.currentSettings.rpcIgnoreIpv4;
+    this._currentSettings.rpcIgnoreIpv4 = !this._currentSettings.rpcIgnoreIpv4;
   }
 
   public OnDisableRpcBanChange() {
-    this.currentSettings.disableRpcBan = !this.currentSettings.disableRpcBan;
+    this._currentSettings.disableRpcBan = !this._currentSettings.disableRpcBan;
   }
 
   public OnRpcUseIPv6Change(): void {
-    this.currentSettings.rpcUseIpv6 = !this.currentSettings.rpcUseIpv6;
+    this._currentSettings.rpcUseIpv6 = !this._currentSettings.rpcUseIpv6;
   }
 
   public OnNoZmqChange(): void {
-    this.currentSettings.noZmq = !this.currentSettings.noZmq;
+    this._currentSettings.noZmq = !this._currentSettings.noZmq;
   }
 
   public OnSyncEnableChange(): void {
-    this.currentSettings.noSync = !this.currentSettings.noSync;
+    this._currentSettings.noSync = !this._currentSettings.noSync;
   }
 
   public OnRelayFlufflyBlocksChange(): void {
-    this.currentSettings.noFluffyBlocks = !this.currentSettings.noFluffyBlocks;
+    this._currentSettings.noFluffyBlocks = !this._currentSettings.noFluffyBlocks;
   }
 
   public OnNetworkTypeChange(): void {
     if (this.networkType == 'mainnet') {
-      this.currentSettings.mainnet = true;
-      this.currentSettings.testnet = false;
-      this.currentSettings.stagenet = false;
-      this.currentSettings.privnet = false;
+      this._currentSettings.mainnet = true;
+      this._currentSettings.testnet = false;
+      this._currentSettings.stagenet = false;
+      this._currentSettings.privnet = false;
     }
     else if (this.networkType == 'testnet') {
-      this.currentSettings.mainnet = false;
-      this.currentSettings.testnet = true;
-      this.currentSettings.stagenet = false;
-      this.currentSettings.privnet = false;
+      this._currentSettings.mainnet = false;
+      this._currentSettings.testnet = true;
+      this._currentSettings.stagenet = false;
+      this._currentSettings.privnet = false;
     }
     else if (this.networkType == 'stagenet') {
-      this.currentSettings.mainnet = false;
-      this.currentSettings.testnet = false;
-      this.currentSettings.stagenet = true;
-      this.currentSettings.privnet = false;
+      this._currentSettings.mainnet = false;
+      this._currentSettings.testnet = false;
+      this._currentSettings.stagenet = true;
+      this._currentSettings.privnet = false;
     }
     else if (this.networkType == 'privnet') {
-      this.currentSettings.mainnet = false;
-      this.currentSettings.testnet = false;
-      this.currentSettings.stagenet = false;
-      this.currentSettings.privnet = true;
+      this._currentSettings.mainnet = false;
+      this._currentSettings.testnet = false;
+      this._currentSettings.stagenet = false;
+      this._currentSettings.privnet = true;
     }
   }
 
@@ -450,9 +477,9 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
 
       const oldStartMinimized: boolean = this.originalSettings.startAtLoginMinimized;
 
-      await this.daemonService.saveSettings(this.currentSettings);
+      await this.daemonService.saveSettings(this._currentSettings);
 
-      this.originalSettings = this.currentSettings.clone();
+      this.originalSettings = this._currentSettings.clone();
 
       const minimizedChanged: boolean = oldStartMinimized != this.originalSettings.startAtLoginMinimized;
 
@@ -515,7 +542,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
         settings.upgradeAutomatically = this.originalSettings.upgradeAutomatically;
         settings.downloadUpgradePath = this.originalSettings.downloadUpgradePath;
 
-        this.currentSettings = settings;
+        this._currentSettings = settings;
 
         await this.OnSave();
 
@@ -590,12 +617,12 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     }
 
     this.ngZone.run(() => {
-      this.currentSettings.banList = file;
+      this._currentSettings.banList = file;
     });
   }
 
   public removeBanListFile(): void {
-    this.currentSettings.banList = '';
+    this._currentSettings.banList = '';
   }
 
   public async downloadBanListFile(): Promise<void> {
@@ -615,7 +642,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
           throw new Error("Downloaded file doesn't seem to be a valid ban list txt file");
         }
   
-        this.currentSettings.banList = filePath;
+        this._currentSettings.banList = filePath;
         this.remoteBanList = false;
       }
     }
@@ -637,12 +664,12 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     if (privateKey == '') return;
 
     this.ngZone.run(() => {
-      this.currentSettings.rpcSslPrivateKey = privateKey;
+      this._currentSettings.rpcSslPrivateKey = privateKey;
     });
   }
 
   public removeSslPrivateKey(): void {
-    this.currentSettings.rpcSslPrivateKey = '';
+    this._currentSettings.rpcSslPrivateKey = '';
   }
 
   public async selectSslCertificate(): Promise<void> {
@@ -651,12 +678,12 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     if (cert == '') return;
 
     this.ngZone.run(() => {
-      this.currentSettings.rpcSslCertificate = cert;
+      this._currentSettings.rpcSslCertificate = cert;
     });
   }
 
   public removeSslCertificate(): void {
-    this.currentSettings.rpcSslCertificate = '';
+    this._currentSettings.rpcSslCertificate = '';
   }
 
   public async selectSslCACertificates(): Promise<void> {
@@ -665,12 +692,12 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     if (cert == '') return;
 
     this.ngZone.run(() => {
-      this.currentSettings.rpcSslCACertificates = cert;
+      this._currentSettings.rpcSslCACertificates = cert;
     });
   }
   
   public removeSslCACertificates(): void {
-    this.currentSettings.rpcSslCACertificates = '';
+    this._currentSettings.rpcSslCACertificates = '';
   }
 
   public async chooseMoneroDownloadPath(): Promise<void> {
@@ -682,12 +709,12 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     }
 
     this.ngZone.run(() => {
-      this.currentSettings.downloadUpgradePath = folder;
+      this._currentSettings.downloadUpgradePath = folder;
     });
   }
 
   public removeMoneroDownloadPath(): void {
-    this.currentSettings.downloadUpgradePath = '';
+    this._currentSettings.downloadUpgradePath = '';
   }
 
   public async chooseDataDir(): Promise<void> {
@@ -698,12 +725,12 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     }
 
     this.ngZone.run(() => {
-      this.currentSettings.dataDir = folder;
+      this._currentSettings.dataDir = folder;
     });
   }
 
   public removeDataDir(): void {
-    this.currentSettings.dataDir = '';
+    this._currentSettings.dataDir = '';
   }
 
   public chooseXmrigFile(): void {
@@ -724,12 +751,12 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     }
 
     this.ngZone.run(() => {
-      this.currentSettings.extraMessagesFile = file;
+      this._currentSettings.extraMessagesFile = file;
     });
   }
 
   public removeExtraMessagesFile(): void {
-    this.currentSettings.extraMessagesFile = '';
+    this._currentSettings.extraMessagesFile = '';
   }
 
   public async chooseLogFile(): Promise<void> {
@@ -740,12 +767,12 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     }
 
     this.ngZone.run(() => {
-      this.currentSettings.logFile = file;
+      this._currentSettings.logFile = file;
     });
   }
 
   public removeLogFile(): void {
-    this.currentSettings.logFile = '';
+    this._currentSettings.logFile = '';
   }
 
   public addExclusiveNode(): void {
@@ -758,7 +785,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     try {
       const node = `${this.exclusiveNodeAddress}:${this.exclusiveNodePort}`;
     
-      this.currentSettings.addExclusiveNode(node);
+      this._currentSettings.addExclusiveNode(node);
 
       this.loadExclusiveNodesTable();
     }
@@ -780,7 +807,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     
     removed.forEach((r) => {
       const node = r.port >= 0 ? `${r.address}:${r.port}` : r.address;
-      this.currentSettings.removeExclusiveNode(node);
+      this._currentSettings.removeExclusiveNode(node);
     });
     
     this.loadExclusiveNodesTable();
@@ -798,7 +825,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     try {
       const node = `${this.priorityNodeAddress}:${this.priorityNodePort}`;
     
-      this.currentSettings.addPriorityNode(node);
+      this._currentSettings.addPriorityNode(node);
       this.loadPriorityNodesTable();
     }
     catch (error: any) {
@@ -819,7 +846,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     
     removed.forEach((r) => {
       const node = r.port >= 0 ? `${r.address}:${r.port}` : r.address;
-      this.currentSettings.removePriorityNode(node);
+      this._currentSettings.removePriorityNode(node);
     });
     
     this.loadPriorityNodesTable();
@@ -829,8 +856,8 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
 
   public onRpcLoginChange(): void {
     const empty: boolean = this.rpcLoginUser.length === 0 && this.rpcLoginPassword.length === 0;
-    if (empty) this.currentSettings.rpcLogin = '';
-    else this.currentSettings.rpcLogin = `${this.rpcLoginUser}:${this.rpcLoginPassword}`;
+    if (empty) this._currentSettings.rpcLogin = '';
+    else this._currentSettings.rpcLogin = `${this.rpcLoginUser}:${this.rpcLoginPassword}`;
   }
 
 }

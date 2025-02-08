@@ -45,3 +45,6 @@ export { NetHashRateHistory, NetHashRateHistoryEntry } from './NetHashRateHistor
 export * from './error';
 export * from './request';
 export * from './utils';
+
+export { DefaultPrivnetNode1Settings } from "./DefaultPrivnetNode1Settings";
+export { DefaultPrivnetNode2Settings } from "./DefaultPrivnetNode2Settings";

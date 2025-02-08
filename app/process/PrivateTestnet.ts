@@ -11,7 +11,7 @@ export abstract class PrivateTestnet {
     private static readonly _node2Options: string[] = [
         '--testnet', '--no-igd', '--hide-my-port', '--data-dir', '.localnet/xmr_local/node2',
         '--p2p-bind-ip', '127.0.0.1', '--p2p-bind-port', '48080', '--rpc-bind-port' ,'48081',
-        '--zmq-rpc-bind-port', '48082', '--log-level', '0', '--confirm-external-bind', '--add-exclusive-node', '127.0.0.1:28080',
+        '--zmq-rpc-bind-port', '48082', '--log-level', '1', '--confirm-external-bind', '--add-exclusive-node', '127.0.0.1:28080',
         '--add-exclusive-node', '127.0.0.1:58080', '--rpc-access-control-origins', '*',
         '--fixed-difficulty', '500', '--disable-rpc-ban', '--non-interactive'
     ];

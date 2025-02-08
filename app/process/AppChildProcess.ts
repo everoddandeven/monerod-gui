@@ -205,14 +205,22 @@ export class AppChildProcess {
             throw new Error("Process is already stopping");
         }
 
-        if (!this._running || !this._process) {
+        const proc = this._process;
+
+        if (!this._running || !proc) {
             throw new Error("Process is not running");
         }
 
         this._stopping = true;
 
-        const promise = new Promise<number | null>((resolve) => {
-            process.on('close', (code: number | null) => {
+        const promise = new Promise<number | null>((resolve, reject) => {
+            proc.on('close', (code: number | null) => {
+                this._process = undefined;
+                this._running = false;
+                this._stopping = false;
+                resolve(code);
+            });
+            proc.on('exit', (code: | number) => {
                 this._process = undefined;
                 this._running = false;
                 this._stopping = false;
@@ -220,7 +228,9 @@ export class AppChildProcess {
             });
         });
 
-        this._process?.kill();
+        if (!proc.kill()) {
+            throw new Error("Could not kill monerod process: " + proc.pid);
+        }
 
         return await promise;
     }

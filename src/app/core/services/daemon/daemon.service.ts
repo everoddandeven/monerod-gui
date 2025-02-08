@@ -54,6 +54,9 @@ export class DaemonService {
     else if (this.settings.testnet) {
       return 28081;
     }
+    else if (this.settings.privnet) {
+      return 48081;
+    }
     
     return 38081;
   }

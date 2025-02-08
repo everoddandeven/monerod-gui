@@ -561,10 +561,20 @@ try {
 
   ipcMain.handle('stop-monerod', async (event: IpcMainInvokeEvent) => {
     let stopped: boolean = false;
+    console.log("ipcMain.handler('stop-monerod')");
 
     if (monerodProcess) {
-      if (PrivateTestnet.started) await PrivateTestnet.stop();
-      else await monerodProcess.stop();
+      if (PrivateTestnet.started) {
+        console.log("ipcMain.handler('stop-monerod'): stopping private testnet");
+        await PrivateTestnet.stop();
+        console.log("ipcMain.handler('stop-monerod'): private testnet stopped");
+      }
+      else {
+        console.log("ipcMain.handler('stop-monerod'): stopping monerod process");
+        await monerodProcess.stop();
+        console.log("ipcMain.handler('stop-monerod'): monerod process stopped");
+      }
+      
       stopped = true;
       monerodProcess = null;
     }

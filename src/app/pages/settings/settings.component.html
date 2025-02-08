@@ -51,7 +51,7 @@
           <div class="col-md-6">
             <label for="import-config-file" class="form-label">Import config file</label>
             <div class="input-group mb-3">
-              <button type="button" class="btn btn-secondary btn-sm" (click)="importMonerodConfigFile()"><i class="bi bi-box-arrow-in-down"></i> Import</button>
+              <button [disabled]="!canImportConfigFile" type="button" class="btn btn-secondary btn-sm" (click)="importMonerodConfigFile()"><i class="bi bi-box-arrow-in-down"></i> Import</button>
             </div>
             <small class="text-body-secondary">Import custom monerod config file</small>
           </div>
@@ -59,7 +59,7 @@
           <div class="col-md-6">
             <label for="export-config-file" class="form-label">Export config file</label>
             <div class="input-group mb-3">
-              <button type="button" class="btn btn-secondary btn-sm" (click)="exportMonerodConfigFile()"><i class="bi bi-box-arrow-up-right"></i> Export</button>
+              <button [disabled]="!canExportConfigFile" type="button" class="btn btn-secondary btn-sm" (click)="exportMonerodConfigFile()"><i class="bi bi-box-arrow-up-right"></i> Export</button>
             </div>
             <small class="text-body-secondary">Export current saved settings to config file</small>
           </div>
@@ -72,7 +72,7 @@
         <div class="col-md-12">
           <div class="form-check form-switch col-md-6">
             <label for="general-remote-ban-list" class="form-check-label">Remote ban list</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="general-remote-ban-list" [checked]="remoteBanList" [(ngModel)]="remoteBanList" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canAddBanList" class="form-control form-check-input" type="checkbox" role="switch" id="general-remote-ban-list" [checked]="remoteBanList" [(ngModel)]="remoteBanList" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Specify a remote URL for download ban list</small>
           </div>
@@ -83,9 +83,9 @@
         <div *ngIf="!remoteBanList" class="col-md-12">
           <label for="general-ban-list-file" class="form-label">Ban list file</label>
           <div class="input-group mb-3">
-            <input id="general-ban-list-file" type="text" class="form-control form-control-sm" placeholder="" aria-label="Ban list file path" aria-describedby="basic-addon3" [value]="currentSettings.banList" readonly>
-            <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseBanListFile()"><i class="bi bi-filetype-txt"></i> Choose File</button></span>
-            <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeBanListFile()" [disabled]="currentSettings.banList === ''"><i class="bi bi-file-x"></i> Remove</button></span>           
+            <input [disabled]="!canAddBanList" id="general-ban-list-file" type="text" class="form-control form-control-sm" placeholder="" aria-label="Ban list file path" aria-describedby="basic-addon3" [value]="currentSettings.banList" readonly>
+            <span class="input-group-text" id="basic-addon3"><button [disabled]="!canAddBanList" type="button" class="btn btn-secondary btn-sm" (click)="chooseBanListFile()"><i class="bi bi-filetype-txt"></i> Choose File</button></span>
+            <span class="input-group-text" id="basic-addon3"><button [disabled]="!canAddBanList" type="button" class="btn btn-secondary btn-sm" (click)="removeBanListFile()" [disabled]="currentSettings.banList === ''"><i class="bi bi-file-x"></i> Remove</button></span>           
           </div>
           <small class="text-body-secondary">Specify ban list file, one IP address per line. It is <strong>not recommended</strong> to statically ban any IP addresses unless you absolutely need to. Banning IPs often excludes the most vulnerable users who are forced to operate entirely behind Tor or other anonymity networks</small>
         </div>
@@ -93,8 +93,8 @@
         <div *ngIf="remoteBanList" class="col-md-12">
           <label for="general-ban-list-url" class="form-label">Ban list URL</label>
           <div class="input-group mb-3">
-            <input id="general-ban-list-url" type="text" class="form-control form-control-sm" placeholder="https://gui.xmr.pm/files/block.txt" aria-label="Ban list file url" aria-describedby="basic-addon3" [(ngModel)]="banListUrl"  [ngModelOptions]="{standalone: true}">
-            <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="downloadBanListFile()" [disabled]="!validBanListUrl"><i class="bi bi-filetype-txt"></i> Download</button></span>            
+            <input [disabled]="!canAddBanList" id="general-ban-list-url" type="text" class="form-control form-control-sm" placeholder="https://gui.xmr.pm/files/block.txt" aria-label="Ban list file url" aria-describedby="basic-addon3" [(ngModel)]="banListUrl"  [ngModelOptions]="{standalone: true}">
+            <span class="input-group-text" id="basic-addon3"><button [disabled]="!canAddBanList" type="button" class="btn btn-secondary btn-sm" (click)="downloadBanListFile()" [disabled]="!validBanListUrl"><i class="bi bi-filetype-txt"></i> Download</button></span>            
           </div>          
           
           <small class="text-body-secondary">Specify ban list file, one IP address per line. It is <strong>not recommended</strong> to statically ban any IP addresses unless you absolutely need to. Banning IPs often excludes the most vulnerable users who are forced to operate entirely behind Tor or other anonymity networks</small>
@@ -112,26 +112,26 @@
         <div class="row gy-3">
           <div class="col-md-6">
             <label for="max-concurrency" class="form-label">Max concurrency</label>
-            <input type="number" min="0" class="form-control" id="max-concurrency" placeholder="0" [(ngModel)]="currentSettings.maxConcurrency" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="max-concurrency" placeholder="0" [(ngModel)]="currentSettings.maxConcurrency" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Max number of threads to use for a parallel job</small>
           </div>
 
           <div class="col-md-6">
             <label for="max-connections-per-ip" class="form-label">Max connections per IP</label>
-            <input type="number" min="0" class="form-control" id="max-connections-per-ip" placeholder="1" [(ngModel)]="currentSettings.maxConnectionsPerIp" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="max-connections-per-ip" placeholder="1" [(ngModel)]="currentSettings.maxConnectionsPerIp" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Maximum number of connections allowed from the same IP address</small>
           </div>
 
           <div *ngIf="!isPortable" class="form-check form-switch col-md-6">
             <label for="start-at-login" class="form-check-label">Start at login</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="start-at-login" [checked]="currentSettings.startAtLogin" [(ngModel)]="currentSettings.startAtLogin" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="start-at-login" [checked]="currentSettings.startAtLogin" [(ngModel)]="currentSettings.startAtLogin" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Start monero daemon at login</small>
           </div>
 
           <div *ngIf="!isPortable" class="form-check form-switch col-md-6">
             <label for="start-minimized" class="form-check-label">Start minimized</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="start-minimized" [checked]="currentSettings.startAtLoginMinimized" [(ngModel)]="currentSettings.startAtLoginMinimized" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="start-minimized" [checked]="currentSettings.startAtLoginMinimized" [(ngModel)]="currentSettings.startAtLoginMinimized" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Start monero daemon at login as tray icon</small>
           </div>
@@ -146,9 +146,9 @@
           <div class="col-md-12">
             <label for="data-dir" class="form-label">Data dir</label>
             <div class="input-group mb-3">
-              <input id="data-dir" type="text" class="form-control form-control-sm" placeholder="" aria-label="Data dir" aria-describedby="basic-addon2" [value]="currentSettings.dataDir" readonly>
-              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseDataDir()"><i class="bi bi-folder"></i> Choose folder</button></span>            
-              <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeDataDir()" [disabled]="currentSettings.dataDir === ''"><i class="bi bi-folder-x"></i> Remove</button></span>
+              <input [disabled]="!canEditNodeSettings" id="data-dir" type="text" class="form-control form-control-sm" placeholder="" aria-label="Data dir" aria-describedby="basic-addon2" [value]="currentSettings.dataDir" readonly>
+              <span class="input-group-text" id="basic-addon2"><button [disabled]="!canEditNodeSettings" type="button" class="btn btn-secondary btn-sm" (click)="chooseDataDir()"><i class="bi bi-folder"></i> Choose folder</button></span>            
+              <span class="input-group-text" id="basic-addon3"><button [disabled]="!canEditNodeSettings" type="button" class="btn btn-secondary btn-sm" (click)="removeDataDir()" [disabled]="currentSettings.dataDir === ''"><i class="bi bi-folder-x"></i> Remove</button></span>
             </div>
             <small class="text-body-secondary">Specify data directory</small>
           </div>
@@ -162,13 +162,13 @@
 
           <div class="col-12">
             <label for="proxy" class="form-label">Proxy</label>
-            <input type="text" class="form-control" id="proxy" placeholder="socks-ip:port" [(ngModel)]="currentSettings.proxy" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="proxy" placeholder="socks-ip:port" [(ngModel)]="currentSettings.proxy" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Network communication through proxy</small>
           </div>
 
           <div class="col-12">
             <label for="anonymous-inbound" class="form-label">Anonymous inbound</label>
-            <input type="text" class="form-control" id="anonymous-inbound" placeholder="x.onion,127.0.0.1:18083,100" [(ngModel)]="currentSettings.anonymousInbound" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="anonymous-inbound" placeholder="x.onion,127.0.0.1:18083,100" [(ngModel)]="currentSettings.anonymousInbound" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">
               hidden-service-address,[bind-ip:]port[,max_connections]
             </small>
@@ -176,7 +176,7 @@
 
           <div class="col-12">
             <label for="tx-proxy" class="form-label">Tx Proxy</label>
-            <input type="text" class="form-control" id="tx-proxy" placeholder="tor,127.0.0.1:9050,100,disable_noise" [(ngModel)]="currentSettings.txProxy" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="tx-proxy" placeholder="tor,127.0.0.1:9050,100,disable_noise" [(ngModel)]="currentSettings.txProxy" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">
               Send local txes through proxy: network-type,socks-ip:port[,max_connections][,disable_noise]
             </small>
@@ -184,7 +184,7 @@
 
           <div class="form-check form-switch col-md-6">
             <label for="proxy-allow-dns-leaks" class="form-check-label">Allow DNS leaks</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="proxy-allow-dns-leaks" [checked]="currentSettings.proxyAllowDnsLeaks" [(ngModel)]="currentSettings.proxyAllowDnsLeaks" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="proxy-allow-dns-leaks" [checked]="currentSettings.proxyAllowDnsLeaks" [(ngModel)]="currentSettings.proxyAllowDnsLeaks" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Allow DNS leaks outside of proxy</small>
           </div>
@@ -192,7 +192,7 @@
   
           <div class="form-check form-switch col-md-6">
             <label for="enforce-dns-checkpointing" class="form-check-label">Enforce DNS checkpointing</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="enforce-dns-checkpointing" [checked]="currentSettings.enforceDnsCheckpointing" [(ngModel)]="currentSettings.enforceDnsCheckpointing" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="enforce-dns-checkpointing" [checked]="currentSettings.enforceDnsCheckpointing" [(ngModel)]="currentSettings.enforceDnsCheckpointing" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Checkpoints from DNS server will be enforced</small>
           </div>
@@ -200,7 +200,7 @@
   
           <div class="form-check form-switch col-md-6">
             <label for="disable-dns-checkpoints" class="form-check-label">Disable DNS checkpoints</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="disable-dns-checkpoints" [checked]="currentSettings.disableDnsCheckpoints" [(ngModel)]="currentSettings.disableDnsCheckpoints" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="disable-dns-checkpoints" [checked]="currentSettings.disableDnsCheckpoints" [(ngModel)]="currentSettings.disableDnsCheckpoints" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Do not retrieve checkpoints from DNS</small>
           </div>
@@ -208,7 +208,7 @@
   
           <div class="form-check form-switch col-md-6">
             <label for="enable-dns-blocklist" class="form-check-label">Enable DNS blocklist</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="enable-dns-blocklist" [checked]="currentSettings.enableDnsBlocklist" [(ngModel)]="currentSettings.enableDnsBlocklist" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="enable-dns-blocklist" [checked]="currentSettings.enableDnsBlocklist" [(ngModel)]="currentSettings.enableDnsBlocklist" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Apply realtime blocklist from DNS</small>
           </div>
@@ -216,7 +216,7 @@
   
           <div class="form-check form-switch col-md-6">
             <label for="hide-my-port" class="form-check-label">Hide my port</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="disable-dns-checkpoints" [checked]="currentSettings.hideMyPort" [(ngModel)]="currentSettings.hideMyPort" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="disable-dns-checkpoints" [checked]="currentSettings.hideMyPort" [(ngModel)]="currentSettings.hideMyPort" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Do not announce yourself as peerlist candidate</small>
           </div>
@@ -229,14 +229,14 @@
           
           <div class="form-check form-switch col-md-6">
             <label for="run-on-battery" class="form-check-label">Run on battery</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="run-on-battery" [checked]="currentSettings.runOnBattery" [(ngModel)]="currentSettings.runOnBattery" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="run-on-battery" [checked]="currentSettings.runOnBattery" [(ngModel)]="currentSettings.runOnBattery" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Enable monerod to run on battery power</small>
           </div>
 
           <div class="col-md-6">
             <label for="battery-threshold" class="form-label">Battery level threshold</label>
-            <input [disabled]="!currentSettings.runOnBattery" type="number" min="0" max="100" class="form-control" id="battery-threshold" placeholder="0" [(ngModel)]="currentSettings.batteryLevelThreshold" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!currentSettings.runOnBattery || !canEditNodeSettings" type="number" min="0" max="100" class="form-control" id="battery-threshold" placeholder="0" [(ngModel)]="currentSettings.batteryLevelThreshold" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Stop monerod when battery threshold is reached (0 to disable)</small>
           </div>
           
@@ -249,7 +249,7 @@
                         
           <div class="col-md-6">
             <label for="check-updates" class="form-label">Check updates</label>
-            <select class="form-select" id="log-level" [(ngModel)]="currentSettings.checkUpdates" [ngModelOptions]="{standalone: true}">
+            <select [disabled]="!canEditNodeSettings" class="form-select" id="log-level" [(ngModel)]="currentSettings.checkUpdates" [ngModelOptions]="{standalone: true}">
               <option [ngValue]="'disabled'">Disabled</option>
               <option [ngValue]="'notify'">Notify</option>
               <option [ngValue]="'download'">Download</option>
@@ -263,7 +263,7 @@
 
           <div class="form-check form-switch col-md-6">
             <label for="upgrade-automatically" class="form-check-label">Upgrade Automatically</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="upgrade-automatically" [checked]="currentSettings.upgradeAutomatically" [(ngModel)]="currentSettings.upgradeAutomatically" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="upgrade-automatically" [checked]="currentSettings.upgradeAutomatically" [(ngModel)]="currentSettings.upgradeAutomatically" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Upgrade monerod automatically when a new version is available</small>
           </div>
@@ -271,9 +271,9 @@
           <div class="col-md-12">
             <label for="upgrade-download-path" class="form-label">Download path</label>
             <div class="input-group mb-3">
-              <input id="upgrade-download-path=" type="text" class="form-control form-control-sm" placeholder="" aria-label="Monerod path" aria-describedby="basic-addon2" [value]="currentSettings.downloadUpgradePath" readonly>
-              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseMoneroDownloadPath()"><i class="bi bi-folder"></i> Choose folder</button></span>            
-              <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeMoneroDownloadPath()" [disabled]="currentSettings.downloadUpgradePath === ''"><i class="bi bi-folder-x"></i> Remove</button></span>
+              <input [disabled]="!canEditNodeSettings" id="upgrade-download-path=" type="text" class="form-control form-control-sm" placeholder="" aria-label="Monerod path" aria-describedby="basic-addon2" [value]="currentSettings.downloadUpgradePath" readonly>
+              <span class="input-group-text" id="basic-addon2"><button [disabled]="!canEditNodeSettings" type="button" class="btn btn-secondary btn-sm" (click)="chooseMoneroDownloadPath()"><i class="bi bi-folder"></i> Choose folder</button></span>            
+              <span class="input-group-text" id="basic-addon3"><button [disabled]="!canEditNodeSettings" type="button" class="btn btn-secondary btn-sm" (click)="removeMoneroDownloadPath()" [disabled]="currentSettings.downloadUpgradePath === ''"><i class="bi bi-folder-x"></i> Remove</button></span>
             </div>
             <small class="text-body-secondary">Folder where to save updates</small>
           </div>
@@ -292,73 +292,73 @@
 
           <div class="form-check form-switch col-md-6">
             <label for="offline" class="form-check-label">Offline</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="offline" [checked]="currentSettings.offline" (change)="OnOfflineChange()">
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="offline" [checked]="currentSettings.offline" (change)="OnOfflineChange()">
             <br>
             <small class="text-body-secondary">Do not listen for peers, nor connect to any</small>
           </div>
 
           <div class="form-check form-switch col-md-6">
             <label for="public-node" class="form-check-label">Public node</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="public-node" [checked]="currentSettings.publicNode" (change)="OnPublicNodeChange()">
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="public-node" [checked]="currentSettings.publicNode" (change)="OnPublicNodeChange()">
             <br>
             <small class="text-body-secondary">Allow other users to use the node as a remote (restricted RPC mode, view-only commands) and advertise it over P2P</small>
           </div>
 
           <div class="form-check form-switch col-md-6">
             <label for="restricted-rpc" class="form-check-label">Restricted RPC</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="restricted-rpc" [checked]="currentSettings.restrictedRpc" (change)="OnRestrictedRPCChange()">
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="restricted-rpc" [checked]="currentSettings.restrictedRpc" (change)="OnRestrictedRPCChange()">
             <br>
             <small class="text-body-secondary">Restrict RPC to view-only commands and do not return privacy sensitive data in RPC calls</small>
           </div>
 
           <div class="form-check form-switch col-md-6">
             <label for="confirm-external-bind" class="form-check-label">Confirm external bind</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="confirm-external-bind" [checked]="currentSettings.confirmExternalBind" (change)="OnConfirmExternalBindChange()">
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="confirm-external-bind" [checked]="currentSettings.confirmExternalBind" (change)="OnConfirmExternalBindChange()">
             <br>
             <small class="text-body-secondary">Confirm Bind IP is not a loopback (local) IP</small>
           </div>
 
           <div class="form-check form-switch col-md-6">
             <label for="rpc-ignore-ipv4" class="form-check-label">Ignore IPv4</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-ignore-ipv4" [checked]="currentSettings.rpcIgnoreIpv4" (change)="OnIgnoreIPv4Change()">
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="rpc-ignore-ipv4" [checked]="currentSettings.rpcIgnoreIpv4" (change)="OnIgnoreIPv4Change()">
             <br>
             <small class="text-body-secondary">Ignore unsuccessful IPv4 bind for RPC</small>
           </div>
 
           <div class="form-check form-switch col-md-6">
             <label for="disable-rpc-ban" class="form-check-label">Disable ban</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="disable-rpc-ban" [checked]="currentSettings.disableRpcBan" (change)="OnDisableRpcBanChange()">
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="disable-rpc-ban" [checked]="currentSettings.disableRpcBan" (change)="OnDisableRpcBanChange()">
             <br>
             <small class="text-body-secondary">Do not ban hosts on RPC errors</small>
           </div>
 
           <div class="col-md-6">
             <label for="rpc-bind-ip" class="form-label">Bind IP</label>
-            <input type="text" class="form-control" id="rpc-bind-ip" placeholder="127.0.0.1" [(ngModel)]="currentSettings.rpcBindIp" [ngModelOptions]="{standalone: true}" >
+            <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="rpc-bind-ip" placeholder="127.0.0.1" [(ngModel)]="currentSettings.rpcBindIp" [ngModelOptions]="{standalone: true}" >
             <small class="text-body-secondary">Specify IP to bind RPC server</small>
           </div>
 
           <div class="col-md-6">
             <label for="rpc-bind-port" class="form-label">Bind port</label>
-            <input type="number" min="0" class="form-control" id="rpc-bind-port" placeholder="18081" [(ngModel)]="currentSettings.rpcBindPort" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="rpc-bind-port" placeholder="18081" [(ngModel)]="currentSettings.rpcBindPort" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">18081 for mainnet, 28081 for testnet, 38081 for stagenet</small>
           </div>
 
           <div class="col-sm-6">
             <label for="rpc-login-user" class="form-label">Username</label>
-            <input type="text" class="form-control" id="rpc-login-user" placeholder="" [(ngModel)]="rpcLoginUser" [ngModelOptions]="{standalone: true}" (change)="onRpcLoginChange()">
+            <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="rpc-login-user" placeholder="" [(ngModel)]="rpcLoginUser" [ngModelOptions]="{standalone: true}" (change)="onRpcLoginChange()">
             <small class="text-body-secondary">Specify username required for RPC server</small>
           </div>
   
           <div class="col-sm-6">
             <label for="rpc-login-password" class="form-label">Password</label>
-            <input type="password" class="form-control" id="rpc-login-password" placeholder="" [(ngModel)]="rpcLoginPassword" [ngModelOptions]="{standalone: true}" (change)="onRpcLoginChange()">
+            <input [disabled]="!canEditNodeSettings" type="password" class="form-control" id="rpc-login-password" placeholder="" [(ngModel)]="rpcLoginPassword" [ngModelOptions]="{standalone: true}" (change)="onRpcLoginChange()">
             <small class="text-body-secondary">Specify password required for RPC server</small>
           </div>
 
           <div class="col-sm-12">
             <label for="rpc-access-control-origins" class="form-label">Access control origins</label>
-            <input type="text" class="form-control" id="rpc-access-control-origins" placeholder="" [(ngModel)]="currentSettings.rpcAccessControlOrigins" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="rpc-access-control-origins" placeholder="" [(ngModel)]="currentSettings.rpcAccessControlOrigins" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Specify a comma separated list of origins to allow cross origin resource sharing</small>
           </div>
         </div>
@@ -370,20 +370,20 @@
 
           <div class="form-check form-switch col-md-12">
             <label for="rpc-use-ipv6" class="form-check-label">Enabled</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-use-ipv6" [checked]="currentSettings.rpcUseIpv6" [(ngModel)]="currentSettings.rpcUseIpv6" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="rpc-use-ipv6" [checked]="currentSettings.rpcUseIpv6" [(ngModel)]="currentSettings.rpcUseIpv6" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Allow IPv6 for RPC</small>
           </div>
 
           <div class="col-md-6">
             <label for="rpc-bind-ipv6-address" class="form-label">Bind IPv6 address</label>
-            <input type="text" class="form-control" id="rpc-bind-ipv6-address" placeholder="::1" [(ngModel)]="currentSettings.rpcBindIpv6Address" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="rpc-bind-ipv6-address" placeholder="::1" [(ngModel)]="currentSettings.rpcBindIpv6Address" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Specify IPv6 address to bind RPC server</small>
           </div>
 
           <div class="col-md-6">
             <label for="rpc-restricted-bind-ipv6-address" class="form-label">Restricted bind IPv6 address</label>
-            <input type="text" class="form-control" id="rpc-restricted-bind-ipv6-address" placeholder="::1">
+            <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="rpc-restricted-bind-ipv6-address" placeholder="::1">
             <small class="text-body-secondary">Specify IPv6 address to bind restricted RPC server</small>
           </div>
 
@@ -396,26 +396,26 @@
 
           <div class="form-check form-switch col-md-12">
             <label for="enable-zmq" class="form-check-label">Enabled</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="enable-zmq" [checked]="!currentSettings.noZmq" (change)="OnNoZmqChange()">
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="enable-zmq" [checked]="!currentSettings.noZmq" (change)="OnNoZmqChange()">
             <br>
             <small class="text-body-secondary">Enable ZMQ RPC Server</small>
           </div>
 
           <div class="col-md-6">
             <label for="zmq-rpc-bind-ip" class="form-label">Bind IP</label>
-            <input type="text" class="form-control" id="zmq-rpc-bind-ip" placeholder="127.0.0.1" [(ngModel)]="currentSettings.zmqRpcBindIp" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="zmq-rpc-bind-ip" placeholder="127.0.0.1" [(ngModel)]="currentSettings.zmqRpcBindIp" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">IP for ZMQ RPC Server to listen on</small>
           </div>
 
           <div class="col-md-6">
             <label for="zmq-rpc-bind-port" class="form-label">Bind port</label>
-            <input type="number" min="0" class="form-control" id="zmq-rpc-bind-port" placeholder="18082" [(ngModel)]="currentSettings.zmqRpcBindPort" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="zmq-rpc-bind-port" placeholder="18082" [(ngModel)]="currentSettings.zmqRpcBindPort" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">18082 for mainnet, 28082 for testnet, 38082 for stagenet</small>
           </div>
 
           <div class="col-md-6">
             <label for="zmq-pub" class="form-label">ZMQ Pub</label>
-            <input type="text" class="form-control" id="zmq-pub" placeholder="tcp://ip:port or ipc://path" [(ngModel)]="currentSettings.zmqPub" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="zmq-pub" placeholder="tcp://ip:port or ipc://path" [(ngModel)]="currentSettings.zmqPub" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Address for ZMQ Pub</small>
           </div>
 
@@ -428,25 +428,25 @@
 
           <div class="col-md-12">
             <label for="rpc-payment-address" class="form-label">Address</label>
-            <input type="text" class="form-control" id="rpc-payment-address" [(ngModel)]="currentSettings.rpcPaymentAddress" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="rpc-payment-address" [(ngModel)]="currentSettings.rpcPaymentAddress" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Restrict RPC to clients sending micropayment to this address</small>
           </div>
 
           <div class="col-md-6">
             <label for="rpc-payment-difficulty" class="form-label">Difficulty</label>
-            <input type="number" min="0" class="form-control" id="rpc-payment-difficulty" placeholder="1000" [(ngModel)]="currentSettings.rpcPaymentDifficuly" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="rpc-payment-difficulty" placeholder="1000" [(ngModel)]="currentSettings.rpcPaymentDifficuly" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Restrict RPC to clients sending micropayment at this difficulty</small>
           </div>
 
           <div class="col-md-6">
             <label for="rpc-payment-credits" class="form-label">Credits</label>
-            <input type="number" min="0" class="form-control" id="rpc-payment-credits" placeholder="100" [(ngModel)]="currentSettings.rpcPaymentCredits" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="rpc-payment-credits" placeholder="100" [(ngModel)]="currentSettings.rpcPaymentCredits" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Restrict RPC to clients sending micropayment, yelds that many credits per payment</small>
           </div>
 
           <div class="form-check form-switch col-md-6">
             <label for="rpc-payment-allow-free-loopback" class="form-check-label">Allow free loopback</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-payment-allow-free-loopback" [checked]="currentSettings.allowLocalIp" [(ngModel)]="currentSettings.rpcPaymentAllowFreeLoopback" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="rpc-payment-allow-free-loopback" [checked]="currentSettings.allowLocalIp" [(ngModel)]="currentSettings.rpcPaymentAllowFreeLoopback" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Allow free access from the loopback address (ie, the local host)</small>
           </div>
@@ -460,7 +460,7 @@
           
           <div class="col-md-4">
             <label for="rpc-ssl" class="form-label">SSL Mode</label>
-            <select class="form-select" id="rpc-ssl" [(ngModel)]="currentSettings.rpcSsl" [ngModelOptions]="{standalone: true}">
+            <select [disabled]="!canEditNodeSettings" class="form-select" id="rpc-ssl" [(ngModel)]="currentSettings.rpcSsl" [ngModelOptions]="{standalone: true}">
               <option [ngValue]="'autodetect'" [selected]="currentSettings.rpcSsl === 'autodetect'">Autodetect</option>
               <option [ngValue]="'enabled'" [selected]="currentSettings.rpcSsl === 'enabled'">Enabled</option>
               <option [ngValue]="'disabled'" [selected]="currentSettings.rpcSsl === 'disabled'">Disabled</option>
@@ -470,14 +470,14 @@
 
           <div class="form-check form-switch col-md-4">
             <label for="rpc-ssl-allow-chained" class="form-check-label">Allow chained</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-ssl-allow-chained" [checked]="currentSettings.rpcSslAllowChained" [(ngModel)]="currentSettings.rpcSslAllowChained" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="rpc-ssl-allow-chained" [checked]="currentSettings.rpcSslAllowChained" [(ngModel)]="currentSettings.rpcSslAllowChained" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Allow user chain certificates</small>
           </div>
 
           <div class="form-check form-switch col-md-4">
             <label for="rpc-ssl-allow-any-cert" class="form-check-label">Allow any cert</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="rpc-ssl-allow-any-cert" [checked]="currentSettings.rpcSslAllowAnyCert" [(ngModel)]="currentSettings.rpcSslAllowAnyCert" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="rpc-ssl-allow-any-cert" [checked]="currentSettings.rpcSslAllowAnyCert" [(ngModel)]="currentSettings.rpcSslAllowAnyCert" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Allow any peer certificate</small>
           </div>
@@ -486,9 +486,9 @@
           <div class="col-md-12">
             <label for="rpc-ssl-private-key" class="form-label">Private key</label>
             <div class="input-group mb-3">
-              <input id="rpc-ssl-private-key" type="text" class="form-control form-control-sm" placeholder="" aria-label="Monerod path" aria-describedby="basic-addon2" [value]="currentSettings.rpcSslPrivateKey" readonly>
-              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="selectSslPrivateKey()"><i class="bi bi-filetype-key"></i> Choose file</button></span>
-              <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeSslPrivateKey()" [disabled]="currentSettings.rpcSslPrivateKey === ''"><i class="bi bi-file-x"></i> Remove</button></span>        
+              <input [disabled]="!canEditNodeSettings" id="rpc-ssl-private-key" type="text" class="form-control form-control-sm" placeholder="" aria-label="Monerod path" aria-describedby="basic-addon2" [value]="currentSettings.rpcSslPrivateKey" readonly>
+              <span class="input-group-text" id="basic-addon2"><button [disabled]="!canEditNodeSettings" type="button" class="btn btn-secondary btn-sm" (click)="selectSslPrivateKey()"><i class="bi bi-filetype-key"></i> Choose file</button></span>
+              <span class="input-group-text" id="basic-addon3"><button [disabled]="!canEditNodeSettings" type="button" class="btn btn-secondary btn-sm" (click)="removeSslPrivateKey()" [disabled]="currentSettings.rpcSslPrivateKey === ''"><i class="bi bi-file-x"></i> Remove</button></span>        
             </div>
             <small class="text-body-secondary">Path to a PEM format private key</small>
           </div>
@@ -497,9 +497,9 @@
           <div class="col-md-12">
             <label for="rpc-ssl-certificate" class="form-label">Certificate</label>
             <div class="input-group mb-3">
-              <input id="rpc-ssl-certificate" type="text" class="form-control form-control-sm" placeholder="" aria-label="RPC SSL Certificate" aria-describedby="basic-addon2" [value]="currentSettings.rpcSslCertificate" readonly>
-              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="selectSslCertificate()"><i class="bi bi-postcard"></i> Choose file</button></span>
-              <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeSslCertificate()" [disabled]="currentSettings.rpcSslCertificate === ''"><i class="bi bi-file-x"></i> Remove</button></span>
+              <input [disabled]="!canEditNodeSettings" id="rpc-ssl-certificate" type="text" class="form-control form-control-sm" placeholder="" aria-label="RPC SSL Certificate" aria-describedby="basic-addon2" [value]="currentSettings.rpcSslCertificate" readonly>
+              <span class="input-group-text" id="basic-addon2"><button [disabled]="!canEditNodeSettings" type="button" class="btn btn-secondary btn-sm" (click)="selectSslCertificate()"><i class="bi bi-postcard"></i> Choose file</button></span>
+              <span class="input-group-text" id="basic-addon3"><button [disabled]="!canEditNodeSettings" type="button" class="btn btn-secondary btn-sm" (click)="removeSslCertificate()" [disabled]="currentSettings.rpcSslCertificate === ''"><i class="bi bi-file-x"></i> Remove</button></span>
             </div>
             <small class="text-body-secondary">Path to a PEM format certificate</small>
           </div>
@@ -508,9 +508,9 @@
           <div class="col-md-12">
             <label for="rpc-ssl-ca-certificates" class="form-label">CA Certificates</label>
             <div class="input-group mb-3">
-              <input id="rpc-ssl-ca-certificates" type="text" class="form-control form-control-sm" placeholder="" aria-label="RPC SSL CA Certificates" aria-describedby="basic-addon2" [value]="currentSettings.rpcSslCACertificates" readonly>
-              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="selectSslCACertificates()"><i class="bi bi-postcard"></i> Choose file</button></span>
-              <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeSslCACertificates()" [disabled]="currentSettings.rpcSslCACertificates === ''"><i class="bi bi-file-x"></i> Remove</button></span>
+              <input [disabled]="!canEditNodeSettings" id="rpc-ssl-ca-certificates" type="text" class="form-control form-control-sm" placeholder="" aria-label="RPC SSL CA Certificates" aria-describedby="basic-addon2" [value]="currentSettings.rpcSslCACertificates" readonly>
+              <span class="input-group-text" id="basic-addon2"><button [disabled]="!canEditNodeSettings" type="button" class="btn btn-secondary btn-sm" (click)="selectSslCACertificates()"><i class="bi bi-postcard"></i> Choose file</button></span>
+              <span class="input-group-text" id="basic-addon3"><button [disabled]="!canEditNodeSettings" type="button" class="btn btn-secondary btn-sm" (click)="removeSslCACertificates()" [disabled]="currentSettings.rpcSslCACertificates === ''"><i class="bi bi-file-x"></i> Remove</button></span>
             </div>
             <small class="text-body-secondary">Path to file containing concatenated PEM format certificate(s) to replace system CA(s)</small>
           </div>
@@ -529,14 +529,14 @@
           
           <div class="form-check form-switch col-md-6">
             <label for="no-igd" class="form-check-label">No IGD</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="no-igd" [checked]="currentSettings.noIgd" [(ngModel)]="currentSettings.noIgd" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="no-igd" [checked]="currentSettings.noIgd" [(ngModel)]="currentSettings.noIgd" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Disable UPnP port mapping on the router (<strong>Internet Gateway Device</strong>). Enable this option to improve security if you are not behind a NAT (you can bind directly to public IP or you run through Tor)</small>
           </div>
 
           <div class="col-md-4">
             <label for="igd" class="form-label">IGD</label>
-            <select [disabled]="currentSettings.noIgd" class="form-select" id="igd" [(ngModel)]="currentSettings.igd" [ngModelOptions]="{standalone: true}">
+            <select [disabled]="currentSettings.noIgd || !canEditNodeSettings" class="form-select" id="igd" [(ngModel)]="currentSettings.igd" [ngModelOptions]="{standalone: true}">
               <option [ngValue]="'delayed'" [selected]="currentSettings.igd === 'delayed'">Delayed</option>
               <option [ngValue]="'enabled'" [selected]="currentSettings.igd === 'enabled'">Enabled</option>
               <option [ngValue]="'disabled'" [selected]="currentSettings.igd === 'disabled'">Disabled</option>
@@ -545,33 +545,33 @@
 
           <div class="form-check form-switch col-md-6">
             <label for="allow-local-ip" class="form-check-label">Allow local IP</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="allow-local-ip" [checked]="currentSettings.allowLocalIp" [(ngModel)]="currentSettings.allowLocalIp" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="allow-local-ip" [checked]="currentSettings.allowLocalIp" [(ngModel)]="currentSettings.allowLocalIp" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Allow local ip add to peer list, mostly in debug process</small>
           </div>
 
           <div class="form-check form-switch col-md-6">
             <label for="p2p-ignore-ipv4" class="form-check-label">Ignore IPv4</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="p2p-ignore-ipv4" [checked]="currentSettings.p2pIgnoreIpv4" [(ngModel)]="currentSettings.p2pIgnoreIpv4">
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="p2p-ignore-ipv4" [checked]="currentSettings.p2pIgnoreIpv4" [(ngModel)]="currentSettings.p2pIgnoreIpv4">
             <br>
             <small class="text-body-secondary">Ignore unsuccessful IPv4 bind for P2P</small>
           </div>
 
           <div class="col-md-6">
             <label for="p2p-bind-ip" class="form-label">Bind IP</label>
-            <input type="text" class="form-control" id="p2p-bind-ip" placeholder="0.0.0.0" [(ngModel)]="currentSettings.p2pBindIp" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="p2p-bind-ip" placeholder="0.0.0.0" [(ngModel)]="currentSettings.p2pBindIp" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Interface for p2p network protocol</small>
           </div>
 
           <div class="col-md-6">
             <label for="p2p-bind-port" class="form-label">Bind port</label>
-            <input type="number" min="0" class="form-control" id="p2p-bind-port" placeholder="18080" [(ngModel)]="currentSettings.p2pBindPort" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="p2p-bind-port" placeholder="18080" [(ngModel)]="currentSettings.p2pBindPort" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">18080 for mainnet, 28080 for testnet, 38080 for stagenet</small>
           </div>
 
           <div class="col-md-6">
             <label for="p2p-external-port" class="form-label">External port</label>
-            <input type="number" min="0" class="form-control" id="p2p-external-port" placeholder="18080" [(ngModel)]="currentSettings.p2pExternalPort" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="p2p-external-port" placeholder="18080" [(ngModel)]="currentSettings.p2pExternalPort" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">External port for p2p network protocol (if port forwarding used with NAT)</small>
           </div>
 
@@ -581,13 +581,13 @@
 
           <div class="col-md-6">
             <label for="p2p-bind-ipv6-address" class="form-label">Bind IPv6 address</label>
-            <input type="text" class="form-control" id="p2p-bind-ipv6-address" placeholder="::1" [(ngModel)]="currentSettings.p2pBindIpv6Address" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="p2p-bind-ipv6-address" placeholder="::1" [(ngModel)]="currentSettings.p2pBindIpv6Address" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Specify IPv6 address to bind RPC server</small>
           </div>
 
           <div class="col-md-6">
             <label for="p2p-bind-port-ipv6" class="form-label">Bind IPv6 port</label>
-            <input type="number" min="0" class="form-control" id="p2p-bind-port-ipv6" placeholder="18080" [(ngModel)]="currentSettings.p2pBindPortIpv6" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="p2p-bind-port-ipv6" placeholder="18080" [(ngModel)]="currentSettings.p2pBindPortIpv6" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">18080 for mainnet, 28080 for testnet, 38080 for stagenet</small>
           </div>
           
@@ -597,13 +597,13 @@
 
           <div class="col-md-6">
             <label for="seed-node-address" class="form-label">Node address</label>
-            <input type="text" class="form-control" id="seed-node-address" [(ngModel)]="seedNodeAddress" (change)="onSeedNodeChange()" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="seed-node-address" [(ngModel)]="seedNodeAddress" (change)="onSeedNodeChange()" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Connect to a node to retrieve other nodes' addresses, and disconnect</small>
           </div>
 
           <div class="col-md-4">
             <label for="seed-node-port" class="form-label">Node port</label>
-            <input type="number" min="0" class="form-control" id="seed-node-port" placeholder="18080" (change)="onSeedNodeChange()" [(ngModel)]="seedNodePort" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="seed-node-port" placeholder="18080" (change)="onSeedNodeChange()" [(ngModel)]="seedNodePort" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Specify node port</small>
           </div>
 
@@ -612,7 +612,7 @@
           <h4 class="mb-3">Exclusive Nodes</h4>
 
           <div class="col-md-12">
-            <button [disabled]="!canRemoveExclusiveNodes" id="remove-selected-exclusive-node" type="button" class="btn btn-primary" (click)="removeSelectedExclusiveNodes()"><i class="bi bi-trash-fill"></i></button>
+            <button [disabled]="!canRemoveExclusiveNodes || !canEditNodeSettings" id="remove-selected-exclusive-node" type="button" class="btn btn-primary" (click)="removeSelectedExclusiveNodes()"><i class="bi bi-trash-fill"></i></button>
             <br><br>
             <table
               id="exclusiveNodesTable"
@@ -631,19 +631,19 @@
 
           <div class="col-md-6">
             <label for="add-exlcusive-node-address" class="form-label">Node address</label>
-            <input type="text" class="form-control" id="add-exlcusive-node-address" [(ngModel)]="exclusiveNodeAddress" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="add-exlcusive-node-address" [(ngModel)]="exclusiveNodeAddress" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Specify a node to connect to only</small>
           </div>
 
           <div class="col-md-4">
             <label for="add-exlcusive-node-port" class="form-label">Node port</label>
-            <input type="number" min="0" class="form-control" id="add-exlcusive-node-port" placeholder="18080" [(ngModel)]="exclusiveNodePort" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="add-exlcusive-node-port" placeholder="18080" [(ngModel)]="exclusiveNodePort" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Specify node port</small>
           </div>
 
           <div class="col-md-2">
             <label class="form-label">Add</label>
-            <button [disabled]="!canAddExclusiveNode" type="button" class="form-control btn btn-primary" (click)="addExclusiveNode()"><i class="bi bi-plus-square"></i></button>
+            <button [disabled]="!canAddExclusiveNode || !canEditNodeSettings" type="button" class="form-control btn btn-primary" (click)="addExclusiveNode()"><i class="bi bi-plus-square"></i></button>
           </div>
 
           <hr class="my-4">
@@ -651,7 +651,7 @@
           <h4 class="mb-3">Priority Nodes</h4>
 
           <div class="col-md-12">
-            <button [disabled]="!canRemovePriorityNodes" id="remove-selected-priority-node" type="button" class="btn btn-primary" (click)="removeSelectedPriorityNodes()"><i class="bi bi-trash-fill"></i></button>
+            <button [disabled]="!canRemovePriorityNodes || !canEditNodeSettings" id="remove-selected-priority-node" type="button" class="btn btn-primary" (click)="removeSelectedPriorityNodes()"><i class="bi bi-trash-fill"></i></button>
             <br><br>
             <table
               id="priorityNodesTable"
@@ -670,19 +670,19 @@
 
           <div class="col-md-6">
             <label for="add-priority-node-address" class="form-label">Node address</label>
-            <input type="text" class="form-control" id="add-priority-node-address" placeholder="" [(ngModel)]="priorityNodeAddress" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="add-priority-node-address" placeholder="" [(ngModel)]="priorityNodeAddress" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Specify a node to connect to only</small>
           </div>
 
           <div class="col-md-4">
             <label for="add-priority-node-port" class="form-label">Node port</label>
-            <input type="number" min="0" class="form-control" id="add-priority-node-port" placeholder="18080" [(ngModel)]="priorityNodePort" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="add-priority-node-port" placeholder="18080" [(ngModel)]="priorityNodePort" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Specify node port</small>
           </div>
 
           <div class="col-md-2">
             <label class="form-label">Add</label>
-            <button [disabled]="!canAddPriorityNode" type="button" class="form-control btn btn-primary" (click)="addPriorityNode()"><i class="bi bi-plus-square"></i></button>
+            <button [disabled]="!canAddPriorityNode || !canEditNodeSettings" type="button" class="form-control btn btn-primary" (click)="addPriorityNode()"><i class="bi bi-plus-square"></i></button>
           </div>
 
 
@@ -725,26 +725,26 @@
 
             <div class="col-12">
                 <label for="address" class="form-label">Address</label>
-                <input type="text" class="form-control" id="address" placeholder="Use 'auto' to enable automatic discovering and switching" [(ngModel)]="currentSettings.bootstrapDaemonAddress" [ngModelOptions]="{standalone: true}">
+                <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="address" placeholder="Use 'auto' to enable automatic discovering and switching" [(ngModel)]="currentSettings.bootstrapDaemonAddress" [ngModelOptions]="{standalone: true}">
                 <small class="text-body-secondary">URL of a bootstrap remote daemon that the connected wallets can use while this daemon is still not fully synced.</small>
             </div>
     
             <div class="col-sm-6">
               <label for="firstName" class="form-label">Username</label>
-              <input type="text" class="form-control" id="firstName" placeholder="">
+              <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="firstName" placeholder="">
               <small class="text-body-secondary">Specify username for the bootstrap daemon login</small>
             </div>
     
             <div class="col-sm-6">
               <label for="lastName" class="form-label">Password</label>
-              <input type="password" class="form-control" id="lastName" placeholder="" value="">
+              <input [disabled]="!canEditNodeSettings" type="password" class="form-control" id="lastName" placeholder="" value="">
               <small class="text-body-secondary">Specify password for the bootstrap daemon login</small>
 
             </div>
 
             <div class="col-12">
               <label for="bootstrap-daemon-proxy" class="form-label">Proxy</label>
-              <input type="text" class="form-control" id="bootstrap-daemon-proxy" placeholder="ip:port" [(ngModel)]="currentSettings.bootstrapDaemonProxy" [ngModelOptions]="{standalone: true}">
+              <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="bootstrap-daemon-proxy" placeholder="ip:port" [(ngModel)]="currentSettings.bootstrapDaemonProxy" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">Socks proxy to use for bootstrap daemon connection</small>
             </div>
     
@@ -757,80 +757,80 @@
               
               <div class="form-check form-switch col-md-6">
                 <label for="sync-enabled" class="form-check-label">Enabled</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="sync-enabled" [checked]="!currentSettings.noSync" (change)="OnSyncEnableChange()">
+                <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="sync-enabled" [checked]="!currentSettings.noSync" (change)="OnSyncEnableChange()">
                 <br>
                 <small class="text-body-secondary">Synchronize the blockchain with other peers</small>
               </div>
 
               <div class="form-check form-switch col-md-6">
                 <label for="prune-blockchain" class="form-check-label">Prune Blockchain</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="prune-blockchain" [checked]="currentSettings.pruneBlockchain" [(ngModel)]="currentSettings.pruneBlockchain" [ngModelOptions]="{standalone: true}">
+                <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="prune-blockchain" [checked]="currentSettings.pruneBlockchain" [(ngModel)]="currentSettings.pruneBlockchain" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">Reduce blockchain disk usage</small>
               </div>
 
               <div class="form-check form-switch col-md-6">
                 <label for="sync-pruned-blocks" class="form-check-label">Sync pruned blocks</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="sync-pruned-blocks" [checked]="currentSettings.syncPrunedBlocks" [(ngModel)]="currentSettings.syncPrunedBlocks" [ngModelOptions]="{standalone: true}">
+                <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="sync-pruned-blocks" [checked]="currentSettings.syncPrunedBlocks" [(ngModel)]="currentSettings.syncPrunedBlocks" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">Allow syncing from nodes with only pruned blocks</small>
               </div>
 
               <div class="form-check form-switch col-md-6">
                 <label for="fast-block-sync" class="form-check-label">Fast block sync</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="fast-block-sync" [checked]="currentSettings.fastBlockSync" [(ngModel)]="currentSettings.fastBlockSync" [ngModelOptions]="{standalone: true}">
+                <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="fast-block-sync" [checked]="currentSettings.fastBlockSync" [(ngModel)]="currentSettings.fastBlockSync" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">Sync up most of the way by using embedded, known block hashes</small>
               </div>
 
               <div class="form-check form-switch col-md-6">
                 <label for="relay-fluffly-blocks" class="form-check-label">Relay fluffy blocks</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="relay-fluffly-blocks" [checked]="!currentSettings.noFluffyBlocks" (change)="OnRelayFlufflyBlocksChange()">
+                <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="relay-fluffly-blocks" [checked]="!currentSettings.noFluffyBlocks" (change)="OnRelayFlufflyBlocksChange()">
                 <br>
                 <small class="text-body-secondary">Relay blocks as fluffy blocks</small>
               </div>
 
               <div class="form-check form-switch col-md-6">
                 <label for="keep-alt-blocks" class="form-check-label">Keep alternative blocks</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="keep-alt-blocks" [checked]="currentSettings.keepAltBlocks" [(ngModel)]="currentSettings.keepAltBlocks" [ngModelOptions]="{standalone: true}">
+                <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="keep-alt-blocks" [checked]="currentSettings.keepAltBlocks" [(ngModel)]="currentSettings.keepAltBlocks" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">Keep alternative blocks on restart</small>
               </div>
 
               <div class="form-check form-switch col-md-12">
                 <label for="sync-on-wifi" class="form-check-label">Sync on Wi-Fi</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="sync-on-wifi" [checked]="currentSettings.syncOnWifi" [(ngModel)]="currentSettings.syncOnWifi" [ngModelOptions]="{standalone: true}">
+                <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="sync-on-wifi" [checked]="currentSettings.syncOnWifi" [(ngModel)]="currentSettings.syncOnWifi" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">Sync when node is connected to Wi-Fi</small>
               </div>
     
               <div class="col-md-3">
                 <label for="prep-block-threads" class="form-label">Prep blocks threads</label>
-                <input type="number" min="0" class="form-control" id="prep-block-threds" placeholder="4" [(ngModel)]="currentSettings.prepBlocksThreads" [ngModelOptions]="{standalone: true}">
+                <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="prep-block-threds" placeholder="4" [(ngModel)]="currentSettings.prepBlocksThreads" [ngModelOptions]="{standalone: true}">
                 <small class="text-body-secondary">Max number of threads to use when preparing block hashes in groups</small>
               </div>
     
               <div class="col-md-3">
                   <label for="block-sync-size" class="form-label">Block sync size</label>
-                  <input type="number" min="0" class="form-control" id="block-sync-size" placeholder="" [(ngModel)]="currentSettings.blockSyncSize" [ngModelOptions]="{standalone: true}">
+                  <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="block-sync-size" placeholder="" [(ngModel)]="currentSettings.blockSyncSize" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">How many blocks to sync at once during chain synchronization (0 = adaptive)</small>
               </div>
       
               <div class="col-md-3">
                   <label for="block-download-max-size" class="form-label">Block download max size</label>
-                  <input type="number" min="0" class="form-control" id="block-download-max-size" placeholder="" [(ngModel)]="currentSettings.blockDownloadMaxSize" [ngModelOptions]="{standalone: true}">
+                  <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="block-download-max-size" placeholder="" [(ngModel)]="currentSettings.blockDownloadMaxSize" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">Set maximum size of block download queue in bytes (0 for default)</small>
               </div>
 
               <div class="col-md-3">
                 <label for="fixed-difficulty" class="form-label">Fixed difficulty</label>
-                <input type="number" min="0" class="form-control" id="fixed-difficulty" placeholder="" [(ngModel)]="currentSettings.fixedDifficulty" [ngModelOptions]="{standalone: true}">
+                <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="fixed-difficulty" placeholder="" [(ngModel)]="currentSettings.fixedDifficulty" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">Fixed difficulty used for testing (0 for default)</small>
               </div>
 
               <div class="form-check form-switch col-md-12">
                 <label for="sync-period-enabled" class="form-check-label">Sync Period Enabled</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="sync-period-enabled" [checked]="currentSettings.syncPeriodEnabled" [(ngModel)]="currentSettings.syncPeriodEnabled" [ngModelOptions]="{standalone: true}" [disabled]="currentSettings.noSync">
+                <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="sync-period-enabled" [checked]="currentSettings.syncPeriodEnabled" [(ngModel)]="currentSettings.syncPeriodEnabled" [ngModelOptions]="{standalone: true}" [disabled]="currentSettings.noSync">
                 <br>
                 <small class="text-body-secondary">Enable syncing in certain hours</small>
               </div>
@@ -838,14 +838,14 @@
               <div class="col-md-4">
                 <label for="sync-period-from" class="form-label">From</label>
                 <div class="cs-form">
-                  <input id="sync-period-from" type="time" class="form-control" value="10:05 AM" [disabled]="!currentSettings.syncPeriodEnabled" [(ngModel)]="currentSettings.syncPeriodFrom" [ngModelOptions]="{standalone: true}" />
+                  <input [disabled]="!canEditNodeSettings" id="sync-period-from" type="time" class="form-control" value="10:05 AM" [disabled]="!currentSettings.syncPeriodEnabled" [(ngModel)]="currentSettings.syncPeriodFrom" [ngModelOptions]="{standalone: true}" />
                 </div>
               </div>
 
               <div class="col-md-4">
                 <label for="sync-period-to" class="form-label">To</label>
                 <div class="cs-form">
-                  <input id="sync-period-to" type="time" class="form-control" value="10:05 AM" [disabled]="!currentSettings.syncPeriodEnabled" [(ngModel)]="currentSettings.syncPeriodTo" [ngModelOptions]="{standalone: true}"/>
+                  <input [disabled]="!canEditNodeSettings" id="sync-period-to" type="time" class="form-control" value="10:05 AM" [disabled]="!currentSettings.syncPeriodEnabled" [(ngModel)]="currentSettings.syncPeriodTo" [ngModelOptions]="{standalone: true}"/>
                 </div>
               </div>
 
@@ -858,7 +858,7 @@
             
             <div class="col-md-2">
               <label for="db-sync-mode-speed" class="form-label"></label>
-              <select class="form-select" id="db-sync-mode-speed" (ngModelChange)="refreshSyncMode()" [(ngModel)]="databaseSyncSpeed" [ngModelOptions]="{standalone: true}">
+              <select [disabled]="!canEditNodeSettings" class="form-select" id="db-sync-mode-speed" (ngModelChange)="refreshSyncMode()" [(ngModel)]="databaseSyncSpeed" [ngModelOptions]="{standalone: true}">
                 <option [ngValue]="'safe'" [selected]="databaseSyncSpeed === 'safe'">Safe</option>
                 <option [ngValue]="'fast'" [selected]="databaseSyncSpeed === 'fast'">Fast</option>
                 <option [ngValue]="'fastest'" [selected]="databaseSyncSpeed === 'fastest'">Fastest</option>
@@ -867,7 +867,7 @@
             
             <div class="col-md-2">
               <label for="db-sync-mode" class="form-label"></label>
-              <select class="form-select" id="db-sync-mode" (ngModelChange)="refreshSyncMode()" [(ngModel)]="databaseSyncMode" [ngModelOptions]="{standalone: true}">
+              <select [disabled]="!canEditNodeSettings" class="form-select" id="db-sync-mode" (ngModelChange)="refreshSyncMode()" [(ngModel)]="databaseSyncMode" [ngModelOptions]="{standalone: true}">
                 <option [ngValue]="'sync'" [selected]="databaseSyncMode === 'sync'">Sync</option>
                 <option [ngValue]="'async'" [selected]="databaseSyncMode === 'async'">Async</option>
               </select>
@@ -875,13 +875,13 @@
 
             <div class="col-md-4">
               <label for="db-sync-mode-n-bytes-or-blocks" class="form-label"></label>
-              <input type="number" min="0" class="form-control" id="db-sync-mode-n-bytes-or-blocks" placeholder="" (ngModelChange)="refreshSyncMode()" [(ngModel)]="databaseSyncNBytesOrBlocks" [ngModelOptions]="{standalone: true}">
+              <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="db-sync-mode-n-bytes-or-blocks" placeholder="" (ngModelChange)="refreshSyncMode()" [(ngModel)]="databaseSyncNBytesOrBlocks" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">Number of bytes/blocks</small>
             </div>
 
             <div class="col-md-2">
               <label for="db-sync-n-per-mode" class="form-label"></label>
-              <select class="form-select" id="db-sync-n-per-mode" (ngModelChange)="refreshSyncMode()" [(ngModel)]="databaseSyncNPerMode" [ngModelOptions]="{standalone: true}">
+              <select [disabled]="!canEditNodeSettings" class="form-select" id="db-sync-n-per-mode" (ngModelChange)="refreshSyncMode()" [(ngModel)]="databaseSyncNPerMode" [ngModelOptions]="{standalone: true}">
                 <option [ngValue]="'bytes'" [selected]="databaseSyncNPerMode === 'bytes'">Bytes</option>
                 <option [ngValue]="'blocks'" [selected]="databaseSyncNPerMode === 'blocks'">Blocks</option>
               </select>
@@ -904,22 +904,22 @@
             
             <div class="col-md-12">
               <label for="mining-address" class="form-label">Address</label>
-              <input type="text" class="form-control" id="mining-address" [(ngModel)]="currentSettings.startMining" [ngModelOptions]="{standalone: true}">
+              <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="mining-address" [(ngModel)]="currentSettings.startMining" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">Specify wallet address to mining for. This must be a <strong>standard address</strong>! (aka primary address) It can be neither a subaddress nor integrated address.</small>
             </div>
 
             <div class="col-md-6">
               <label for="mining-threads" class="form-label">Threads</label>
-              <input type="number" min="0" class="form-control" id="mining-threds" placeholder="1" [(ngModel)]="currentSettings.miningThreads" [ngModelOptions]="{standalone: true}">
+              <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="mining-threds" placeholder="1" [(ngModel)]="currentSettings.miningThreads" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">Specify mining threads count. By default only one thread will be used.</small>
             </div>
             
             <div class="col-md-12">
               <label for="extra-messages-file" class="form-label">Extra messages file</label>
               <div class="input-group mb-3">
-                <input id="extra-messages-file" type="text" class="form-control form-control-sm" placeholder="" aria-label="Monerod path" aria-describedby="basic-addon2" [value]="currentSettings.extraMessagesFile" readonly>
-                <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseExtraMessagesFile()"><i class="bi bi-filetype-txt"></i> Choose file</button></span>            
-                <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeExtraMessagesFile()" [disabled]="currentSettings.extraMessagesFile === ''"><i class="bi bi-file-x"></i> Remove</button></span>
+                <input [disabled]="!canEditNodeSettings" id="extra-messages-file" type="text" class="form-control form-control-sm" placeholder="" aria-label="Monerod path" aria-describedby="basic-addon2" [value]="currentSettings.extraMessagesFile" readonly>
+                <span class="input-group-text" id="basic-addon2"><button [disabled]="!canEditNodeSettings" type="button" class="btn btn-secondary btn-sm" (click)="chooseExtraMessagesFile()"><i class="bi bi-filetype-txt"></i> Choose file</button></span>            
+                <span class="input-group-text" id="basic-addon3"><button [disabled]="!canEditNodeSettings" type="button" class="btn btn-secondary btn-sm" (click)="removeExtraMessagesFile()" [disabled]="currentSettings.extraMessagesFile === ''"><i class="bi bi-file-x"></i> Remove</button></span>
               </div>
               <small class="text-body-secondary">Specify file for extra messages to include into coinbase transactions.</small>
             </div>
@@ -933,33 +933,33 @@
               
               <div class="form-check form-switch col-md-6">
                 <label for="bg-mining-enable" class="form-check-label">Enabled</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="bg-mining-enable" [checked]="currentSettings.bgMiningEnable" [(ngModel)]="currentSettings.bgMiningEnable" [ngModelOptions]="{standalone: true}">
+                <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="bg-mining-enable" [checked]="currentSettings.bgMiningEnable" [(ngModel)]="currentSettings.bgMiningEnable" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">If enabled, mining will use a small percentage of your system resources to never noticeably slow down your computer. This is intended to encourage people to mine to improve decentralization</small>
               </div>
 
               <div class="form-check form-switch col-md-6">
                 <label for="bg-mining-ignore-battery" class="form-check-label">Ignore battery</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="bg-mining-ignore-battery" [checked]="currentSettings.bgMiningIgnoreBattery" [(ngModel)]="currentSettings.bgMiningIgnoreBattery" [ngModelOptions]="{standalone: true}">
+                <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="bg-mining-ignore-battery" [checked]="currentSettings.bgMiningIgnoreBattery" [(ngModel)]="currentSettings.bgMiningIgnoreBattery" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">If enabled, assumes plugged in when unable to query system power status</small>
               </div>
     
               <div class="col-md-4">
                   <label for="bg-mining-min-idle-interval" class="form-label">Minimum idle interval</label>
-                  <input type="number" min="0" class="form-control" id="bg-mining-min-idle-interval" placeholder="" [(ngModel)]="currentSettings.bgMiningMinIdleInterval" [ngModelOptions]="{standalone: true}">
+                  <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="bg-mining-min-idle-interval" placeholder="" [(ngModel)]="currentSettings.bgMiningMinIdleInterval" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">Specify min lookback interval in seconds for determining idle state</small>
               </div>
       
               <div class="col-md-4">
                   <label for="bg-mining-idle-threshold" class="form-label">Idle threshold</label>
-                  <input type="number" min="0" class="form-control" id="bg-mining-idle-threshold" placeholder="" [(ngModel)]="currentSettings.bgMiningIdleThreshold" [ngModelOptions]="{standalone: true}">
+                  <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="bg-mining-idle-threshold" placeholder="" [(ngModel)]="currentSettings.bgMiningIdleThreshold" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">Specify minimum avg idle percentage over lookback interval</small>  
               </div>
     
               <div class="col-md-4">
                   <label for="bg-mining-miner-target" class="form-label">Miner target</label>
-                  <input type="number" min="0" class="form-control" id="bg-mining-miner-target" placeholder="" [(ngModel)]="currentSettings.bgMiningMinerTarget" [ngModelOptions]="{standalone: true}">
+                  <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="bg-mining-miner-target" placeholder="" [(ngModel)]="currentSettings.bgMiningMinerTarget" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">Specify maximum percentage cpu use by miners</small>
               </div>
       
@@ -981,16 +981,16 @@
               <div class="col-md-12">
                 <label for="log-file" class="form-label">Log file</label>
                 <div class="input-group mb-3">
-                  <input id="extra-messages-file" type="text" class="form-control form-control-sm" placeholder="/var/log/monero/mainnet/monerod.log" aria-label="Log file" aria-describedby="basic-addon2" [value]="currentSettings.logFile" readonly>
-                  <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseLogFile()"><i class="bi bi-filetype-txt"></i> Choose file</button></span>            
-                  <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeLogFile()" [disabled]="currentSettings.logFile === ''"><i class="bi bi-file-x"></i> Remove</button></span>
+                  <input [disabled]="!canEditNodeSettings" id="extra-messages-file" type="text" class="form-control form-control-sm" placeholder="/var/log/monero/mainnet/monerod.log" aria-label="Log file" aria-describedby="basic-addon2" [value]="currentSettings.logFile" readonly>
+                  <span class="input-group-text" id="basic-addon2"><button [disabled]="!canEditNodeSettings" type="button" class="btn btn-secondary btn-sm" (click)="chooseLogFile()"><i class="bi bi-filetype-txt"></i> Choose file</button></span>            
+                  <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeLogFile()" [disabled]="currentSettings.logFile === '' || !canEditNodeSettings"><i class="bi bi-file-x"></i> Remove</button></span>
                 </div>
                 <small class="text-body-secondary"><strong>Full path</strong> to the log file (mind file permissions).</small>
               </div>
 
               <div class="col-md-4">
                 <label for="log-level" class="form-label">Log level</label>
-                <select class="form-select" id="log-level" [(ngModel)]="currentSettings.logLevel" [ngModelOptions]="{standalone: true}">
+                <select [disabled]="!canEditNodeSettings" class="form-select" id="log-level" [(ngModel)]="currentSettings.logLevel" [ngModelOptions]="{standalone: true}">
                   <option [ngValue]="0">0</option>
                   <option [ngValue]="1">1</option>
                   <option [ngValue]="2">2</option>
@@ -1002,13 +1002,13 @@
     
               <div class="col-md-4">
                   <label for="max-log-file-size" class="form-label">Max log file size</label>
-                  <input type="number" min="0" class="form-control" id="max-log-file-size" placeholder="104850000" [(ngModel)]="currentSettings.maxLogFileSize" [ngModelOptions]="{standalone: true}">
+                  <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="max-log-file-size" placeholder="104850000" [(ngModel)]="currentSettings.maxLogFileSize" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">Specify maximum log file size [B]</small>
               </div>
       
               <div class="col-md-4">
                   <label for="max-log-files" class="form-label">Max log files</label>
-                  <input type="number" min="0" class="form-control" id="max-log-files" placeholder="50" [(ngModel)]="currentSettings.maxLogFiles" [ngModelOptions]="{standalone: true}">
+                  <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="max-log-files" placeholder="50" [(ngModel)]="currentSettings.maxLogFiles" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">Specify maximum number of rotated log files to be saved (no limit by setting to 0)</small>  
               </div>  
           </div>
