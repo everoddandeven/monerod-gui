@@ -223,13 +223,13 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
       return;
     }
 
-    console.log(`view height: ${viewHeight}`);
+    //console.log(`view height: ${viewHeight}`);
 
     const offset = 35;
     const tab = this.getTableContent();
 
     if (!tab) {
-      console.warn("table content not found");
+      //console.warn("table content not found");
       return;
     }
 
@@ -252,8 +252,6 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
     }
 
     tab.style.height = `${newHeight}px`;
-
-    console.log(`old height: ${currentHeight}, left: ${left} new height: ${newHeight}`);
   }
 
   public scrollTableContentToBottom(): void {

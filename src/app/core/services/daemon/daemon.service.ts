@@ -334,8 +334,7 @@ export class DaemonService {
       headers = new HttpHeaders(this.headers);
     }
 
-    console.log("DaemonService.post(): headers:");
-    console.log(headers);
+    //console.log("DaemonService.post(): headers:", headers);
 
     return await firstValueFrom<{ [key: string]: any }>(this.httpClient.post(`${uri}`, params, { headers, withCredentials }));
   }
