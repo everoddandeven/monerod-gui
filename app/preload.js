@@ -2,6 +2,34 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
+  httpPost: (params, callback) => {
+    const { id } = params;
+    
+    if (!id) throw new Error("Invalid params");
+    const eventId = `on-http-post-result-${id}`;
+
+    const handler = (event, result) => {
+      ipcRenderer.off(eventId, handler);
+      callback(result);
+    };
+
+    ipcRenderer.on(eventId, handler);
+    ipcRenderer.invoke('http-post', params);
+  },
+  httpGet: (params, callback) => {
+    const { id } = params;
+    
+    if (!id) throw new Error("Invalid params");
+    const eventId = `on-http-get-result-${id}`;
+
+    const handler = (event, result) => {
+      ipcRenderer.off(eventId, handler);
+      callback(result);
+    };
+
+    ipcRenderer.on(eventId, handler);
+    ipcRenderer.invoke('http-get', params);
+  },
   getBatteryLevel: () => {
     ipcRenderer.invoke('get-battery-level');
   },

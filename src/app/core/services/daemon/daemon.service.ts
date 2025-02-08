@@ -1,6 +1,5 @@
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { EventEmitter, Injectable } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
 import { 
   GetBlockCountRequest, GetBlockHashRequest, GetBlockTemplateRequest, JsonRPCRequest, 
   SubmitBlockRequest, GenerateBlocksRequest, GetLastBlockHeaderRequest, 
@@ -28,6 +27,8 @@ import {
 import { MoneroInstallerService } from '../monero-installer/monero-installer.service';
 import { ElectronService } from '../electron/electron.service';
 import { openDB, IDBPDatabase } from "idb"
+import { AxiosHeaders, AxiosResponse } from 'axios';
+import { StringUtils } from '../../utils';
 
 @Injectable({
   providedIn: 'root'
@@ -85,7 +86,7 @@ export class DaemonService {
     "Access-Control-Allow-Methods": 'POST,GET' // this states the allowed methods
   };
 
-  constructor(private installer: MoneroInstallerService, private httpClient: HttpClient, private electronService: ElectronService) {
+  constructor(private installer: MoneroInstallerService, private electronService: ElectronService) {
     this.openDbPromise = this.openDatabase();
     this.settings = new DaemonSettings();
 
@@ -294,10 +295,6 @@ export class DaemonService {
     await new Promise<void>(f => setTimeout(f, ms));
   }
 
-  private async get(uri: string): Promise<{[key: string]: any}> {
-    return await firstValueFrom<{ [key: string]: any }>(this.httpClient.get(`${uri}`,this.headers));
-  }
-
   private getLogin(): { 'username': string; 'password': string; } | undefined {
     if (this.settings.rpcLogin != '') {
       try {
@@ -318,8 +315,35 @@ export class DaemonService {
     return undefined;
   }
 
+  private async get(uri: string): Promise<{[key: string]: any}> {
+    const headers: AxiosHeaders = new AxiosHeaders(this.headers);
+
+    const promise = new Promise<AxiosResponse<any, any>>((resolve, reject) => {
+      const onResponse = (result: { data?: AxiosResponse<any, any>; code: number; status: string, error?: string; }) => {
+        if (result.error) {
+          reject(new Error(result.error));
+        }
+        else if (result.data) {
+          if (result.code != 200) {
+            reject(new Error(result.status));
+          }
+          else resolve(result.data);
+        }
+        else {
+          reject(new Error("Unknown network error"));
+        }
+      };
+
+      const id = StringUtils.generateRandomString();
+
+      window.electronAPI.httpPost({ id, url: uri, config: { headers } }, onResponse);
+    });
+
+    return await promise;
+  }
+
   private async post(uri: string, params: {[key: string]: any} = {}): Promise<{[key: string]: any}> {
-    let headers: HttpHeaders;
+    let headers: AxiosHeaders;
     let withCredentials: boolean = false;
 
     const login = this.getLogin();
@@ -327,16 +351,35 @@ export class DaemonService {
     if (login) {
       const _headers = { ...this.headers };
       _headers['Authorization'] = "Basic " + btoa(unescape(encodeURIComponent(`${login.username}:${login.password}`)));
-      headers = new HttpHeaders(_headers);
+      headers = new AxiosHeaders(_headers);
       withCredentials = true;
     }
     else {
-      headers = new HttpHeaders(this.headers);
+      headers = new AxiosHeaders(this.headers);
     }
 
-    //console.log("DaemonService.post(): headers:", headers);
+    const promise = new Promise<AxiosResponse<any, any>>((resolve, reject) => {
+      const onResponse = (result: { data?: AxiosResponse<any, any>; code: number; status: string, error?: string; }) => {
+        if (result.error) {
+          reject(new Error(result.error));
+        }
+        else if (result.data) {
+          if (result.code != 200) {
+            reject(new Error(result.status));
+          }
+          else resolve(result.data);
+        }
+        else {
+          reject(new Error("Unknown network error"));
+        }
+      };
 
-    return await firstValueFrom<{ [key: string]: any }>(this.httpClient.post(`${uri}`, params, { headers, withCredentials }));
+      const id = StringUtils.generateRandomString();
+
+      window.electronAPI.httpPost({ id, url: uri, data: params, config: { headers } }, onResponse);
+    });
+
+    return await promise;
   }
 
   private async callRpc(request: RPCRequest): Promise<{ [key: string]: any }> {

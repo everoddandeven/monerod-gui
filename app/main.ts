@@ -8,6 +8,7 @@ import { app, BrowserWindow, ipcMain, screen, dialog, Tray, Menu, MenuItemConstr
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
+import axios, { AxiosRequestConfig } from 'axios';
 import { AppMainProcess, MonerodProcess, PrivateTestnet } from './process';
 import { BatteryUtils, FileUtils, NetworkUtils } from './utils';
 
@@ -835,6 +836,35 @@ try {
 
   ipcMain.handle('copy-to-clipboard', (event: IpcMainInvokeEvent, content: string) => {
     clipboard.writeText(content, "selection");
+  });
+
+  ipcMain.handle('http-post', async (event: IpcMainInvokeEvent, params: { id: string; url: string; data?: any; config?: AxiosRequestConfig<any> }) => {
+    const { id, url, data, config } = params;
+    const eventId = `on-http-post-result-${id}`;
+    try {
+      const result = await axios.post(url, data, config);
+      win?.webContents.send(eventId, { data: result.data, code: result.status, status: result.statusText });
+    }
+    catch (error: any) {
+      console.error("post(): ", error);
+      win?.webContents.send(eventId, { error: `${error}` });
+    }
+
+  });
+
+  ipcMain.handle('http-get', async (event: IpcMainInvokeEvent, params: { id: string; url: string; config?: AxiosRequestConfig<any> }) => {
+    const { id, url, config } = params;
+    const eventId = `on-http-get-result-${id}`;
+    try {
+      const result = await axios.get(url, config);
+      
+      win?.webContents.send(eventId, { data: result.data, code: result.status, status: result.statusText });
+    }
+    catch (error: any) {
+      console.error("get(): ", error);
+      win?.webContents.send(eventId, { error: `${error}` });
+    }
+
   });
 
 } catch (e: any) {

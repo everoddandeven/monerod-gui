@@ -84,6 +84,7 @@ https://github.com/user-attachments/assets/c4a50d2f-5bbb-48ac-9425-30ecc20ada7c
   - [ ] Linux
   - [ ] Windows
   - [ ] MacOs
+- [ ] Detect already running `monerod` instance
 - [X] Automatic startup at login
   - [X] Linux
   - [X] Windows

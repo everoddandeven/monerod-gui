@@ -7,12 +7,12 @@
     "email": "everoddandeven@protonmail.com"
   },
   "version": "1.1.0",
-  
   "main": "main.js",
   "private": true,
   "dependencies": {
     "adm-zip": "^0.5.16",
     "applescript": "^1.0.0",
+    "axios": "^1.7.9",
     "battery-level": "^3.0.0",
     "network": "^0.7.0",
     "os": "^0.1.2",
@@ -24,6 +24,7 @@
   "devDependencies": {
     "@types/adm-zip": "^0.5.6",
     "@types/auto-launch": "^5.0.5",
+    "@types/axios": "^0.14.4",
     "@types/battery-level": "^3.0.2",
     "@types/pidusage": "^2.0.5",
     "@types/winreg": "^1.2.36"

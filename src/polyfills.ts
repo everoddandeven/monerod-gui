@@ -46,6 +46,7 @@
  * Zone JS is required by default for Angular itself.
  */
 import 'zone.js';  // Included with Angular CLI.
+import { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 
 /***************************************************************************************************
@@ -57,6 +58,8 @@ import { NotificationConstructorOptions } from 'electron';
 declare global {
   interface Window {
     electronAPI: {
+      httpPost: <TConfig extends any = any>(params: { id: string; url: string; data?: any; config?: AxiosRequestConfig<TConfig>}, callback: (result: { data?: AxiosResponse<any, any>, code: number; status: string; error?: string; }) => void) => void;
+      httpGet: <TConfig extends any = any>(params: { id: string; url: string; config?: AxiosRequestConfig<TConfig> }, callback: (result: { data?: AxiosResponse<any, any>, code: number; status: string; error?: string; }) => void) => void;
       copyToClipboard: (content: string) => void;
       startMonerod: (options: string[]) => void;
       stopMonerod: () => void;
