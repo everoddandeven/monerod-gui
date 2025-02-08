@@ -336,7 +336,7 @@ export class DaemonService {
 
       const id = StringUtils.generateRandomString();
 
-      window.electronAPI.httpPost({ id, url: uri, config: { headers } }, onResponse);
+      window.electronAPI.httpGet({ id, url: uri, config: { headers } }, onResponse);
     });
 
     return await promise;
