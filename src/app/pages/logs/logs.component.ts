@@ -88,6 +88,7 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, O
 
     tab.addEventListener('scroll', this.scrollHandler);
     tab.addEventListener('scrollend', this.scrollHandler);
+    this.scrollEventsRegistered = true;
   }
 
   private unregisterScrollEvents(): void {
@@ -105,6 +106,7 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, O
 
     tab.removeEventListener('scroll', this.scrollHandler);
     tab.removeEventListener('scrollend', this.scrollHandler);
+    this.scrollEventsRegistered = false;
   }
 
   public trackByFn(index: number, item: string): number {
