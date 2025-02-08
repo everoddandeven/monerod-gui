@@ -84,7 +84,7 @@ export class DaemonDataService {
           this.startLoop();
         }
         else {
-          this.stopLoop();
+          if (this.refreshInterval) this.stopLoop();
         }
       });
     });
@@ -333,7 +333,7 @@ export class DaemonDataService {
   private osType?: { platform: string };
 
   private async refresh(): Promise<void> {
-    if (this.refreshing || this.tooEarlyForRefresh || this.daemonService.stopping) {
+    if (this.refreshing || this.tooEarlyForRefresh || this.daemonService.stopping || !this._daemonRunning) {
       return;
     }
 
@@ -420,7 +420,7 @@ export class DaemonDataService {
       this._firstRefresh = false;
 
       if (!this._daemonRunning) {
-        this.stopLoop();
+        if (this.refreshInterval) this.stopLoop();
         this.syncEnd.emit();
         return;
       }
@@ -517,7 +517,7 @@ export class DaemonDataService {
       this.syncError.emit(error);
 
       if (!await this.daemonService.isRunning()) {
-        this.stopLoop();
+        if (this.refreshInterval) this.stopLoop();
       }
     }
 

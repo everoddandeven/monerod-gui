@@ -1,15 +1,34 @@
 import { MonerodProcess } from "./MonerodProcess";
+import * as os from 'os';
+
+function copyArray<T>(src: T[], target?: T[]): T[] {
+    if (!target) target = [];
+    if (target.length !== 0) {
+        target = [];
+    }
+
+    src.forEach((v) => target.push(v));
+    return target;
+}
 
 export abstract class PrivateTestnet {
+    private static get isWindows(): boolean {
+        return os.platform() === 'win32';
+    }
+
+    private static get directorySeparator(): '\\' | '/' {
+        return this.isWindows ? '\\' : '/';
+    }
+
     private static readonly _node1Options: string[] = [
-        '--testnet', '--no-igd', '--hide-my-port', '--data-dir', '.localnet/xmr_local/node1',
+        '--testnet', '--no-igd', '--hide-my-port',
         '--p2p-bind-ip', '127.0.0.1', '--log-level', '0', '--add-exclusive-node', '127.0.0.1:48080',
         '--add-exclusive-node', '127.0.0.1:58080', '--rpc-access-control-origins', '*',
         '--fixed-difficulty', '500', '--disable-rpc-ban', '--non-interactive'
     ];
 
     private static readonly _node2Options: string[] = [
-        '--testnet', '--no-igd', '--hide-my-port', '--data-dir', '.localnet/xmr_local/node2',
+        '--testnet', '--no-igd', '--hide-my-port',
         '--p2p-bind-ip', '127.0.0.1', '--p2p-bind-port', '48080', '--rpc-bind-port' ,'48081',
         '--zmq-rpc-bind-port', '48082', '--log-level', '1', '--confirm-external-bind', '--add-exclusive-node', '127.0.0.1:28080',
         '--add-exclusive-node', '127.0.0.1:58080', '--rpc-access-control-origins', '*',
@@ -41,6 +60,51 @@ export abstract class PrivateTestnet {
         return this._mining;
     }
 
+    private static replaceAll(value: string, oldValue: string, newValue: string): string {
+        let v = value;
+
+        while(v.includes(oldValue)) v = v.replace(oldValue, newValue);
+
+        return v;
+    }
+
+    private static parseDataDir(dataDir: string): string {
+        const separator = this.directorySeparator;
+        const dataDirSeparator = dataDir.includes('\\') ? '\\' : '/';
+        const needsReplace = separator !== dataDirSeparator;
+
+        if (needsReplace) return this.replaceAll(dataDir, dataDirSeparator, separator);
+        return dataDir;
+    }
+
+    private static buildDataDir(monerodPath: string, dataDir: string): string {
+        const separator = this.directorySeparator;
+
+        if (monerodPath === '') return dataDir;
+
+        const components = monerodPath.split(separator);
+        components.pop();
+        const path = components.join(separator);
+
+        return `${path}${separator}${this.parseDataDir(dataDir)}`;
+    }
+
+    private static buildDataDirFlags(monerodPath: string, dataDir: string): [string, string] {
+        return ['--data-dir', this.buildDataDir(monerodPath, dataDir)];
+    }
+
+    private static getNode1Flags(monerodPath: string): string[] {
+        const flags = copyArray<string>(this._node1Options);
+        flags.push(...this.buildDataDirFlags(monerodPath, '.localnet/xmr_local/node1'));
+        return flags;
+    }
+
+    private static getNode2Flags(monerodPath: string): string[] {
+        const flags = copyArray<string>(this._node2Options);
+        flags.push(...this.buildDataDirFlags(monerodPath, '.localnet/xmr_local/node2'));
+        return flags;
+    }
+
     public static init(monerodPath: string): void {
         if (this.initialized) {
             throw new Error("Already initiliazed private testnet");
@@ -48,13 +112,13 @@ export abstract class PrivateTestnet {
 
         this._node1 = new MonerodProcess({
             monerodCmd: monerodPath,
-            flags: this._node1Options,
+            flags: this.getNode1Flags(monerodPath),
             isExe: true
         });
         
         this._node2 = new MonerodProcess({
             monerodCmd: monerodPath,
-            flags: this._node2Options,
+            flags: this.getNode2Flags(monerodPath),
             isExe: true
         });
 

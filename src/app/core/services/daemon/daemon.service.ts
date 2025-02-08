@@ -1257,12 +1257,9 @@ export class DaemonService {
   }
 
   public async quit(): Promise<void> {
+    if (this._quitting) throw new Error("Already quitting daemon");
+    
     this._quitting = true;
-    const running: boolean = await this.isRunning();
-
-    if (running) {
-      await this.stopDaemon();
-    }
 
     window.electronAPI.quit();
   }

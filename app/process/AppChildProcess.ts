@@ -64,6 +64,10 @@ export class AppChildProcess {
         return this._running;
     }
 
+    public get stopping(): boolean {
+        return this._stopping;
+    }
+
     constructor({ command, args, isExe } : { command: string, args?: string[], isExe?: boolean}) {
         this._command = command;
         this._args = args;

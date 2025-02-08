@@ -539,20 +539,35 @@ try {
   });
 
   ipcMain.handle('quit', async (event: IpcMainInvokeEvent) => {
-    isQuitting = true;
-
-    if (monerodProcess) {
-      if (PrivateTestnet.started) {
-        await PrivateTestnet.stop();
-      }
-      else await monerodProcess.stop();
-      monerodProcess = null;
+    if (isQuitting) {
+      console.warn("Already quitting");
+      return;
     }
 
-    tray.destroy();
-    win?.close();
-    win?.destroy();
-    app.quit();
+    isQuitting = true;
+
+    try {
+      if (monerodProcess) {
+        if (PrivateTestnet.started) {
+          await PrivateTestnet.stop();
+        }
+        else await monerodProcess.stop();
+        monerodProcess = null;
+      }
+    }
+    catch (error: any) {
+      console.error("An error occured while stopping monerod on quit handler", error);
+    }
+
+    try {
+      tray.destroy();
+      win?.close();
+      win?.destroy();
+      app.quit();
+    }
+    catch(error: any) {
+      console.error("An error occurred on quit handler: ", error);
+    }
   });
 
   ipcMain.handle('start-monerod', (event: IpcMainInvokeEvent, configFilePath: string[]) => {

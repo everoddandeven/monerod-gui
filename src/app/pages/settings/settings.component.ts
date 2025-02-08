@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
-import { DaemonSettings, DefaultPrivnetNode2Settings } from '../../../common';
+import { DaemonSettings, DefaultPrivnetNode2Settings, PrivnetDaemonSettings } from '../../../common';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { ElectronService } from '../../core/services';
 import { DaemonSettingsError } from '../../../common';
@@ -331,7 +331,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
 
     this.isPortable = await this.electronService.isPortable();
     this.networkType = this._currentSettings.mainnet ? 'mainnet' : this._currentSettings.testnet ? 'testnet' : this._currentSettings.stagenet ? 'stagenet' : this._currentSettings.privnet ? 'privnet' : 'mainnet';
-    if (this._privnetSettings.monerodPath == '') this._privnetSettings.monerodPath = this._currentSettings.monerodPath;
+    if (this._privnetSettings.monerodPath == '') this._privnetSettings.setMonerodPath(this._currentSettings.monerodPath);
     this.refreshLogin();
   }
 
@@ -606,7 +606,9 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     const valid = await this.daemonService.checkValidMonerodPath(file);
     if (valid) {
       this.ngZone.run(() => {
-        this.currentSettings.monerodPath = file;
+        const currentSettings = this.currentSettings;
+        if (currentSettings instanceof PrivnetDaemonSettings) currentSettings.setMonerodPath(file);
+        else currentSettings.monerodPath = file;
       });
     }
     else {
