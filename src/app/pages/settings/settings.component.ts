@@ -1,8 +1,7 @@
 import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
-import { DaemonSettings, DefaultPrivnetNode2Settings, PrivnetDaemonSettings } from '../../../common';
-import { DaemonService } from '../../core/services/daemon/daemon.service';
-import { ElectronService } from '../../core/services';
+import { DaemonSettings, DefaultPrivnetNode2Settings, I2pDaemonSettings, PrivnetDaemonSettings } from '../../../common';
+import { DaemonService, I2pDaemonService, ElectronService } from '../../core/services';
 import { DaemonSettingsError } from '../../../common';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { NavbarService } from '../../shared/components';
@@ -58,6 +57,10 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   public get currentSettings(): DaemonSettings {
     if (this.isPrivnet) return this._privnetSettings;
     return this._currentSettings;
+  }
+
+  public get currentI2pdSettings(): I2pDaemonSettings {
+    return this.i2pdService.settings;
   }
 
   public get isPrivnet(): boolean {
@@ -284,7 +287,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
 
   // #endregion
 
-  constructor(private daemonService: DaemonService, private electronService: ElectronService, navbarService: NavbarService, private ngZone: NgZone) {
+  constructor(private daemonService: DaemonService, private i2pdService: I2pDaemonService, private electronService: ElectronService, navbarService: NavbarService, private ngZone: NgZone) {
     super(navbarService);
     this.loading = true;
 
@@ -862,6 +865,10 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     else {
       window.electronAPI.showErrorBox('Invalid i2pd path', `Invalid i2pd path provided: ${file}`);
     }
+  }
+
+  public onI2pServiceEnabledChange(): void {
+
   }
 
   public async chooseBanListFile(): Promise<void> {

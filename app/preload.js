@@ -17,6 +17,41 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on(eventId, handler);
     ipcRenderer.invoke('check-valid-i2pd-path', { eventId, path });
   },
+  startI2pd: (path, flags, callback) => {
+    const eventId = `on-start-i2pd-${newId()}`;
+    const handler = (event, result) => {
+      ipcRenderer.off(eventId, handler);
+      callback(result);
+    };
+
+    ipcRenderer.on(eventId, handler);
+    ipcRenderer.invoke('start-i2pd', { eventId, path, flags });
+  },
+  stopI2pd: (callback) => {
+    const eventId = `on-stop-i2pd-${newId()}`;
+    const handler = (event, result) => {
+      ipcRenderer.off(eventId, handler);
+      callback(result);
+    };
+
+    ipcRenderer.on(eventId, handler);
+    ipcRenderer.invoke('stop-i2pd', { eventId });
+  },
+  onI2pdOutput: (callback) => {
+    ipcRenderer.removeAllListeners('on-ip2d-stdout');
+    ipcRenderer.removeAllListeners('on-ip2d-stderr');
+
+    const handlerStdOut = (event, stdout) => {
+      callback({ stdout });
+    };
+
+    const handlerStdErr = (event, stderr) => {
+      callback({ stderr });
+    };
+    
+    ipcRenderer.on('on-ip2d-stderr', handlerStdErr)
+    ipcRenderer.on('on-ip2d-stdout', handlerStdOut);
+  },
   httpPost: (params, callback) => {
     const { id } = params;
     

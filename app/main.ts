@@ -33,6 +33,7 @@ console.log('dirname: ' + dirname);
 
 //let monerodProcess: ChildProcessWithoutNullStreams | null = null;
 let monerodProcess: MonerodProcess | null = null;
+let i2pdProcess: I2pdProcess | null = null;
 
 const iconRelPath: string = 'assets/icons/monero-symbol-on-white-480.png';
 //const wdwIcon = `${dirname}/${iconRelPath}`;
@@ -292,7 +293,7 @@ async function getMonerodVersion(monerodFilePath: string): Promise<void> {
 }
 
 async function checkValidMonerodPath(monerodPath: string): Promise<void> {
-  const valid = await MonerodProcess.isValidMonerodPath(monerodPath);
+  const valid = await MonerodProcess.isValidPath(monerodPath);
   
   win?.webContents.send('on-check-valid-monerod-path', valid);
 }
@@ -527,6 +528,53 @@ try {
   });
 
   // #endregion
+
+  ipcMain.handle('start-i2pd', async (event: IpcMainInvokeEvent, params: { eventId: string; path: string, flags: string[] }) => {
+    const { eventId, path, flags } = params;
+    
+    let error: string | undefined = undefined;
+
+    if (i2pdProcess && i2pdProcess.running) {
+      error = 'i2pd already started';
+    }
+    else if (!I2pdProcess.isValidPath(path)) {
+      error = 'invalid i2pd path provided: ' + path;
+    }
+    else {
+      try {
+        i2pdProcess = new I2pdProcess({ i2pdPath: path, flags, isExe: true });
+        await i2pdProcess.start();
+        i2pdProcess.onStdOut((out: string) => win?.webContents.send('on-ip2d-stdout', out));
+        i2pdProcess.onStdErr((out: string) => win?.webContents.send('on-ip2d-stderr', out));
+      }
+      catch (err: any) {
+        error = `${err}`;
+        i2pdProcess = null;
+      }
+    }
+
+    win?.webContents.send(eventId, error);
+  });
+
+  ipcMain.handle('stop-i2pd', async (event: IpcMainInvokeEvent, params: { eventId: string; }) => {
+    let err: string | undefined = undefined;
+    const { eventId } = params;
+
+    if (i2pdProcess == null) err = 'Already stopped i2pd';
+    else if (i2pdProcess.stopping) err = 'Alrady stopping i2pd';
+    else if (i2pdProcess.starting) err = 'i2pd is starting';
+    else {
+      try {
+        await i2pdProcess.stop();
+        i2pdProcess = null;
+      }
+      catch(error: any) {
+        err = `${error}`;
+      }
+    }
+
+    win?.webContents.send(eventId, err);
+  });
 
   ipcMain.handle('is-on-battery-power', async (event: IpcMainInvokeEvent, params: { eventId: string; }) => {
     const onBattery = await BatteryUtils.isOnBatteryPower();

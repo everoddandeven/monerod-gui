@@ -1092,67 +1092,75 @@
     <div class="row g-5 p-3">
       <div class="col-md-12 col-lg-12">
         <form class="needs-validation" novalidate="">    
-          <h4 class="mb-3">I2pd</h4>
-
-          <div class="col-md-12">
-            <label for="i2pd-path" class="form-label">I2pd path</label>
-            <div class="input-group mb-3">
-              <input id="i2pd-path" type="text" class="form-control form-control-sm" placeholder="" aria-label="I2pd path" aria-describedby="basic-addon2" [value]="currentSettings.i2pdPath" readonly>
-              <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseI2pdFile()"><i class="bi bi-filetype-exe"></i> Choose executable</button></span>            
-              <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeMonerodFile()" [disabled]="currentSettings.i2pdPath === ''"><i class="bi bi-file-x"></i> Remove</button></span>
+          <h4 class="mb-3">I2P Service</h4>          
+          <div class="row g-3">
+            
+            <div class="col-md-12">
+              <label for="i2pd-path" class="form-label">I2pd path</label>
+              <div class="input-group mb-3">
+                <input id="i2pd-path" type="text" class="form-control form-control-sm" placeholder="" aria-label="I2pd path" aria-describedby="basic-addon2" [value]="currentSettings.i2pdPath" readonly>
+                <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseI2pdFile()"><i class="bi bi-filetype-exe"></i> Choose executable</button></span>            
+                <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeMonerodFile()" [disabled]="currentSettings.i2pdPath === ''"><i class="bi bi-file-x"></i> Remove</button></span>
+              </div>
+              <small class="text-body-secondary">Path to i2pd executable</small>
             </div>
-            <small class="text-body-secondary">Path to i2pd executable</small>
+
+            <div class="form-check form-switch col-md-6">
+              <label for="i2p-service-enabled" class="form-check-label">Enabled</label>
+              <input (change)="onI2pServiceEnabledChange()" [disabled]="!canEditNodeSettings || currentSettings.i2pdPath === ''" class="form-control form-check-input" type="checkbox" role="switch" id="sync-period-enabled" [checked]="currentI2pdSettings.enabled" [(ngModel)]="currentI2pdSettings.enabled" [ngModelOptions]="{standalone: true}">
+              <br>
+              <small class="text-body-secondary">Enable I2P Service</small>
+            </div>
+
+            <div class="form-check form-switch col-md-6">
+              <label for="i2p-sync-on-clearnet" class="form-check-label">Sync on Clearnet</label>
+              <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="i2p-sync-on-clearnet" [checked]="currentI2pdSettings.syncOnClearNet" [(ngModel)]="currentI2pdSettings.syncOnClearNet" [ngModelOptions]="{standalone: true}" [disabled]="!currentI2pdSettings.enabled">
+              <br>
+              <small class="text-body-secondary">Allow blockchain synchronization on clearnet</small>
+            </div>
+
+            <div class="form-check form-switch col-md-6">
+              <label for="i2p-allow-incoming-connections" class="form-check-label">Allow incoming connections</label>
+              <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="i2p-allow-incoming-connections" [checked]="currentI2pdSettings.allowIncomingConnections" [(ngModel)]="currentI2pdSettings.allowIncomingConnections" [ngModelOptions]="{standalone: true}" [disabled]="!currentI2pdSettings.enabled">
+              <br>
+              <small class="text-body-secondary">Allow incoming connections to the I2P service</small>
+            </div>
+    
+            <div class="form-check form-switch col-md-6">
+              <label for="i2p-tx-proxy-enabled" class="form-check-label">Tx proxy</label>
+              <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="i2p-tx-proxy-enabled" [checked]="currentI2pdSettings.txProxyEnabled" [(ngModel)]="currentI2pdSettings.txProxyEnabled" [ngModelOptions]="{standalone: true}" [disabled]="!currentI2pdSettings.enabled">
+              <br>
+              <small class="text-body-secondary">Enable tx proxy through I2P service</small>
+            </div>
           </div>
-  
+          
           <hr class="my-4">
-          <h4 class="mb-3">Config file</h4>
-  
+          <h4 class="mb-3">I2P Tx Proxy</h4>
           <div class="row g-3">
-  
-            <div class="col-md-6">
-              <label for="import-i2pd-config-file" class="form-label">Import config file</label>
-              <div class="input-group mb-3">
-                <button [disabled]="!canImportConfigFile" type="button" class="btn btn-secondary btn-sm" (click)="importMonerodConfigFile()"><i class="bi bi-box-arrow-in-down"></i> Import</button>
-              </div>
-              <small class="text-body-secondary">Import custom i2pd config file</small>
-            </div>
-            
-            <div class="col-md-6">
-              <label for="export-i2pd-config-file" class="form-label">Export config file</label>
-              <div class="input-group mb-3">
-                <button [disabled]="!canExportConfigFile" type="button" class="btn btn-secondary btn-sm" (click)="exportMonerodConfigFile()"><i class="bi bi-box-arrow-up-right"></i> Export</button>
-              </div>
-              <small class="text-body-secondary">Export current saved i2pd settings to config file</small>
-            </div>
-  
-          </div>
 
-          <div class="row g-3">
-            <h4 class="mb-3">I2P Tx Proxy</h4>
-            
-            <div class="col-10">
-              <label for="i2p-tx-proxy-ip" class="form-label"></label>
-              <input (input)="onI2pTxProxyChange()" [disabled]="!canEditNodeSettings" type="text" class="form-control" id="tx-proxy" placeholder="127.0.0.1" [(ngModel)]="i2pTxProxyIp" [ngModelOptions]="{standalone: true}">
+            <div class="col-8">
+              <label for="i2p-tx-proxy-ip" class="form-label">Socks IP</label>
+              <input (input)="onI2pTxProxyChange()" [disabled]="!canEditNodeSettings || currentI2pdSettings.enabled" type="text" class="form-control" id="tx-proxy" placeholder="127.0.0.1" [(ngModel)]="i2pTxProxyIp" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">
-                Socks proxy ip.
+                Socks proxy ip
               </small>
             </div>
 
             <div class="col-md-2">
-              <label for="i2p-tx-proxy-port" class="form-label"></label>
-              <input (change)="onI2pTxProxyChange()" [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="i2p-tx-proxy-port" placeholder="9050" [(ngModel)]="i2pTxProxyPort" [ngModelOptions]="{standalone: true}">
+              <label for="i2p-tx-proxy-port" class="form-label">Socks Port</label>
+              <input (change)="onI2pTxProxyChange()" [disabled]="!canEditNodeSettings || currentI2pdSettings.enabled" type="number" min="0" class="form-control" id="i2p-tx-proxy-port" placeholder="9050" [(ngModel)]="i2pTxProxyPort" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">Socks proxy port</small>
             </div>
 
             <div class="col-md-2">
-              <label for="i2p-tx-proxy-max-connections" class="form-label"></label>
-              <input (change)="onI2pTxProxyChange()" [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="i2p-tx-proxy-max-connections" placeholder="10" [(ngModel)]="i2pTxProxyMaxConnections" [ngModelOptions]="{standalone: true}">
+              <label for="i2p-tx-proxy-max-connections" class="form-label">Max Connections</label>
+              <input (change)="onI2pTxProxyChange()" [disabled]="!canEditNodeSettings || currentI2pdSettings.enabled" type="number" min="0" class="form-control" id="i2p-tx-proxy-max-connections" placeholder="10" [(ngModel)]="i2pTxProxyMaxConnections" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">Max connections</small>
             </div>
 
             <div class="form-check form-switch col-md-6">
               <label for="i2p-tx-proxy-disable-noise" class="form-check-label">Disable Noise</label>
-              <input (change)="onI2pTxProxyChange()" [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="sync-period-enabled" [checked]="i2pTxProxyDisableNoise" [(ngModel)]="i2pTxProxyDisableNoise" [ngModelOptions]="{standalone: true}" [disabled]="currentSettings.noSync">
+              <input (change)="onI2pTxProxyChange()" [disabled]="!canEditNodeSettings || currentI2pdSettings.enabled" class="form-control form-check-input" type="checkbox" role="switch" id="sync-period-enabled" [checked]="i2pTxProxyDisableNoise" [(ngModel)]="i2pTxProxyDisableNoise" [ngModelOptions]="{standalone: true}" [disabled]="currentSettings.noSync">
               <br>
               <small class="text-body-secondary">Tx will be <i>fluffed</i> to outbound I2P and I2P peers, and the receiving hidden service will immediately fluff the transaction to ipv4/6 peers. This will speed up tx broadcast.</small>
             </div>
@@ -1166,7 +1174,7 @@
             
             <div class="col-10">
               <label for="i2p-anonymous-inbound-address" class="form-label">Inbound Address</label>
-              <input (input)="onI2pAnonymousInboundChange()" [disabled]="!canEditNodeSettings" type="text" class="form-control" id="i2p-anonymous-inbound-address" placeholder="...sxakefmed.i2p" [(ngModel)]="i2pAnonymousInboundAddress" [ngModelOptions]="{standalone: true}">
+              <input (input)="onI2pAnonymousInboundChange()" [disabled]="!canEditNodeSettings || currentI2pdSettings.enabled" type="text" class="form-control" id="i2p-anonymous-inbound-address" placeholder="...sxakefmed.i2p" [(ngModel)]="i2pAnonymousInboundAddress" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">
                 Specify inbound hidden service address for receiving incoming I2P connections
               </small>
@@ -1174,15 +1182,15 @@
 
             <div class="col-md-2">
               <label for="i2p-anonymous-inbound-port" class="form-label"></label>
-              <input (change)="onI2pAnonymousInboundChange()" [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="i2p-anonymous-inbound-port" placeholder="28083" [(ngModel)]="i2pAnonymousInboundPort" [ngModelOptions]="{standalone: true}">
+              <input (change)="onI2pAnonymousInboundChange()" [disabled]="!canEditNodeSettings || currentI2pdSettings.enabled" type="number" min="0" class="form-control" id="i2p-anonymous-inbound-port" placeholder="28083" [(ngModel)]="i2pAnonymousInboundPort" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">
                 Specify inbound hidden service port for receiving incoming I2P connections
               </small>
             </div>
             
-            <div class="col-10">
+            <div class="col-8">
               <label for="i2p-anonymous-inbound-forward-ip" class="form-label">Forward Ip</label>
-              <input (input)="onI2pAnonymousInboundChange()" [disabled]="!canEditNodeSettings" type="text" class="form-control" id="i2p-anonymous-inbound-forward-ip" placeholder="127.0.0.1" [(ngModel)]="i2pAnonymousInboundForwardIp" [ngModelOptions]="{standalone: true}">
+              <input (input)="onI2pAnonymousInboundChange()" [disabled]="!canEditNodeSettings || currentI2pdSettings.enabled" type="text" class="form-control" id="i2p-anonymous-inbound-forward-ip" placeholder="127.0.0.1" [(ngModel)]="i2pAnonymousInboundForwardIp" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">
                 Forward node ip
               </small>
@@ -1190,13 +1198,13 @@
 
             <div class="col-md-2">
               <label for="i2p-anonymous-inbound-forward-port" class="form-label">Forward Port</label>
-              <input (change)="onI2pAnonymousInboundChange()" [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="i2p-anonymous-inbound-forward-port" placeholder="28083" [(ngModel)]="i2pAnonymousInboundForwardPort" [ngModelOptions]="{standalone: true}">
+              <input (change)="onI2pAnonymousInboundChange()" [disabled]="!canEditNodeSettings || currentI2pdSettings.enabled" type="number" min="0" class="form-control" id="i2p-anonymous-inbound-forward-port" placeholder="28083" [(ngModel)]="i2pAnonymousInboundForwardPort" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">Forward node port</small>
             </div>
 
             <div class="col-md-2">
-              <label for="i2p-anonymous-inbound-max-connections" class="form-label"></label>
-              <input (change)="onI2pAnonymousInboundChange()" [disabled]="!canEditNodeSettings" type="number" min="-1" class="form-control" id="i2p-anonymous-inbound-max-connections" placeholder="10" [(ngModel)]="i2pAnonymousInboundMaxConnections" [ngModelOptions]="{standalone: true}">
+              <label for="i2p-anonymous-inbound-max-connections" class="form-label">Max Connections</label>
+              <input (change)="onI2pAnonymousInboundChange()" [disabled]="!canEditNodeSettings || currentI2pdSettings.enabled" type="number" min="-1" class="form-control" id="i2p-anonymous-inbound-max-connections" placeholder="10" [(ngModel)]="i2pAnonymousInboundMaxConnections" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">Max connections</small>
             </div>
 

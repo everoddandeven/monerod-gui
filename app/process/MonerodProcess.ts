@@ -22,7 +22,7 @@ export class MonerodProcess extends AppChildProcess {
         })
     }
 
-    public static async isValidMonerodPath(monerodPath: string): Promise<boolean> {
+    public static async isValidPath(monerodPath: string): Promise<boolean> {
         console.log(`MonerodProcess.isValidMonerodPath('${monerodPath}')`);
 
         if (typeof monerodPath !== 'string' || MonerodProcess.replaceAll(monerodPath, " ", "") == "") {
@@ -86,7 +86,7 @@ export class MonerodProcess extends AppChildProcess {
 
     public override async start(): Promise<void> {
         if (this._isExe) {
-            const validPath = await MonerodProcess.isValidMonerodPath(this._command);
+            const validPath = await MonerodProcess.isValidPath(this._command);
 
             if (!validPath) {
                 throw new Error("Invalid monerod path provided: " + this._command);

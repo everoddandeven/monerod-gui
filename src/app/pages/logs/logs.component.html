@@ -20,8 +20,7 @@
     
     <div *ngIf="lines.length > 0" class="terminal bg-dark text-light p-3 m-4" #logTerminal>
         <div class="terminal-output" id="terminalOutput">
-          {{ logs }}
-
+{{ logs }}
         </div>
     </div>    
   </div>
@@ -765,6 +764,19 @@
     <button *ngIf="!settingLogHashRate" class="w-100 btn btn-primary btn-lg" type="button" (click)="setLogHashRate()">Set Log Hash Rate</button>
     <button *ngIf="settingLogHashRate" class="w-100 btn btn-primary btn-lg" type="button" disabled>Setting Log Hash Rate ...</button>
   
+  </div>
+
+  <div class="tab-pane fade show active" id="pills-i2pd" role="tabpanel" aria-labelledby="pills-i2pd-tab" tabindex="0">
+    <div *ngIf="i2pdLogs.length === 0" class="h-100 p-5 text-bg-dark rounded-3 m-4 text-center">
+      <h2><i class="bi bi-exclamation-diamond m-4"></i> No logs</h2>
+      <p>Start I2P daemon to enable session logging</p>
+    </div>
+    
+    <div *ngIf="i2pdLogs.length > 0" class="terminal bg-dark text-light p-3 m-4" #logTerminal>
+        <div class="terminal-output" id="terminalOutput">
+{{ i2pdLogs }}
+        </div>
+    </div>    
   </div>
 
 </div>

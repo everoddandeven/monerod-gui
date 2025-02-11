@@ -68,6 +68,10 @@ export class AppChildProcess {
         return this._stopping;
     }
 
+    public get starting(): boolean {
+        return this._starting;
+    }
+
     constructor({ command, args, isExe } : { command: string, args?: string[], isExe?: boolean}) {
         this._command = command;
         this._args = args;

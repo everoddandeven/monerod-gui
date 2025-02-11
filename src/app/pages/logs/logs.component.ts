@@ -2,7 +2,7 @@ import { AfterViewInit, Component, NgZone, OnDestroy } from '@angular/core';
 import { LogsService } from './logs.service';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
-import { DaemonService } from '../../core/services';
+import { DaemonService, I2pDaemonService } from '../../core/services';
 import { LogCategories } from '../../../common';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { Subscription } from 'rxjs';
@@ -41,7 +41,7 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, O
     return this.logsService.categories;
   }
   
-  constructor(navbarService: NavbarService, private logsService: LogsService, private daemonService: DaemonService, private ngZone: NgZone) {
+  constructor(navbarService: NavbarService, private i2pdService: I2pDaemonService, private logsService: LogsService, private daemonService: DaemonService, private ngZone: NgZone) {
     super(navbarService);
 
     const onLogSub: Subscription = this.logsService.onLog.subscribe((message: string) => {
@@ -49,12 +49,20 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, O
       this.onLog()
     });
 
-    this.setLinks([
+    const links = [
       new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', false, 'Overview'),
       new NavbarLink('pills-set-log-level-tab', '#pills-set-log-level', 'pills-set-log-level', false, 'Set Log Level'),
       new NavbarLink('pills-set-log-categories-tab', '#pills-set-log-categories', 'pills-set-log-categories', false, 'Set Log Categories'),
       new NavbarLink('pills-set-log-hash-rate-tab', '#pills-set-log-hash-rate', 'pills-set-log-hash-rate', false, 'Set Log Hash Rate')
-    ]);
+    ];
+
+    if (i2pdService.running) {
+      const link = new NavbarLink('pills-i2pd-tab', '#pills-i2pd', 'pills-i2pd', false, 'I2P')
+
+      links.push(link);
+    }
+
+    this.setLinks(links);
 
     this.subscriptions.push(onLogSub);
   }
@@ -65,6 +73,14 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, O
 
   public get logs(): string {
     return this.initing ? '' : this.lines.join("\n");
+  }
+
+  public get i2pdLines(): string [] {
+    return this.i2pdService.logs;
+  }
+
+  public get i2pdLogs(): string {
+    return this.initing ? '' : this.i2pdLines.join("\n");
   }
 
   private onLog(): void {
