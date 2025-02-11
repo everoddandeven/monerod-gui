@@ -1,7 +1,22 @@
 // preload.js
 const { contextBridge, ipcRenderer } = require('electron');
 
+function newId() {
+  return parseInt(`${Math.random()*1000}`);
+}
+
 contextBridge.exposeInMainWorld('electronAPI', {
+  checkValidI2pdPath: (path, callback) => {
+    const eventId = `on-check-valid-i2pd-path-${newId()}`;
+
+    const handler = (event, result) => {
+      ipcRenderer.off(eventId, handler);
+      callback(result);
+    };
+
+    ipcRenderer.on(eventId, handler);
+    ipcRenderer.invoke('check-valid-i2pd-path', { eventId, path });
+  },
   httpPost: (params, callback) => {
     const { id } = params;
     

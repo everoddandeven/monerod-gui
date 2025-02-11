@@ -735,6 +735,22 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     throw new Error("Could not get monerod mime type");
   }
 
+  private async getI2pdFileSpec(): Promise<{ extensions?: string[]; mimeType: string; }> {
+    const { platform } = await this.electronService.getOsType();
+
+    if (platform == 'win32') {
+      return { mimeType: 'application/vnd.microsoft.portable-executable', extensions: ['exe']};
+    }
+    else if (platform == 'darwin') {
+      return { mimeType: 'application/octet-stream' };
+    }
+    else if (platform == 'linux') {
+      return { mimeType: 'application/x-executable'};
+    }
+
+    throw new Error("Could not get i2pd mime type");
+  }
+
   public async importMonerodConfigFile(): Promise<void> {
     try {
       try {
@@ -824,6 +840,27 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     }
     else {
       window.electronAPI.showErrorBox('Invalid monerod path', `Invalid monerod path provided: ${file}`);
+    }
+  }
+
+  public async chooseI2pdFile(): Promise<void> {
+    const spec = await this.getI2pdFileSpec();
+    const file = await this.electronService.selectFile(spec.extensions);
+
+    if (file == '') {
+      return;
+    }
+
+    const valid = await this.daemonService.checkValidI2pdPath(file);
+    if (valid) {
+      this.ngZone.run(() => {
+        const currentSettings = this.currentSettings;
+        if (currentSettings instanceof PrivnetDaemonSettings) return;
+        else currentSettings.i2pdPath = file;
+      });
+    }
+    else {
+      window.electronAPI.showErrorBox('Invalid i2pd path', `Invalid i2pd path provided: ${file}`);
     }
   }
 

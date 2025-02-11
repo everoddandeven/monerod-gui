@@ -251,6 +251,20 @@ export class DaemonService {
     return await checkPromise;
   }
 
+  
+  public async checkValidI2pdPath(path: string): Promise<boolean> {
+    if (path == null || path == undefined || path.replace(' ', '') == '') {
+      return false;
+    }
+
+    const checkPromise = new Promise<boolean>((resolve) => {
+      window.electronAPI.checkValidI2pdPath(path, resolve);
+    });
+
+    return await checkPromise;
+  }
+
+
   public async getSettings(): Promise<DaemonSettings> {
     const db = await this.openDbPromise;
     const result = await db.get(this.storeName, 1);

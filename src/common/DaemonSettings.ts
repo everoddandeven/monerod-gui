@@ -2,6 +2,7 @@ import { DaemonSettingsDuplicateExclusiveNodeError, DaemonSettingsDuplicatePrior
 
 export class DaemonSettings {
   public monerodPath: string = '';
+  public i2pdPath: string = '';
 
   public startAtLogin: boolean = false;
   public startAtLoginMinimized: boolean = false;

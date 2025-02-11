@@ -95,7 +95,7 @@ declare global {
       onMoneroClose: (callback: (event: any, code: number) => void) => void;
       onMoneroStdout: (callbak: (event: any, out: string) => void) => void;
       unregisterOnMoneroStdout: () => void;
-
+      checkValidI2pdPath: (path: string, callback: (valid: boolean) => void) => void;
       isWifiConnected: () => void;
       onIsWifiConnectedResponse: (callback: (event: any, connected: boolean) => void) => void;
       unregisterOnIsWifiConnectedResponse: () => void;

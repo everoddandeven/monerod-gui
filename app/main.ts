@@ -9,7 +9,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 import axios, { AxiosRequestConfig } from 'axios';
-import { AppMainProcess, MonerodProcess, PrivateTestnet } from './process';
+import { AppMainProcess, I2pdProcess, MonerodProcess, PrivateTestnet } from './process';
 import { BatteryUtils, FileUtils, NetworkUtils } from './utils';
 
 app.setName('Monero Daemon');
@@ -772,7 +772,12 @@ try {
 
   ipcMain.handle('check-valid-monerod-path', (event: IpcMainInvokeEvent, path: string) => {
     checkValidMonerodPath(path);
-  })
+  });
+
+  ipcMain.handle('check-valid-i2pd-path', async (event: IpcMainInvokeEvent, params: { eventId: string, path: string }) => {
+    const { eventId, path } = params;
+    win?.webContents.send(eventId, await I2pdProcess.isValidPath(path));
+  });
 
   ipcMain.handle('show-notification', (event: IpcMainInvokeEvent, options?: NotificationConstructorOptions) => {
     showNotification(options);
