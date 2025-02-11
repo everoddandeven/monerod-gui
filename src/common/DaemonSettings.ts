@@ -99,8 +99,8 @@ export class DaemonSettings {
   public priorityNodes: string[] = [];
 
   public seedNode: string = '';
-  public txProxy: string = '';
-  public anonymousInbound: string = '';
+  public txProxies: { tor: string; i2p: string; } = { tor: '', i2p: '' };
+  public anonymousInbounds: { tor: string; i2p: string } = { tor: '', i2p: '' };
 
   public banList: string = '';
   public hideMyPort: boolean = false;
@@ -165,6 +165,32 @@ export class DaemonSettings {
 
   public get isPrivnet(): boolean {
     return this.privnet;
+  }
+
+  public setTxProxy(proxy: string, type?: 'tor' | 'i2p'): void {
+    if (type === 'tor') { 
+      if (!DaemonSettings.isValidTorTxProxy(proxy)) {
+        throw new Error('Invalid tor proxy provided: ' + proxy);
+      }
+      this.txProxies.tor = proxy; 
+    }
+    else if (type === 'i2p') {
+      if (!DaemonSettings.isValidI2pTxProxy(proxy)) {
+        throw new Error('Invalid i2p proxy provided: ' + proxy);
+      }
+      this.txProxies.i2p = proxy;
+    }
+    else {
+      if (DaemonSettings.isValidTorTxProxy(proxy)) {
+        this.txProxies.tor = proxy;      
+      }
+      else if (DaemonSettings.isValidI2pTxProxy(proxy)) {
+        this.txProxies.i2p = proxy;
+      }
+      else {
+        throw new Error('Invalid proxy provided: ' + proxy);
+      }
+    }
   }
 
   public addExclusiveNode(node: string): void {
@@ -268,7 +294,109 @@ export class DaemonSettings {
     this.exclusiveNodes.forEach((en) => result.addExclusiveNode(en));
     this.priorityNodes.forEach((pn) => result.addPriorityNode(pn));
 
+    result.txProxies = { ...this.txProxies };
+    result.anonymousInbounds = { ...this.anonymousInbounds };
+
     return result;
+  }
+
+  public setAnonymousInbound(inbound: string, type?: 'tor' | 'i2p'): void {
+    if (type && !DaemonSettings.isValidAnonymousInbound(inbound, type)) throw new Error("Invalid anonymous inbound: " + inbound);
+
+    if (type == 'tor') {
+      this.anonymousInbounds.tor = inbound;
+    }
+    else if (type == 'i2p') {
+      this.anonymousInbounds.i2p = inbound;
+    }
+    else if (type === undefined) {
+      if (DaemonSettings.isValidTorAnonymousInbound(inbound)) {
+        this.anonymousInbounds.tor = inbound;
+      }
+      else if (DaemonSettings.isValidI2pAnonymousInbound(inbound)) {
+        this.anonymousInbounds.i2p = inbound;
+      }
+      else {
+        throw new Error("Invalid anonymous inbound provided: " + inbound);
+      }
+    }
+    else {
+      throw new Error("Invalid type provided: " + type);
+    }
+  }
+
+  public static isValidAnonymousInbound(inbound: string, type: 'tor' | 'i2p'): boolean {
+    const components = inbound.split(',');
+    const address = components[0];
+    const port = components[1];
+    const socks = components[2];
+    const maxConnections = components[3];
+
+    if (!address || address == '' || !address.endsWith(`.${type}`) || !port || port == '' || !socks || socks == '') return false;
+    
+    if (maxConnections) {
+      try {
+        if (parseInt(maxConnections) < -1) return false;
+      }
+      catch {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  public static isValidTorAnonymousInbound(inbound: string): boolean {
+    return this.isValidAnonymousInbound(inbound, 'tor');
+  }
+
+  public static isValidI2pAnonymousInbound(inbound: string): boolean {
+    return this.isValidAnonymousInbound(inbound, 'i2p');
+  }
+
+  
+
+  public static isValidTxProxy(txProxy: string, type: 'tor' | 'i2p'): boolean {
+    const netType = `${type},`;
+    if (!txProxy.startsWith(netType)) {
+      return false;
+    }
+
+    const components = txProxy.replace(netType, '').split(',');
+    const socks = components[0];
+    const maxConnections = components[1];
+    const disableNoise = components[2];
+
+    if (!socks) return false;
+    
+    const socksComponents = socks.split(':');
+    const socksIp = socksComponents[0];
+    const socksPort = socksComponents[1];
+
+    if (!socksIp || !socksPort || socksIp == '' || socksPort == '' || socksPort == '0') return false;
+
+    if (maxConnections) {
+      try {
+        if(parseInt(maxConnections) < 0) return false;
+      }
+      catch {
+        return false;
+      }
+    }
+
+    if (disableNoise) {
+      if (disableNoise !== 'disablenoise') return false;
+    }
+
+    return true;
+  }
+
+  public static isValidTorTxProxy(proxy: string): boolean {
+    return this.isValidTxProxy(proxy, 'tor');
+  }
+
+  public static isValidI2pTxProxy(proxy: string): boolean {
+    return this.isValidTxProxy(proxy, 'i2p');
   }
 
   public static parse(data: any): DaemonSettings {
@@ -360,10 +488,10 @@ export class DaemonSettings {
             case 'db-salvage': settings.dbSalvage = boolValue; break;
             case 'regtest': settings.regtest = boolValue; break;
             case 'pad-transactions': settings.padTransactions = boolValue; break;
-            case 'anonymous-inbound': settings.anonymousInbound = value; break;
+            case 'anonymous-inbound': settings.setAnonymousInbound(value); break;
             case 'fluffy-blocks': settings.fluffyBlocks = boolValue; break;
             case 'no-fluffy-blocks': settings.noFluffyBlocks = boolValue; break;
-            case 'tx-proxy': settings.txProxy = value; break;
+            case 'tx-proxy': settings.setTxProxy(value); break;
             case 'max-txpool-weight': settings.maxTxPoolWeight = parseInt(value, 10); break;
             case 'public-node': settings.publicNode = boolValue; break;
             case 'allow-local-ip': settings.allowLocalIp = boolValue; break;
@@ -511,8 +639,10 @@ export class DaemonSettings {
     if (this.hasPriorityNodes) this.priorityNodes.forEach((node) => options.push(`--add-priority-node`, node));
     if (this.hasExclusiveNodes) this.exclusiveNodes.forEach((node) => options.push(`--add-exlcusive-node`, node));
     if (this.seedNode != '') options.push(`--seed-node`, this.seedNode);
-    if (this.txProxy != '') options.push(`--tx-proxy`, this.txProxy);
-    if (this.anonymousInbound != '') options.push(`--anonymous-inbound`, this.anonymousInbound);
+    if (this.txProxies.tor && this.txProxies.tor != '') options.push(`--tx-proxy`, this.txProxies.tor);
+    if (this.txProxies.i2p && this.txProxies.i2p != '') options.push(`--tx-proxy`, this.txProxies.i2p);
+    if (this.anonymousInbounds.tor != '') options.push(`--anonymous-inbound`, this.anonymousInbounds.tor);
+    if (this.anonymousInbounds.i2p != '') options.push(`--anonymous-inbound`, this.anonymousInbounds.i2p);
     if (this.banList != '') options.push(`--ban-list`, this.banList);
     if (this.hideMyPort) options.push(`--hide-my-port`);
     if (this.noSync) options.push(`--no-sync`);

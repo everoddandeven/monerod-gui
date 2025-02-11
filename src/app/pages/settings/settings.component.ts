@@ -82,6 +82,58 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   public seedNodeAddress: string = '';
   public seedNodePort: number = 0;
 
+  public torTxProxyIp: string = '';
+  public torTxProxyPort: number = 0;
+  public torTxProxyMaxConnections: number = 10;
+  public torTxProxyDisableNoise: boolean = false;
+
+  public get torTxProxy(): string {
+    const torTxProxy = `tor,${this.torTxProxyIp}:${this.torTxProxyPort}${this.torTxProxyMaxConnections > 0 ? ',' + this.torTxProxyMaxConnections : ''}${this.torTxProxyDisableNoise ? ',disablenoise' : ''}`;
+
+    if (!DaemonSettings.isValidTorTxProxy(torTxProxy)) return '';
+
+    return torTxProxy;
+  }
+
+  public i2pTxProxyIp: string = '';
+  public i2pTxProxyPort: number = 0;
+  public i2pTxProxyMaxConnections: number = 10;
+  public i2pTxProxyDisableNoise: boolean = false;
+
+  public get i2pTxProxy(): string {
+    const i2pTxProxy = `i2p,${this.i2pTxProxyIp}:${this.i2pTxProxyPort}${this.i2pTxProxyMaxConnections > 0 ? ',' + this.i2pTxProxyMaxConnections : ''}${this.i2pTxProxyDisableNoise ? ',disablenoise' : ''}`;
+
+    if (!DaemonSettings.isValidI2pTxProxy(i2pTxProxy)) return '';
+
+    return i2pTxProxy;
+  }
+
+  public torAnonymousInboundAddress: string = '';
+  public torAnonymousInboundPort: number = 0;
+  public torAnonymousInboundForwardIp: string = '';
+  public torAnonymousInboundForwardPort: number = 0;
+  public torAnonymousInboundMaxConnections: number = 0;
+
+  public get torAnonymousInbound(): string {
+    const torAnonymousInbound = `${this.torAnonymousInboundAddress}:${this.torAnonymousInboundPort},${this.torAnonymousInboundForwardIp}:${this.torAnonymousInboundForwardPort}${this.torTxProxyMaxConnections > -1 ? ',' + this.torAnonymousInboundMaxConnections : ''}`;
+    if (!DaemonSettings.isValidTorAnonymousInbound(torAnonymousInbound)) return '';
+
+    return torAnonymousInbound;
+  }
+
+  public i2pAnonymousInboundAddress: string = '';
+  public i2pAnonymousInboundPort: number = 0;
+  public i2pAnonymousInboundForwardIp: string = '';
+  public i2pAnonymousInboundForwardPort: number = 0;
+  public i2pAnonymousInboundMaxConnections: number = 0;
+
+  public get i2pAnonymousInbound(): string {
+    const i2pAnonymousInbound = `${this.i2pAnonymousInboundAddress}:${this.i2pAnonymousInboundPort},${this.i2pAnonymousInboundForwardIp}:${this.i2pAnonymousInboundForwardPort}${this.i2pTxProxyMaxConnections > -1 ? ',' + this.i2pAnonymousInboundMaxConnections : ''}`;
+    if (!DaemonSettings.isValidI2pAnonymousInbound(i2pAnonymousInbound)) return '';
+
+    return i2pAnonymousInbound;
+  }
+
   private get seedNode(): string {
     return `${this.seedNodeAddress}:${this.seedNodePort}`;
   }
@@ -243,7 +295,9 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
       new NavbarLink('pills-p2p-tab', '#pills-p2p', 'pills-p2p', false, 'P2P', false),
       new NavbarLink('pills-blockchain-tab', '#pills-blockchain', 'pills-blockchain', false, 'Blockchain', false),
       new NavbarLink('pills-mining-tab', '#pills-mining', 'pills-mining', false, 'Mining', false),
-      new NavbarLink('pills-logs-tab', '#pills-logs', 'pills-logs', false, 'Logs', false)
+      new NavbarLink('pills-logs-tab', '#pills-logs', 'pills-logs', false, 'Logs', false),
+      new NavbarLink('pills-tor-tab', '#pills-tor', 'pills-tor', false, 'Tor', false),
+      new NavbarLink('pills-i2p-tab', '#pills-i2p', 'pills-i2p', false, 'I2P', false)
     ];
     
     this.originalSettings = new DaemonSettings();
@@ -254,6 +308,159 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     }).catch((error: any) => {
       console.error(error);
     });
+  }
+
+  public get validTorTxProxy(): boolean {
+    return this.torTxProxy !== '';
+  }
+
+  public onTorTxProxyChange(): void {
+    if (!this.validTorTxProxy) return;
+
+    const torTxProxy = this.torTxProxy;
+    
+    this._currentSettings.setTxProxy(torTxProxy, 'tor');
+  }
+
+  public onI2pTxProxyChange(): void {
+    if (!this.validTorTxProxy) return;
+
+    const i2pTxProxy = this.i2pTxProxy;
+    
+    this._currentSettings.setTxProxy(i2pTxProxy, 'i2p');
+  }
+
+  public onTorAnonymousInboundChange(): void {
+    if (this.torAnonymousInbound == '') return;
+
+    const torAnonymousInbound = this.torAnonymousInbound;
+    
+    this._currentSettings.setAnonymousInbound(torAnonymousInbound, 'tor');
+  }
+
+  public onI2pAnonymousInboundChange(): void {
+    if (this.i2pAnonymousInbound == '') return;
+
+    const i2pAnonymousInbound = this.i2pAnonymousInbound;
+    
+    this._currentSettings.setAnonymousInbound(i2pAnonymousInbound, 'i2p');
+  }
+
+  private refreshI2pAnonymousInbound(): void {
+    const i2pProxy = this._currentSettings.anonymousInbounds.i2p;
+
+    if (!DaemonSettings.isValidI2pAnonymousInbound(i2pProxy)) {
+      this.i2pAnonymousInboundAddress = '';
+      this.i2pAnonymousInboundPort = 0;
+      this.i2pAnonymousInboundForwardIp = '';
+      this.i2pAnonymousInboundForwardPort = 0;
+      this.i2pAnonymousInboundMaxConnections = 10;
+      return;
+    }
+
+    const components = i2pProxy.replace(`i2p,`, '').split(',');
+    const address = components[0];
+    const port = components[1];
+    const socks = components[2];
+    const socksComponent = socks.split(':');
+    const socksIp = socksComponent[0];
+    const socksPort = socksComponent[1];
+    const maxConnections = components[3];
+
+    this.i2pAnonymousInboundAddress = address;
+    this.i2pAnonymousInboundPort = parseInt(port);
+    this.i2pAnonymousInboundForwardIp = socksIp;
+    this.i2pAnonymousInboundForwardPort = parseInt(socksPort);
+    
+    if (maxConnections) {
+      this.i2pAnonymousInboundMaxConnections = parseInt(maxConnections);
+    }
+  }
+
+  private refreshI2pTxProxy(): void {
+    const i2pTxProxy = this._currentSettings.txProxies.i2p;
+    if (!DaemonSettings.isValidI2pTxProxy(i2pTxProxy)) {
+      this.i2pTxProxyIp = '';
+      this.i2pTxProxyPort = 0;
+      this.i2pTxProxyMaxConnections = 10;
+      this.i2pTxProxyDisableNoise = false;
+      return;
+    }
+
+    const components = i2pTxProxy.replace('i2p,', '').split(',');
+    const socks = components[0];
+    const maxConnections = components[1];
+    const disableNoise = components[2];    
+    const socksComponents = socks.split(':');
+    const socksIp = socksComponents[0];
+    const socksPort = socksComponents[1];
+
+    this.i2pTxProxyIp = socksIp;
+    this.i2pTxProxyPort = parseInt(socksPort);
+    this.i2pTxProxyDisableNoise = disableNoise === 'disablenoise';
+
+    if (maxConnections) {
+      this.i2pTxProxyMaxConnections = parseInt(maxConnections);
+    }
+  }
+
+  private refreshTorAnonymousInbound(): void {
+    const torProxy = this._currentSettings.anonymousInbounds.tor;
+
+    if (!DaemonSettings.isValidTorAnonymousInbound(torProxy)) {
+      this.torAnonymousInboundAddress = '';
+      this.torAnonymousInboundPort = 0;
+      this.torAnonymousInboundForwardIp = '';
+      this.torAnonymousInboundForwardPort = 0;
+      this.torAnonymousInboundMaxConnections = 10;
+      return;
+    }
+
+    const components = torProxy.replace(`tor,`, '').split(',');
+    const address = components[0];
+    const port = components[1];
+    const socks = components[2];
+    const socksComponent = socks.split(':');
+    const socksIp = socksComponent[0];
+    const socksPort = socksComponent[1];
+    const maxConnections = components[3];
+
+    this.torAnonymousInboundAddress = address;
+    this.torAnonymousInboundPort = parseInt(port);
+    this.torAnonymousInboundForwardIp = socksIp;
+    this.torAnonymousInboundForwardPort = parseInt(socksPort);
+    
+    if (maxConnections) {
+      this.torAnonymousInboundMaxConnections = parseInt(maxConnections);
+    }
+
+  }
+
+  private refreshTorTxProxy(): void {
+    const torTxProxy = this._currentSettings.txProxies.tor;
+    if (!DaemonSettings.isValidTorTxProxy(torTxProxy)) {
+      this.torTxProxyIp = '';
+      this.torTxProxyPort = 0;
+      this.torTxProxyMaxConnections = 10;
+      this.torTxProxyDisableNoise = false;
+      return;
+    }
+
+    const components = torTxProxy.replace('tor,', '').split(',');
+    const socks = components[0];
+    const maxConnections = components[1];
+    const disableNoise = components[2];    
+    const socksComponents = socks.split(':');
+    const socksIp = socksComponents[0];
+    const socksPort = socksComponents[1];
+
+    this.torTxProxyIp = socksIp;
+    this.torTxProxyPort = parseInt(socksPort);
+    this.torTxProxyDisableNoise = disableNoise === 'disablenoise';
+
+    if (maxConnections) {
+      this.torTxProxyMaxConnections = parseInt(maxConnections);
+    }
   }
 
   private refreshLogin(): void {
@@ -333,6 +540,10 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     this.networkType = this._currentSettings.mainnet ? 'mainnet' : this._currentSettings.testnet ? 'testnet' : this._currentSettings.stagenet ? 'stagenet' : this._currentSettings.privnet ? 'privnet' : 'mainnet';
     if (this._privnetSettings.monerodPath == '') this._privnetSettings.setMonerodPath(this._currentSettings.monerodPath);
     this.refreshLogin();
+    this.refreshTorAnonymousInbound();
+    this.refreshTorTxProxy();
+    this.refreshI2pAnonymousInbound();
+    this.refreshI2pTxProxy();
   }
 
   private loadTables(): void {
