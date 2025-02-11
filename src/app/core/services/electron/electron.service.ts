@@ -76,26 +76,21 @@ export class ElectronService {
 
   public async isOnBatteryPower(): Promise<boolean> {
     const promise = new Promise<boolean>((resolve) => {
-      window.electronAPI.onIsOnBatteryPower((event: any, onBattery: boolean) => {
-        window.electronAPI.unregisterOnIsOnBatteryPower();
+      window.electronAPI.isOnBatteryPower((onBattery: boolean) => {
         resolve(onBattery);
       });
     });
-
-    window.electronAPI.isOnBatteryPower();
 
     return await promise;
   }
 
   public async getBatteryLevel(): Promise<number> {
     const promise = new Promise<number>((resolve) => {
-      window.electronAPI.onGetBatteryLevel((event: any, level: number) => {
+      window.electronAPI.getBatteryLevel((level: number) => {
         window.electronAPI.unregisterOnGetBatteryLevel();
         resolve(level);
       });
     });
-
-    window.electronAPI.getBatteryLevel();
 
     return (await promise)*100;
   }

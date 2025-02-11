@@ -45,29 +45,30 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on(eventId, handler);
     ipcRenderer.invoke('http-get', params);
   },
-  getBatteryLevel: () => {
-    ipcRenderer.invoke('get-battery-level');
+  getBatteryLevel: (callback) => {
+    const eventId = `on-get-battery-level-${newId()};`
+    const handler = (event, result) => {
+      ipcRenderer.off(eventId, handler);
+      callback(result);
+    };
+    ipcRenderer.on(eventId, handler);
+    ipcRenderer.invoke('get-battery-level', { eventId });
   },
-  onGetBatteryLevel: (callback) => {
-    ipcRenderer.on('on-get-battery-level', callback);
-  },
-  isOnBatteryPower: () => {
-    ipcRenderer.invoke('is-on-battery-power');
-  },
-  onIsOnBatteryPower: (callback) => {
-    ipcRenderer.on('on-is-on-battery-power', callback);
-  },
-  unregisterOnIsOnBatteryPower: () => {
-    ipcRenderer.removeAllListeners('on-is-on-battery-power');
+  isOnBatteryPower: (callback) => {
+    const eventId = `on-is-on-battery-power-${newId()};`
+    const handler = (event, result) => {
+      ipcRenderer.off(eventId);
+      callback(result);
+    };
+
+    ipcRenderer.on('on-is-on-battery-power', handler);
+    ipcRenderer.invoke('is-on-battery-power', { eventId });
   },
   onAc: (callback) => {
     ipcRenderer.on('on-ac', callback);
   },
   onBattery: (callback) => {
     ipcRenderer.on('on-battery', callback);
-  },
-  unregisterOnGetBatteryLevel: () => {
-    ipcRenderer.removeAllListeners('on-get-battery-level');
   },
   copyToClipboard: (content) => {
     ipcRenderer.invoke('copy-to-clipboard', content);

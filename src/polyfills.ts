@@ -156,13 +156,10 @@ declare global {
       setTrayItemEnabled: (id: string, enabled: boolean) => void;
       setTrayToolTip: (toolTip: string) => void;
 
-      getBatteryLevel: () => void;
-      onGetBatteryLevel: (callback: (event: any, level: number) => void) => void;
+      getBatteryLevel: (callback: (level: number) => void) => void;
       unregisterOnGetBatteryLevel: () => void;
 
-      isOnBatteryPower: () => void;
-      onIsOnBatteryPower: (callback: (event: any, onBattery: boolean) => void) => void;
-      unregisterOnIsOnBatteryPower: () => void;
+      isOnBatteryPower: (callback: (onBattery: boolean) => void) => void;
       onBattery: (callback: (event: any) => void) => void;
       onAc: (callback: (event: any) => void) => void;
 

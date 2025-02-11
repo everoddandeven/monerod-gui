@@ -528,9 +528,9 @@ try {
 
   // #endregion
 
-  ipcMain.handle('is-on-battery-power', async (event: IpcMainInvokeEvent) => {
+  ipcMain.handle('is-on-battery-power', async (event: IpcMainInvokeEvent, params: { eventId: string; }) => {
     const onBattery = await BatteryUtils.isOnBatteryPower();
-    win?.webContents.send('on-is-on-battery-power', onBattery);
+    win?.webContents.send(params.eventId, onBattery);
   });
 
   powerMonitor.on('on-ac', () => win?.webContents.send('on-ac'));
@@ -802,8 +802,8 @@ try {
     }
   });
 
-  ipcMain.handle('get-battery-level', async (event: IpcMainInvokeEvent) => {
-    win?.webContents.send('on-get-battery-level', await BatteryUtils.getLevel());
+  ipcMain.handle('get-battery-level', async (event: IpcMainInvokeEvent, params: { eventId: string; }) => {
+    win?.webContents.send(params.eventId, await BatteryUtils.getLevel());
   });
 
   ipcMain.handle('disable-auto-launch', async (event: IpcMainInvokeEvent) => {
