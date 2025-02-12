@@ -21,7 +21,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
 
   private addingExclusiveNode: boolean = false;
   private addingPriorityNode: boolean = false;
-  private originalSettings: DaemonSettings;
+  private originalSettings: DaemonSettings = new DaemonSettings();
   private _currentSettings: DaemonSettings;
   private readonly _privnetSettings: DefaultPrivnetNode2Settings = new DefaultPrivnetNode2Settings();
 
@@ -59,8 +59,11 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     return this._currentSettings;
   }
 
+  public originalI2pdSettings: I2pDaemonSettings;
+  private _currentI2pdSettings: I2pDaemonSettings;
+
   public get currentI2pdSettings(): I2pDaemonSettings {
-    return this.i2pdService.settings;
+    return this._currentI2pdSettings;
   }
 
   public get isPrivnet(): boolean {
@@ -303,8 +306,9 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
       new NavbarLink('pills-i2p-tab', '#pills-i2p', 'pills-i2p', false, 'I2P', false)
     ];
     
-    this.originalSettings = new DaemonSettings();
     this._currentSettings = this.originalSettings.clone();
+    this.originalI2pdSettings = this.i2pdService.settings;
+    this._currentI2pdSettings = this.originalI2pdSettings.clone();
 
     this.load().then(() => {
       console.debug("Settings loaded");
@@ -517,6 +521,16 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   }
 
   private async load(): Promise<void> {
+    if (!this.i2pdService.loaded)
+    {
+      this.originalI2pdSettings = await this.i2pdService.loadSettings();
+    }
+    else {
+      this.originalI2pdSettings = this.i2pdService.settings;
+    }
+
+    this._currentI2pdSettings = this.originalI2pdSettings.clone();
+
     this.originalSettings = await this.daemonService.getSettings();
     this._currentSettings = this.originalSettings.clone();
 
@@ -568,6 +582,9 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
 
   public get modified(): boolean {
     if (!this._currentSettings.equals(this.originalSettings)) {
+      return true;
+    }
+    if (!this._currentI2pdSettings.equals(this.originalI2pdSettings)) {
       return true;
     }
 
@@ -697,8 +714,11 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
       const oldStartMinimized: boolean = this.originalSettings.startAtLoginMinimized;
 
       await this.daemonService.saveSettings(this._currentSettings);
+      this.i2pdService.setSettings(this._currentI2pdSettings);
+      await this.i2pdService.saveSettings();
 
       this.originalSettings = this._currentSettings.clone();
+      this.originalI2pdSettings = this._currentI2pdSettings.clone();
 
       const minimizedChanged: boolean = oldStartMinimized != this.originalSettings.startAtLoginMinimized;
 
@@ -822,7 +842,11 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   }
 
   public removeMonerodFile(): void {
-    this.currentSettings.monerodPath = '';
+    this._currentSettings.monerodPath = '';
+  }
+
+  public removeI2pdFile(): void {
+    this._currentSettings.monerodPath = '';
   }
 
   public async chooseMonerodFile(): Promise<void> {
@@ -857,9 +881,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     const valid = await this.daemonService.checkValidI2pdPath(file);
     if (valid) {
       this.ngZone.run(() => {
-        const currentSettings = this.currentSettings;
-        if (currentSettings instanceof PrivnetDaemonSettings) return;
-        else currentSettings.i2pdPath = file;
+        this.currentI2pdSettings.path = file;
       });
     }
     else {

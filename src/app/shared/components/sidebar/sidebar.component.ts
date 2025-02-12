@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { DaemonService } from '../../../core/services/daemon/daemon.service';
+import { I2pDaemonService } from '../../../core/services';
 
 @Component({
     selector: 'app-sidebar',
@@ -23,15 +24,27 @@ export class SidebarComponent {
     return this.navLinks.filter((link) => link.position == 'bottom');
   }
 
-  constructor(private router: Router, private daemonService: DaemonService) {
+  public get i2pEnabled(): boolean {
+    return this.i2pService.settings.enabled;
+  }
+
+  constructor(private router: Router, private i2pService: I2pDaemonService) {
     this.updateLinks();
     this.isLoading = false;
     this.errorMessage = '';
+    
+    this.i2pService.onStart.subscribe(() => {
+      this.updateLinks();
+    });
+
+    this.i2pService.onStop.subscribe(() => {
+      this.updateLinks();
+    });
   }
 
   private createFullLinks(): NavLink[] {
     //       new NavLink('XMRig', '/xmrig', 'icon-xr text-primary'),
-    return this.navLinks = [
+    this.navLinks = [
       new NavLink('Dashboard', '/detail', 'bi bi-speedometer2'),
       new NavLink('Blockchain', '/blockchain', 'bi bi-bounding-box'),
       new NavLink('Transactions', '/transactions', 'bi bi-credit-card-2-front'),
@@ -41,16 +54,24 @@ export class SidebarComponent {
       new NavLink('Network', '/network', 'bi bi-hdd-network', 'bottom'),
       new NavLink('Peers', '/peers', 'bi bi-people', 'bottom'),
       new NavLink('Bans', '/bans', 'bi bi-ban', 'bottom'),
-      new NavLink('Logs', '/logs', 'bi bi-terminal', 'bottom'),
+      new NavLink('Logs', '/logs', 'bi bi-terminal', 'bottom')
+    ];
+
+    if (this.i2pEnabled) {
+      this.navLinks.push(new NavLink('I2P', '/i2pwebconsole', 'bi bi-incognito', 'bottom'));
+    }
+
+    this.navLinks.push(
       new NavLink('Version', '/version', 'bi bi-git', 'bottom'),
       new NavLink('Settings', '/settings', 'bi bi-gear', 'bottom'),
       new NavLink('About', '/about', 'bi bi-info-circle', 'bottom')
-    ];
+    );
+
+    return this.navLinks;
   }
 
   private updateLinks(): void {
     this.navLinks = this.createFullLinks();
-
   }
 
   public isActive(navLink: NavLink): boolean {

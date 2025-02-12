@@ -1,8 +1,8 @@
+import { Comparable } from "./Comparable";
 import { DaemonSettingsDuplicateExclusiveNodeError, DaemonSettingsDuplicatePriorityNodeError, DaemonSettingsInvalidNetworkError, DaemonSettingsInvalidValueError, DaemonSettingsUnknownKeyError } from "./error";
 
-export class DaemonSettings {
+export class DaemonSettings extends Comparable<DaemonSettings> {
   public monerodPath: string = '';
-  public i2pdPath: string = '';
 
   public startAtLogin: boolean = false;
   public startAtLoginMinimized: boolean = false;
@@ -236,12 +236,7 @@ export class DaemonSettings {
     }
   }
 
-  public equals(settings: DaemonSettings): boolean {
-    //return this.toCommandOptions().join('') == settings.toCommandOptions().join('');
-    return this.deepEqual(this, settings);
-  }
-
-  private deepEqual(obj1: any, obj2: any): boolean {
+  protected override deepEqual(obj1: any, obj2: any): boolean {
     // Se sono lo stesso riferimento, sono uguali
     if (obj1 === obj2) return true;
 
@@ -286,7 +281,7 @@ export class DaemonSettings {
     return true;
   }
 
-  public clone(): DaemonSettings {
+  public override clone(): DaemonSettings {
     const result = Object.assign(new DaemonSettings(), this);
 
     result.exclusiveNodes = [];
@@ -354,8 +349,6 @@ export class DaemonSettings {
   public static isValidI2pAnonymousInbound(inbound: string): boolean {
     return this.isValidAnonymousInbound(inbound, 'i2p');
   }
-
-  
 
   public static isValidTxProxy(txProxy: string, type: 'tor' | 'i2p'): boolean {
     const netType = `${type},`;

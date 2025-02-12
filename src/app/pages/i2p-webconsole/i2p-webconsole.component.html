@@ -1,0 +1,168 @@
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2">I2P</h1>
+  <div class="btn-toolbar mb-2 mb-md-0">
+    <ul class="nav nav-pills m-3" id="pills-tab" role="tablist">
+      @for(navbarLink of links; track navbarLink.name) {
+        <li class="nav-item mr-2" role="presentation">
+            <button [class]="navbarLink.selected ? 'nav-link active btn-sm' : 'nav-link btn-sm'" [id]="navbarLink.id" data-bs-toggle="pill" [attr.data-bs-target]="navbarLink.target" type="button" role="tab" [attr.aria-controls]="navbarLink.controls" [attr.aria-selected]="navbarLink.selected" [disabled]="navbarLink.disabled">{{navbarLink.name}}</button>
+        </li>
+      }
+    </ul>
+  </div>
+</div>
+<div class="tab-content tab-grow" id="pills-tabContent">
+
+  <div class="tab-pane fade show active" id="pills-overview" role="tabpanel" aria-labelledby="pills-overview-tab" tabindex="0">
+    <div class="card p-1">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Info</h6>
+            <ul class="list-group">
+              <li class="list-group-item"><strong>Uptime:</strong> {{ mainData.uptime }}</li>
+              <li class="list-group-item"><strong>Network Status:</strong> {{ mainData.networkStatus }}</li>
+              <li class="list-group-item"><strong>Client Tunnels:</strong> {{ mainData.clientTunnels }}</li>
+              <li class="list-group-item"><strong>Transit Tunnels:</strong> {{ mainData.transitTunnels }}</li>
+              <li class="list-group-item"><strong>Tunnel Creation Success Rate:</strong> {{ mainData.tunnelCreationSuccessRate }}</li>
+              <li class="list-group-item"><strong>Data Path:</strong> {{ mainData.dataPath }}</li>
+              <li class="list-group-item"><strong>Router Identity:</strong> {{ mainData.routerIdent }}</li>
+              <li class="list-group-item"><strong>Router Caps:</strong> {{ mainData.routerCaps }}</li>
+              <li class="list-group-item"><strong>Routers:</strong> {{ mainData.routers }}</li>
+              <li class="list-group-item"><strong>Version:</strong> {{ mainData.version }}</li>
+            </ul>
+          </div>
+          <div class="col-md-6">
+            <h6>Services</h6>
+            <ul class="list-group">
+              <li class="list-group-item"><strong>HTTP Proxy:</strong> {{ mainData.services.httpProxy ? 'Enabled' : 'Disabled' }}</li>
+              <li class="list-group-item"><strong>SOCKS Proxy:</strong> {{ mainData.services.socksProxy ? 'Enabled' : 'Disabled' }}</li>
+              <li class="list-group-item"><strong>BOB:</strong> {{ mainData.services.bob ? 'Enabled' : 'Disabled' }}</li>
+              <li class="list-group-item"><strong>SAME:</strong> {{ mainData.services.same ? 'Enabled' : 'Disabled' }}</li>
+              <li class="list-group-item"><strong>I2CP:</strong> {{ mainData.services.i2cp ? 'Enabled' : 'Disabled' }}</li>
+              <li class="list-group-item"><strong>I2PControl:</strong> {{ mainData.services.i2pcControl ? 'Enabled' : 'Disabled' }}</li>
+            </ul>
+          </div>
+        </div>
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <h6>Network</h6>
+            <ul class="list-group">
+              <li class="list-group-item"><strong>Sent:</strong> {{ mainData.sent }}</li>
+              <li class="list-group-item"><strong>Received:</strong> {{ mainData.received }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id="pills-router-commands" role="tabpanel" aria-labelledby="pills-router-commands-tab" tabindex="0">
+    <div class="row g-5 p-3">
+      <div class="col-md-12 col-lg-12">
+
+        <h4 class="mb-3">Commands</h4>
+
+        <div class="row g-3">
+
+          <div class="col-md-4">
+            <label for="import-config-file" class="form-label">Run peer test</label>
+            <div class="input-group mb-3">
+              <button type="button" class="btn btn-secondary btn-sm"><i class="bi bi-play-fill"></i> Run</button>
+            </div>
+            <small class="text-body-secondary">Check network connectivity</small>
+          </div>
+          
+          <div class="col-md-4">
+            <label for="export-config-file" class="form-label">Reload tunnels configuration</label>
+            <div class="input-group mb-3">
+              <button type="button" class="btn btn-secondary btn-sm"><i class="bi bi-play-fill"></i> Run</button>
+            </div>
+            <small class="text-body-secondary">Reload configuration and restart tunnels</small>
+          </div>
+
+          <div class="col-md-4">
+            <label for="export-config-file" class="form-label">Decline transit tunnels</label>
+            <div class="input-group mb-3">
+              <button type="button" class="btn btn-secondary btn-sm"><i class="bi bi-play-fill"></i> Run</button>
+            </div>
+            <small class="text-body-secondary">Stop connectivity to transit tunnels</small>
+          </div>
+
+        </div> 
+
+        <hr class="my-4">
+        <h4 class="mb-3">Miscellaneous</h4>
+
+        <div class="row g-3">
+
+          <div class="col-md-4">
+            <label for="log-level" class="form-label">Logging Level</label>
+            <select class="form-select" id="log-level" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="warn">none</option>
+              <option [ngValue]="warn">critical</option>
+              <option [ngValue]="warn">error</option>
+              <option [ngValue]="warn">warn</option>
+              <option [ngValue]="info">info</option>
+              <option [ngValue]="debug">debug</option>
+            </select>
+          </div>
+
+          <div class="col-md-8">
+            <label for="export-config-file" class="form-label">Update Logging Level</label>
+            <div class="input-group mb-3">
+              <button type="button" class="btn btn-secondary btn-sm"><i class="bi bi-play-fill"></i> Update</button>
+            </div>
+          </div>
+
+        </div> 
+
+
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id="pills-local-destinations" role="tabpanel" aria-labelledby="pills-local-destinations-tab" tabindex="0">
+    <div class="card p-1">
+      <div class="card-body">
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <h6>Local Destinations</h6>
+            <ul class="list-group">
+              @for(dest of localDestinations.destinations; track dest) {
+                <li class="list-group-item">{{ dest }}</li>
+              }
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane fade" id="pills-i2p-tunnels" role="tabpanel" aria-labelledby="pills-i2p-tunnels-tab" tabindex="0">
+    <div class="card p-1">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Client Tunnels</h6>
+            <ul class="list-group">
+              @for(client of i2pTunnels.clients; track client.name) {
+                <li class="list-group-item"><strong>{{ client.name }}:</strong> {{ client.address }}</li>
+              }
+            </ul>
+          </div>
+          <div class="col-md-6">
+            <h6>Server Tunnels</h6>
+            <ul class="list-group">
+              @for(server of i2pTunnels.servers; track server.name) {
+                <li class="list-group-item"><strong>{{ server.name }}:</strong> {{ server.address }}</li>
+              }
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div>

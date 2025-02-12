@@ -1,3 +1,4 @@
+export { Comparable } from "./Comparable";
 export { AddedAuxPow } from "./AddedAuxPow";
 export { AuxPoW } from "./AuxPoW";
 export { Ban } from "./Ban";
@@ -45,6 +46,7 @@ export { NetHashRateHistory, NetHashRateHistoryEntry } from './NetHashRateHistor
 export * from './error';
 export * from './request';
 export * from './utils';
+export * from './i2p';
 
 export { PrivnetDaemonSettings } from "./PrivnetDaemonSettings";
 export { DefaultPrivnetNode1Settings } from "./DefaultPrivnetNode1Settings";

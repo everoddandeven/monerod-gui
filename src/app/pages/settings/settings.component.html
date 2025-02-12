@@ -1098,16 +1098,16 @@
             <div class="col-md-12">
               <label for="i2pd-path" class="form-label">I2pd path</label>
               <div class="input-group mb-3">
-                <input id="i2pd-path" type="text" class="form-control form-control-sm" placeholder="" aria-label="I2pd path" aria-describedby="basic-addon2" [value]="currentSettings.i2pdPath" readonly>
+                <input id="i2pd-path" type="text" class="form-control form-control-sm" placeholder="" aria-label="I2pd path" aria-describedby="basic-addon2" [value]="currentI2pdSettings.path" readonly>
                 <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseI2pdFile()"><i class="bi bi-filetype-exe"></i> Choose executable</button></span>            
-                <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeMonerodFile()" [disabled]="currentSettings.i2pdPath === ''"><i class="bi bi-file-x"></i> Remove</button></span>
+                <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeI2pdFile()" [disabled]="currentI2pdSettings.path === ''"><i class="bi bi-file-x"></i> Remove</button></span>
               </div>
               <small class="text-body-secondary">Path to i2pd executable</small>
             </div>
 
             <div class="form-check form-switch col-md-6">
               <label for="i2p-service-enabled" class="form-check-label">Enabled</label>
-              <input (change)="onI2pServiceEnabledChange()" [disabled]="!canEditNodeSettings || currentSettings.i2pdPath === ''" class="form-control form-check-input" type="checkbox" role="switch" id="sync-period-enabled" [checked]="currentI2pdSettings.enabled" [(ngModel)]="currentI2pdSettings.enabled" [ngModelOptions]="{standalone: true}">
+              <input (change)="onI2pServiceEnabledChange()" [disabled]="!canEditNodeSettings || currentI2pdSettings.path === ''" class="form-control form-check-input" type="checkbox" role="switch" id="sync-period-enabled" [checked]="currentI2pdSettings.enabled" [(ngModel)]="currentI2pdSettings.enabled" [ngModelOptions]="{standalone: true}">
               <br>
               <small class="text-body-secondary">Enable I2P Service</small>
             </div>
@@ -1181,10 +1181,9 @@
             </div>
 
             <div class="col-md-2">
-              <label for="i2p-anonymous-inbound-port" class="form-label"></label>
+              <label for="i2p-anonymous-inbound-port" class="form-label">Inbound port</label>
               <input (change)="onI2pAnonymousInboundChange()" [disabled]="!canEditNodeSettings || currentI2pdSettings.enabled" type="number" min="0" class="form-control" id="i2p-anonymous-inbound-port" placeholder="28083" [(ngModel)]="i2pAnonymousInboundPort" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">
-                Specify inbound hidden service port for receiving incoming I2P connections
               </small>
             </div>
             

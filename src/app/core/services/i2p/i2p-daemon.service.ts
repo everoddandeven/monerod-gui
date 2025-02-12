@@ -10,6 +10,9 @@ export class I2pDaemonService {
   private readonly storeName = 'settingsStore';
   private readonly openDbPromise: Promise<IDBPDatabase>;
 
+  public readonly onStart: EventEmitter<void> = new EventEmitter<void>();
+  public readonly onStop: EventEmitter<void> = new EventEmitter<void>();
+
   private _settings: I2pDaemonSettings = new I2pDaemonSettings();
   private _running: boolean = false;
   private _starting: boolean = false;
@@ -48,9 +51,12 @@ export class I2pDaemonService {
     return this._loaded;
   }
 
+  private detectedInstallation?: { path: string; configFile?: string; tunnelConfig?: string; tunnelsConfigDir?: string; pidFile?: string; isRunning?: boolean; };
+
   constructor() 
   { 
     this.openDbPromise = this.openDatabase();
+    this.loadSettings();
   }
 
   private async openDatabase(): Promise<IDBPDatabase<any>> {
@@ -75,16 +81,19 @@ export class I2pDaemonService {
     if (this.starting) throw new Error("Alrady starting i2pd");
     this._starting = true;
     const promise = new Promise<void>((resolve, reject) => {
-      window.electronAPI.onI2pdOutput((stdout?: string, stderr?: string) => {
+      
+      window.electronAPI.onI2pdOutput(({stdout, stderr} : { stdout?: string, stderr?: string }) => {
         if (stdout) {
           this._logs.push(stdout);
           this.std.out.emit(stdout);
         } else if (stderr) {
           this._logs.push(stderr);
           this.std.err.emit(stderr);
+          this._running = false;
         }
       });
-      window.electronAPI.startI2pd(_config.path, _config.toFlags(), (error?: any) => {
+
+      window.electronAPI.startI2pd(_config.path, (error?: any) => {
         this._starting = false;
         if (error) reject(new Error(`${error}`));
         else resolve();
@@ -94,6 +103,7 @@ export class I2pDaemonService {
     await promise;
     this.setSettings(_config);
     this._running = true;
+    this.onStart.emit();
   }
   
   public async stop(): Promise<void> {
@@ -113,6 +123,7 @@ export class I2pDaemonService {
     await promise;
 
     this._running = false;
+    if (!this.restarting) this.onStop.emit();
   }
 
   public async restart(): Promise<void> {
@@ -152,11 +163,19 @@ export class I2pDaemonService {
     const result = await db.get(this.storeName, 1);
     
     if (result) {
-      this._settings = I2pDaemonSettings.parse(result);
+      this.setSettings(I2pDaemonSettings.parse(result));
     }
     else
     {
-      this._settings = new I2pDaemonSettings();
+      this.setSettings(new I2pDaemonSettings());
+    }
+
+    if (!this.detectedInstallation) {
+      this.detectedInstallation = await this.detectInstallation();
+    }
+
+    if (this._settings.path === '' && this.detectedInstallation) {
+      this._settings.path = this.detectedInstallation.path;
     }
 
     this._loaded = true;
@@ -187,6 +206,12 @@ export class I2pDaemonService {
 
   public clearLogs(): void {
     this._logs = [];
+  }
+
+  private async detectInstallation(): Promise<{ path: string; configFile?: string; tunnelConfig?: string; tunnelsConfigDir?: string; pidFile?: string; isRunning?: boolean; } | undefined> {
+    return await new Promise<{ path: string; } | undefined>((resolve) => {
+      window.electronAPI.detectInstallation('i2pd', resolve);
+    });
   }
 }
 

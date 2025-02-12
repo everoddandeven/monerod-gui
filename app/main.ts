@@ -8,9 +8,10 @@ import { app, BrowserWindow, ipcMain, screen, dialog, Tray, Menu, MenuItemConstr
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
-import axios, { AxiosRequestConfig } from 'axios';
+import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import { AppMainProcess, I2pdProcess, MonerodProcess, PrivateTestnet } from './process';
 import { BatteryUtils, FileUtils, NetworkUtils } from './utils';
+import { MoneroI2pdProcess } from './process/I2pdProcess';
 
 app.setName('Monero Daemon');
 
@@ -395,6 +396,13 @@ async function monitorMonerod(): Promise<void> {
 
 // #region Download Utils 
 
+async function detectInstallation(program: string): Promise<any> {
+  if (program === 'i2pd') {
+    return await I2pdProcess.detectInstalled();
+  }
+  else return undefined;
+}
+
 async function downloadAndVerifyHash(hashUrl: string, fileName: string, filePath: string): Promise<boolean> {
   const hashFileName = await FileUtils.downloadFile(hashUrl, app.getPath('temp'), () => {});
   const hashFilePath = `${app.getPath('temp')}/${hashFileName}`;
@@ -529,8 +537,14 @@ try {
 
   // #endregion
 
-  ipcMain.handle('start-i2pd', async (event: IpcMainInvokeEvent, params: { eventId: string; path: string, flags: string[] }) => {
-    const { eventId, path, flags } = params;
+  ipcMain.handle('detect-installation', async (event: IpcMainInvokeEvent, params: { eventId: string; program: string }) => {
+    const { eventId, program } = params;
+
+    win?.webContents.send(eventId, await detectInstallation(program));
+  });
+
+  ipcMain.handle('start-i2pd', async (event: IpcMainInvokeEvent, params: { eventId: string; path: string }) => {
+    const { eventId, path } = params;
     
     let error: string | undefined = undefined;
 
@@ -542,7 +556,8 @@ try {
     }
     else {
       try {
-        i2pdProcess = new I2pdProcess({ i2pdPath: path, flags, isExe: true });
+        //i2pdProcess = new I2pdProcess({ i2pdPath: path, flags, isExe: true });
+        i2pdProcess = MoneroI2pdProcess.createSimple(path);
         await i2pdProcess.start();
         i2pdProcess.onStdOut((out: string) => win?.webContents.send('on-ip2d-stdout', out));
         i2pdProcess.onStdErr((out: string) => win?.webContents.send('on-ip2d-stderr', out));
@@ -578,7 +593,11 @@ try {
 
   ipcMain.handle('is-on-battery-power', async (event: IpcMainInvokeEvent, params: { eventId: string; }) => {
     const onBattery = await BatteryUtils.isOnBatteryPower();
-    win?.webContents.send(params.eventId, onBattery);
+    if (!win) {
+      console.warn("is-on-battery-power: window not set");
+      return;
+    }
+    win.webContents.send(params.eventId, onBattery);
   });
 
   powerMonitor.on('on-ac', () => win?.webContents.send('on-ac'));
@@ -603,6 +622,8 @@ try {
         }
         else await monerodProcess.stop();
         monerodProcess = null;
+
+        if (i2pdProcess && i2pdProcess.running) await i2pdProcess.stop();
       }
     }
     catch (error: any) {
@@ -903,10 +924,16 @@ try {
       win?.webContents.send(eventId, { data: result.data, code: result.status, status: result.statusText });
     }
     catch (error: any) {
-      console.error("post(): ", error);
-      win?.webContents.send(eventId, { error: `${error}` });
-    }
+      let msg: string;
+      if (error instanceof AxiosError) {
+        msg = error.message
+      }
+      else msg = `${error}`;
 
+      console.error(msg);
+
+      win?.webContents.send(eventId, { error: msg });
+    }
   });
 
   ipcMain.handle('http-get', async (event: IpcMainInvokeEvent, params: { id: string; url: string; config?: AxiosRequestConfig<any> }) => {
@@ -918,8 +945,15 @@ try {
       win?.webContents.send(eventId, { data: result.data, code: result.status, status: result.statusText });
     }
     catch (error: any) {
-      console.error("get(): ", error);
-      win?.webContents.send(eventId, { error: `${error}` });
+      let msg: string;
+      if (error instanceof AxiosError) {
+        msg = error.message
+      }
+      else msg = `${error}`;
+
+      console.error(msg);
+
+      win?.webContents.send(eventId, { error: msg });
     }
 
   });

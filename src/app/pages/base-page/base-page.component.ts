@@ -18,17 +18,20 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
   protected subscriptions: Subscription[] = [];
 
   private readonly mResizeHandler: (event: Event) => void = (event: Event) => setTimeout(() => {
-    console.debug(event);
-    this.updateTableContentHeight();
+    this.updateTablesContentHeight();
   }, 100);
 
   constructor(private navbarService: NavbarService) {
     this.subscriptions.push(this.navbarService.onDaemonStatusChanged.subscribe((running) => {
-      if (running) setTimeout(() => this.updateTableContentHeight(), 100);
+      if (running) setTimeout(() => this.updateTablesContentHeight(), 100);
     }));
 
     window.addEventListener('resize', this.mResizeHandler);
-   }
+  }
+
+  public updateTablesContentHeight(): void {
+
+  }
 
   protected setLinks(links: NavbarLink[] = []): void {
     this._links = links;
@@ -181,8 +184,6 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
 
   public ngAfterContentInit(): void {
     this.navbarService.setLinks(this._links);
-
-    setTimeout(() => this.updateTableContentHeight(), 100);
   }
 
   public ngOnDestroy(): void {
@@ -196,14 +197,9 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
     this.destroyTables();
   }
 
-  public getTableContent(): HTMLElement | undefined {
-    const elements = document.getElementsByClassName('tab-content tab-grow');
+  public getTableContent(id: string): HTMLElement | undefined {
 
-    if (!elements || elements.length === 0) {
-      return undefined;
-    }
-
-    const element = elements[0];
+    const element = document.getElementById(id);
 
     if (!(element instanceof HTMLElement)) {
       return undefined;
@@ -212,7 +208,7 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
     return element;
   }
 
-  public updateTableContentHeight(): void {
+  public updateTableContentHeight(id: string): void {
     if (!visualViewport) {
       return;
     }
@@ -223,13 +219,10 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
       return;
     }
 
-    //console.log(`view height: ${viewHeight}`);
-
     const offset = 35;
-    const tab = this.getTableContent();
+    const tab = this.getTableContent(id);
 
     if (!tab) {
-      //console.warn("table content not found");
       return;
     }
 
@@ -254,9 +247,9 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
     tab.style.height = `${newHeight}px`;
   }
 
-  public scrollTableContentToBottom(): void {
+  public scrollTableContentToBottom(id: string): void {
     setTimeout(() => {
-      const tabContent = this.getTableContent();
+      const tabContent = this.getTableContent(id);
   
       if (!tabContent) {
         console.warn("Could not find logs tab");

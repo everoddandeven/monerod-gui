@@ -6,35 +6,42 @@ function newId() {
 }
 
 contextBridge.exposeInMainWorld('electronAPI', {
+  detectInstallation: (program, callback) => {
+    const eventId = `on-detect-installation-${newId()}`;
+
+    const handler = (event, result) => {
+      callback(result);
+    };
+
+    ipcRenderer.once(eventId, handler);
+    ipcRenderer.invoke('detect-installation', { eventId, program });
+  },
   checkValidI2pdPath: (path, callback) => {
     const eventId = `on-check-valid-i2pd-path-${newId()}`;
 
     const handler = (event, result) => {
-      ipcRenderer.off(eventId, handler);
       callback(result);
     };
 
-    ipcRenderer.on(eventId, handler);
+    ipcRenderer.once(eventId, handler);
     ipcRenderer.invoke('check-valid-i2pd-path', { eventId, path });
   },
-  startI2pd: (path, flags, callback) => {
+  startI2pd: (path, callback) => {
     const eventId = `on-start-i2pd-${newId()}`;
     const handler = (event, result) => {
-      ipcRenderer.off(eventId, handler);
       callback(result);
     };
 
-    ipcRenderer.on(eventId, handler);
-    ipcRenderer.invoke('start-i2pd', { eventId, path, flags });
+    ipcRenderer.once(eventId, handler);
+    ipcRenderer.invoke('start-i2pd', { eventId, path });
   },
   stopI2pd: (callback) => {
     const eventId = `on-stop-i2pd-${newId()}`;
     const handler = (event, result) => {
-      ipcRenderer.off(eventId, handler);
       callback(result);
     };
 
-    ipcRenderer.on(eventId, handler);
+    ipcRenderer.once(eventId, handler);
     ipcRenderer.invoke('stop-i2pd', { eventId });
   },
   onI2pdOutput: (callback) => {
@@ -59,11 +66,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     const eventId = `on-http-post-result-${id}`;
 
     const handler = (event, result) => {
-      ipcRenderer.off(eventId, handler);
       callback(result);
     };
 
-    ipcRenderer.on(eventId, handler);
+    ipcRenderer.once(eventId, handler);
     ipcRenderer.invoke('http-post', params);
   },
   httpGet: (params, callback) => {
@@ -73,30 +79,28 @@ contextBridge.exposeInMainWorld('electronAPI', {
     const eventId = `on-http-get-result-${id}`;
 
     const handler = (event, result) => {
-      ipcRenderer.off(eventId, handler);
       callback(result);
     };
 
-    ipcRenderer.on(eventId, handler);
+    ipcRenderer.once(eventId, handler);
     ipcRenderer.invoke('http-get', params);
   },
   getBatteryLevel: (callback) => {
-    const eventId = `on-get-battery-level-${newId()};`
+    const eventId = `on-get-battery-level-${newId()}`;
     const handler = (event, result) => {
-      ipcRenderer.off(eventId, handler);
       callback(result);
     };
-    ipcRenderer.on(eventId, handler);
+    ipcRenderer.once(eventId, handler);
     ipcRenderer.invoke('get-battery-level', { eventId });
   },
   isOnBatteryPower: (callback) => {
-    const eventId = `on-is-on-battery-power-${newId()};`
+    //const eventId = `on-is-on-battery-power-${newId()}`;
+    const eventId = 'on-is-on-battery-power';
     const handler = (event, result) => {
-      ipcRenderer.off(eventId);
       callback(result);
     };
 
-    ipcRenderer.on('on-is-on-battery-power', handler);
+    ipcRenderer.once(eventId, handler);
     ipcRenderer.invoke('is-on-battery-power', { eventId });
   },
   onAc: (callback) => {
@@ -272,11 +276,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   quit: (callback) => {
     const handler = (event, result) => {
-      ipcRenderer.off('on-quit', handler);
       callback(result);
     };
 
-    ipcRenderer.on('on-quit', handler);
+    ipcRenderer.once('on-quit', handler);
     ipcRenderer.invoke('quit');
   },
   enableAutoLaunch: (minimized) => {

@@ -2,7 +2,7 @@ import { AfterViewInit, Component, NgZone, OnDestroy } from '@angular/core';
 import { LogsService } from './logs.service';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
-import { DaemonService, I2pDaemonService } from '../../core/services';
+import { DaemonService } from '../../core/services';
 import { LogCategories } from '../../../common';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { Subscription } from 'rxjs';
@@ -41,26 +41,20 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, O
     return this.logsService.categories;
   }
   
-  constructor(navbarService: NavbarService, private i2pdService: I2pDaemonService, private logsService: LogsService, private daemonService: DaemonService, private ngZone: NgZone) {
+  constructor(navbarService: NavbarService, private logsService: LogsService, private daemonService: DaemonService, private ngZone: NgZone) {
     super(navbarService);
 
-    const onLogSub: Subscription = this.logsService.onLog.subscribe((message: string) => {
-      console.debug(message);
-      this.onLog()
+    const onLogSub: Subscription = this.logsService.onLog.subscribe(({ type } : { message: string; type: 'monerod' | 'i2pd'; }) => {
+      this.onLog(type);
     });
 
     const links = [
-      new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', false, 'Overview'),
+      new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', false, 'monerod'),
+      new NavbarLink('pills-i2pd-tab', '#pills-i2pd', 'pills-i2pd', false, 'i2pd'),
       new NavbarLink('pills-set-log-level-tab', '#pills-set-log-level', 'pills-set-log-level', false, 'Set Log Level'),
       new NavbarLink('pills-set-log-categories-tab', '#pills-set-log-categories', 'pills-set-log-categories', false, 'Set Log Categories'),
       new NavbarLink('pills-set-log-hash-rate-tab', '#pills-set-log-hash-rate', 'pills-set-log-hash-rate', false, 'Set Log Hash Rate')
     ];
-
-    if (i2pdService.running) {
-      const link = new NavbarLink('pills-i2pd-tab', '#pills-i2pd', 'pills-i2pd', false, 'I2P')
-
-      links.push(link);
-    }
 
     this.setLinks(links);
 
@@ -68,7 +62,7 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, O
   }
 
   public get lines(): string[] {
-    return this.logsService.lines;
+    return this.logsService.logs.monerod;
   }
 
   public get logs(): string {
@@ -76,17 +70,17 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, O
   }
 
   public get i2pdLines(): string [] {
-    return this.i2pdService.logs;
+    return this.logsService.logs.i2pd;
   }
 
   public get i2pdLogs(): string {
     return this.initing ? '' : this.i2pdLines.join("\n");
   }
 
-  private onLog(): void {
+  private onLog(type: 'monerod' | 'i2pd'): void {
     if (this.scrolling) return;
 
-    this.scrollTableContentToBottom();
+    this.scrollTableContentToBottom(`${type}-log-table`);
   }
 
   private registerScrollEvents(): void {
@@ -95,16 +89,25 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, O
       return;
     }
 
-    const tab = this.getTableContent();
+    const tabs = this.getTableContents();
 
-    if (!tab) {
-      console.warn("Coult not find table content");
-      return;
-    }
+    tabs.forEach((tab) => {
+      tab.addEventListener('scroll', this.scrollHandler);
+      tab.addEventListener('scrollend', this.scrollHandler);
+    });
 
-    tab.addEventListener('scroll', this.scrollHandler);
-    tab.addEventListener('scrollend', this.scrollHandler);
     this.scrollEventsRegistered = true;
+  }
+
+  private getTableContents(): HTMLElement[] {
+    const table1 = document.getElementById('monerod-log-table');
+    const table2 = document.getElementById('i2pd-log-table');
+    const result: HTMLElement[] = [];
+
+    if (table1) result.push(table1);
+    if (table2) result.push(table2);
+
+    return result;
   }
 
   private unregisterScrollEvents(): void {
@@ -113,15 +116,18 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, O
       return;
     }
 
-    const tab = this.getTableContent();
+    const tabs = this.getTableContents();
 
-    if (!tab) {
-      console.warn("Coult not find table content");
-      return;
-    }
+    tabs.forEach((tab) => {
+      if (!tab) {
+        console.warn("Coult not find table content");
+        return;
+      }
+  
+      tab.removeEventListener('scroll', this.scrollHandler);
+      tab.removeEventListener('scrollend', this.scrollHandler);
+    });
 
-    tab.removeEventListener('scroll', this.scrollHandler);
-    tab.removeEventListener('scrollend', this.scrollHandler);
     this.scrollEventsRegistered = false;
   }
 
@@ -184,15 +190,31 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, O
     this.settingLogCategories = false;
   }
 
+  public override ngAfterContentInit(): void {
+    super.ngAfterContentInit();
+
+    setTimeout(() => this.updateTablesContentHeight(), 100);
+  }
+
+  public override updateTablesContentHeight(): void {
+    this.updateTableContentHeight('monerod-log-table');
+    this.updateTableContentHeight('i2pd-log-table');
+  }
+
+  public scrollTablesContentToBottom(): void {
+    this.scrollTableContentToBottom('monerod-log-table');
+    this.scrollTableContentToBottom('i2pd-log-table');
+  }
+
   public ngAfterViewInit(): void {
     this.initing = true;  
     setTimeout(() => {
       this.registerScrollEvents();
-      this.scrollTableContentToBottom();
+      this.scrollTablesContentToBottom();
       this.initing = false;
       
       setTimeout(() => {
-        this.scrollTableContentToBottom();
+        this.scrollTablesContentToBottom();
       }, 500);
     }, 500);  
   }

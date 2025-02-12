@@ -29,6 +29,7 @@ import { ElectronService } from '../electron/electron.service';
 import { openDB, IDBPDatabase } from "idb"
 import { AxiosHeaders, AxiosResponse } from 'axios';
 import { StringUtils } from '../../utils';
+import { I2pDaemonService } from '../i2p/i2p-daemon.service';
 
 @Injectable({
   providedIn: 'root'
@@ -86,14 +87,11 @@ export class DaemonService {
     "Access-Control-Allow-Methods": 'POST,GET' // this states the allowed methods
   };
 
-  constructor(private installer: MoneroInstallerService, private electronService: ElectronService) {
+  constructor(private installer: MoneroInstallerService, private electronService: ElectronService, private i2pService: I2pDaemonService) {
     this.openDbPromise = this.openDatabase();
     this.settings = new DaemonSettings();
 
     window.electronAPI.onMoneroClose((event: any, code: number) => {
-      console.debug(event);
-      console.debug(code);
-
       if (code != 0) {
         window.electronAPI.showNotification({
           title: 'Daemon Error',
@@ -251,7 +249,6 @@ export class DaemonService {
     return await checkPromise;
   }
 
-  
   public async checkValidI2pdPath(path: string): Promise<boolean> {
     if (path == null || path == undefined || path.replace(' ', '') == '') {
       return false;
@@ -263,7 +260,6 @@ export class DaemonService {
 
     return await checkPromise;
   }
-
 
   public async getSettings(): Promise<DaemonSettings> {
     const db = await this.openDbPromise;
@@ -457,6 +453,12 @@ export class DaemonService {
       console.log("Disabling sync ...");
 
       this.settings.noSync = true;
+    }
+
+    if (this.i2pService.settings.enabled && !this.i2pService.running) {
+      console.log('starting i2pd service');
+      await this.i2pService.start();
+      console.log('started i2pd service');
     }
 
     const startPromise = new Promise<void>((resolve, reject) => {
@@ -1077,6 +1079,13 @@ export class DaemonService {
 
         if (!this.restarting) {
           if (!this.quitting) {
+
+            if (this.i2pService.running) {
+              console.log('stopping i2pd service');
+              await this.i2pService.stop();
+              console.log('stopped i2pd service');
+            }
+        
             window.electronAPI.showNotification({
               title: 'Daemon stopped',
               body: 'Successfully stopped monero daemon'
@@ -1305,6 +1314,12 @@ export class DaemonService {
     window.electronAPI.monitorMonerod();
 
     return await getProcessStatsPromise;
+  }
+
+  public async detectInstallation(): Promise<{ path: string; } | undefined> {
+    return await new Promise<{ path: string; } | undefined>((resolve) => {
+      window.electronAPI.detectInstallation('monerod', resolve);
+    });
   }
 
   private _quitting: boolean = false;

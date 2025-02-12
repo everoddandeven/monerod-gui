@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable } from '@angular/core';
+import { EventEmitter, Injectable, NgZone } from '@angular/core';
 // If you import a module but never use any of the imported values other than as TypeScript types,
 // the resulting javascript file will look as if you never imported the module at all.
 import * as childProcess from 'child_process';
@@ -24,7 +24,7 @@ export class ElectronService {
     return this._isProduction;
   }
 
-  constructor() {
+  constructor(private ngZone: NgZone) {
     this._online = navigator.onLine;
     window.addEventListener('online', () => this._online = true);
     window.addEventListener('offline', () => this._online = false);
@@ -77,7 +77,9 @@ export class ElectronService {
   public async isOnBatteryPower(): Promise<boolean> {
     const promise = new Promise<boolean>((resolve) => {
       window.electronAPI.isOnBatteryPower((onBattery: boolean) => {
-        resolve(onBattery);
+        this.ngZone.run(() => {        
+          resolve(onBattery);
+        });
       });
     });
 
@@ -87,7 +89,6 @@ export class ElectronService {
   public async getBatteryLevel(): Promise<number> {
     const promise = new Promise<number>((resolve) => {
       window.electronAPI.getBatteryLevel((level: number) => {
-        window.electronAPI.unregisterOnGetBatteryLevel();
         resolve(level);
       });
     });

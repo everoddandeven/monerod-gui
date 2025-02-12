@@ -58,11 +58,12 @@ import { NotificationConstructorOptions } from 'electron';
 declare global {
   interface Window {
     electronAPI: {
+      detectInstallation: (program: 'monerod' | 'i2pd' | 'tor' | 'monerod-gui', callback: (info?: any) => void) => void;
       httpPost: <TConfig extends {} = {}>(params: { id: string; url: string; data?: any; config?: AxiosRequestConfig<TConfig>}, callback: (result: { data?: AxiosResponse<any, any>, code: number; status: string; error?: string; }) => void) => void;
       httpGet: <TConfig extends {} = {}>(params: { id: string; url: string; config?: AxiosRequestConfig<TConfig> }, callback: (result: { data?: AxiosResponse<any, any>, code: number; status: string; error?: string; }) => void) => void;
-      startI2pd: (path: string, flags: string[], callback: (error?: any) => void) => void;
+      startI2pd: (path: string, callback: (error?: any) => void) => void;
       stopI2pd: (callback: (error?: any) => void) => void;
-      onI2pdOutput: (callback: (stdout?: string, stderr?: string) => void) => void;
+      onI2pdOutput: (callback: (output: {stdout?: string, stderr?: string}) => void) => void;
       copyToClipboard: (content: string) => void;
       startMonerod: (options: string[]) => void;
       stopMonerod: () => void;
@@ -160,7 +161,6 @@ declare global {
       setTrayToolTip: (toolTip: string) => void;
 
       getBatteryLevel: (callback: (level: number) => void) => void;
-      unregisterOnGetBatteryLevel: () => void;
 
       isOnBatteryPower: (callback: (onBattery: boolean) => void) => void;
       onBattery: (callback: (event: any) => void) => void;

@@ -1,7 +1,7 @@
 import { Component, AfterViewInit, NgZone } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
-import { DaemonService, DaemonDataService } from '../../core/services';
+import { DaemonService, DaemonDataService, I2pDaemonService } from '../../core/services';
 import { Subscription } from 'rxjs';
 import { Connection, Span, Peer } from '../../../common';
 import { SimpleBootstrapCard } from '../../shared/utils';
@@ -134,6 +134,14 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
     return this.daemonData.info ? this.daemonData.info.offline ? 'offline' : 'online' : 'offline';
   }
 
+  private get connectionType(): 'Clearnet' | 'I2P' | 'TOR' {
+    if (this.i2pService.settings.enabled) {
+      return 'I2P';
+    }
+
+    return 'Clearnet';
+  }
+
   private get txCount(): number {
     return this.daemonData.info ? this.daemonData.info.txCount : 0;
   }
@@ -197,7 +205,8 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
   public cards: SimpleBootstrapCard[];
 
   constructor(
-    private daemonService: DaemonService, 
+    private daemonService: DaemonService,
+    private i2pService: I2pDaemonService,
     navbarService: NavbarService, 
     private daemonData: DaemonDataService, 
     private ngZone: NgZone) {
@@ -273,6 +282,7 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
 
     cards.push(
       new SimpleBootstrapCard('Connection Status', this.connectionStatus, loading),
+      new SimpleBootstrapCard('Connection Type', this.connectionType, loading),
       new SimpleBootstrapCard('Network Type', this.networkType, loading),
       new SimpleBootstrapCard('Node Type', this.nodeType, loading),
       new SimpleBootstrapCard('Sync progress', this.syncProgress, loading),
