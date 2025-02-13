@@ -40,7 +40,7 @@
               <li class="list-group-item"><strong>BOB:</strong> {{ mainData.services.bob ? 'Enabled' : 'Disabled' }}</li>
               <li class="list-group-item"><strong>SAME:</strong> {{ mainData.services.same ? 'Enabled' : 'Disabled' }}</li>
               <li class="list-group-item"><strong>I2CP:</strong> {{ mainData.services.i2cp ? 'Enabled' : 'Disabled' }}</li>
-              <li class="list-group-item"><strong>I2PControl:</strong> {{ mainData.services.i2pcControl ? 'Enabled' : 'Disabled' }}</li>
+              <li class="list-group-item"><strong>I2PControl:</strong> {{ mainData.services.i2pControl ? 'Enabled' : 'Disabled' }}</li>
             </ul>
           </div>
         </div>
@@ -98,13 +98,13 @@
 
           <div class="col-md-4">
             <label for="log-level" class="form-label">Logging Level</label>
-            <select class="form-select" id="log-level" [ngModelOptions]="{standalone: true}">
-              <option [ngValue]="warn">none</option>
-              <option [ngValue]="warn">critical</option>
-              <option [ngValue]="warn">error</option>
-              <option [ngValue]="warn">warn</option>
-              <option [ngValue]="info">info</option>
-              <option [ngValue]="debug">debug</option>
+            <select class="form-select" id="log-level" [(ngModel)]="loggingLevel" [ngModelOptions]="{standalone: true}">
+              <option [ngValue]="'none'">none</option>
+              <option [ngValue]="'critical'">critical</option>
+              <option [ngValue]="'error'">error</option>
+              <option [ngValue]="'warn'">warn</option>
+              <option [ngValue]="'info'">info</option>
+              <option [ngValue]="'debug'">debug</option>
             </select>
           </div>
 

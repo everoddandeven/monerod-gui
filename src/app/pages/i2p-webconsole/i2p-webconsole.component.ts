@@ -19,6 +19,8 @@ export class I2pWebconsoleComponent extends BasePageComponent implements OnDestr
   public localDestinations: LocalDestinationsData = new LocalDestinationsData();
   public i2pTunnels: TunnelsData = new TunnelsData();
 
+  public loggingLevel: string = 'warn';
+
   constructor(navbarService: NavbarService) {
     super(navbarService);
 
