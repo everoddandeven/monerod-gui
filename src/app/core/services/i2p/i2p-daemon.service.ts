@@ -54,8 +54,9 @@ export class I2pDaemonService {
   private detectedInstallation?: { path: string; configFile?: string; tunnelConfig?: string; tunnelsConfigDir?: string; pidFile?: string; isRunning?: boolean; };
 
   constructor() 
-  { 
+  {
     this.openDbPromise = this.openDatabase();
+    this.openDbPromise.then(() => console.log('Loaded i2p settings database')).catch((error: any) => console.error(error));
     this.loadSettings();
   }
 

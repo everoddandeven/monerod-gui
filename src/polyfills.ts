@@ -59,8 +59,8 @@ declare global {
   interface Window {
     electronAPI: {
       detectInstallation: (program: 'monerod' | 'i2pd' | 'tor' | 'monerod-gui', callback: (info?: any) => void) => void;
-      httpPost: <TConfig extends {} = {}>(params: { id: string; url: string; data?: any; config?: AxiosRequestConfig<TConfig>}, callback: (result: { data?: AxiosResponse<any, any>, code: number; status: string; error?: string; }) => void) => void;
-      httpGet: <TConfig extends {} = {}>(params: { id: string; url: string; config?: AxiosRequestConfig<TConfig> }, callback: (result: { data?: AxiosResponse<any, any>, code: number; status: string; error?: string; }) => void) => void;
+      httpPost: <TConfig extends { [key: string]: any } = object>(params: { id: string; url: string; data?: any; config?: AxiosRequestConfig<TConfig>}, callback: (result: { data?: AxiosResponse<any, any>, code: number; status: string; error?: string; }) => void) => void;
+      httpGet: <TConfig extends { [key: string]: any } = object>(params: { id: string; url: string; config?: AxiosRequestConfig<TConfig> }, callback: (result: { data?: AxiosResponse<any, any>, code: number; status: string; error?: string; }) => void) => void;
       startI2pd: (path: string, callback: (error?: any) => void) => void;
       stopI2pd: (callback: (error?: any) => void) => void;
       onI2pdOutput: (callback: (output: {stdout?: string, stderr?: string}) => void) => void;

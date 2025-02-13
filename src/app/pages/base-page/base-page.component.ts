@@ -17,7 +17,7 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
 
   protected subscriptions: Subscription[] = [];
 
-  private readonly mResizeHandler: (event: Event) => void = (event: Event) => setTimeout(() => {
+  private readonly mResizeHandler: () => void = () => setTimeout(() => {
     this.updateTablesContentHeight();
   }, 100);
 

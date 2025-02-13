@@ -354,7 +354,6 @@ export class DaemonService {
 
   private async post(uri: string, params: {[key: string]: any} = {}): Promise<{[key: string]: any}> {
     let headers: AxiosHeaders;
-    let withCredentials: boolean = false;
 
     const login = this.getLogin();
 
@@ -362,7 +361,6 @@ export class DaemonService {
       const _headers = { ...this.headers };
       _headers['Authorization'] = "Basic " + btoa(unescape(encodeURIComponent(`${login.username}:${login.password}`)));
       headers = new AxiosHeaders(_headers);
-      withCredentials = true;
     }
     else {
       headers = new AxiosHeaders(this.headers);

@@ -80,7 +80,7 @@ export class I2pWebconsoleComponent extends BasePageComponent implements OnDestr
 
         reject(new Error('Wrapper not found'));
       })
-      .catch(error => reject(error));
+      .catch(error => reject(error instanceof Error ? error : new Error(`${error}`)));
     });
   }
 

@@ -317,7 +317,7 @@ export class DaemonSettings extends Comparable<DaemonSettings> {
       }
     }
     else {
-      throw new Error("Invalid type provided: " + type);
+      throw new Error("Invalid type provided");
     }
   }
 

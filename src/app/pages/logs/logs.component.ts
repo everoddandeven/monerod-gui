@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, NgZone, OnDestroy } from '@angular/core';
+import { AfterContentInit, AfterViewInit, Component, NgZone, OnDestroy } from '@angular/core';
 import { LogsService } from './logs.service';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
@@ -13,7 +13,7 @@ import { Subscription } from 'rxjs';
     styleUrl: './logs.component.scss',
     standalone: false
 })
-export class LogsComponent extends BasePageComponent implements AfterViewInit, OnDestroy {
+export class LogsComponent extends BasePageComponent implements AfterViewInit, AfterContentInit, OnDestroy {
   private initing: boolean = false;
   private scrollEventsRegistered: boolean = false;
   

@@ -1,6 +1,5 @@
 import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
-import { DaemonService } from '../../../core/services/daemon/daemon.service';
 import { I2pDaemonService } from '../../../core/services';
 
 @Component({
