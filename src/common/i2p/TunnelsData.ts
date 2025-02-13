@@ -1,6 +1,6 @@
 import { I2PData } from "./I2PData";
 
-interface TunnelInfo {
+export interface TunnelInfo {
   name: string;
   address: string;
 }

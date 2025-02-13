@@ -38,44 +38,44 @@ export class MainData {
     let lastExternalAddress: { type: string; address: string; } | undefined = undefined;
 
     components.forEach((component) => {
-      if (component.includes('Uptime')) {
+      if (component.startsWith('Uptime')) {
         result.uptime = component.replace('Uptime: ', '');
       }
-      else if (component.includes('Network status')) {
+      else if (component.startsWith('Network status')) {
         result.networkStatus = component.replace('Network status: ', '');
       }
-      else if (component.includes('Tunnel creation success rate')) {
+      else if (component.startsWith('Tunnel creation success rate')) {
         result.tunnelCreationSuccessRate = component.replace('Tunnel creation success rate: ', '');
       }
-      else if (component.includes('Received')) {
+      else if (component.startsWith('Received')) {
         result.received = component.replace('Received: ', '');
       }
-      else if (component.includes('Sent')) {
+      else if (component.startsWith('Sent')) {
         result.sent = component.replace('Sent: ', '');
       }
-      else if (component.includes('Transit')) {
+      else if (component.startsWith('Transit')) {
         result.transit = component.replace('Transit: ', '');
       }
-      else if (component.includes('Data path')) {
+      else if (component.startsWith('Data path')) {
         result.dataPath = component.replace('Data path: ', '');
       }
-      else if (component.includes('Router Ident')) {
+      else if (component.startsWith('Router Ident')) {
         result.routerIdent = component.replace('Router Ident: ', '');
       }
-      else if (component.includes('Router Caps')) {
+      else if (component.startsWith('Router Caps')) {
         result.routerCaps = component.replace('Router Caps: ', '');
       }
-      else if (component.includes('Version')) {
+      else if (component.startsWith('Version')) {
         result.version = component.replace('Version: ', '');
       }
-      else if (component.includes('Our external address')) {
+      else if (component.startsWith('Our external address')) {
         constructingExternalAddresses = true;
         return;
       }
-      else if (component.includes('Routers')) {
+      else if (component.startsWith('Routers')) {
         result.routers = component.replace('Routers: ', '');
       }
-      else if (component.includes('Client Tunnels')) {
+      else if (component.startsWith('Client Tunnels')) {
         const v = component.replace('Client Tunnels: ', 'Transit Tunnels: ').split(' ');
         const v0 = Number(v[0]);
         const v1 = Number(v[1]);
@@ -83,19 +83,19 @@ export class MainData {
         result.clientTunnels = (!isNaN(v0)) ? v0 : 0;
         result.transitTunnels = (!isNaN(v1)) ? v1 : 0;
       }
-      else if (component.includes('HTTP Proxy')) {
+      else if (component.startsWith('HTTP Proxy')) {
         result.services.httpProxy = component.replace('HTTP Proxy', '') == 'Enabled';
       }
-      else if (component.includes('SOCKS Proxy')) {
+      else if (component.startsWith('SOCKS Proxy')) {
         result.services.socksProxy = component.replace('SOCKS Proxy', '') == 'Enabled';
       }
-      else if (component.includes('BOB')) {
+      else if (component.startsWith('BOB')) {
         result.services.bob = component.replace('BOB', '') == 'Enabled';
       }
-      else if (component.includes('I2CP')) {
+      else if (component.startsWith('I2CP')) {
         result.services.i2cp = component.replace('I2CP', '') == 'Enabled';
       }
-      else if (component.includes('I2PControl')) {
+      else if (component.startsWith('I2PControl')) {
         result.services.bob = component.replace('I2PControl', '') == 'Enabled';
       }
       else if (constructingExternalAddresses) {

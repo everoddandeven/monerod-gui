@@ -457,6 +457,17 @@ export class DaemonService {
       console.log('starting i2pd service');
       await this.i2pService.start();
       console.log('started i2pd service');
+
+      if (this.i2pService.settings.txProxyEnabled) {
+        this.settings.setTxProxy(this.i2pService.txProxy, 'i2p');
+      }
+      if (this.i2pService.settings.allowIncomingConnections) {
+        const anonInbound = await this.i2pService.getAnonymousInbound();
+        this.settings.setAnonymousInbound(anonInbound, 'i2p');
+      }
+      if (!this.i2pService.settings.syncOnClearNet) {
+        this.settings.proxy = this.i2pService.proxy;
+      }
     }
 
     const startPromise = new Promise<void>((resolve, reject) => {

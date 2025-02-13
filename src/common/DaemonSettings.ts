@@ -325,10 +325,10 @@ export class DaemonSettings extends Comparable<DaemonSettings> {
     const components = inbound.split(',');
     const address = components[0];
     const port = components[1];
-    const socks = components[2];
+    //const socks = components[2];
     const maxConnections = components[3];
 
-    if (!address || address == '' || !address.endsWith(`.${type}`) || !port || port == '' || !socks || socks == '') return false;
+    if (!address || address == '' || !address.endsWith(`.${type}`) || !port || port == '') return false;
     
     if (maxConnections) {
       try {
@@ -632,11 +632,11 @@ export class DaemonSettings extends Comparable<DaemonSettings> {
     if (this.addPeer != '') options.push('--add-peer', this.addPeer);
     if (this.hasPriorityNodes) this.priorityNodes.forEach((node) => options.push(`--add-priority-node`, node));
     if (this.hasExclusiveNodes) this.exclusiveNodes.forEach((node) => options.push(`--add-exlcusive-node`, node));
-    if (this.seedNode != '') options.push(`--seed-node`, this.seedNode);
     if (this.txProxies.tor && this.txProxies.tor != '') options.push(`--tx-proxy`, this.txProxies.tor);
     if (this.txProxies.i2p && this.txProxies.i2p != '') options.push(`--tx-proxy`, this.txProxies.i2p);
     if (this.anonymousInbounds.tor != '') options.push(`--anonymous-inbound`, this.anonymousInbounds.tor);
     if (this.anonymousInbounds.i2p != '') options.push(`--anonymous-inbound`, this.anonymousInbounds.i2p);
+    if (this.seedNode != '') options.push(`--seed-node`, this.seedNode);
     if (this.banList != '') options.push(`--ban-list`, this.banList);
     if (this.hideMyPort) options.push(`--hide-my-port`);
     if (this.noSync) options.push(`--no-sync`);

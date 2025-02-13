@@ -2,6 +2,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { LocalDestinationsData, MainData, TunnelsData } from '../../../common';
 import { NavbarLink, NavbarService } from '../../shared/components';
+import { I2pDaemonService } from '../../core/services';
 
 @Component({
   selector: 'app-i2p-webconsole',
@@ -10,7 +11,6 @@ import { NavbarLink, NavbarService } from '../../shared/components';
   standalone: false
 })
 export class I2pWebconsoleComponent extends BasePageComponent implements OnDestroy {
-  private readonly host: string = 'http://127.0.0.1:7070';
 
   private refreshing: boolean = false;
   private refreshInterval?: NodeJS.Timeout;
@@ -21,7 +21,7 @@ export class I2pWebconsoleComponent extends BasePageComponent implements OnDestr
 
   public loggingLevel: string = 'warn';
 
-  constructor(navbarService: NavbarService) {
+  constructor(navbarService: NavbarService, private i2pService: I2pDaemonService) {
     super(navbarService);
 
     const links = [
@@ -42,9 +42,9 @@ export class I2pWebconsoleComponent extends BasePageComponent implements OnDestr
     this.refreshing = true;
 
     try {
-      this.mainData = await this.getMainData();
-      this.localDestinations = await this.getLocalDestinations();
-      this.i2pTunnels = await this.getI2pTunnels();
+      this.mainData = await this.i2pService.getMainData();
+      this.localDestinations = await this.i2pService.getLocalDestinations();
+      this.i2pTunnels = await this.i2pService.getI2pTunnels();
     }
     catch (error: any) {
       console.error(error);
@@ -58,42 +58,6 @@ export class I2pWebconsoleComponent extends BasePageComponent implements OnDestr
     this.refresh().then(() => {
       this.refreshInterval = setInterval(this.refreshHandler, 5000);
     }).catch((error: any) => console.error(error));
-  }
-
-  private async fetchContent(request: string = ''): Promise<HTMLDivElement> {
-    return await new Promise<HTMLDivElement>((resolve, reject) => {
-      fetch(`${this.host}/${request}`)
-      .then(response => response.text())
-      .then(html => {  
-        const _content = document.createElement('div');
-        _content.innerHTML = html;
-    
-        for (let i = 0; i < _content.children.length; i++) {
-          const child = _content.children.item(i);
-          if (!child) continue;
-  
-          if (child.className === 'wrapper') {
-            resolve(child as HTMLDivElement);
-            return;
-          }
-        }
-
-        reject(new Error('Wrapper not found'));
-      })
-      .catch(error => reject(error instanceof Error ? error : new Error(`${error}`)));
-    });
-  }
-
-  public async getMainData(): Promise<MainData> {
-    return MainData.fromWrapper(await this.fetchContent())
-  }
-
-  public async getLocalDestinations(): Promise<LocalDestinationsData> {
-    return LocalDestinationsData.fromWrapper(await this.fetchContent('?page=local_destinations'));
-  }
-
-  public async getI2pTunnels(): Promise<TunnelsData> {
-    return TunnelsData.fromWrapper(await this.fetchContent('?page=i2p_tunnels'));
   }
 
   public override ngOnDestroy(): void {

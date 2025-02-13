@@ -1,17 +1,22 @@
 import { EventEmitter, Injectable } from '@angular/core';
-import { I2pDaemonSettings } from '../../../../common';
+import { I2pDaemonSettings, LocalDestinationsData, MainData, TunnelInfo, TunnelsData } from '../../../../common';
 import { IDBPDatabase, openDB } from 'idb';
 
 @Injectable({
   providedIn: 'root'
 })
 export class I2pDaemonService {
+  private readonly i2pdWebConsoleUri: string = 'http://127.0.0.1:7070';
+
   private readonly dbName = 'I2PDaemonSettingsDB';
   private readonly storeName = 'settingsStore';
   private readonly openDbPromise: Promise<IDBPDatabase>;
 
   public readonly onStart: EventEmitter<void> = new EventEmitter<void>();
   public readonly onStop: EventEmitter<void> = new EventEmitter<void>();
+  
+  public readonly proxy: string = '127.0.0.1:4447';
+  public readonly txProxy: string = 'i2p,127.0.0.1:4447,disable_noise';
 
   private _settings: I2pDaemonSettings = new I2pDaemonSettings();
   private _running: boolean = false;
@@ -20,6 +25,13 @@ export class I2pDaemonService {
   private _restarting: boolean = false;
   private _loaded: boolean = false;
   private _logs: string[] = [];
+  private _anonymousInbound: string = '';
+
+  private _detectedInstallation?: { path: string; configFile?: string; tunnelConfig?: string; tunnelsConfigDir?: string; pidFile?: string; isRunning?: boolean; };
+
+  public get anonymousInbound(): string {
+    return this._anonymousInbound;
+  }
 
   public readonly std: I2pStd = { out: new EventEmitter<string>(), err: new EventEmitter<string>() };
 
@@ -50,8 +62,6 @@ export class I2pDaemonService {
   public get loaded(): boolean {
     return this._loaded;
   }
-
-  private detectedInstallation?: { path: string; configFile?: string; tunnelConfig?: string; tunnelsConfigDir?: string; pidFile?: string; isRunning?: boolean; };
 
   constructor() 
   {
@@ -171,12 +181,12 @@ export class I2pDaemonService {
       this.setSettings(new I2pDaemonSettings());
     }
 
-    if (!this.detectedInstallation) {
-      this.detectedInstallation = await this.detectInstallation();
+    if (!this._detectedInstallation) {
+      this._detectedInstallation = await this.detectInstallation();
     }
 
-    if (this._settings.path === '' && this.detectedInstallation) {
-      this._settings.path = this.detectedInstallation.path;
+    if (this._settings.path === '' && this._detectedInstallation) {
+      this._settings.path = this._detectedInstallation.path;
     }
 
     this._loaded = true;
@@ -214,6 +224,116 @@ export class I2pDaemonService {
       window.electronAPI.detectInstallation('i2pd', resolve);
     });
   }
+
+  private async fetchContent(request: string = ''): Promise<HTMLDivElement> {
+    const resolveFunction = (resolve: (value: HTMLDivElement) => void, reject: (error: Error) => void) => {
+      fetch(`${this.i2pdWebConsoleUri}/${request}`)
+      .then(response => response.text())
+      .then(html => {  
+        const _content = document.createElement('div');
+        _content.innerHTML = html;
+    
+        for (let i = 0; i < _content.children.length; i++) {
+          const child = _content.children.item(i);
+          if (!child) continue;
+  
+          if (child.className === 'wrapper') {
+            resolve(child as HTMLDivElement);
+            return;
+          }
+        }
+
+        reject(new Error('Wrapper not found'));
+      })
+      .catch(error => reject(error instanceof Error ? error : new Error(`${error}`)));
+    };
+
+    function createPromise(): Promise<HTMLDivElement> {
+      return new Promise<HTMLDivElement>(resolveFunction);
+    }
+
+    async function wait(d: number = 5000): Promise<void> {
+      await new Promise<void>((resolve) => setTimeout(resolve, d));
+    }
+
+    const tries: number = 3;
+    let err: any = null;
+
+    for(let i = 0; i < tries; i++) {
+      try {
+        return await createPromise();
+      }
+      catch (error: any) {
+        err = error;
+
+        if (i != tries - 1) await wait();
+      }
+    }
+
+    if (err) {
+      throw err;
+    }
+
+    throw new Error("Unknown error");
+  }
+
+  public async getMainData(): Promise<MainData> {
+    return MainData.fromWrapper(await this.fetchContent())
+  }
+
+  public async getLocalDestinations(): Promise<LocalDestinationsData> {
+    return LocalDestinationsData.fromWrapper(await this.fetchContent('?page=local_destinations'));
+  }
+
+  public async getI2pTunnels(): Promise<TunnelsData> {
+    return TunnelsData.fromWrapper(await this.fetchContent('?page=i2p_tunnels'));
+  }
+
+  public async getMoneroServerTunnels(): Promise<TunnelInfo[]> {
+    const tunnels = await this.getI2pTunnels();
+    return tunnels.servers.filter((t) => t.name.includes('monero'));
+  }
+
+  public async getMoneroNodeServerTunnel(): Promise<TunnelInfo | undefined> {
+    const tunnels = await this.getMoneroServerTunnels();
+
+    return tunnels.find((t) => t.name === 'monero-node');
+  }
+
+  public async getAnonymousInbound(): Promise<string> {
+    const tunnel = await this.getMoneroNodeServerTunnel();
+
+    if (!tunnel) return '';
+
+    const c = tunnel.address.split(':');
+
+    if (c.length != 2) return '';
+
+    const address = c[0];
+    //const port = Number(c[1]);
+    const port = 1885;
+
+    return `${address},127.0.0.1:${port}`;
+  }
+
+  public async getAnonymousInboundUri(): Promise<string> {
+    const tunnel = await this.getMoneroNodeServerTunnel();
+
+    if (!tunnel) return '';
+
+    return tunnel.address;
+  }
+
+  public async getAnonymousInboundAddress(): Promise<string> {
+    const uri = await this.getAnonymousInboundUri();
+    const c = uri.split(':');
+    const result = c[0];
+
+    if (!result || result.endsWith('.i2p')) return '';
+
+    return result;
+  }
+
 }
 
 export interface I2pStd {
