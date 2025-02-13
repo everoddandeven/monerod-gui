@@ -5,7 +5,6 @@ import { NavbarLink, NavbarService } from '../../shared/components';
 
 @Component({
   selector: 'app-i2p-webconsole',
-  imports: [],
   templateUrl: './i2p-webconsole.component.html',
   styleUrl: './i2p-webconsole.component.scss',
   standalone: false
