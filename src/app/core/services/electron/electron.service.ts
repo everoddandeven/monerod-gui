@@ -267,9 +267,9 @@ export class ElectronService {
     return this._osType;
   }
 
-  public async downloadFile(url: string, destination: string, progressFunction?: (info: { progress: number, status: string }) => void): Promise<string> {
+  public async downloadFile(url: string, destination: string, progressFunction: (info: { progress: number, status: string }) => void): Promise<string> {
     const promise = new Promise<string>((resolve, reject) => {
-      window.electronAPI.downloadFile(url, destination, progressFunction ? progressFunction : (info: any) => {}, (fileName: string) => resolve(fileName), (error: string) => reject(new Error(error)));
+      window.electronAPI.downloadFile(url, destination, progressFunction, (fileName: string) => resolve(fileName), (error: string) => reject(new Error(error)));
     });
 
     return await promise;

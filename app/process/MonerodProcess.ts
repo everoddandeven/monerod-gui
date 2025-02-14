@@ -1,4 +1,6 @@
 import { AppChildProcess } from "./AppChildProcess";
+import { MonerodInstallationInfo } from "./MonerodInstallationInfo";
+import * as fs from 'fs';
 
 export class MonerodProcess extends AppChildProcess {
 
@@ -230,6 +232,55 @@ export class MonerodProcess extends AppChildProcess {
     console.log("MonerodProcess.getVersion(): After proc.start()");
 
     return await promise;
+  }
+
+  public static async detectInstalled(): Promise<MonerodInstallationInfo | undefined> {
+    if (this.isLinux) {
+      return await this.detectInstalledLinux();
+    }
+    else if (this.isWindows) {
+      return await this.detectInstalledWindows();
+    }
+    else if (this.isMacos) {
+      return await this.detectInstalledMacos();
+    }
+    
+    return undefined;
+  }
+
+  private static async detectInstalledLinux(): Promise<MonerodInstallationInfo | undefined> {
+    let path: string | undefined = undefined;
+    let configFile: string | undefined = undefined;
+    let pidFile: string | undefined = undefined;
+    let isRunning: boolean = false;
+
+    if (await this.isValidPath('/usr/bin/monerod')) {
+      path = '/usr/bin/monerod';
+    }
+    else if (await this.isValidPath('/opt/monero/monerod')) {
+      path = '/opt/monero/monerod';
+    }
+    if (fs.existsSync('/etc/monerod.conf')) {
+      configFile = '/etc/monerod.conf';
+    }
+    if (fs.existsSync('/run/monero/monerod.pid')) {
+      pidFile = '/run/monero/monerod.pid';
+      isRunning = true;
+    }
+
+    if (path) {
+      return { path, configFile, pidFile, isRunning };
+    }
+
+    return undefined;
+  }
+
+  private static async detectInstalledWindows(): Promise<MonerodInstallationInfo | undefined> {
+    return undefined;
+  }
+
+  private static async detectInstalledMacos(): Promise<MonerodInstallationInfo | undefined> {
+    return undefined;
   }
 
 }

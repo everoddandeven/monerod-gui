@@ -1,9 +1,7 @@
 import { execSync } from "child_process";
 import { AppChildProcess } from "./AppChildProcess";
 import * as fs from 'fs';
-
-export interface InstallationInfo { path: string };
-export interface I2pdInstallationInfo extends InstallationInfo { configFile?: string; tunnelConfig?: string; tunnelsConfigDir?: string; pidFile?: string; isRunning?: boolean; };
+import { I2pdInstallationInfo } from "./I2pdInstallationInfo";
 
 export interface I2pTunnelConfig {
   name: string;

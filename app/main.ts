@@ -404,6 +404,9 @@ async function detectInstallation(program: string): Promise<any> {
   if (program === 'i2pd') {
     return await I2pdProcess.detectInstalled();
   }
+  else if (program === 'monerod') {
+    return await MonerodProcess.detectInstalled();
+  }
   else return undefined;
 }
 
