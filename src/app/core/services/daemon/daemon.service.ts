@@ -838,7 +838,7 @@ export class DaemonService {
         window.electronAPI.getMoneroVersion(monerodPath, (result: { version?: string; error?: string; }) => {
           if (result.version) resolve(DaemonVersion.parse(result.version));
           else if (result.error) reject(new Error(result.error));
-          else reject("No result found");
+          else reject(new Error("No result found"));
         });
 
       });

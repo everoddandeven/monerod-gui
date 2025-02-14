@@ -34,6 +34,7 @@
         "@typescript-eslint/no-unsafe-member-access": 0,
         "prefer-arrow/prefer-arrow-functions": 0,
         "@angular-eslint/directive-selector":  0,
+        "@angular-eslint/prefer-standalone": 0,
         "@angular-eslint/component-selector": [
           "error",
           {

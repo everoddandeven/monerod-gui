@@ -66,8 +66,7 @@ export class I2pDaemonService {
   constructor() 
   {
     this.openDbPromise = this.openDatabase();
-    this.openDbPromise.then(() => console.log('Loaded i2p settings database')).catch((error: any) => console.error(error));
-    this.loadSettings();
+    this.loadSettings().then(() => console.log('Loaded i2p settings database')).catch((error: any) => console.error(error));
   }
 
   private async openDatabase(): Promise<IDBPDatabase<any>> {
