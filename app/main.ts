@@ -757,11 +757,11 @@ try {
   ipcMain.handle('read-file', (event: IpcMainInvokeEvent, filePath: string) => {
     fs.readFile(filePath, 'utf-8', (err, data) => {
       if (err != null) {
-        win?.webContents.send('on-read-file-error', `${err}`);
+        win?.webContents.send('on-read-file', { error: `${err}` });
         return;
       }
 
-      win?.webContents.send('on-read-file', data);
+      win?.webContents.send('on-read-file', { data });
     });
   });
 

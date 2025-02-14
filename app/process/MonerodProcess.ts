@@ -151,13 +151,23 @@ export class MonerodProcess extends AppChildProcess {
         }
       };
 
-      if (waitForPattern) this.onStdOut(onStdOut);
+      const onClose = (code: number | null) => {
+        if (timeout) {
+          clearTimeout(timeout);
+          reject("monerod return " + code);
+        }
+      };
+
+      if (waitForPattern) {
+        this.onStdOut(onStdOut);
+        this.onClose(onClose);
+      }
       else resolve();
     });
 
     await super.start();
 
-    await this.wait(1000);
+    if (waitForPattern) await this.wait(1000);
 
     if (!this._process || !this._process.pid || !this._running) {
       throw new Error("Monerod process did not start!");

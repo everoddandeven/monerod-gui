@@ -99,7 +99,6 @@ declare global {
       selectFile: (extensions: string[], callback: (path: string) => void) => void;
 
       readFile: (filePath: string, callback: (result: { data?: string; error?: string; }) => void) => void;
-
       saveFile: (defaultPath: string, content: string, callback: (result: { path?: string; error?: string; }) => void) => void;
 
       getPath: (path: 'home' | 'appData' | 'userData' | 'sessionData' | 'temp' | 'exe' | 'module' | 'desktop' | 'documents' | 'downloads' | 'music' | 'pictures' | 'videos' | 'recent' | 'logs' | 'crashDumps', callback: (path: string) => void) => void;
@@ -130,12 +129,13 @@ declare global {
       onBattery: (callback: (event: any) => void) => void;
       onAc: (callback: (event: any) => void) => void;
 
-      downloadFile: (url: string, destination: string) => void;
-      onDownloadFileProgress: (callback: (event: any, info: { progress: number, status: string }) => void) => void;
-      onDownloadFileError: (callback: (event: any, error: string) => void) => void;
-      onDownloadFileComplete: (callback: (event: any, fileName: string) => void) => void;
-      unregisterOnDownloadFile: () => void;
-
+      downloadFile: (
+        url: string, 
+        destination: string,
+        progress: (info: { progress: number, status: string }) => void, 
+        complete: (fileName: string) => void,
+        error: (error: string) => void
+      ) => void;
       showErrorBox: (title: string, content: string) => void;
     };
   }

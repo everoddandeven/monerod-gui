@@ -181,28 +181,20 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onDownloadProgress: (callback) => {
     ipcRenderer.on('download-progress', callback);
   },
-  checkValidMonerodPath: (path) => {
+  checkValidMonerodPath: (path, callback) => {
     const handler = (event, result) => callback(result);
     ipcRenderer.once('on-check-valid-monerod-path', handler);
     ipcRenderer.invoke('check-valid-monerod-path', path);
   },
-  selectFolder: () => {
+  selectFolder: (callback) => {
     const handler = (event, result) => callback(result);
     ipcRenderer.once('selected-folder', handler);
     ipcRenderer.invoke('select-folder')
   },
-  readFile: (filePath) => {
+  readFile: (filePath, callback) => {
+    const handler = (event, result) => callback(result);
+    ipcRenderer.once('on-read-file', handler);
     ipcRenderer.invoke('read-file', filePath);
-  },
-  onReadFile: (callback) => {
-    ipcRenderer.on('on-read-file', callback);
-  },
-  onReadFileError: (callback) => {
-    ipcRenderer.on('on-read-file-error', callback);
-  },
-  unregisterOnReadFile: () => {
-    ipcRenderer.removeAllListeners('on-read-file');
-    ipcRenderer.removeAllListeners('on-read-file-error');
   },
   saveFile: (defaultPath, content, callback) => {
     const handler = (event, result) => callback(result);
@@ -211,7 +203,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   selectFile: (extensions, callback) => {
     const handler = (event, result) => callback(result);
-    ipcRenderer.on('selected-file', handler);
+    ipcRenderer.once('selected-file', handler);
     ipcRenderer.invoke('select-file', extensions);
   },
   isWifiConnected: (callback) => {
@@ -224,9 +216,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     const handler = (event, result) => callback(result);
     ipcRenderer.once('on-get-path', handler);
     ipcRenderer.invoke('get-path', path);
-  },
-  unregisterOnGetPath: () => {
-    ipcRenderer.removeAllListeners('on-get-path');
   },
   getOsType: (callback) => {
     const handler = (event, result) => {
@@ -278,22 +267,28 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.once('on-is-auto-launched', handler);
     ipcRenderer.invoke('is-auto-launched');
   },
-  downloadFile: (url, destination) => {
+  downloadFile: (url, destination, progress, complete, error) => {
+    const progressHandler = (event, info) => {
+      progress(info);
+    };
+    const completeHandler = (event, fileName) => {
+      ipcRenderer.removeAllListeners('download-file-progress');
+      ipcRenderer.removeAllListeners('download-file-error');
+      ipcRenderer.removeAllListeners('download-file-complete');
+      complete(fileName);
+    };
+    const errorHandler = (event, err) => {
+      ipcRenderer.removeAllListeners('download-file-progress');
+      ipcRenderer.removeAllListeners('download-file-error');
+      ipcRenderer.removeAllListeners('download-file-complete');
+      error(err);
+    };
+
+    ipcRenderer.on('download-file-progress', progressHandler);
+    ipcRenderer.on('download-file-error', errorHandler);
+    ipcRenderer.on('download-file-complete', completeHandler);
+
     ipcRenderer.invoke('download-file', url, destination);
-  },
-  onDownloadFileProgress: (callback) => {
-    ipcRenderer.on('download-file-progress', callback);
-  },
-  onDownloadFileError: (callback) => {
-    ipcRenderer.on('download-file-error', callback);
-  },
-  onDownloadFileComplete: (callback) => {
-    ipcRenderer.on('download-file-complete', callback);
-  },
-  unregisterOnDownloadFile: () => {
-    ipcRenderer.removeAllListeners('download-file-progress');
-    ipcRenderer.removeAllListeners('download-file-error');
-    ipcRenderer.removeAllListeners('download-file-complete');
   },
   showErrorBox: (title, content) => {
     ipcRenderer.invoke('show-error-box', title, content);

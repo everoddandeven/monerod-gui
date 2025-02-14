@@ -269,22 +269,9 @@ export class ElectronService {
 
   public async downloadFile(url: string, destination: string, progressFunction?: (info: { progress: number, status: string }) => void): Promise<string> {
     const promise = new Promise<string>((resolve, reject) => {
-      if (progressFunction) {
-        window.electronAPI.onDownloadProgress((event: any, prog: { progress: number, status: string }) => progressFunction(prog));
-      }
-
-      window.electronAPI.onDownloadFileError((event: any, error: string) => {
-        window.electronAPI.unregisterOnDownloadFile();
-        reject(new Error(error));
-      });
-
-      window.electronAPI.onDownloadFileComplete((event: any, fileName: string) => {
-        window.electronAPI.unregisterOnDownloadFile();
-        resolve(fileName);
-      });
+      window.electronAPI.downloadFile(url, destination, progressFunction ? progressFunction : (info: any) => {}, (fileName: string) => resolve(fileName), (error: string) => reject(new Error(error)));
     });
 
-    window.electronAPI.downloadFile(url, destination);
     return await promise;
   }
 
