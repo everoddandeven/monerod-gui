@@ -563,6 +563,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     this.refreshTorTxProxy();
     this.refreshI2pAnonymousInbound();
     this.refreshI2pTxProxy();
+    this.updateTablesContentHeight();
   }
 
   private loadTables(): void {

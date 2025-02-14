@@ -197,8 +197,9 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, A
   }
 
   public override updateTablesContentHeight(): void {
-    this.updateTableContentHeight('monerod-log-table');
-    this.updateTableContentHeight('i2pd-log-table');
+    super.updateTablesContentHeight();
+    //this.updateTableContentHeight('monerod-log-table');
+    //this.updateTableContentHeight('i2pd-log-table');
   }
 
   public scrollTablesContentToBottom(): void {

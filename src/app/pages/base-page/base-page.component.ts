@@ -30,7 +30,7 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
   }
 
   public updateTablesContentHeight(): void {
-
+    this.updateTableContentHeight('pills-tabContent');
   }
 
   protected setLinks(links: NavbarLink[] = []): void {
