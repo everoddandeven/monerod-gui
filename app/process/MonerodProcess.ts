@@ -157,7 +157,9 @@ export class MonerodProcess extends AppChildProcess {
 
     await super.start();
 
-    if (!this._process || !this._process.pid) {
+    await this.wait(1000);
+
+    if (!this._process || !this._process.pid || !this._running) {
       throw new Error("Monerod process did not start!");
     }
     try {            

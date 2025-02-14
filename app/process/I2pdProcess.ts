@@ -371,10 +371,6 @@ export abstract class MoneroI2pTunnelConfigService {
 
 }
 
-async function wait(d: number = 5000): Promise<void> {
-  await new Promise<void>((resolve) => setTimeout(resolve, d));
-}
-
 export class I2pdProcess extends AppChildProcess {
 
   constructor({ i2pdPath, flags, isExe }: { i2pdPath: string, flags?: string[], isExe?: boolean }) {
@@ -402,7 +398,7 @@ export class I2pdProcess extends AppChildProcess {
 
       const onStdOut = (out: string) => {
         stdOutFound = true;
-        wait(3000).then(resolve);
+        this.wait(3000).then(resolve);
       };
 
       const onStdErr = (out: string) => {

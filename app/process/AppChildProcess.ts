@@ -211,13 +211,15 @@ export class AppChildProcess {
     });
 
     process.once('close', () => {
-      if (this._stopping) return;
-
       this._running = false;
       this._process = undefined;
     });
 
     await promise;
+  }
+
+  public async wait(d: number = 5000): Promise<void> {
+    await new Promise<void>((resolve) => setTimeout(resolve, d));
   }
 
   public async stop(): Promise<number | null> {

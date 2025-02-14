@@ -52,9 +52,7 @@ export class ElectronService {
     try {
       const promise = new Promise<boolean>((resolve, reject) => {
         try {
-          window.electronAPI.onIsWifiConnectedResponse((event: any, connected: boolean) => {
-            console.debug(event);
-            window.electronAPI.unregisterOnIsWifiConnectedResponse();
+          window.electronAPI.isWifiConnected((connected: boolean) => {
             resolve(connected);
           });
         }
@@ -62,8 +60,6 @@ export class ElectronService {
           reject(new Error(`${error}`));
         }
       });
-
-      window.electronAPI.isWifiConnected();
 
       return await promise;
     }
@@ -100,15 +96,11 @@ export class ElectronService {
     if (this._isAutoLaunched === undefined) {
       try {
         const promise = new Promise<boolean>((resolve) => {
-          window.electronAPI.onIsAutoLaunched((event: any, isAutoLaunched: boolean) => {
-            console.debug(event);
-            window.electronAPI.unregisterOnIsAutoLaunched();
+          window.electronAPI.isAutoLaunchEnabled((isAutoLaunched: boolean) => {
             resolve(isAutoLaunched);
           });
         });
-  
-        window.electronAPI.isAutoLaunched();
-  
+    
         this._isAutoLaunched = await promise;
       } catch(error: any) {
         console.error(error);
@@ -125,13 +117,10 @@ export class ElectronService {
     }
 
     const promise = new Promise<boolean>((resolve) => {
-      window.electronAPI.onIsAutoLaunchEnabled((event: any, enabled: boolean) => {
-        window.electronAPI.unregisterOnIsAutoLaunchEnabled();
+      window.electronAPI.isAutoLaunchEnabled((enabled: boolean) => {
         resolve(enabled);
       });
     });
-
-    window.electronAPI.isAutoLaunchEnabled();
 
     return await promise;
   }
@@ -148,22 +137,13 @@ export class ElectronService {
     }
 
     const promise = new Promise<void>((resolve, reject) => {
-      window.electronAPI.onEnableAutoLaunchError((event: any, error: string) => {
-        console.debug(event);
-        window.electronAPI.unregisterOnEnableAutoLaunchError();
-        window.electronAPI.unregisterOnEnableAutoLaunchSuccess();
-        reject(new Error(error));
-      });
+      window.electronAPI.enableAutoLaunch(minimized, (result: { error?: string; }) => {
+        const { error } = result;
 
-      window.electronAPI.onEnableAutoLaunchSuccess((event: any) => {
-        console.debug(event);
-        window.electronAPI.unregisterOnEnableAutoLaunchError();
-        window.electronAPI.unregisterOnEnableAutoLaunchSuccess();
-        resolve();
+        if (error) reject(new Error(error));
+        else resolve();
       });
     });
-
-    window.electronAPI.enableAutoLaunch(minimized);
 
     await promise;
   }
@@ -181,22 +161,13 @@ export class ElectronService {
     }
 
     const promise = new Promise<void>((resolve, reject) => {
-      window.electronAPI.onDisableAutoLaunchError((event: any, error: string) => {
-        console.debug(event);
-        window.electronAPI.unregisterOnDisableAutoLaunchError();
-        window.electronAPI.unregisterOnDisableAutoLaunchSuccess();
-        reject(new Error(error));
-      });
+      window.electronAPI.disableAutoLaunch((result: { error?: string} ) => {
+        const { error } = result;
 
-      window.electronAPI.onDisableAutoLaunchSuccess((event: any) => {
-        console.debug(event);
-        window.electronAPI.unregisterOnDisableAutoLaunchError();
-        window.electronAPI.unregisterOnDisableAutoLaunchSuccess();
-        resolve();
+        if (error) reject(new Error(error));
+        else resolve();
       });
     });
-
-    window.electronAPI.disableAutoLaunch();
 
     await promise;
   }
@@ -204,14 +175,11 @@ export class ElectronService {
   public async isPortable(): Promise<boolean> {
     if (this._isPortable === undefined) {
       const promise = new Promise<boolean>((resolve) => {
-        window.electronAPI.onIsPortable((event: any, value: boolean) => {
-          window.electronAPI.unregisterIsPortable();
+        window.electronAPI.isPortable((value: boolean) => {
           resolve(value);
         });
       });
-  
-      window.electronAPI.isPortable();
-  
+    
       this._isPortable = await promise;
     }
 
@@ -221,90 +189,82 @@ export class ElectronService {
   public async selectFile(extensions?: string[]): Promise<string> {
   
     const selectPromise: Promise<string> = new Promise<string>((resolve) => {
-      window.electronAPI.onSelectedFile((event: any, path: string) => {
-        window.electronAPI.unregisterOnSelectedFile();
+      window.electronAPI.selectFile(extensions ? extensions : [], (path: string) => {
         resolve(path);
       });
     });
-
-    window.electronAPI.selectFile(extensions);
     
     return await selectPromise;
   }
 
   public async readFile(filePath: string): Promise<string> {
     const promise = new Promise<string>((resolve, reject) => {
-      window.electronAPI.onReadFileError((event: any, error: string) => {
-        window.electronAPI.unregisterOnReadFile();
-        reject(new Error(error));
-      });
+      window.electronAPI.readFile(filePath, (result: { data?: string; error?: string; }) => {
+        const { data, error } = result;
 
-      window.electronAPI.onReadFile((event: any, data: string) => {
-        window.electronAPI.unregisterOnReadFile();
-        resolve(data);
+        if (error) reject(new Error(error));
+        else if (data) resolve(data);
+        else reject(new Error("Cannot read file"));
       });
     });
-
-    window.electronAPI.readFile(filePath);
 
     return await promise;
   }
 
   public async saveFile(defaultPath: string, content: string): Promise<string> {
     const promise = new Promise<string>((resolve, reject) => {
-      window.electronAPI.onSaveFileError((event: any, error: string) => {
-        window.electronAPI.unregisterOnSaveFile();
-        reject(new Error(error));
+      window.electronAPI.saveFile(defaultPath, content, (result: { path?: string; error?: string }) => {
+        const { path, error } = result;
+
+        if (error) reject(new Error(error));
+        else if (path) resolve(path);
+        else reject(new Error("Could not save file"));
       });
 
-      window.electronAPI.onSaveFile((event: any, filePath: string) => {
-        window.electronAPI.unregisterOnSaveFile();
-        resolve(filePath);
-      })
     });
-
-    window.electronAPI.saveFile(defaultPath, content);
 
     return await promise;
   }
 
   public async selectFolder(): Promise<string> {
     const selectPromise = new Promise<string>((resolve) => {
-      window.electronAPI.onSelectedFolder((event: any, folder: string) => {
-        window.electronAPI.unregisterOnSelectedFolder();
+      window.electronAPI.selectFolder((folder: string) => {
         resolve(folder);
       });
     });
-
-    window.electronAPI.selectFolder();
     
     return await selectPromise;
   }
 
   public async getPath(path: 'home' | 'appData' | 'userData' | 'sessionData' | 'temp' | 'exe' | 'module' | 'desktop' | 'documents' | 'downloads' | 'music' | 'pictures' | 'videos' | 'recent' | 'logs' | 'crashDumps'): Promise<string> {
     const promise = new Promise<string>((resolve) => {
-      window.electronAPI.onGetPath((event: any, result: string) => {
-        window.electronAPI.unregisterOnGetPath();
+      window.electronAPI.getPath(path, (result: string) => {
         resolve(result);
       })
     });
 
-    window.electronAPI.getPath(path);
-
     return await promise;
   }
 
+  private _osType?: { platform: string; arch: string; };
+
   public async getOsType(): Promise<{ platform: string, arch: string }> {
-    const promise = new Promise<{ platform: string, arch: string }>((resolve) => {
-      window.electronAPI.gotOsType((event: any, osType: { platform: string; arch: string; }) => {
-        window.electronAPI.unregisterGotOsType();
-        resolve(osType);
+    if (this._osType) return this._osType;
+
+    const promise = new Promise<{ platform: string, arch: string }>((resolve, reject) => {
+      window.electronAPI.getOsType((result: { osType?: { platform: string; arch: string; }; error?: string;}) => {
+        const { error, osType } = result;
+
+        if (error) reject(new Error(error));
+        else if (osType) resolve(osType);
+        else reject(new Error("Could not get os type"))
+
       });
     });
 
-    window.electronAPI.getOsType();
+    this._osType = await promise;
 
-    return await promise;
+    return this._osType;
   }
 
   public async downloadFile(url: string, destination: string, progressFunction?: (info: { progress: number, status: string }) => void): Promise<string> {

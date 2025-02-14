@@ -238,13 +238,10 @@ export class DaemonService {
     }
 
     const checkPromise = new Promise<boolean>((resolve) => {
-      window.electronAPI.onCheckValidMonerodPath((event: any, valid: boolean) => {
-        window.electronAPI.unregisterOnCheckValidMonerodPath();
+      window.electronAPI.checkValidMonerodPath(path, (valid: boolean) => {
         resolve(valid);
       });
     });
-
-    window.electronAPI.checkValidMonerodPath(path);
 
     return await checkPromise;
   }
@@ -444,18 +441,16 @@ export class DaemonService {
     
     if (!this.settings.noSync && !this.settings.syncOnWifi && await this.electronService.isWifiConnected()) {
       console.log("Disabling sync ...");
-
       this.settings.noSync = true;
     }
     else if (!this.settings.noSync && this.settings.syncPeriodEnabled && !TimeUtils.isInTimeRange(this.settings.syncPeriodFrom, this.settings.syncPeriodTo)) {
       console.log("Disabling sync ...");
-
       this.settings.noSync = true;
     }
 
-    if (this.i2pService.settings.enabled && !this.i2pService.running) {
+    if (this.i2pService.settings.enabled) {
       console.log('starting i2pd service');
-      await this.i2pService.start();
+      if (!this.i2pService.running) await this.i2pService.start();
       console.log('started i2pd service');
 
       if (this.i2pService.settings.txProxyEnabled) {
@@ -471,11 +466,13 @@ export class DaemonService {
     }
 
     const startPromise = new Promise<void>((resolve, reject) => {
-      window.electronAPI.onMonerodStarted((event: any, started: boolean) => {
-        console.debug(event);
-        
+      window.electronAPI.startMonerod(this.settings.toCommandOptions(), (result: {error?: any}) => {
+        const { error } = result;
+        const started = error === undefined || error === null;
+
         if (started) {
           console.log("monerod started");
+
           this.delay(3000).then(() => {
             this.isRunning(true).then((running: boolean) => {
               window.electronAPI.showNotification({
@@ -505,30 +502,26 @@ export class DaemonService {
             this.starting = false;
           });
         }
-        else {
+        else if (error) {
+          const body = this.enablingSync ? 'Could not enable node blockchain sync' : this.restarting ? 'Could not restart monerod' : 'Could not start monerod';
+
           console.log("Daemon not started");
           window.electronAPI.showNotification({
             title: 'Daemon Error',
-            body: this.enablingSync ? 'Could not enable node blockchain sync' : this.restarting ? 'Could not restart monerod' : 'Could not start monerod'
+            body
           });
           this.onDaemonStatusChanged.emit(false);
           this.startedAt = undefined;
           this.starting = false;
-          reject(new Error('Could not start daemon'));
+          
+          const err = error instanceof Error ? error.message : `${error}`;
+          reject(new Error('Could not start daemon: ' + err));
         }
+
       })
     });
-
-    window.electronAPI.startMonerod(this.settings.toCommandOptions());
     
-    try {
-      await startPromise;
-    }
-    catch(error: any) {
-      console.error(error);
-    }
-    
-    window.electronAPI.unsubscribeOnMonerodStarted();
+    await startPromise;    
   }
 
   public async restartDaemon(): Promise<void> {
@@ -842,21 +835,16 @@ export class DaemonService {
       }
 
       const promise = new Promise<DaemonVersion>((resolve, reject) => {
-        window.electronAPI.onMoneroVersion((event: any, version: string) => {
-          window.electronAPI.unregisterOnMoneroVersion();
-          window.electronAPI.unregisterOnMoneroVersionError();
-          resolve(DaemonVersion.parse(version));
-        })
-        window.electronAPI.onMoneroVersionError((event: any, error: string) => {
-          window.electronAPI.unregisterOnMoneroVersion();
-          window.electronAPI.unregisterOnMoneroVersionError();
-          reject(new Error(error));
+        window.electronAPI.getMoneroVersion(monerodPath, (result: { version?: string; error?: string; }) => {
+          if (result.version) resolve(DaemonVersion.parse(result.version));
+          else if (result.error) reject(new Error(result.error));
+          else reject("No result found");
         });
+
       });
 
-      window.electronAPI.getMoneroVersion(monerodPath);
-
       this.version = await promise;
+
       return this.version;
     }
 
@@ -1307,20 +1295,19 @@ export class DaemonService {
     }
 
     const getProcessStatsPromise = new Promise<ProcessStats>((resolve, reject) => {
-      window.electronAPI.onMonitorMonerodError((event: any, error: string) => {
-        window.electronAPI.unregisterOnMonitorMonerod();
-        window.electronAPI.unregisterOnMonitorMonerodError();
-        reject(new Error(error));
-      });
+      window.electronAPI.monitorMonerod((result) => {
+        const { error, stats } = result;
 
-      window.electronAPI.onMonitorMonerod((event: any, stats: ProcessStats) => {
-        window.electronAPI.unregisterOnMonitorMonerod();
-        window.electronAPI.unregisterOnMonitorMonerodError();
-        resolve(stats);
+        if (error) {
+          if (error instanceof Error) reject(error);
+          else reject(new Error(`${error}`));
+        }
+        else if (stats) {
+          resolve(stats);
+        }
       });
     })
 
-    window.electronAPI.monitorMonerod();
 
     return await getProcessStatsPromise;
   }

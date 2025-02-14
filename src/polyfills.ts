@@ -55,6 +55,16 @@ import { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 import { NotificationConstructorOptions } from 'electron';
 
+interface ProcessInfo {
+  cpu: number;
+  memory: number;
+  ppid: number;
+  pid: number;
+  ctime: number;
+  elapsed: number;
+  timestamp: number;
+};
+
 declare global {
   interface Window {
     electronAPI: {
@@ -65,92 +75,47 @@ declare global {
       stopI2pd: (callback: (error?: any) => void) => void;
       onI2pdOutput: (callback: (output: {stdout?: string, stderr?: string}) => void) => void;
       copyToClipboard: (content: string) => void;
-      startMonerod: (options: string[]) => void;
+      startMonerod: (options: string[], callback: (result: {error?: any}) => void) => void;
       stopMonerod: () => void;
-      monitorMonerod: () => void;
-      onMonitorMonerod: (callback: (event: any, stats: {
-        cpu: number;
-        memory: number;
-        ppid: number;
-        pid: number;
-        ctime: number;
-        elapsed: number;
-        timestamp: number;
-      }
-      ) => void) => void;
-      onMonitorMonerodError: (callback: (event: any, error: string) => void) => void;
-      unregisterOnMonitorMonerod: () => void,
-      unregisterOnMonitorMonerodError: () => void,
 
-      onMonerodStarted: (callback: (event: any, started: boolean) => void) => void;
-      getMoneroVersion: (path: string) => void;
+      monitorMonerod: (callback: (result: {stats?: ProcessInfo, error?: any}) => void) => void;
 
-      onMoneroVersion: (callback: (event: any, version: string) => void) => void;
-      onMoneroVersionError: (callback: (event: any, error: string) => void) => void;
-      unregisterOnMoneroVersion: () => void;
-      unregisterOnMoneroVersionError: () => void;
+      getMoneroVersion: (path: string, callback: (result: { version?: string; error?: string; }) => void) => void;
 
       downloadMonerod: (downloadUrl:string, destination: string) => void;
       onDownloadProgress: (callback: (event: any, progress: { progress: number, status: string }) => void) => void;
-      checkValidMonerodPath: (path: string) => void;
-      onCheckValidMonerodPath: (callback: (event: any, valid: boolean) => void) => void;
-      unregisterOnCheckValidMonerodPath: () => void;
-      unsubscribeOnMonerodStarted: () => void;
+
+      checkValidMonerodPath: (path: string, callback: (valid: boolean) => void) => void;
+
       onMoneroClose: (callback: (event: any, code: number) => void) => void;
       onMoneroStdout: (callbak: (event: any, out: string) => void) => void;
+
       unregisterOnMoneroStdout: () => void;
       checkValidI2pdPath: (path: string, callback: (valid: boolean) => void) => void;
-      isWifiConnected: () => void;
-      onIsWifiConnectedResponse: (callback: (event: any, connected: boolean) => void) => void;
-      unregisterOnIsWifiConnectedResponse: () => void;
-      selectFolder: () => void;
-      selectFile: (extensions?: string[]) => void;
-      readFile: (filePath: string) => void;
-      unregisterOnReadFile: () => void;
-      onReadFile: (callback: (event: any, data: string) => void) => void;
-      onReadFileError: (callback: (event: any, error: string) => void) => void;
-      saveFile: (defaultPath: string, content: string) => void;
-      onSaveFile: (callback: (event: any, filePath: string) => void) => void;
-      onSaveFileError: (callback: (event: any, error: string) => void) => void;
-      unregisterOnSaveFile: () => void;
-      onSelectedFolder: (callback: (event: any, path: string) => void) => void;
-      onSelectedFile: (callback: (event: any, path: string) => void) => void;
-      unregisterOnSelectedFile: () => void;
-      unregisterOnSelectedFolder: () => void;
+      
+      isWifiConnected: (callback: (connected: boolean) => void) => void;
 
-      getPath: (path: 'home' | 'appData' | 'userData' | 'sessionData' | 'temp' | 'exe' | 'module' | 'desktop' | 'documents' | 'downloads' | 'music' | 'pictures' | 'videos' | 'recent' | 'logs' | 'crashDumps') => void;
-      onGetPath: (callback: (event: any, path: string) => void) => void;
-      unregisterOnGetPath: () => void;
+      selectFolder: (callback: (path: string) => void) => void;
+      selectFile: (extensions: string[], callback: (path: string) => void) => void;
 
-      getOsType: () => void;
-      gotOsType: (callback: (event: any, osType: { platform: string, arch: string }) => void) => void;
-      unregisterGotOsType: () => void;
+      readFile: (filePath: string, callback: (result: { data?: string; error?: string; }) => void) => void;
+
+      saveFile: (defaultPath: string, content: string, callback: (result: { path?: string; error?: string; }) => void) => void;
+
+      getPath: (path: 'home' | 'appData' | 'userData' | 'sessionData' | 'temp' | 'exe' | 'module' | 'desktop' | 'documents' | 'downloads' | 'music' | 'pictures' | 'videos' | 'recent' | 'logs' | 'crashDumps', callback: (path: string) => void) => void;
+      getOsType: (callback: (event: { osType?: { platform: string, arch: string }; error?: string;}) => void) => void;
+
       showNotification: (options: NotificationConstructorOptions) => void;
       quit: (callback: (error?: string) => void) => void;
 
-      isPortable: () => void;
-      onIsPortable: (callback: (event: any, value: boolean) => void) => void;
-      unregisterIsPortable: () => void;
+      isPortable: (callback: (event: any, value: boolean) => void) => void;
 
-      isAutoLaunchEnabled: () => void;
-      onIsAutoLaunchEnabled: (callback: (event: any, enabled: boolean) => void) => void;
-      unregisterOnIsAutoLaunchEnabled: () => void;
+      isAutoLaunchEnabled: (callback: (enabled: boolean) => void) => void;
 
-      enableAutoLaunch: (minimized: boolean) => void;
-      onEnableAutoLaunchError: (callback: (event: any, error: string) => void) => void;
-      onEnableAutoLaunchSuccess: (callback: (event: any) => void) => void;
-      unregisterOnEnableAutoLaunchError: () => void,
-      unregisterOnEnableAutoLaunchSuccess: () => void,
+      enableAutoLaunch: (minimized: boolean, callback: (result: { error?: string; }) => void) => void;
     
-      disableAutoLaunch: () => void;
-      onDisableAutoLaunchError: (callback: (event: any, error: string) => void) => void;
-      onDisableAutoLaunchSuccess: (callback: (event: any) => void) => void;
-      unregisterOnDisableAutoLaunchError: () => void,
-      unregisterOnDisableAutoLaunchSuccess: () => void,
-
-      isAutoLaunched: () => void;
-      onIsAutoLaunched: (callback: (event: any, isAutoLaunched: boolean) => void) => void;
-      unregisterOnIsAutoLaunched: () => void;
+      disableAutoLaunch: (callback: (result: { error?: string; }) => void) => void;
+      isAutoLaunched: (callback: (isAutoLaunched: boolean) => void) => void;
 
       onTrayStartDaemon: (callback: (event: any) => void) => void;
       onTrayStopDaemon: (callback: (event: any) => void) => void;
@@ -160,8 +125,7 @@ declare global {
       setTrayItemEnabled: (id: string, enabled: boolean) => void;
       setTrayToolTip: (toolTip: string) => void;
 
-      getBatteryLevel: (callback: (level: number) => void) => void;
-
+      getBatteryLevel: (callback: (level: number) => void) => void
       isOnBatteryPower: (callback: (onBattery: boolean) => void) => void;
       onBattery: (callback: (event: any) => void) => void;
       onAc: (callback: (event: any) => void) => void;

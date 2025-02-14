@@ -282,14 +282,12 @@ async function getMonerodVersion(monerodFilePath: string): Promise<void> {
   });
 
   try {
-    console.log("Before proc.getVersion()");
     const version = await proc.getVersion();
-    console.log("After proc.getVersion()");
-    win?.webContents.send('monero-version', version);
+    win?.webContents.send('monero-version', { version });
   }
   catch(error: any) {
     const err = (error instanceof Error) ? error.message : `${error}`;
-    win?.webContents.send('monero-version-error', err);
+    win?.webContents.send('monero-version', { error: err });
   }
 }
 
@@ -297,6 +295,10 @@ async function checkValidMonerodPath(monerodPath: string): Promise<void> {
   const valid = await MonerodProcess.isValidPath(monerodPath);
   
   win?.webContents.send('on-check-valid-monerod-path', valid);
+}
+
+async function wait(delay: number = 5000): Promise<void> {
+  await new Promise<void>((resolve) => setTimeout(resolve, delay));
 }
 
 async function startMoneroDaemon(commandOptions: string[]): Promise<void> {
@@ -358,25 +360,27 @@ async function startMoneroDaemon(commandOptions: string[]): Promise<void> {
   try {
     if (privnet) await PrivateTestnet.start();
     else await monerodProcess.start();
-    win?.webContents.send('monerod-started', true);
+    await wait(3000);
+    win?.webContents.send('monerod-started', {});
   }
   catch(error: any) {
     console.error(error);
-    win?.webContents.send('monero-stderr', `${error}`);
-    win?.webContents.send('monerod-started', false);
+    const err = `${error}`;
+    win?.webContents.send('monero-stderr', err);
+    win?.webContents.send('monerod-started', { error });
     monerodProcess = null;
   }
 }
 
 async function monitorMonerod(): Promise<void> {
   if (!monerodProcess) {
-    win?.webContents.send('on-monitor-monerod-error', 'Monerod not running');
+    win?.webContents.send('on-monitor-monerod', { error: 'Monerod not running' });
     return;
   }
 
   try {
     const stats = await monerodProcess.getStats();
-    win?.webContents.send('on-monitor-monerod', stats);
+    win?.webContents.send('on-monitor-monerod', { stats });
   }
   catch(error: any) {
     let message: string;
@@ -388,7 +392,7 @@ async function monitorMonerod(): Promise<void> {
       message = `${error}`;
     }
 
-    win?.webContents.send('on-monitor-monerod-error', message);
+    win?.webContents.send('on-monitor-monerod', { error: message });
   }
 }
 
@@ -775,16 +779,16 @@ try {
     });
 
     if (result.canceled) {
-      win.webContents.send('on-save-file', '');
+      win.webContents.send('on-save-file', { path: '' });
       return;
     }
     try {
       fs.writeFileSync(result.filePath, content);
 
-      win.webContents.send('on-save-file', result.filePath);
+      win.webContents.send('on-save-file', { path: result.filePath });
     }
     catch(error: any) {
-      win.webContents.send('on-save-file-error', `${error}`);
+      win.webContents.send('on-save-file-error', { error: `${error}` });
     }
   });
 
@@ -832,7 +836,9 @@ try {
   });
 
   ipcMain.handle('get-os-type', (event: IpcMainInvokeEvent) => {
-    win?.webContents.send('got-os-type', { platform: os.platform(), arch: os.arch() });
+    const osType = { platform: os.platform(), arch: os.arch() };
+
+    win?.webContents.send('got-os-type', { osType });
   })
 
   ipcMain.handle('monitor-monerod', (event: IpcMainInvokeEvent) => {
@@ -862,12 +868,12 @@ try {
   ipcMain.handle('enable-auto-launch', async (event: IpcMainInvokeEvent, minimized: boolean) => {
     try {
       await AppMainProcess.enableAutoLaunch(minimized);
-      win?.webContents.send('on-enable-auto-launch-success');
+      win?.webContents.send('on-enable-auto-launch', {});
     }
     catch(error: any) {
       const err = (error instanceof Error) ? error.message : `${error}`;
 
-      win?.webContents.send('on-enable-auto-launch-error', err);
+      win?.webContents.send('on-enable-auto-launch', { error: err });
     }
   });
 
@@ -878,11 +884,11 @@ try {
   ipcMain.handle('disable-auto-launch', async (event: IpcMainInvokeEvent) => {
     try {
       await AppMainProcess.disableAutoLaunch();
-      win?.webContents.send('on-disable-auto-launch-success');
+      win?.webContents.send('on-disable-auto-launch', {});
     }
     catch(error: any) {
       const err = (error instanceof Error) ? error.message : `${error}`;
-      win?.webContents.send('on-disable-auto-launch-error', err);
+      win?.webContents.send('on-disable-auto-launch', { error: err });
     }
   });
 

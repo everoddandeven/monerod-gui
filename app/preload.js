@@ -133,30 +133,26 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setTrayToolTip: (toolTip) => {
     ipcRenderer.invoke('set-tray-tool-tip', toolTip);
   },
-  startMonerod: (args) => {
+  startMonerod: (args, callback) => {
+    const handler = (event, result) => {
+      callback(result);
+    };
+
+    ipcRenderer.once('monerod-started', handler);
     ipcRenderer.invoke('start-monerod', args);
   },
   stopMonerod: () => {
     ipcRenderer.invoke('stop-monerod');
   },
-  onMonerodStarted: (callback) => {
-    ipcRenderer.on('monerod-started', callback);
-  },
-  monitorMonerod: () => {
+  monitorMonerod: (callback) => {
+    const handler = (event, result) => {
+      callback(result);
+    };
+
+    ipcRenderer.once('on-monitor-monerod', handler);
     ipcRenderer.invoke('monitor-monerod');
   },
-  onMonitorMonerod: (callback) => {
-    ipcRenderer.on('on-monitor-monerod', callback);
-  },
-  onMonitorMonerodError: (callback) => {
-    ipcRenderer.on('on-monitor-monerod-error', callback);
-  },
-  unregisterOnMonitorMonerod: () => {
-    ipcRenderer.removeAllListeners('on-monitor-monerod');
-  },
-  unregisterOnMonitorMonerodError: () => {
-    ipcRenderer.removeAllListeners('on-monitor-monerod-error');
-  },
+  
   unsubscribeOnMonerodStarted: () => {
     ipcRenderer.removeAllListeners('monerod-started');
   },
@@ -169,21 +165,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
   unregisterOnMoneroStdout: () => {
     ipcRenderer.removeAllListeners('monero-stdout');
   },
-  getMoneroVersion: (monerodPath) => {
+
+  getMoneroVersion: (monerodPath, callback) => {
+    const handler = (event, result) => {
+      callback(result);
+    }
+
+    ipcRenderer.once('monero-version', handler);
     ipcRenderer.invoke('get-monero-version', monerodPath);
   },
-  onMoneroVersion: (callback) => {
-    ipcRenderer.on('monero-version', callback);
-  },
-  onMoneroVersionError: (callback) => {
-    ipcRenderer.on('monero-version-error', callback);
-  },
-  unregisterOnMoneroVersion: () => {
-    ipcRenderer.removeAllListeners('monero-version');
-  },
-  unregisterOnMoneroVersionError: () => {
-    ipcRenderer.removeAllListeners('monero-version-error');
-  },
+
   downloadMonerod: (downloadUrl, destination) => {
     ipcRenderer.invoke('download-monerod', downloadUrl, destination);
   },
@@ -191,19 +182,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('download-progress', callback);
   },
   checkValidMonerodPath: (path) => {
+    const handler = (event, result) => callback(result);
+    ipcRenderer.once('on-check-valid-monerod-path', handler);
     ipcRenderer.invoke('check-valid-monerod-path', path);
   },
-  onCheckValidMonerodPath: (callback) => {
-    ipcRenderer.on('on-check-valid-monerod-path', callback);
-  },
-  unregisterOnCheckValidMonerodPath: () => {
-    ipcRenderer.removeAllListeners('on-check-valid-monerod-path');
-  },
   selectFolder: () => {
+    const handler = (event, result) => callback(result);
+    ipcRenderer.once('selected-folder', handler);
     ipcRenderer.invoke('select-folder')
-  },
-  onSelectedFolder: (callback) => {
-    ipcRenderer.on('selected-folder', callback);
   },
   readFile: (filePath) => {
     ipcRenderer.invoke('read-file', filePath);
@@ -218,57 +204,37 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.removeAllListeners('on-read-file');
     ipcRenderer.removeAllListeners('on-read-file-error');
   },
-  unregisterOnSelectedFolder: () => {
-    ipcRenderer.removeAllListeners('selected-folder');
-  },
-  saveFile: (defaultPath, content) => {
+  saveFile: (defaultPath, content, callback) => {
+    const handler = (event, result) => callback(result);
+    ipcRenderer.once('on-save-file', handler);
     ipcRenderer.invoke('save-file', defaultPath, content);
   },
-  onSaveFileError: (callback) => {
-    ipcRenderer.on('on-save-file-error', callback);
-  },
-  onSaveFile: (callback) => {
-    ipcRenderer.on('on-save-file', callback);
-  },
-  unregisterOnSaveFile: () => {
-    ipcRenderer.removeAllListeners('on-save-file-error');
-    ipcRenderer.removeAllListeners('on-save-file');
-  },
-  selectFile: (extensions = undefined) => {
+  selectFile: (extensions, callback) => {
+    const handler = (event, result) => callback(result);
+    ipcRenderer.on('selected-file', handler);
     ipcRenderer.invoke('select-file', extensions);
   },
-  onSelectedFile: (callback) => {
-    ipcRenderer.on('selected-file', callback);
-  },
-  unregisterOnSelectedFile: () => {
-    ipcRenderer.removeAllListeners('selected-file');
-  },
-  isWifiConnected: () => {
+  isWifiConnected: (callback) => {
+    const handler = (event, result) => callback(result);
+
+    ipcRenderer.once('is-wifi-connected-result', handler);
     ipcRenderer.invoke('is-wifi-connected');
   },
-  onIsWifiConnectedResponse: (callback) => {
-    ipcRenderer.on('is-wifi-connected-result', callback);
-  },
-  unregisterOnIsWifiConnectedResponse: () => {
-    ipcRenderer.removeAllListeners('is-wifi-connected-result');
-  },
-  getPath: (path) => {
+  getPath: (path, callback) => {
+    const handler = (event, result) => callback(result);
+    ipcRenderer.once('on-get-path', handler);
     ipcRenderer.invoke('get-path', path);
-  },
-  onGetPath: (callback) => {
-    ipcRenderer.on('on-get-path', callback);
   },
   unregisterOnGetPath: () => {
     ipcRenderer.removeAllListeners('on-get-path');
   },
-  getOsType: () => {
+  getOsType: (callback) => {
+    const handler = (event, result) => {
+      callback(result);
+    };
+    
+    ipcRenderer.once('got-os-type', handler);
     ipcRenderer.invoke('get-os-type');
-  },
-  gotOsType: (callback) => {
-    ipcRenderer.on('got-os-type', callback);
-  },
-  unregisterGotOsType: () => {
-    ipcRenderer.removeAllListeners('got-os-type');
   },
 
   showNotification: (options) => {
@@ -282,62 +248,35 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.once('on-quit', handler);
     ipcRenderer.invoke('quit');
   },
-  enableAutoLaunch: (minimized) => {
+  enableAutoLaunch: (minimized, callback) => {
+    const handler = (event, result) => callback(result);
+    ipcRenderer.once('on-enable-auto-launch', handler);
     ipcRenderer.invoke('enable-auto-launch', minimized);
   },
-  isAutoLaunchEnabled: () => {
+  isAutoLaunchEnabled: (callback) => {
+    const handler = (event, result) => callback(result);
+    ipcRenderer.once('on-is-auto-launch-enabled', handler);
     ipcRenderer.invoke('is-auto-launch-enabled');
   },
-  onIsAutoLaunchEnabled: (callback) => {
-    ipcRenderer.on('on-is-auto-launch-enabled', callback);
-  },
-  unregisterOnIsAutoLaunchEnabled: () => {
-    ipcRenderer.removeAllListeners('on-is-auto-launch-enabled');
-  },
-  onEnableAutoLaunchError: (callback) => {
-    ipcRenderer.on('on-enable-auto-launch-error', callback);
-  },
-  onEnableAutoLaunchSuccess: (callback) => {
-    ipcRenderer.on('on-enable-auto-launch-success', callback);
-  },
-  unregisterOnEnableAutoLaunchError: () => {
-    ipcRenderer.removeAllListeners('on-enable-auto-launch-error');
-  },
-  unregisterOnEnableAutoLaunchSuccess: () => {
-    ipcRenderer.removeAllListeners('on-enable-auto-launch-success')
-  },
-  disableAutoLaunch: () => {
+
+  disableAutoLaunch: (callback) => {
+    const handler = (event, result) => callback(result);
+    ipcRenderer.once('on-disable-auto-launch', handler);
     ipcRenderer.invoke('disable-auto-launch');
   },
-  onDisableAutoLaunchError: (callback) => {
-    ipcRenderer.on('on-disable-auto-launch-error', callback);
-  },
-  onDisableAutoLaunchSuccess: (callback) => {
-    ipcRenderer.on('on-disable-auto-launch-success', callback);
-  },
-  unregisterOnDisableAutoLaunchError: () => {
-    ipcRenderer.removeAllListeners('on-disable-auto-launch-error');
-  },
-  unregisterOnDisableAutoLaunchSuccess: () => {
-    ipcRenderer.removeAllListeners('on-disable-auto-launch-success')
-  },
-  isPortable: () => {
+
+  isPortable: (callback) => {
+    const handler = (event, result) => {
+      callback(result);
+    };
+
+    ipcRenderer.once('on-is-portable', handler);
     ipcRenderer.invoke('is-portable');
   },
-  onIsPortable: (callback) => {
-    ipcRenderer.on('on-is-portable', callback);
-  },
-  unregisterIsPortable: () => {
-    ipcRenderer.removeAllListeners('on-is-portable');
-  },
-  isAutoLaunched: () => {
+  isAutoLaunched: (callback) => {
+    const handler = (event, result) => callback(result);
+    ipcRenderer.once('on-is-auto-launched', handler);
     ipcRenderer.invoke('is-auto-launched');
-  },
-  onIsAutoLaunched: (callback) => {
-    ipcRenderer.on('on-is-auto-launched', callback);
-  },
-  unregisterOnIsAutoLaunched: () => {
-    ipcRenderer.removeAllListeners('on-is-auto-launched');
   },
   downloadFile: (url, destination) => {
     ipcRenderer.invoke('download-file', url, destination);

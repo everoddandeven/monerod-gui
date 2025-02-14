@@ -534,8 +534,10 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     this.originalSettings = await this.daemonService.getSettings();
     this._currentSettings = this.originalSettings.clone();
 
-    if (this.seedNode !== '') {
-      const components = this.seedNode.split(":");
+    const seedNode = this._currentSettings.seedNode;
+
+    if (seedNode !== '') {
+      const components = seedNode.split(":");
 
       if (components.length >= 2) {
         const [node, strPort] = components;
@@ -596,7 +598,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   }
 
   public onSeedNodeChange() {
-    if (this.seedNodePort >= 0) {
+    if (this.seedNodePort > 0) {
       this._currentSettings.seedNode = `${this.seedNodeAddress}:${this.seedNodePort}`;
     }
     else {
