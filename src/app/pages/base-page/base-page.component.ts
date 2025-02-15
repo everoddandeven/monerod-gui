@@ -184,6 +184,8 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
 
   public ngAfterContentInit(): void {
     this.navbarService.setLinks(this._links);
+
+    setTimeout(() => this.updateTablesContentHeight(), 100);
   }
 
   public ngOnDestroy(): void {

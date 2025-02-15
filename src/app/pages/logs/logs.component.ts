@@ -190,12 +190,6 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, A
     this.settingLogCategories = false;
   }
 
-  public override ngAfterContentInit(): void {
-    super.ngAfterContentInit();
-
-    setTimeout(() => this.updateTablesContentHeight(), 100);
-  }
-
   public override updateTablesContentHeight(): void {
     super.updateTablesContentHeight();
     //this.updateTableContentHeight('monerod-log-table');
@@ -203,8 +197,9 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, A
   }
 
   public scrollTablesContentToBottom(): void {
-    this.scrollTableContentToBottom('monerod-log-table');
-    this.scrollTableContentToBottom('i2pd-log-table');
+    this.scrollTableContentToBottom('pills-tabContent');
+    //this.scrollTableContentToBottom('monerod-log-table');
+    //this.scrollTableContentToBottom('i2pd-log-table');
   }
 
   public ngAfterViewInit(): void {
