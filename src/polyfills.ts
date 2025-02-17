@@ -71,26 +71,21 @@ declare global {
       detectInstallation: (program: 'monerod' | 'i2pd' | 'tor' | 'monerod-gui', callback: (info?: any) => void) => void;
       httpPost: <TConfig extends { [key: string]: any } = object>(params: { id: string; url: string; data?: any; config?: AxiosRequestConfig<TConfig>}, callback: (result: { data?: AxiosResponse<any, any>, code: number; status: string; error?: string; }) => void) => void;
       httpGet: <TConfig extends { [key: string]: any } = object>(params: { id: string; url: string; config?: AxiosRequestConfig<TConfig> }, callback: (result: { data?: AxiosResponse<any, any>, code: number; status: string; error?: string; }) => void) => void;
+      copyToClipboard: (content: string) => void;
+      
+      startMonerod: (options: string[], callback: (result: {error?: any}) => void) => void;
+      stopMonerod: () => void;
+      monitorMonerod: (callback: (result: {stats?: ProcessInfo, error?: any}) => void) => void;
+      getMonerodVersion: (path: string, callback: (result: { version?: string; error?: string; }) => void) => void;
+      downloadMonerod: (downloadUrl:string, destination: string, progress: (info: { progress: number, status: string }) => void, complete: (path: string) => void, error: (err: string) => void) => void;
+      checkValidMonerodPath: (path: string, callback: (valid: boolean) => void) => void;
+      onMonerodClose: (callback: (code: number) => void) => void;
+      onMonerodStdout: (callbak: (out: string) => void) => void;
+      unregisterOnMoneroStdout: () => void;
+
       startI2pd: (path: string, callback: (error?: any) => void) => void;
       stopI2pd: (callback: (error?: any) => void) => void;
       onI2pdOutput: (callback: (output: {stdout?: string, stderr?: string}) => void) => void;
-      copyToClipboard: (content: string) => void;
-      startMonerod: (options: string[], callback: (result: {error?: any}) => void) => void;
-      stopMonerod: () => void;
-
-      monitorMonerod: (callback: (result: {stats?: ProcessInfo, error?: any}) => void) => void;
-
-      getMoneroVersion: (path: string, callback: (result: { version?: string; error?: string; }) => void) => void;
-
-      downloadMonerod: (downloadUrl:string, destination: string) => void;
-      onDownloadProgress: (callback: (event: any, progress: { progress: number, status: string }) => void) => void;
-
-      checkValidMonerodPath: (path: string, callback: (valid: boolean) => void) => void;
-
-      onMoneroClose: (callback: (event: any, code: number) => void) => void;
-      onMoneroStdout: (callbak: (event: any, out: string) => void) => void;
-
-      unregisterOnMoneroStdout: () => void;
       checkValidI2pdPath: (path: string, callback: (valid: boolean) => void) => void;
       
       isWifiConnected: (callback: (connected: boolean) => void) => void;
@@ -107,12 +102,10 @@ declare global {
       showNotification: (options: NotificationConstructorOptions) => void;
       quit: (callback: (error?: string) => void) => void;
 
-      isPortable: (callback: (event: any, value: boolean) => void) => void;
+      isPortable: (callback: (value: boolean) => void) => void;
 
       isAutoLaunchEnabled: (callback: (enabled: boolean) => void) => void;
-
       enableAutoLaunch: (minimized: boolean, callback: (result: { error?: string; }) => void) => void;
-    
       disableAutoLaunch: (callback: (result: { error?: string; }) => void) => void;
       isAutoLaunched: (callback: (isAutoLaunched: boolean) => void) => void;
 
@@ -126,8 +119,8 @@ declare global {
 
       getBatteryLevel: (callback: (level: number) => void) => void
       isOnBatteryPower: (callback: (onBattery: boolean) => void) => void;
-      onBattery: (callback: (event: any) => void) => void;
-      onAc: (callback: (event: any) => void) => void;
+      onBattery: (callback: () => void) => void;
+      onAc: (callback: () => void) => void;
 
       downloadFile: (
         url: string, 
@@ -136,6 +129,7 @@ declare global {
         complete: (fileName: string) => void,
         error: (error: string) => void
       ) => void;
+      
       showErrorBox: (title: string, content: string) => void;
     };
   }

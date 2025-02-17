@@ -30,12 +30,10 @@ export class ElectronService {
     window.addEventListener('offline', () => this._online = false);
     this._isProduction = APP_CONFIG.production;
 
-    window.electronAPI.onBattery((event: any) => {
-      console.debug(event);
+    window.electronAPI.onBattery(() => {
       this.onBatteryPower.emit()
     });
-    window.electronAPI.onAc((event: any) => { 
-      console.debug(event);
+    window.electronAPI.onAc(() => { 
       this.onAcPower.emit()
     });
   }

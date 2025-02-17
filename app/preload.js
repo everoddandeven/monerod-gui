@@ -1,4 +1,5 @@
 // preload.js
+const { callback } = require('chart.js/dist/helpers/helpers.core');
 const { contextBridge, ipcRenderer } = require('electron');
 
 function newId() {
@@ -104,10 +105,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('is-on-battery-power', { eventId });
   },
   onAc: (callback) => {
-    ipcRenderer.on('on-ac', callback);
+    const handler = (event) => callback();
+    ipcRenderer.on('on-ac', handler);
   },
   onBattery: (callback) => {
-    ipcRenderer.on('on-battery', callback);
+    const handler = (event) => callback();
+    ipcRenderer.on('on-battery', handler);
   },
   copyToClipboard: (content) => {
     ipcRenderer.invoke('copy-to-clipboard', content);
@@ -156,17 +159,18 @@ contextBridge.exposeInMainWorld('electronAPI', {
   unsubscribeOnMonerodStarted: () => {
     ipcRenderer.removeAllListeners('monerod-started');
   },
-  onMoneroStdout: (callback) => {
-    ipcRenderer.on('monero-stdout', callback);
+  onMonerodStdout: (callback) => {
+    const handler = (event, result) => callback(result);
+    ipcRenderer.on('monero-stdout', handler);
   },
-  onMoneroClose: (callback) => {
-    ipcRenderer.on('monero-close', callback);
+  onMonerodClose: (callback) => {
+    const handler = (event, result) => callback(result);
+    ipcRenderer.on('monero-close', handler);
   },
   unregisterOnMoneroStdout: () => {
     ipcRenderer.removeAllListeners('monero-stdout');
   },
-
-  getMoneroVersion: (monerodPath, callback) => {
+  getMonerodVersion: (monerodPath, callback) => {
     const handler = (event, result) => {
       callback(result);
     }
@@ -175,11 +179,28 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('get-monero-version', monerodPath);
   },
 
-  downloadMonerod: (downloadUrl, destination) => {
+  downloadMonerod: (downloadUrl, destination, progress, complete, error) => {
+    const progressHandler = (event, result) => progress(result);
+    let errorHandler, completeHandler;
+
+    completeHandler = (event, result) => {
+      ipcRenderer.removeListener('download-monerod-progress', progressHandler);
+      ipcRenderer.removeListener('download-monerod-error', errorHandler);
+      complete(result);
+    };
+
+    errorHandler = (event, result) => {
+      ipcRenderer.removeListener('download-monerod-progress', progressHandler);
+      ipcRenderer.removeListener('download-monerod-complete', completeHandler);
+      error(result);
+    };
+
+    ipcRenderer.once('download-monerod-error', errorHandler);
+    ipcRenderer.once('download-monerod-complete', completeHandler);
+    ipcRenderer.on('download-monerod-progress', progressHandler);
     ipcRenderer.invoke('download-monerod', downloadUrl, destination);
   },
   onDownloadProgress: (callback) => {
-    ipcRenderer.on('download-progress', callback);
   },
   checkValidMonerodPath: (path, callback) => {
     const handler = (event, result) => callback(result);

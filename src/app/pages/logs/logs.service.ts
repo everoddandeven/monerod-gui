@@ -10,7 +10,7 @@ export class LogsService {
     this.log(message, 'i2pd');
   }
 
-  private readonly monerodLogHandler: (event: any, message: string) => void = (event: any, message: string) => {
+  private readonly monerodLogHandler: (message: string) => void = (message: string) => {
     this.log(message, 'monerod');
   }
 
@@ -26,7 +26,7 @@ export class LogsService {
   public readonly categories: LogCategories = new LogCategories();
   
   constructor(private ngZone: NgZone, private i2pService: I2pDaemonService) {
-    window.electronAPI.onMoneroStdout(this.monerodLogHandler);
+    window.electronAPI.onMonerodStdout(this.monerodLogHandler);
     this.i2pService.std.out.subscribe(this.i2pdLogHandler);
     this.i2pService.std.err.subscribe(this.i2pdLogHandler);
   }

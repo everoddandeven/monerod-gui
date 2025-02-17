@@ -44,30 +44,21 @@ export class MoneroInstallerService {
     
     try {
       const result = await new Promise<string>((resolve, reject) => {
-
-        window.electronAPI.onDownloadProgress((event: any, progress: { progress: number, status: string }) => {
-
+        const onError = (err: string) => reject(new Error(err));
+        const onComplete = (path: string) => resolve(path);
+        const onProgress = (progress: { progress: number, status: string }) => {
           this.ngZone.run(() => {
             this._progress = progress;
           });
+        };
 
-          if (progress.status.includes('Error')) {
-            reject(new Error(progress.status));
-          }
-
-          if (progress.progress == 200) {
-            resolve(progress.status);
-          }
-
-        });
-
-        window.electronAPI.downloadMonerod(downloadUrl, destination);
+        window.electronAPI.downloadMonerod(downloadUrl, destination, onProgress, onComplete, onError);
       });
 
       this._downloading = false;
       return result;
     }
-    catch (error) {
+    catch (error: any) {
       console.error(error);
       this._downloading = false;
 

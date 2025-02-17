@@ -685,48 +685,42 @@ try {
   // Gestione IPC
   ipcMain.handle('download-monerod', async (event: IpcMainInvokeEvent, downloadUrl: string, destination: string) => {
     try {
-      //const fileName = path.basename(downloadUrl);
-      //const filePath = path.join(destination, fileName);
       const hashUrl = 'https://www.getmonero.org/downloads/hashes.txt';
 
-      // Inizializza il progresso
-      event.sender.send('download-progress', { progress: 0, status: 'Starting download' });
+      win?.webContents.send('download-monerod-progress', { progress: 0, status: 'Starting download' });
       
       win?.setProgressBar(0, {
         mode: 'normal'
       });
 
-      // Scarica il file Monero
       const fileName = await FileUtils.downloadFile(downloadUrl, destination, (progress) => {
         win?.setProgressBar(progress, {
           mode: 'normal'
         });
 
-        event.sender.send('download-progress', { progress, status: 'Downloading' });
+        win?.webContents.send('download-monerod-progress', { progress, status: 'Downloading' });
       });
 
-      // Scarica e verifica l'hash
-      event.sender.send('download-progress', { progress: 100, status: 'Verifying hash' });
+      win?.webContents.send('download-monerod-progress', { progress: 100, status: 'Verifying hash' });
       win?.setProgressBar(100, {
         mode: 'indeterminate'
       });
 
       await downloadAndVerifyHash(hashUrl, fileName, destination);
 
-      // Estrai il file
       const fPath = `${destination}/${fileName}`;
-      event.sender.send('download-progress', { progress: 100, status: 'Extracting' });
+      win?.webContents.send('download-monerod-progress', { progress: 100, status: 'Extracting' });
       const extractedDir = await FileUtils.extract(fPath, destination);
 
-      event.sender.send('download-progress', { progress: 100, status: 'Download and extraction completed successfully' });
-      event.sender.send('download-progress', { progress: 200, status: os.platform() == 'win32' ? extractedDir : `${destination}/${extractedDir}` });
+      win?.webContents.send('download-monerod-progress', { progress: 100, status: 'Download and extraction completed' });
+      win?.webContents.send('download-monerod-complete', os.platform() == 'win32' ? extractedDir : `${destination}/${extractedDir}`);
 
       win?.setProgressBar(100, {
         mode: 'none'
       });
       
     } catch (error) {
-      event.sender.send('download-progress', { progress: 0, status: `${error}` });
+      win?.webContents.send('download-monerod-error', `${error}`);
       win?.setProgressBar(0, {
         mode: 'error'
       });

@@ -91,7 +91,7 @@ export class DaemonService {
     this.openDbPromise = this.openDatabase();
     this.settings = new DaemonSettings();
 
-    window.electronAPI.onMoneroClose((event: any, code: number) => {
+    window.electronAPI.onMonerodClose((code: number) => {
       if (code != 0) {
         window.electronAPI.showNotification({
           title: 'Daemon Error',
@@ -835,7 +835,7 @@ export class DaemonService {
       }
 
       const promise = new Promise<DaemonVersion>((resolve, reject) => {
-        window.electronAPI.getMoneroVersion(monerodPath, (result: { version?: string; error?: string; }) => {
+        window.electronAPI.getMonerodVersion(monerodPath, (result: { version?: string; error?: string; }) => {
           if (result.version) resolve(DaemonVersion.parse(result.version));
           else if (result.error) reject(new Error(result.error));
           else reject(new Error("No result found"));
