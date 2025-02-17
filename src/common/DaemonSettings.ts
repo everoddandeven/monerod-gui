@@ -631,7 +631,7 @@ export class DaemonSettings extends Comparable<DaemonSettings> {
     if (this.allowLocalIp) options.push(`--allow-local-ip`);
     if (this.addPeer != '') options.push('--add-peer', this.addPeer);
     if (this.hasPriorityNodes) this.priorityNodes.forEach((node) => options.push(`--add-priority-node`, node));
-    if (this.hasExclusiveNodes) this.exclusiveNodes.forEach((node) => options.push(`--add-exlcusive-node`, node));
+    if (this.hasExclusiveNodes) this.exclusiveNodes.forEach((node) => options.push(`--add-exclusive-node`, node));
     if (this.txProxies.tor && this.txProxies.tor != '') options.push(`--tx-proxy`, this.txProxies.tor);
     if (this.txProxies.i2p && this.txProxies.i2p != '') options.push(`--tx-proxy`, this.txProxies.i2p);
     if (this.anonymousInbounds.tor != '') options.push(`--anonymous-inbound`, this.anonymousInbounds.tor);
