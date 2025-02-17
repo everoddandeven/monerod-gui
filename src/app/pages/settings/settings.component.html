@@ -1113,13 +1113,6 @@
             </div>
 
             <div class="form-check form-switch col-md-6">
-              <label for="i2p-sync-on-clearnet" class="form-check-label">Sync on Clearnet</label>
-              <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="i2p-sync-on-clearnet" [checked]="currentI2pdSettings.syncOnClearNet" [(ngModel)]="currentI2pdSettings.syncOnClearNet" [ngModelOptions]="{standalone: true}" [disabled]="!currentI2pdSettings.enabled">
-              <br>
-              <small class="text-body-secondary">Allow blockchain synchronization on clearnet</small>
-            </div>
-
-            <div class="form-check form-switch col-md-6">
               <label for="i2p-allow-incoming-connections" class="form-check-label">Allow incoming connections</label>
               <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="i2p-allow-incoming-connections" [checked]="currentI2pdSettings.allowIncomingConnections" [(ngModel)]="currentI2pdSettings.allowIncomingConnections" [ngModelOptions]="{standalone: true}" [disabled]="!currentI2pdSettings.enabled">
               <br>

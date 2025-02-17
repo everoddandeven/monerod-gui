@@ -460,9 +460,6 @@ export class DaemonService {
         const anonInbound = await this.i2pService.getAnonymousInbound();
         this.settings.setAnonymousInbound(anonInbound, 'i2p');
       }
-      if (!this.i2pService.settings.syncOnClearNet) {
-        this.settings.proxy = this.i2pService.proxy;
-      }
     }
 
     const startPromise = new Promise<void>((resolve, reject) => {
