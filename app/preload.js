@@ -1,5 +1,4 @@
 // preload.js
-const { callback } = require('chart.js/dist/helpers/helpers.core');
 const { contextBridge, ipcRenderer } = require('electron');
 
 function newId() {
