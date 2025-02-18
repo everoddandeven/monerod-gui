@@ -26,14 +26,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.once(eventId, handler);
     ipcRenderer.invoke('check-valid-i2pd-path', { eventId, path });
   },
-  startI2pd: (path, callback) => {
+  startI2pd: (path, port, rpcPort, callback) => {
     const eventId = `on-start-i2pd-${newId()}`;
     const handler = (event, result) => {
       callback(result);
     };
 
     ipcRenderer.once(eventId, handler);
-    ipcRenderer.invoke('start-i2pd', { eventId, path });
+    ipcRenderer.invoke('start-i2pd', { eventId, path, port, rpcPort });
   },
   stopI2pd: (callback) => {
     const eventId = `on-stop-i2pd-${newId()}`;

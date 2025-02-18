@@ -1,6 +1,7 @@
 import { execSync } from "child_process";
 import { AppChildProcess } from "./AppChildProcess";
 import * as fs from 'fs';
+import * as path from 'path';
 import { I2pdInstallationInfo } from "./I2pdInstallationInfo";
 
 export interface I2pTunnelConfig {
@@ -270,7 +271,7 @@ export abstract class MoneroI2pTunnelConfigCreator {
 
 }
 
-export abstract class MoneroI2pTunnelConfigService {
+export class MoneroI2pTunnelConfigService {
   private _loading: boolean = false;
   private _saving: boolean = false;
   private _loaded: boolean = false;
@@ -342,7 +343,7 @@ export abstract class MoneroI2pTunnelConfigService {
     this._saving = true;
 
     try {
-      if (!this.modified) throw new Error("Config not modified");
+      //if (!this.modified) throw new Error("Config not modified");
 
       I2pTunnelConfigWriter.write(this._config, path);
       this._originalConfig = [ { ...this._config[0] }, { ...this._config[1] }];
@@ -403,14 +404,21 @@ export class I2pdProcess extends AppChildProcess {
         if (!stdOutFound) reject(new Error(out));
       };
 
+      const onClose = (code: number | null) => {
+        if (!stdOutFound) reject(new Error(`Exited with code ${code}`));
+      }
+
       this.onError((err) => onStdErr(err.message));
       this.onStdOut(onStdOut);
       this.onStdErr(onStdErr);
+      this.onClose(onClose);
     });
 
     await super.start();
 
     await promise;
+
+    console.log(`Started i2pd process ${this._process?.pid}`);
   }
 
   static async isValidPath(executablePath: string): Promise<boolean> {
@@ -510,8 +518,102 @@ export class MoneroI2pdProcess extends I2pdProcess {
     //'--service'
   ];
 
-  public static createSimple(i2pdPath: string): MoneroI2pdProcess {
-    return new MoneroI2pdProcess({ i2pdPath, flags: this.defaultFlags, isExe: true })
+  private static get defaultConfigPath(): string {
+    return path.join(this.userDataPath, 'i2pd', 'i2pd.conf');
+  }
+
+  private static get defaultConfigFlag(): string {
+    return `--conf=${this.defaultConfigPath}`;
+  }
+
+  private static get defaultTunnelsConfigPath(): string {
+    return path.join(this.userDataPath, 'i2pd', 'tunnels.conf');
+  }
+
+  private static get defaultTunnelsConfigFlag(): string {
+    return `--tunconf=${this.defaultTunnelsConfigPath}`;
+  }
+
+  private static get defaultTunnelsDirPath(): string {
+    return path.join(this.userDataPath, 'i2pd', 'tunnels.conf.d');
+  }
+
+  private static get defaultTunnelsDirFlag(): string {
+    return `--tunnelsdir=${this.defaultTunnelsDirPath}`;
+  }
+
+  private static get defaultLogPath(): string {
+    return path.join(this.userDataPath, 'i2pd', 'i2pd.log');
+  }
+
+  private static get defaultLogFlag(): string {
+    return `--logfile=${this.defaultLogPath}`;
+  }
+
+  private static getDefaultFlags(): string[] {
+    return [
+      this.defaultConfigFlag,
+      this.defaultTunnelsConfigFlag,
+      this.defaultTunnelsDirFlag,
+      this.defaultLogFlag
+    ];
+  }
+
+  private static createDefaultConfigFile(): void {
+    if (!fs.existsSync(path.join(this.userDataPath, 'i2pd'))) {
+      fs.mkdirSync(path.join(this.userDataPath, 'i2pd'));
+    }
+
+    fs.writeFileSync(this.defaultConfigPath, `ipv4 = true
+ipv6 = false
+daemon = false
+
+[httpproxy]
+enabled = false
+outproxy = http://exit.stormycloud.i2p
+
+[socksproxy]
+enabled = true
+outproxy.enabled = true
+#outproxy = exit.stormycloud.i2p
+#outproxy = 127.0.0.1
+#outproxyport = 9050
+
+[reseed]
+verify = true
+`);
+  }
+
+  private static createDefaultTunnelsConfigFile(): void {
+    fs.writeFileSync(this.defaultTunnelsConfigPath, ``);
+  }
+
+  private static createDefaultTunnelsDir(port: number, rpcPort: number): void {
+    const service = new MoneroI2pTunnelConfigService(path.join(this.defaultTunnelsConfigPath));
+    const result = MoneroI2pTunnelConfigCreator.createSimple('mainnet', port, rpcPort);
+    service.setConfig(result[0], result[1], true);
+  }
+
+  private static createDefaultLogFile(): void {
+    fs.writeFileSync(this.defaultLogPath, ``);
+  }
+
+  public static createSimple(i2pdPath: string, port: number = 18080, rpcPort: number = 18081): MoneroI2pdProcess {
+    this.createDefaultConfigFile();
+
+    if (!fs.existsSync(this.defaultTunnelsConfigPath)) {
+      this.createDefaultTunnelsConfigFile();
+    }
+
+    this.createDefaultTunnelsDir(port, rpcPort);
+
+    if (!fs.existsSync(this.defaultLogPath)) {
+      this.createDefaultLogFile();
+    }
+
+    const flags = this.getDefaultFlags();
+    
+    return new MoneroI2pdProcess({ i2pdPath, flags, isExe: true })
   }
 
 }

@@ -574,8 +574,8 @@ try {
     win?.webContents.send(eventId, await detectInstallation(program));
   });
 
-  ipcMain.handle('start-i2pd', async (event: IpcMainInvokeEvent, params: { eventId: string; path: string }) => {
-    const { eventId, path } = params;
+  ipcMain.handle('start-i2pd', async (event: IpcMainInvokeEvent, params: { eventId: string; path: string; port: number; rpcPort: number; }) => {
+    const { eventId, path, port, rpcPort } = params;
     
     let error: string | undefined = undefined;
 
@@ -588,7 +588,7 @@ try {
     else {
       try {
         //i2pdProcess = new I2pdProcess({ i2pdPath: path, flags, isExe: true });
-        i2pdProcess = MoneroI2pdProcess.createSimple(path);
+        i2pdProcess = MoneroI2pdProcess.createSimple(path, port, rpcPort);
         await i2pdProcess.start();
         i2pdProcess.onStdOut((out: string) => win?.webContents.send('on-ip2d-stdout', out));
         i2pdProcess.onStdErr((out: string) => win?.webContents.send('on-ip2d-stderr', out));

@@ -450,7 +450,18 @@ export class DaemonService {
 
     if (this.i2pService.settings.enabled) {
       console.log('starting i2pd service');
-      if (!this.i2pService.running) await this.i2pService.start();
+      this.i2pService.settings.port = this.settings.getPort();
+      this.i2pService.settings.rpcPort = this.settings.getRpcPort();
+
+      if (!this.i2pService.running) try {
+        await this.i2pService.start();
+      }
+      catch (error: any) {
+        console.error(error);
+        this.starting = false;
+        throw error;
+      }
+
       console.log('started i2pd service');
 
       this.settings.padTransactions = true;

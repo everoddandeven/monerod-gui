@@ -103,7 +103,7 @@ export class I2pDaemonService {
         }
       });
 
-      window.electronAPI.startI2pd(_config.path, (error?: any) => {
+      window.electronAPI.startI2pd(_config.path, _config.port, _config.rpcPort, (error?: any) => {
         this._starting = false;
         if (error) reject(new Error(`${error}`));
         else resolve();

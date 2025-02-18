@@ -168,6 +168,38 @@ export class DaemonSettings extends Comparable<DaemonSettings> {
     return this.privnet;
   }
 
+  public getRpcPort(): number {
+    if (this.rpcBindPort > 0) return this.rpcBindPort;
+
+    if (this.mainnet) {
+      return 18080;
+    }
+    else if (this.testnet) {
+      return 28080;
+    }
+    else if (this.stagenet) {
+      return 38080;
+    }
+
+    return 0;
+  }
+  
+  public getPort(): number {
+    if (this.p2pBindPort > 0) return this.p2pBindPort;
+
+    if (this.mainnet) {
+      return 18081;
+    }
+    else if (this.testnet) {
+      return 28081;
+    }
+    else if (this.stagenet) {
+      return 38081;
+    }
+
+    return 0;
+  }
+
   public setTxProxy(proxy: string, type?: 'tor' | 'i2p'): void {
     if (type === 'tor') { 
       if (!DaemonSettings.isValidTorTxProxy(proxy)) {

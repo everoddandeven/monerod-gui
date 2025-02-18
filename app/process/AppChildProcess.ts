@@ -2,11 +2,16 @@ import * as fs from 'fs';
 import * as os from 'os';
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import { ProcessStats } from './ProcessStats';
+import { app } from 'electron';
 
 
 const pidusage = require('pidusage');
 
 export class AppChildProcess {
+
+  public static get userDataPath(): string {
+    return app.getPath('userData');
+  }
 
   public static get platform(): NodeJS.Platform {
     return os.platform();
@@ -22,6 +27,10 @@ export class AppChildProcess {
 
   public static get isMacos(): boolean {
     return this.platform === 'darwin';
+  }
+
+  public static get pathSeparator(): '\\' | '/' {
+    return this.platform === 'win32' ? '\\' : '/';
   }
 
   protected _starting: boolean = false;
@@ -183,7 +192,7 @@ export class AppChildProcess {
 
     this._starting = true;
 
-    const process = spawn(this._command, this._args);
+    const process = spawn(this._command, this._args, {});
     this._process = process;
 
     const promise = new Promise<void>((resolve, reject) => {
@@ -193,16 +202,15 @@ export class AppChildProcess {
         reject(err);
       };
 
+      process.on('error', this.mOnErrorDefaultHandler);
+      this._handlers.onclose.forEach((listener) => process.on('close', listener));
+      this._handlers.onerror.forEach((listener) => process.on('error', listener));
+      this._handlers.stdout.forEach((listener) => process.stdout.on('data', listener));
+      this._handlers.stderr.forEach((listener) => process.stderr.on('data', listener));
+
       const onSpawn = () => {
         this._starting = false;
         this._running = true;
-        process.on('error', this.mOnErrorDefaultHandler);
-
-        this._handlers.onclose.forEach((listener) => process.on('close', listener));
-        this._handlers.onerror.forEach((listener) => process.on('error', listener));
-        this._handlers.stdout.forEach((listener) => process.stdout.on('data', listener));
-        this._handlers.stderr.forEach((listener) => process.stderr.on('data', listener));
-        
         resolve();
       };
 

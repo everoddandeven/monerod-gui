@@ -101,7 +101,7 @@ export class I2pWebconsoleComponent extends BasePageComponent implements OnDestr
 
   public async runPeerTest(): Promise<void> {
     try {
-      const result = this.i2pService.runPeerTest();
+      const result = await this.i2pService.runPeerTest();
       console.log(result);
     }
     catch (error: any) {
@@ -111,7 +111,7 @@ export class I2pWebconsoleComponent extends BasePageComponent implements OnDestr
 
   public async reloadTunnelsConfiguration(): Promise<void> {
     try {
-      const result = this.i2pService.reloadTunnelsConfiguration();
+      const result = await this.i2pService.reloadTunnelsConfiguration();
       console.log(result);
     }
     catch (error: any) {
@@ -121,7 +121,7 @@ export class I2pWebconsoleComponent extends BasePageComponent implements OnDestr
 
   public async declineTransitTunnels(): Promise<void> {
     try {
-      const result = this.i2pService.declineTransitTunnels();
+      const result = await this.i2pService.declineTransitTunnels();
       console.log(result);
     }
     catch (error: any) {
@@ -131,7 +131,7 @@ export class I2pWebconsoleComponent extends BasePageComponent implements OnDestr
 
   public async setLogLevel(): Promise<void> {
     try {
-      const result = this.i2pService.setLogLevel(this.loggingLevel);
+      const result = await this.i2pService.setLogLevel(this.loggingLevel);
       console.log(result);
     }
     catch (error: any) {

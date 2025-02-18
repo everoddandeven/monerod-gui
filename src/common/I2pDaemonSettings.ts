@@ -6,6 +6,9 @@ export class I2pDaemonSettings extends Comparable<I2pDaemonSettings> {
   public enabled: boolean = false;
   public path: string = "";
 
+  public port: number = 18085;
+  public rpcPort: number = 18089;
+
   public override clone(): I2pDaemonSettings {
     const result = Object.assign(new I2pDaemonSettings(), this);
 

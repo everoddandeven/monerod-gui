@@ -83,7 +83,7 @@ declare global {
       onMonerodStdout: (callbak: (out: string) => void) => void;
       unregisterOnMoneroStdout: () => void;
 
-      startI2pd: (path: string, callback: (error?: any) => void) => void;
+      startI2pd: (path: string, port: number, rpcPort: number, callback: (error?: any) => void) => void;
       stopI2pd: (callback: (error?: any) => void) => void;
       onI2pdOutput: (callback: (output: {stdout?: string, stderr?: string}) => void) => void;
       checkValidI2pdPath: (path: string, callback: (valid: boolean) => void) => void;
