@@ -19,7 +19,39 @@ export class I2pWebconsoleComponent extends BasePageComponent implements OnDestr
   public localDestinations: LocalDestinationsData = new LocalDestinationsData();
   public i2pTunnels: TunnelsData = new TunnelsData();
 
-  public loggingLevel: string = 'warn';
+  public loggingLevel: 'none' | 'critical' | 'error' | 'warn' | 'info' | 'debug' = 'warn';
+
+  public get stopping(): boolean {
+    return this.i2pService.stopping;
+  }
+
+  public get starting(): boolean {
+    return this.i2pService.starting;
+  }
+
+  public get running(): boolean {
+    return this.i2pService.running;
+  }
+
+  public get enabled(): boolean {
+    return this.i2pService.settings.enabled;
+  }
+
+  public get alertTitle(): string {
+    if (this.starting) return "Starting I2P Service";
+    if (this.stopping) return "Stopping I2P Service";
+    if (!this.enabled) return "I2P Service disabled";
+    else if (!this.running) return "I2P Service not running";
+    return "";
+  }
+
+  public get alertMessage(): string {
+    if (this.starting) return "I2P Service is starting";
+    if (this.stopping) return "I2P Service is shutting down gracefully";
+    if (!this.enabled) return "Enable I2P in daemon settings";
+    else if (!this.running) return "Start monero daemon to active I2P service";
+    return "";
+  }
 
   constructor(navbarService: NavbarService, private i2pService: I2pDaemonService) {
     super(navbarService);
@@ -38,7 +70,7 @@ export class I2pWebconsoleComponent extends BasePageComponent implements OnDestr
   private readonly refreshHandler: () => void = () => this.refresh();
 
   private async refresh(): Promise<void> {
-    if (this.refreshing) return;
+    if (this.refreshing || !this.running) return;
     this.refreshing = true;
 
     try {
@@ -67,5 +99,44 @@ export class I2pWebconsoleComponent extends BasePageComponent implements OnDestr
     clearInterval(this.refreshInterval);
   }
 
+  public async runPeerTest(): Promise<void> {
+    try {
+      const result = this.i2pService.runPeerTest();
+      console.log(result);
+    }
+    catch (error: any) {
+      console.error(error);
+    }
+  }
+
+  public async reloadTunnelsConfiguration(): Promise<void> {
+    try {
+      const result = this.i2pService.reloadTunnelsConfiguration();
+      console.log(result);
+    }
+    catch (error: any) {
+      console.error(error);
+    }
+  }
+
+  public async declineTransitTunnels(): Promise<void> {
+    try {
+      const result = this.i2pService.declineTransitTunnels();
+      console.log(result);
+    }
+    catch (error: any) {
+      console.error(error);
+    }
+  }
+
+  public async setLogLevel(): Promise<void> {
+    try {
+      const result = this.i2pService.setLogLevel(this.loggingLevel);
+      console.log(result);
+    }
+    catch (error: any) {
+      console.error(error);
+    }
+  }
 }
 

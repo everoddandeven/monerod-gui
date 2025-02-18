@@ -244,6 +244,10 @@ export class ElectronService {
     return await promise;
   }
 
+  public async getAppDataPath(): Promise<string> {
+    return await this.getPath('appData');
+  }
+
   private _osType?: { platform: string; arch: string; };
 
   public async getOsType(): Promise<{ platform: string, arch: string }> {

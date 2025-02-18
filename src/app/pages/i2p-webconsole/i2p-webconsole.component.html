@@ -11,7 +11,22 @@
     </ul>
   </div>
 </div>
-<div class="tab-content tab-grow" id="pills-tabContent">
+
+<div *ngIf="!running || stopping || starting" class="h-100 p-5 text-bg-dark rounded-3 m-4 text-center">
+  <h2><i class="bi bi-exclamation-diamond m-4"></i>{{ alertTitle }}</h2>
+  @if(stopping || starting) {
+    <button class="btn btn-outline-light" type="button" disabled>
+      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+      {{ alertMessage }}
+    </button>
+  }
+  @else {
+    <p>{{ alertMessage }}</p>
+  }
+    
+</div>
+
+<div [hidden]="!running || stopping || starting" class="tab-content tab-grow" id="pills-tabContent">
 
   <div class="tab-pane fade show active" id="pills-overview" role="tabpanel" aria-labelledby="pills-overview-tab" tabindex="0">
     <div class="card p-1">
@@ -68,7 +83,7 @@
           <div class="col-md-4">
             <label for="import-config-file" class="form-label">Run peer test</label>
             <div class="input-group mb-3">
-              <button type="button" class="btn btn-secondary btn-sm"><i class="bi bi-play-fill"></i> Run</button>
+              <button type="button" class="btn btn-secondary btn-sm" (click)="runPeerTest()"><i class="bi bi-play-fill"></i> Run</button>
             </div>
             <small class="text-body-secondary">Check network connectivity</small>
           </div>
@@ -76,7 +91,7 @@
           <div class="col-md-4">
             <label for="export-config-file" class="form-label">Reload tunnels configuration</label>
             <div class="input-group mb-3">
-              <button type="button" class="btn btn-secondary btn-sm"><i class="bi bi-play-fill"></i> Run</button>
+              <button type="button" class="btn btn-secondary btn-sm" (click)="reloadTunnelsConfiguration()"><i class="bi bi-play-fill"></i> Run</button>
             </div>
             <small class="text-body-secondary">Reload configuration and restart tunnels</small>
           </div>
@@ -84,7 +99,7 @@
           <div class="col-md-4">
             <label for="export-config-file" class="form-label">Decline transit tunnels</label>
             <div class="input-group mb-3">
-              <button type="button" class="btn btn-secondary btn-sm"><i class="bi bi-play-fill"></i> Run</button>
+              <button type="button" class="btn btn-secondary btn-sm" (click)="declineTransitTunnels()"><i class="bi bi-play-fill"></i> Run</button>
             </div>
             <small class="text-body-secondary">Stop connectivity to transit tunnels</small>
           </div>
@@ -111,7 +126,7 @@
           <div class="col-md-8">
             <label for="export-config-file" class="form-label">Update Logging Level</label>
             <div class="input-group mb-3">
-              <button type="button" class="btn btn-secondary btn-sm"><i class="bi bi-play-fill"></i> Update</button>
+              <button type="button" class="btn btn-secondary btn-sm" (click)="setLogLevel()"><i class="bi bi-play-fill"></i> Update</button>
             </div>
           </div>
 

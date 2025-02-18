@@ -1,5 +1,5 @@
 import { EventEmitter, Injectable } from '@angular/core';
-import { I2pDaemonSettings, LocalDestinationsData, MainData, TunnelInfo, TunnelsData } from '../../../../common';
+import { I2pDaemonSettings, LocalDestinationsData, MainData, RouterCommandResultData, TokenData, TunnelInfo, TunnelsData } from '../../../../common';
 import { IDBPDatabase, openDB } from 'idb';
 
 @Injectable({
@@ -282,6 +282,46 @@ export class I2pDaemonService {
 
   public async getLocalDestinations(): Promise<LocalDestinationsData> {
     return LocalDestinationsData.fromWrapper(await this.fetchContent('?page=local_destinations'));
+  }
+
+  public async getTokenData(): Promise<TokenData> {
+    return TokenData.fromWrapper(await this.fetchContent('?page=commands'));
+  }
+
+  public async runPeerTest(): Promise<RouterCommandResultData> {
+    const tokenData = await this.getTokenData();
+
+    return RouterCommandResultData.fromWrapper(await this.fetchContent(`?cmd=run_peer_test&token=${tokenData.token}`));
+  }
+
+  public async reloadTunnelsConfiguration(): Promise<RouterCommandResultData> {
+    const tokenData = await this.getTokenData();
+    
+    return RouterCommandResultData.fromWrapper(await this.fetchContent(`?cmd=reload_tunnels_config&token=${tokenData.token}`));
+  }
+
+  public async declineTransitTunnels(): Promise<RouterCommandResultData> {
+    const tokenData = await this.getTokenData();
+    
+    return RouterCommandResultData.fromWrapper(await this.fetchContent(`?cmd=disable_transit&token=${tokenData.token}`));
+  }
+
+  public async setLogLevel(logLevel: 'none' | 'critical' | 'error' | 'warn' | 'info' | 'debug'): Promise<RouterCommandResultData> {
+    const tokenData = await this.getTokenData();
+    
+    return RouterCommandResultData.fromWrapper(await this.fetchContent(`?cmd=set_loglevel&level=${logLevel}&token=${tokenData.token}`));
+  }
+
+  public async startGracefulShutdown(): Promise<RouterCommandResultData> {
+    const tokenData = await this.getTokenData();
+    
+    return RouterCommandResultData.fromWrapper(await this.fetchContent(`?cmd=shutdown_start&token=${tokenData.token}`));
+  }
+
+  public async forceShutdown(): Promise<RouterCommandResultData> {
+    const tokenData = await this.getTokenData();
+    
+    return RouterCommandResultData.fromWrapper(await this.fetchContent(`?cmd=terminate&token=${tokenData.token}`));
   }
 
   public async getI2pTunnels(): Promise<TunnelsData> {

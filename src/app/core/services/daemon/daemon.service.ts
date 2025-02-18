@@ -453,6 +453,8 @@ export class DaemonService {
       if (!this.i2pService.running) await this.i2pService.start();
       console.log('started i2pd service');
 
+      this.settings.padTransactions = true;
+
       if (this.i2pService.settings.txProxyEnabled) {
         this.settings.setTxProxy(this.i2pService.txProxy, 'i2p');
       }
