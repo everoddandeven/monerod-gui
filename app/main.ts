@@ -174,7 +174,7 @@ async function createWindow(): Promise<BrowserWindow> {
       pathIndex = '../dist/index.html';
     }
 
-    const url = new URL(path.join('file:', dirname, pathIndex));
+    const url = new URL('file:' + path.join(dirname, pathIndex));
     console.log(`Main window url: ${url}`);
 
     await win.loadURL(url.href);
@@ -202,8 +202,7 @@ async function createWindow(): Promise<BrowserWindow> {
   return win;
 }
 
-const createSplashWindow = async (): Promise<BrowserWindow | undefined> => {  
-  console.log("createSplashWindow()");
+async function createSplashWindow(): Promise<BrowserWindow> {
 
   const window = new BrowserWindow({
     width: 480,
@@ -232,16 +231,32 @@ const createSplashWindow = async (): Promise<BrowserWindow | undefined> => {
   }
 
   if (!fs.existsSync(path.join(dirname, pathIndex))) {
-    console.error("createSplashScreen(): path doesn't exists: " + path.join(dirname, pathIndex));
     window.close();
-    return undefined;
+    throw new Error(`Cannot create splash window: path doesn't exists: ${path.join(dirname, pathIndex)}`);
   }
 
-  const indexPath = path.join('file:', dirname, pathIndex);
+  const indexPath = 'file:' + path.join(dirname, pathIndex);
+  console.log(`createSplashWindow(): loading path ` + indexPath);
 
-  const url = new URL(indexPath);
+  let url: URL;
 
-  await window.loadURL(url.href);
+  try {
+    url = new URL(indexPath);
+  }
+  catch (error: any) {
+    const err = error instanceof Error ? error.message : `${error}`;
+    window.close();
+    throw new Error(`Cannot create splash window at ${indexPath}: ${err}`);
+  }
+
+  try {
+    await window.loadURL(url.href);
+  }
+  catch (error: any) {
+    const err = error instanceof Error ? error.message : `${error}`;
+    window.close();
+    throw new Error(`Cannot create splash window, an error uccurred while loading url ${url.href}: ${err}`);
+  }
 
   await new Promise<void>((resolve) => {
     setTimeout(() => {
@@ -470,36 +485,45 @@ try {
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
   // Added 400 ms to fix the black background issue while using transparent window. More detais at https://github.com/electron/electron/issues/15947
-  app.on('ready', () => {
-    Menu.setApplicationMenu(null);
-    const gotInstanceLock = app.requestSingleInstanceLock();
-
-    if (!gotInstanceLock) {
-      dialog.showErrorBox('', 'Another instance of Monerod GUI is running');
-      app.quit();
-      return;
-    }
-
-    setTimeout(async () => {
+  app.on('ready', async () => {
+    try {
+      Menu.setApplicationMenu(null);
+      const gotInstanceLock = app.requestSingleInstanceLock();
+  
+      if (!gotInstanceLock) {
+        dialog.showErrorBox('', 'Another instance of Monerod GUI is running');
+        app.quit();
+        return;
+      }
+  
       const splash = await createSplashWindow();
-      await createWindow();
-
+      const mainWindowPromise = createWindow();
+  
       await new Promise<void>((resolve, reject) => {
-        try {
+        mainWindowPromise.then((mainWindow) => {
           setTimeout(() => {
-            if (splash) splash.close();
-            if (!AppMainProcess.startMinized) { 
-              win?.show();
-              win?.maximize();
+            try {
+              splash.close();
+                
+              if (!AppMainProcess.startMinized) { 
+                mainWindow.show();
+                mainWindow.maximize();
+              }
+    
+              resolve();
             }
-            resolve();
+            catch(error: any) {
+              reject(error);
+            }
           }, 2600);
-        }
-        catch(error: any) {
-          reject(error);
-        }
+        })
+        .catch((error: any) => reject(error));
       });
-    }, 400);
+    }
+    catch (error: any) {
+      console.error(error);
+      app.quit();
+    }
   });
 
   // Quit when all windows are closed.
