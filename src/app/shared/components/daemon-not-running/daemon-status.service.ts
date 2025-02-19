@@ -149,14 +149,7 @@ export class DaemonStatusService {
       return;
     }
 
-    await new Promise<void>((resolve, reject) => {
-      setTimeout(() => {
-        this.daemonService.startDaemon().then(() => {
-          resolve();
-        }).catch((error: any) => {
-          reject(new Error(`${error}`));
-        });
-      }, 500)});
+    await this.daemonService.startDaemon();
   }
 
   public async restartDaemon(): Promise<void> {

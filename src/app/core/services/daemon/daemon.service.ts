@@ -177,11 +177,20 @@ export class DaemonService {
   }
 
   private onClose(): void {
-    this.daemonRunning = false;
-    this.starting = false;
-    this.stopping = false;
-    this.onDaemonStatusChanged.emit(false);
-    this.onDaemonStopEnd.emit();
+    this.stopping = true;
+    const handler = () => {
+      this.daemonRunning = false;
+      this.starting = false;
+      this.stopping = false;
+      this.onDaemonStatusChanged.emit(false);
+      this.onDaemonStopEnd.emit();
+    };
+    if (this.i2pService.running && !this.i2pService.stopping) {
+      this.i2pService.stop().catch((error: any) => console.error(error)).finally(handler);
+    }
+    else {
+      handler();
+    }
   }
 
   private async openDatabase(): Promise<IDBPDatabase<any>> {

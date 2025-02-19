@@ -572,9 +572,12 @@ daemon = false
 enabled = false
 outproxy = http://exit.stormycloud.i2p
 
+[sam]
+enabled = false
+
 [socksproxy]
 enabled = true
-outproxy.enabled = true
+#outproxy.enabled = true
 #outproxy = exit.stormycloud.i2p
 #outproxy = 127.0.0.1
 #outproxyport = 9050

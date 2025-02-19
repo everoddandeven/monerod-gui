@@ -355,13 +355,24 @@ export class DaemonSettings extends Comparable<DaemonSettings> {
 
   public static isValidAnonymousInbound(inbound: string, type: 'tor' | 'i2p'): boolean {
     const components = inbound.split(',');
-    const address = components[0];
+    const host = components[0];
+    const address = host ? host.split(':')[0] : undefined;
+    const addrPort = host ? host.split(':')[1] : undefined;
     const port = components[1];
     //const socks = components[2];
     const maxConnections = components[3];
 
     if (!address || address == '' || !address.endsWith(`.${type}`) || !port || port == '') return false;
     
+    if (addrPort) {
+      try {
+        if (parseInt(addrPort) < -1) return false;
+      }
+      catch {
+        return false;
+      }      
+    }
+
     if (maxConnections) {
       try {
         if (parseInt(maxConnections) < -1) return false;
@@ -428,6 +439,10 @@ export class DaemonSettings extends Comparable<DaemonSettings> {
   public static parse(data: any): DaemonSettings {
     const settings = new DaemonSettings();
     Object.assign(settings, data);
+
+    if (Array.isArray(settings.anonymousInbounds.i2p)) {
+      settings.anonymousInbounds = { tor: '', i2p: '' };
+    }
     return settings;
   }
 
