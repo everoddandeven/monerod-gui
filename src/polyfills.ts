@@ -74,7 +74,7 @@ declare global {
       copyToClipboard: (content: string) => void;
       
       startMonerod: (options: string[], callback: (result: {error?: any}) => void) => void;
-      stopMonerod: () => void;
+      stopMonerod: (callback: (result: { error?: string; code?: number; }) => void) => void;
       monitorMonerod: (callback: (result: {stats?: ProcessInfo, error?: any}) => void) => void;
       getMonerodVersion: (path: string, callback: (result: { version?: string; error?: string; }) => void) => void;
       downloadMonerod: (downloadUrl:string, destination: string, progress: (info: { progress: number, status: string }) => void, complete: (path: string) => void, error: (err: string) => void) => void;

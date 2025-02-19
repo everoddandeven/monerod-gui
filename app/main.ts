@@ -679,27 +679,26 @@ try {
     startMoneroDaemon(configFilePath);
   });
 
-  ipcMain.handle('stop-monerod', async (event: IpcMainInvokeEvent) => {
-    let stopped: boolean = false;
-    console.log("ipcMain.handler('stop-monerod')");
-
-    if (monerodProcess) {
-      if (PrivateTestnet.started) {
-        console.log("ipcMain.handler('stop-monerod'): stopping private testnet");
-        await PrivateTestnet.stop();
-        console.log("ipcMain.handler('stop-monerod'): private testnet stopped");
+  ipcMain.handle('stop-monerod', async (event: IpcMainInvokeEvent) => {    
+    try {
+      if (monerodProcess) {
+        if (PrivateTestnet.started) {
+          await PrivateTestnet.stop();
+        }
+        else {
+          await monerodProcess.stop();
+        }
+        
+        monerodProcess = null;
+        win?.webContents.send('monero-close', 0);
+        win?.webContents.send('on-stop-monerod', 0);
       }
-      else {
-        console.log("ipcMain.handler('stop-monerod'): stopping monerod process");
-        await monerodProcess.stop();
-        console.log("ipcMain.handler('stop-monerod'): monerod process stopped");
-      }
-      
-      stopped = true;
-      monerodProcess = null;
+      else throw new Error("monerod not started");
     }
 
-    win?.webContents.send('monero-close', 0);
+    catch (error: any) {
+      win?.webContents.send('on-stop-monerod-error', error instanceof Error ? error.message : `${error}`);
+    }
   });
 
   ipcMain.handle('get-monero-version', (event: IpcMainInvokeEvent, configFilePath: string) => {

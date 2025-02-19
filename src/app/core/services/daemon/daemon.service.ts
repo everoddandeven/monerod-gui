@@ -1055,16 +1055,21 @@ export class DaemonService {
       return;
     }
 
+    this.stopping = true;
+    this.onDaemonStopStart.emit();
+    
     window.electronAPI.showNotification({
       title: this.quitting ? 'Quiting monero daemon' : this.restarting ? 'Restarting monero daemon' : 'Stopping monero daemon',
       body: this.quitting ? 'Monero daemon is quiting' : this.restarting ? 'Monero daemon is restarting' : 'Monero daemon is stopping'
     });
-
-    this.stopping = true;
-    this.onDaemonStopStart.emit();
-
+    
     if (this.settings.privnet) {
-      window.electronAPI.stopMonerod();
+      await new Promise<void>((resolve, reject) => {
+        window.electronAPI.stopMonerod(({ error }: { error?: string; code?: number; }) => {
+          if (error) reject(new Error(error));
+          else resolve();
+        });
+      });
       return;
     }
 
@@ -1082,16 +1087,17 @@ export class DaemonService {
 
     for(let i = 0; i < maxChecks; i++) {
       if (!await this.isRunning(true)) {
+        
+        if (this.i2pService.running) {
+          console.log('stopping i2pd service');
+          await this.i2pService.stop();
+          console.log('stopped i2pd service');
+        }
+
         this.stopping = false;
 
         if (!this.restarting) {
           if (!this.quitting) {
-
-            if (this.i2pService.running) {
-              console.log('stopping i2pd service');
-              await this.i2pService.stop();
-              console.log('stopped i2pd service');
-            }
         
             window.electronAPI.showNotification({
               title: 'Daemon stopped',
@@ -1107,8 +1113,9 @@ export class DaemonService {
         }
         
         return;
-      } 
-      await this.delay(15000);
+      }
+       
+      await this.delay(5000);
     }
 
     window.electronAPI.showNotification({
