@@ -9,7 +9,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
-import { AppMainProcess, I2pdProcess, MonerodProcess, PrivateTestnet } from './process';
+import { AppMainProcess, I2pdProcess, MonerodProcess, PrivateTestnet, TorProcess } from './process';
 import { BatteryUtils, FileUtils, NetworkUtils } from './utils';
 import { MoneroI2pdProcess } from './process/I2pdProcess';
 
@@ -35,6 +35,7 @@ console.log('dirname: ' + dirname);
 //let monerodProcess: ChildProcessWithoutNullStreams | null = null;
 let monerodProcess: MonerodProcess | null = null;
 let i2pdProcess: I2pdProcess | null = null;
+let torProcess: TorProcess | null = null;
 
 const iconRelPath: string = 'assets/icons/monero-symbol-on-white-480.png';
 //const wdwIcon = `${dirname}/${iconRelPath}`;
@@ -630,6 +631,63 @@ try {
     win?.webContents.send(eventId, err);
   });
 
+
+  ipcMain.handle('start-tor', async (event: IpcMainInvokeEvent, params: { eventId: string; path: string; }) => {
+    const { eventId, path } = params;
+    
+    let error: string | undefined = undefined;
+
+    if (torProcess && torProcess.running) {
+      error = 'tor already started';
+    }
+    else if (!TorProcess.isValidPath(path)) {
+      error = 'invalid tor path provided: ' + path;
+    }
+    else {
+      try {
+        //torProcess = new TorProcess({ i2pdPath: path, flags, isExe: true });
+        torProcess = new TorProcess(path);
+        await torProcess.start();
+        torProcess.onStdOut((out: string) => win?.webContents.send('on-ip2d-stdout', out));
+        torProcess.onStdErr((out: string) => win?.webContents.send('on-ip2d-stderr', out));
+        torProcess.onClose((_code: number | null) => {
+          const code = _code != null ? _code : -Number.MAX_SAFE_INTEGER;
+          const msg = `Process tor ${torProcess?.pid} exited with code: ${code}`;
+          console.log(msg);
+          win?.webContents.send('tor-stdout', msg);
+          win?.webContents.send('tor-close', code);
+          monerodProcess = null;
+        });
+      }
+      catch (err: any) {
+        error = `${err}`;
+        torProcess = null;
+      }
+    }
+
+    win?.webContents.send(eventId, error);
+  });
+
+  ipcMain.handle('stop-tor', async (event: IpcMainInvokeEvent, params: { eventId: string; }) => {
+    let err: string | undefined = undefined;
+    const { eventId } = params;
+
+    if (torProcess == null) err = 'Already stopped tor';
+    else if (torProcess.stopping) err = 'Alrady stopping tor';
+    else if (torProcess.starting) err = 'tor is starting';
+    else {
+      try {
+        await torProcess.stop();
+        torProcess = null;
+      }
+      catch(error: any) {
+        err = `${error}`;
+      }
+    }
+
+    win?.webContents.send(eventId, err);
+  });
+
   ipcMain.handle('is-on-battery-power', async (event: IpcMainInvokeEvent, params: { eventId: string; }) => {
     const onBattery = await BatteryUtils.isOnBatteryPower();
     if (!win) {
@@ -880,6 +938,11 @@ try {
   ipcMain.handle('check-valid-i2pd-path', async (event: IpcMainInvokeEvent, params: { eventId: string, path: string }) => {
     const { eventId, path } = params;
     win?.webContents.send(eventId, await I2pdProcess.isValidPath(path));
+  });
+
+  ipcMain.handle('check-valid-tor-path', async (event: IpcMainInvokeEvent, params: { eventId: string, path: string }) => {
+    const { eventId, path } = params;
+    win?.webContents.send(eventId, await TorProcess.isValidPath(path));
   });
 
   ipcMain.handle('show-notification', (event: IpcMainInvokeEvent, options?: NotificationConstructorOptions) => {

@@ -89,6 +89,12 @@ declare global {
       checkValidI2pdPath: (path: string, callback: (valid: boolean) => void) => void;
       onI2pdClose: (callback: (code: number) => void) => void;
 
+      startTor: (options: { path: string; }, callback: (error?: any) => void) => void;
+      stopTor: (callback: (error?: any) => void) => void;
+      onTorOutput: (callback: (output: {stdout?: string, stderr?: string}) => void) => void;
+      checkValidTorPath: (path: string, callback: (valid: boolean) => void) => void;
+      onTorClose: (callback: (code: number) => void) => void;
+
       isWifiConnected: (callback: (connected: boolean) => void) => void;
 
       selectFolder: (callback: (path: string) => void) => void;

@@ -16,6 +16,50 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.once(eventId, handler);
     ipcRenderer.invoke('detect-installation', { eventId, program });
   },
+  checkValidTorPath: (path, callback) => {
+    const eventId = `on-check-valid-tor-path-${newId()}`;
+
+    const handler = (event, result) => {
+      callback(result);
+    };
+
+    ipcRenderer.once(eventId, handler);
+    ipcRenderer.invoke('check-valid-tor-path', { eventId, path });
+  },
+  startTor: (options, callback) => {
+    const { path } = options;
+    const eventId = `on-start-tor-${newId()}`;
+    const handler = (event, result) => {
+      callback(result);
+    };
+
+    ipcRenderer.once(eventId, handler);
+    ipcRenderer.invoke('start-tor', { eventId, path });
+  },
+  stopTor: (callback) => {
+    const eventId = `on-stop-tor-${newId()}`;
+    const handler = (event, result) => {
+      callback(result);
+    };
+
+    ipcRenderer.once(eventId, handler);
+    ipcRenderer.invoke('stop-tor', { eventId });
+  },
+  onTorOutput: (callback) => {
+    ipcRenderer.removeAllListeners('on-tor-stdout');
+    ipcRenderer.removeAllListeners('on-tor-stderr');
+
+    const handlerStdOut = (event, stdout) => {
+      callback({ stdout });
+    };
+
+    const handlerStdErr = (event, stderr) => {
+      callback({ stderr });
+    };
+    
+    ipcRenderer.on('on-tor-stderr', handlerStdErr)
+    ipcRenderer.on('on-tor-stdout', handlerStdOut);
+  },
   checkValidI2pdPath: (path, callback) => {
     const eventId = `on-check-valid-i2pd-path-${newId()}`;
 
@@ -183,7 +227,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     const handler = (event, result) => callback(result);
     ipcRenderer.once('i2pd-close', handler);
   },
-  
+  onTorClose: (callback) => {
+    const handler = (event, result) => callback(result);
+    ipcRenderer.once('tor-close', handler);
+  },
   unregisterOnMoneroStdout: () => {
     ipcRenderer.removeAllListeners('monero-stdout');
   },
