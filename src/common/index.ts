@@ -52,3 +52,4 @@ export { PrivnetDaemonSettings } from "./PrivnetDaemonSettings";
 export { DefaultPrivnetNode1Settings } from "./DefaultPrivnetNode1Settings";
 export { DefaultPrivnetNode2Settings } from "./DefaultPrivnetNode2Settings";
 export * from './I2pDaemonSettings';
+export * from './TorDaemonSettings';
