@@ -167,9 +167,9 @@ export class I2pDaemonService {
     if (this.starting) throw new Error("i2pd is starting");
     if (!this.running) throw new Error("Already stopped i2pd");
 
-    await new Promise<void>((resolve, reject) => {
+    await new Promise<number>((resolve, reject) => {
       window.electronAPI.onI2pdClose((code: number) => {
-        resolve();
+        resolve(code);
       });
 
       this.forceShutdown().then((result) => {

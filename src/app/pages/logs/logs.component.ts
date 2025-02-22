@@ -138,11 +138,11 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, A
     return index;  // usa l'indice per tracciare gli elementi
   }
 
-  public async clearMonerodLogs(): Promise<void> {
+  public clearMonerodLogs(): void {
     this.logsService.clear('monerod');
   }
 
-  public async clearI2pdLogs(): Promise<void> {
+  public clearI2pdLogs(): void{
     this.logsService.clear('i2pd');
   }
 
