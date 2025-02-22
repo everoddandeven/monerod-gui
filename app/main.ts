@@ -632,7 +632,7 @@ try {
   });
 
 
-  ipcMain.handle('start-tor', async (event: IpcMainInvokeEvent, params: { eventId: string; path: string; }) => {
+  ipcMain.handle('start-tor', async (event: IpcMainInvokeEvent, params: { eventId: string; path: string; port?: number; rpcPort?: number; }) => {
     const { eventId, path } = params;
     
     let error: string | undefined = undefined;

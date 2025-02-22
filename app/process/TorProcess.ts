@@ -1,6 +1,7 @@
 import { execSync } from "child_process";
 import { AppChildProcess } from "./AppChildProcess";
 import * as fs from 'fs';
+import * as path from 'path';
 import { InstallationInfo } from "./InstallationInfo";
 
 
@@ -8,8 +9,38 @@ export interface TorInstallationInfo extends InstallationInfo { configFile?: str
 
 export class TorProcess extends AppChildProcess {
 
-  constructor(path: string) {
-    super({ command: path, args: [], isExe: true });
+  private static get defaultDataDirectory(): string {
+    return path.join(this.userDataPath, 'tor', 'data');
+  }
+
+  private static get defaultConfigPath(): string {
+    return path.join(this.userDataPath, 'tor', 'config', 'torrc');
+  }
+
+  private static get defaultP2pHiddenServiceDir(): string {
+    return path.join(this.userDataPath, 'tor', 'hidden_services', 'monero_node_hidden_service')
+  }
+
+  private static get defaultRpcHiddenServiceDir(): string {
+    return path.join(this.userDataPath, 'tor', 'hidden_services', 'monero_rpc_hidden_service')
+  }
+
+  private static get defaultConfigFlag(): string {
+    return `--f=${this.defaultConfigPath}`;
+  }
+
+  private static get defaultFlags(): string[] {
+    const flags: string[] = [];
+
+    flags.push(this.defaultConfigFlag);
+
+    return flags;
+  }
+
+  constructor(path: string, port?: number, rpcPort?: number) {
+    super({ command: path, args: TorProcess.defaultFlags, isExe: true });
+
+    TorProcess.createDefaultConfigFile({port, rpcPort});
   }
 
   public override async start(): Promise<void> {
@@ -84,45 +115,74 @@ export class TorProcess extends AppChildProcess {
     return false;
   }
 
-    public static async detectInstalled(): Promise<TorInstallationInfo | undefined> {
-      if (this.isLinux) {
-        return await this.detectInstalledLinux();
-      }
-      else if (this.isWindows) {
-        return await this.detectInstalledWindows();
-      }
-      else if (this.isMacos) {
-        return await this.detectInstalledMacos();
-      }
-      
-      return undefined;
+  public static async detectInstalled(): Promise<TorInstallationInfo | undefined> {
+    if (this.isLinux) {
+      return await this.detectInstalledLinux();
     }
-  
-    private static async detectInstalledLinux(): Promise<TorInstallationInfo | undefined> {
-      let path: string | undefined = undefined;
-      let configFile: string | undefined = undefined;
-      let isRunning: boolean = false;
-  
-      if (await this.isValidPath('/usr/bin/tor')) {
-        path = '/usr/bin/tor';
-      }
-      if (fs.existsSync('/etc/tor/torrc.conf')) {
-        configFile = '/etc/tor/torrc.conf';
-      }
-  
-      if (path) {
-        return { path, configFile, isRunning };
-      }
-  
-      return undefined;
+    else if (this.isWindows) {
+      return await this.detectInstalledWindows();
     }
-  
-    private static async detectInstalledWindows(): Promise<TorInstallationInfo | undefined> {
-      return undefined;
+    else if (this.isMacos) {
+      return await this.detectInstalledMacos();
     }
-  
-    private static async detectInstalledMacos(): Promise<TorInstallationInfo | undefined> {
-      return undefined;
+    
+    return undefined;
+  }
+
+  private static async detectInstalledLinux(): Promise<TorInstallationInfo | undefined> {
+    let path: string | undefined = undefined;
+    let configFile: string | undefined = undefined;
+    let isRunning: boolean = false;
+
+    if (await this.isValidPath('/usr/bin/tor')) {
+      path = '/usr/bin/tor';
     }
+    if (fs.existsSync('/etc/tor/torrc.conf')) {
+      configFile = '/etc/tor/torrc.conf';
+    }
+
+    if (path) {
+      return { path, configFile, isRunning };
+    }
+
+    return undefined;
+  }
+
+  private static async detectInstalledWindows(): Promise<TorInstallationInfo | undefined> {
+    return undefined;
+  }
+
+  private static async detectInstalledMacos(): Promise<TorInstallationInfo | undefined> {
+    return undefined;
+  }
+
+  private static createConfigDir(): void {
+    if (!fs.existsSync(path.join(this.userDataPath, 'tor'))) {
+      fs.mkdirSync(path.join(this.userDataPath, 'tor'));
+    }
+
+    if (!fs.existsSync(path.join(this.userDataPath, 'tor', 'data'))) {
+      fs.mkdirSync(path.join(this.userDataPath, 'tor', 'data'));
+    }
+  }
+  
+  private static createDefaultConfigFile(options: { port?: number, rpcPort?: number }): void {
+    this.createConfigDir();
+    const { port, rpcPort } = options;
+    let content = `DataDirectory ${this.defaultDataDirectory}
+HiddenServiceDir ${this.defaultP2pHiddenServiceDir}`;
+
+    if (port !== undefined) {
+      content = `${content}
+HiddenServicePort ${port} 127.0.0.1:${port}    # interface for P2P network`
+    }
+
+    if (rpcPort !== undefined) {
+      content = `${content}
+HiddenServicePort ${rpcPort} 127.0.0.1:${rpcPort}    # interface for wallet RPC`
+    }
+
+    fs.writeFileSync(this.defaultConfigPath, content);
+  }
   
 }

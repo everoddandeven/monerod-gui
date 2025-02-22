@@ -27,14 +27,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('check-valid-tor-path', { eventId, path });
   },
   startTor: (options, callback) => {
-    const { path } = options;
+    const { path, port, rpcPort } = options;
     const eventId = `on-start-tor-${newId()}`;
     const handler = (event, result) => {
       callback(result);
     };
 
     ipcRenderer.once(eventId, handler);
-    ipcRenderer.invoke('start-tor', { eventId, path });
+    ipcRenderer.invoke('start-tor', { eventId, path, port, rpcPort });
   },
   stopTor: (callback) => {
     const eventId = `on-stop-tor-${newId()}`;
