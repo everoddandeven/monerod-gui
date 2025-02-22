@@ -207,7 +207,6 @@ export class AppChildProcess {
       this._handlers.onerror.forEach((listener) => process.on('error', listener));
       this._handlers.stdout.forEach((listener) => process.stdout.on('data', listener));
       this._handlers.stderr.forEach((listener) => process.stderr.on('data', listener));
-
       const onSpawn = () => {
         this._starting = false;
         this._running = true;

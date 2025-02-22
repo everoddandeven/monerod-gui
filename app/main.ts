@@ -12,8 +12,9 @@ import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import { AppMainProcess, I2pdProcess, MonerodProcess, PrivateTestnet, TorProcess } from './process';
 import { BatteryUtils, FileUtils, NetworkUtils } from './utils';
 import { MoneroI2pdProcess } from './process/I2pdProcess';
-
-app.setName('Monero Daemon');
+const appName = 'Monero Daemon';
+app.setName(appName);
+app.setPath('userData', app.getPath('userData').replace(appName, 'MoneroDaemon'));
 
 if (process.platform === 'win32')
 {
@@ -423,6 +424,9 @@ async function detectInstallation(program: string): Promise<any> {
   else if (program === 'monerod') {
     return await MonerodProcess.detectInstalled();
   }
+  else if (program === 'tor') {
+    return await TorProcess.detectInstalled();
+  }
   else return undefined;
 }
 
@@ -631,9 +635,22 @@ try {
     win?.webContents.send(eventId, err);
   });
 
+  ipcMain.handle('get-tor-hostname', async (event: IpcMainInvokeEvent, params: { eventId: string; }) => {
+    const { eventId } = params;
+
+    try {
+      const hostname = torProcess ? await torProcess.getHostname() : '';
+      
+      win?.webContents.send(eventId, { hostname });
+    }
+    catch (err: any) {
+      const error = err instanceof Error ? err.message : `${err}`;
+      win?.webContents.send(eventId, { error });
+    }
+  });
 
   ipcMain.handle('start-tor', async (event: IpcMainInvokeEvent, params: { eventId: string; path: string; port?: number; rpcPort?: number; }) => {
-    const { eventId, path } = params;
+    const { eventId, path, port, rpcPort } = params;
     
     let error: string | undefined = undefined;
 
@@ -646,10 +663,10 @@ try {
     else {
       try {
         //torProcess = new TorProcess({ i2pdPath: path, flags, isExe: true });
-        torProcess = new TorProcess(path);
+        torProcess = new TorProcess(path, port, rpcPort);
         await torProcess.start();
-        torProcess.onStdOut((out: string) => win?.webContents.send('on-ip2d-stdout', out));
-        torProcess.onStdErr((out: string) => win?.webContents.send('on-ip2d-stderr', out));
+        torProcess.onStdOut((out: string) => win?.webContents.send('on-tor-stdout', out));
+        torProcess.onStdErr((out: string) => win?.webContents.send('on-tor-stderr', out));
         torProcess.onClose((_code: number | null) => {
           const code = _code != null ? _code : -Number.MAX_SAFE_INTEGER;
           const msg = `Process tor ${torProcess?.pid} exited with code: ${code}`;
@@ -721,6 +738,10 @@ try {
         monerodProcess = null;
 
         if (i2pdProcess && i2pdProcess.running) await i2pdProcess.stop();
+        if (torProcess && torProcess.running) await torProcess.stop();
+
+        i2pdProcess = null;
+        torProcess = null;
       }
     }
     catch (error: any) {

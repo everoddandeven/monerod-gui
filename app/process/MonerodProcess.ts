@@ -4,7 +4,7 @@ import * as fs from 'fs';
 
 export class MonerodProcess extends AppChildProcess {
 
-  protected static readonly stdoutPattern: string = '**********************************************************************';
+  protected static readonly stdoutPattern: string = `Use "help <command>" to see a command's documentation.`;
 
   public privnet: boolean = false;
 
@@ -105,7 +105,6 @@ export class MonerodProcess extends AppChildProcess {
   
     console.log(message);
 
-    let firstPatternFound = false;
     const waitForPattern = this._args ? !this.privnet && !this._args.includes('--version') && !this.args.includes('--help') : true;
 
     const patternPromise = new Promise<void>((resolve, reject) => {
@@ -128,7 +127,7 @@ export class MonerodProcess extends AppChildProcess {
             timeout = undefined;
 
             reject(new Error("MonerodProcess.start(): Timed out"));
-          }, 90*1000);
+          }, 60*1000);
         }
 
         const foundPattern = out.includes(MonerodProcess.stdoutPattern);
@@ -137,20 +136,15 @@ export class MonerodProcess extends AppChildProcess {
           return;
         }
 
-        if (firstPatternFound) {
-          if(timeout !== undefined) {
-            clearTimeout(timeout);
-            console.log("MonerodProcess.start(): Cleared timeout");
-          }
-          else {
-            console.log("MonerodProcess.start(): No timeout found");
-          }
-          
-          resolve();
+        if(timeout !== undefined) {
+          clearTimeout(timeout);
+          console.log("MonerodProcess.start(): Cleared timeout");
         }
         else {
-          firstPatternFound = true;
+          console.log("MonerodProcess.start(): No timeout found");
         }
+        
+        resolve();
       };
 
       const onClose = (code: number | null) => {

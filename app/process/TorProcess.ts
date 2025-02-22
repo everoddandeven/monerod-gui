@@ -17,30 +17,27 @@ export class TorProcess extends AppChildProcess {
     return path.join(this.userDataPath, 'tor', 'config', 'torrc');
   }
 
-  private static get defaultP2pHiddenServiceDir(): string {
-    return path.join(this.userDataPath, 'tor', 'hidden_services', 'monero_node_hidden_service')
+  private static get defaultHiddenServiceDir(): string {
+    return path.join(this.userDataPath, 'tor', 'hidden_services', 'monero');
   }
 
-  private static get defaultRpcHiddenServiceDir(): string {
-    return path.join(this.userDataPath, 'tor', 'hidden_services', 'monero_rpc_hidden_service')
+  private static get defaultHostnamePath(): string {
+    return path.join(this.userDataPath, 'tor', 'hidden_services', 'monero', 'hostname');
   }
 
-  private static get defaultConfigFlag(): string {
-    return `--f=${this.defaultConfigPath}`;
-  }
 
   private static get defaultFlags(): string[] {
     const flags: string[] = [];
 
-    flags.push(this.defaultConfigFlag);
+    flags.push('-f', this.defaultConfigPath);
 
     return flags;
   }
 
   constructor(path: string, port?: number, rpcPort?: number) {
-    super({ command: path, args: TorProcess.defaultFlags, isExe: true });
-
     TorProcess.createDefaultConfigFile({port, rpcPort});
+
+    super({ command: path, args: TorProcess.defaultFlags, isExe: true });
   }
 
   public override async start(): Promise<void> {
@@ -56,6 +53,7 @@ export class TorProcess extends AppChildProcess {
 
     const promise = new Promise<void>((resolve, reject) => {
       let stdOutFound = false;
+      let lastError: string | null = null;
 
       const onStdOut = (out: string) => {
         if (stdOutFound) return;
@@ -67,6 +65,9 @@ export class TorProcess extends AppChildProcess {
           stdOutFound = true;
           reject(new Error("Tor is already running"));
         }
+        else if (out.includes('[err]')) {
+          lastError = out.replace('[err] ', '');
+        }
       };
 
       const onStdErr = (out: string) => {
@@ -74,7 +75,11 @@ export class TorProcess extends AppChildProcess {
       };
 
       const onClose = (code: number | null) => {
-        if (!stdOutFound) reject(new Error(`Exited with code ${code}`));
+        console.log("TorProcess.start(): Exited with code: " + code);
+        if (!stdOutFound) {
+          if (!lastError) reject(new Error(`Exited with code ${code}`));
+          else reject(new Error(lastError));
+        }
       }
 
       this.onError((err) => onStdErr(err.message));
@@ -115,6 +120,21 @@ export class TorProcess extends AppChildProcess {
     return false;
   }
 
+  public async getHostname(): Promise<string> {
+    const filePath = TorProcess.defaultHostnamePath;
+    if (!fs.existsSync(filePath)) {
+      return "";
+    }
+
+    return await new Promise<string>((resolve, reject) => {
+      fs.readFile(filePath, 'utf-8', (err, data) => {
+        if (err != null) err instanceof Error ? reject(err) : reject(new Error(`${err}`));
+        else if (data) resolve(data.replace('\n', ''));
+        else reject(new Error("Unknown error"));
+      });  
+    });
+  }
+
   public static async detectInstalled(): Promise<TorInstallationInfo | undefined> {
     if (this.isLinux) {
       return await this.detectInstalledLinux();
@@ -137,8 +157,8 @@ export class TorProcess extends AppChildProcess {
     if (await this.isValidPath('/usr/bin/tor')) {
       path = '/usr/bin/tor';
     }
-    if (fs.existsSync('/etc/tor/torrc.conf')) {
-      configFile = '/etc/tor/torrc.conf';
+    if (fs.existsSync('/etc/tor/torrc')) {
+      configFile = '/etc/tor/torrc';
     }
 
     if (path) {
@@ -161,25 +181,43 @@ export class TorProcess extends AppChildProcess {
       fs.mkdirSync(path.join(this.userDataPath, 'tor'));
     }
 
+    if (!fs.existsSync(path.join(this.userDataPath, 'tor', 'hidden_services'))) {
+      fs.mkdirSync(path.join(this.userDataPath, 'tor', 'hidden_services'));
+    }
+
     if (!fs.existsSync(path.join(this.userDataPath, 'tor', 'data'))) {
       fs.mkdirSync(path.join(this.userDataPath, 'tor', 'data'));
     }
+
+    if (!fs.existsSync(path.join(this.userDataPath, 'tor', 'config'))) {
+      fs.mkdirSync(path.join(this.userDataPath, 'tor', 'config'));
+    }
+
   }
   
   private static createDefaultConfigFile(options: { port?: number, rpcPort?: number }): void {
     this.createConfigDir();
     const { port, rpcPort } = options;
     let content = `DataDirectory ${this.defaultDataDirectory}
-HiddenServiceDir ${this.defaultP2pHiddenServiceDir}`;
+
+## To send all messages to stderr:
+Log debug stderr
+Log debug stdout
+`;
+    if (port !== undefined || rpcPort !== undefined) {
+      content = `${content}
+HiddenServiceDir ${this.defaultHiddenServiceDir}`;
+    }
 
     if (port !== undefined) {
       content = `${content}
-HiddenServicePort ${port} 127.0.0.1:${port}    # interface for P2P network`
+HiddenServicePort ${port} 127.0.0.1:${port}    # interface for P2P network`;
     }
 
     if (rpcPort !== undefined) {
       content = `${content}
-HiddenServicePort ${rpcPort} 127.0.0.1:${rpcPort}    # interface for wallet RPC`
+HiddenServicePort ${rpcPort} 127.0.0.1:${rpcPort}    # interface for wallet RPC
+`;
     }
 
     fs.writeFileSync(this.defaultConfigPath, content);

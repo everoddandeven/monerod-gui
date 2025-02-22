@@ -353,7 +353,8 @@ export class DaemonSettings extends Comparable<DaemonSettings> {
     }
   }
 
-  public static isValidAnonymousInbound(inbound: string, type: 'tor' | 'i2p'): boolean {
+  public static isValidAnonymousInbound(inbound: string, t: 'tor' | 'i2p'): boolean {
+    const type = t === 'tor' ? 'onion' : 'i2p';
     const components = inbound.split(',');
     const host = components[0];
     const address = host ? host.split(':')[0] : undefined;

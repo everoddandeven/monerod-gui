@@ -1006,13 +1006,55 @@
     <div class="row g-5 p-3">
       <div class="col-md-12 col-lg-12">
         <form class="needs-validation" novalidate="">    
-          
+          <h4 class="mb-3">TOR Service</h4>          
           <div class="row g-3">
+            <div class="form-check form-switch col-md-6">
+              <label for="tor-service-enabled" class="form-check-label">Enabled</label>
+              <input (change)="onTorServiceEnabledChange()" [disabled]="!canEditNodeSettings || currentTorSettings.path === ''" class="form-control form-check-input" type="checkbox" role="switch" id="sync-period-enabled" [checked]="currentTorSettings.enabled" [(ngModel)]="currentTorSettings.enabled" [ngModelOptions]="{standalone: true}">
+              <br>
+              <small class="text-body-secondary">Enable TOR Service</small>
+            </div>
+
+            <div *ngIf="currentTorSettings.enabled" class="col-md-12">
+              <label for="tor-path" class="form-label">Tor path</label>
+              <div class="input-group mb-3">
+                <input id="tor-path" type="text" class="form-control form-control-sm" placeholder="" aria-label="Tor path" aria-describedby="basic-addon2" [value]="currentTorSettings.path" readonly>
+                <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseTorFile()"><i class="bi bi-filetype-exe"></i> Choose executable</button></span>            
+                <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeTorFile()" [disabled]="currentTorSettings.path === ''"><i class="bi bi-file-x"></i> Remove</button></span>
+              </div>
+              <small class="text-body-secondary">Path to tor bundle executable</small>
+            </div>
+
+            <div *ngIf="currentTorSettings.enabled"class="form-check form-switch col-md-4">
+              <label for="tor-allow-incoming-connections" class="form-check-label">Allow incoming connections</label>
+              <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="tor-allow-incoming-connections" [checked]="currentTorSettings.allowIncomingConnections" [(ngModel)]="currentTorSettings.allowIncomingConnections" [ngModelOptions]="{standalone: true}" [disabled]="!currentTorSettings.enabled">
+              <br>
+              <small class="text-body-secondary">Allow incoming connections to the TOR service</small>
+            </div>
+    
+            <div *ngIf="currentTorSettings.enabled" class="form-check form-switch col-md-4">
+              <label for="tor-tx-proxy-enabled" class="form-check-label">Tx proxy</label>
+              <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="tor-tx-proxy-enabled" [checked]="currentTorSettings.txProxyEnabled" [(ngModel)]="currentTorSettings.txProxyEnabled" [ngModelOptions]="{standalone: true}" [disabled]="!currentTorSettings.enabled">
+              <br>
+              <small class="text-body-secondary">Enable tx proxy through TOR service</small>
+            </div>
+            
+            <div *ngIf="currentTorSettings.enabled" class="form-check form-switch col-md-4">
+              <label for="tor-proxy-enabled" class="form-check-label">Proxy all network connections</label>
+              <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="tor-proxy-enabled" [checked]="currentTorSettings.proxyAllNetConnections" [(ngModel)]="currentTorSettings.proxyAllNetConnections" [ngModelOptions]="{standalone: true}" [disabled]="!currentTorSettings.enabled">
+              <br>
+              <small class="text-body-secondary">Enabling this setting sends all traffic through TOR service</small>
+            </div>
+          </div>
+          
+          <hr *ngIf="!currentTorSettings.enabled" class="my-4">
+
+          <div *ngIf="!currentTorSettings.enabled" class="row g-3">
             <h4 class="mb-3">TOR Tx Proxy</h4>
             
-            <div class="col-10">
+            <div class="col-4">
               <label for="tor-tx-proxy-ip" class="form-label"></label>
-              <input (input)="onTorTxProxyChange()" [disabled]="!canEditNodeSettings" type="text" class="form-control" id="tx-proxy" placeholder="127.0.0.1" [(ngModel)]="torTxProxyIp" [ngModelOptions]="{standalone: true}">
+              <input (input)="onTorTxProxyChange()" [disabled]="!canEditNodeSettings || currentTorSettings.enabled" type="text" class="form-control" id="tx-proxy" placeholder="127.0.0.1" [(ngModel)]="torTxProxyIp" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">
                 Socks proxy ip.
               </small>
@@ -1020,33 +1062,33 @@
 
             <div class="col-md-2">
               <label for="tor-tx-proxy-port" class="form-label"></label>
-              <input (change)="onTorTxProxyChange()" [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="tor-tx-proxy-port" placeholder="9050" [(ngModel)]="torTxProxyPort" [ngModelOptions]="{standalone: true}">
+              <input (change)="onTorTxProxyChange()" [disabled]="!canEditNodeSettings || currentTorSettings.enabled" type="number" min="0" class="form-control" id="tor-tx-proxy-port" placeholder="9050" [(ngModel)]="torTxProxyPort" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">Socks proxy port</small>
             </div>
 
             <div class="col-md-2">
               <label for="tor-tx-proxy-max-connections" class="form-label"></label>
-              <input (change)="onTorTxProxyChange()" [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="tor-tx-proxy-max-connections" placeholder="10" [(ngModel)]="torTxProxyMaxConnections" [ngModelOptions]="{standalone: true}">
+              <input (change)="onTorTxProxyChange()" [disabled]="!canEditNodeSettings || currentTorSettings.enabled" type="number" min="0" class="form-control" id="tor-tx-proxy-max-connections" placeholder="10" [(ngModel)]="torTxProxyMaxConnections" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">Max connections</small>
             </div>
 
-            <div class="form-check form-switch col-md-6">
+            <div class="form-check form-switch col-md-4">
               <label for="tor-tx-proxy-disable-noise" class="form-check-label">Disable Noise</label>
-              <input (change)="onTorTxProxyChange()" [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="sync-period-enabled" [checked]="torTxProxyDisableNoise" [(ngModel)]="torTxProxyDisableNoise" [ngModelOptions]="{standalone: true}" [disabled]="currentSettings.noSync">
+              <input (change)="onTorTxProxyChange()" [disabled]="!canEditNodeSettings || currentTorSettings.enabled" class="form-control form-check-input" type="checkbox" role="switch" id="sync-period-enabled" [checked]="torTxProxyDisableNoise" [(ngModel)]="torTxProxyDisableNoise" [ngModelOptions]="{standalone: true}" [disabled]="currentSettings.noSync">
               <br>
               <small class="text-body-secondary">Tx will be <i>fluffed</i> to outbound TOR and I2P peers, and the receiving hidden service will immediately fluff the transaction to ipv4/6 peers. This will speed up tx broadcast.</small>
             </div>
 
           </div>
 
-          <hr class="my-4">
+          <hr *ngIf="!currentTorSettings.enabled" class="my-4">
 
-          <div class="row g-3">
+          <div *ngIf="!currentTorSettings.enabled" class="row g-3">
             <h4 class="mb-3">TOR Anonymous Inbound</h4>
             
             <div class="col-10">
               <label for="tor-anonymous-inbound-address" class="form-label">Inbound Address</label>
-              <input (input)="onTorAnonymousInboundChange()" [disabled]="!canEditNodeSettings" type="text" class="form-control" id="tor-anonymous-inbound-address" placeholder="...sxakefmed.onion" [(ngModel)]="torAnonymousInboundAddress" [ngModelOptions]="{standalone: true}">
+              <input (input)="onTorAnonymousInboundChange()" [disabled]="!canEditNodeSettings|| currentTorSettings.enabled" type="text" class="form-control" id="tor-anonymous-inbound-address" placeholder="...sxakefmed.onion" [(ngModel)]="torAnonymousInboundAddress" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">
                 Specify inbound hidden service address for receiving incoming TOR connections
               </small>
@@ -1054,7 +1096,7 @@
 
             <div class="col-md-2">
               <label for="tor-anonymous-inbound-port" class="form-label"></label>
-              <input (change)="onTorAnonymousInboundChange()" [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="tor-anonymous-inbound-port" placeholder="28083" [(ngModel)]="torAnonymousInboundPort" [ngModelOptions]="{standalone: true}">
+              <input (change)="onTorAnonymousInboundChange()" [disabled]="!canEditNodeSettings || currentTorSettings.enabled" type="number" min="0" class="form-control" id="tor-anonymous-inbound-port" placeholder="28083" [(ngModel)]="torAnonymousInboundPort" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">
                 Specify inbound hidden service port for receiving incoming TOR connections
               </small>
@@ -1062,7 +1104,7 @@
             
             <div class="col-10">
               <label for="tor-anonymous-inbound-forward-ip" class="form-label">Forward Ip</label>
-              <input (input)="onTorAnonymousInboundChange()" [disabled]="!canEditNodeSettings" type="text" class="form-control" id="tor-anonymous-inbound-forward-ip" placeholder="127.0.0.1" [(ngModel)]="torAnonymousInboundForwardIp" [ngModelOptions]="{standalone: true}">
+              <input (input)="onTorAnonymousInboundChange()" [disabled]="!canEditNodeSettings || currentTorSettings.enabled" type="text" class="form-control" id="tor-anonymous-inbound-forward-ip" placeholder="127.0.0.1" [(ngModel)]="torAnonymousInboundForwardIp" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">
                 Forward node ip
               </small>
@@ -1070,13 +1112,13 @@
 
             <div class="col-md-2">
               <label for="tor-anonymous-inbound-forward-port" class="form-label">Forward Port</label>
-              <input (change)="onTorAnonymousInboundChange()" [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="tor-anonymous-inbound-forward-port" placeholder="28083" [(ngModel)]="torAnonymousInboundForwardPort" [ngModelOptions]="{standalone: true}">
+              <input (change)="onTorAnonymousInboundChange()" [disabled]="!canEditNodeSettings || currentTorSettings.enabled" type="number" min="0" class="form-control" id="tor-anonymous-inbound-forward-port" placeholder="28083" [(ngModel)]="torAnonymousInboundForwardPort" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">Forward node port</small>
             </div>
 
             <div class="col-md-2">
               <label for="tor-anonymous-inbound-max-connections" class="form-label"></label>
-              <input (change)="onTorAnonymousInboundChange()" [disabled]="!canEditNodeSettings" type="number" min="-1" class="form-control" id="tor-anonymous-inbound-max-connections" placeholder="10" [(ngModel)]="torAnonymousInboundMaxConnections" [ngModelOptions]="{standalone: true}">
+              <input (change)="onTorAnonymousInboundChange()" [disabled]="!canEditNodeSettings || currentTorSettings.enabled" type="number" min="-1" class="form-control" id="tor-anonymous-inbound-max-connections" placeholder="10" [(ngModel)]="torAnonymousInboundMaxConnections" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">Max connections</small>
             </div>
 
@@ -1094,8 +1136,14 @@
         <form class="needs-validation" novalidate="">    
           <h4 class="mb-3">I2P Service</h4>          
           <div class="row g-3">
-            
-            <div class="col-md-12">
+            <div class="form-check form-switch col-md-6">
+              <label for="i2p-service-enabled" class="form-check-label">Enabled</label>
+              <input (change)="onI2pServiceEnabledChange()" [disabled]="!canEditNodeSettings || currentI2pdSettings.path === ''" class="form-control form-check-input" type="checkbox" role="switch" id="sync-period-enabled" [checked]="currentI2pdSettings.enabled" [(ngModel)]="currentI2pdSettings.enabled" [ngModelOptions]="{standalone: true}">
+              <br>
+              <small class="text-body-secondary">Enable I2P Service</small>
+            </div>
+
+            <div *ngIf="currentI2pdSettings.enabled" class="col-md-12">
               <label for="i2pd-path" class="form-label">I2pd path</label>
               <div class="input-group mb-3">
                 <input id="i2pd-path" type="text" class="form-control form-control-sm" placeholder="" aria-label="I2pd path" aria-describedby="basic-addon2" [value]="currentI2pdSettings.path" readonly>
@@ -1105,48 +1153,48 @@
               <small class="text-body-secondary">Path to i2pd executable</small>
             </div>
 
-            <div class="form-check form-switch col-md-6">
-              <label for="i2p-service-enabled" class="form-check-label">Enabled</label>
-              <input (change)="onI2pServiceEnabledChange()" [disabled]="!canEditNodeSettings || currentI2pdSettings.path === ''" class="form-control form-check-input" type="checkbox" role="switch" id="sync-period-enabled" [checked]="currentI2pdSettings.enabled" [(ngModel)]="currentI2pdSettings.enabled" [ngModelOptions]="{standalone: true}">
-              <br>
-              <small class="text-body-secondary">Enable I2P Service</small>
-            </div>
-
-            <div class="form-check form-switch col-md-6">
+            <div *ngIf="currentI2pdSettings.enabled" class="form-check form-switch col-md-4">
               <label for="i2p-allow-incoming-connections" class="form-check-label">Allow incoming connections</label>
               <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="i2p-allow-incoming-connections" [checked]="currentI2pdSettings.allowIncomingConnections" [(ngModel)]="currentI2pdSettings.allowIncomingConnections" [ngModelOptions]="{standalone: true}" [disabled]="!currentI2pdSettings.enabled">
               <br>
               <small class="text-body-secondary">Allow incoming connections to the I2P service</small>
             </div>
     
-            <div class="form-check form-switch col-md-6">
+            <div *ngIf="currentI2pdSettings.enabled" class="form-check form-switch col-md-4">
               <label for="i2p-tx-proxy-enabled" class="form-check-label">Tx proxy</label>
               <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="i2p-tx-proxy-enabled" [checked]="currentI2pdSettings.txProxyEnabled" [(ngModel)]="currentI2pdSettings.txProxyEnabled" [ngModelOptions]="{standalone: true}" [disabled]="!currentI2pdSettings.enabled">
               <br>
               <small class="text-body-secondary">Enable tx proxy through I2P service</small>
             </div>
+
+            <div *ngIf="currentI2pdSettings.enabled" class="form-check form-switch col-md-4">
+              <label for="i2p-tx-proxy-enabled" class="form-check-label">TOR as outproxy</label>
+              <input [disabled]="!canEditNodeSettings || !currentI2pdSettings.enabled || !currentTorSettings.enabled" class="form-control form-check-input" type="checkbox" role="switch" id="i2p-tx-proxy-enabled" [checked]="currentI2pdSettings.torAsOutproxy" [(ngModel)]="currentI2pdSettings.torAsOutproxy" [ngModelOptions]="{standalone: true}">
+              <br>
+              <small class="text-body-secondary">Enable blockchain synchronization through TOR service</small>
+            </div>
             
-            <div class="col-8">
+            <div *ngIf="currentI2pdSettings.enabled && !currentI2pdSettings.torAsOutproxy" class="col-8">
               <label for="outproxy" class="form-label">Outproxy IP</label>
-              <input (input)="onI2pOutproxyChange()" [disabled]="!canEditNodeSettings" type="text" class="form-control" id="outproxy" placeholder="127.0.0.1" [(ngModel)]="i2pOutproxyIp" [ngModelOptions]="{standalone: true}">
+              <input (input)="onI2pOutproxyChange()" [disabled]="!canEditNodeSettings || !currentI2pdSettings.enabled" type="text" class="form-control" id="outproxy" placeholder="127.0.0.1" [(ngModel)]="i2pOutproxyIp" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">
                 Outproxy ip
               </small>
             </div>
 
-            <div class="col-md-4">
+            <div *ngIf="currentI2pdSettings.enabled && !currentI2pdSettings.torAsOutproxy" class="col-md-4">
               <label for="outproxy-port" class="form-label">Outproxy Port</label>
-              <input (change)="onI2pOutproxyChange()" [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="outproxy-port" placeholder="9050" [(ngModel)]="i2pOutproxyPort" [ngModelOptions]="{standalone: true}">
+              <input (change)="onI2pOutproxyChange()" [disabled]="!canEditNodeSettings || !currentI2pdSettings.enabled" type="number" min="0" class="form-control" id="outproxy-port" placeholder="9050" [(ngModel)]="i2pOutproxyPort" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">Outproxy port</small>
             </div>
             
           </div>
           
-          <hr class="my-4">
-          <h4 class="mb-3">I2P Tx Proxy</h4>
-          <div class="row g-3">
+          <hr *ngIf="!currentI2pdSettings.enabled" class="my-4">
+          <h4 *ngIf="!currentI2pdSettings.enabled" class="mb-3">I2P Tx Proxy</h4>
+          <div *ngIf="!currentI2pdSettings.enabled" class="row g-3">
 
-            <div class="col-8">
+            <div class="col-4">
               <label for="i2p-tx-proxy-ip" class="form-label">Socks IP</label>
               <input (input)="onI2pTxProxyChange()" [disabled]="!canEditNodeSettings || currentI2pdSettings.enabled" type="text" class="form-control" id="tx-proxy" placeholder="127.0.0.1" [(ngModel)]="i2pTxProxyIp" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">
@@ -1166,7 +1214,7 @@
               <small class="text-body-secondary">Max connections</small>
             </div>
 
-            <div class="form-check form-switch col-md-6">
+            <div class="form-check form-switch col-md-4">
               <label for="i2p-tx-proxy-disable-noise" class="form-check-label">Disable Noise</label>
               <input (change)="onI2pTxProxyChange()" [disabled]="!canEditNodeSettings || currentI2pdSettings.enabled" class="form-control form-check-input" type="checkbox" role="switch" id="sync-period-enabled" [checked]="i2pTxProxyDisableNoise" [(ngModel)]="i2pTxProxyDisableNoise" [ngModelOptions]="{standalone: true}" [disabled]="currentSettings.noSync">
               <br>
@@ -1175,9 +1223,9 @@
 
           </div>
 
-          <hr class="my-4">
+          <hr *ngIf="!currentI2pdSettings.enabled" class="my-4">
 
-          <div class="row g-3">
+          <div *ngIf="!currentI2pdSettings.enabled" class="row g-3">
             <h4 class="mb-3">I2P Anonymous Inbound</h4>
             
             <div class="col-10">

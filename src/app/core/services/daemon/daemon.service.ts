@@ -30,6 +30,7 @@ import { openDB, IDBPDatabase } from "idb"
 import { AxiosHeaders, AxiosResponse } from 'axios';
 import { StringUtils } from '../../utils';
 import { I2pDaemonService } from '../i2p/i2p-daemon.service';
+import { TorDaemonService } from '../tor/tor-daemon.service';
 
 @Injectable({
   providedIn: 'root'
@@ -82,6 +83,14 @@ export class DaemonService {
     return this.i2pService.stopping;
   }
 
+  public get startingTorService(): boolean {
+    return this.torService.starting;
+  }
+
+  public get stoppingTorService(): boolean {
+    return this.i2pService.stopping;
+  }
+
   public readonly onDaemonStatusChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
   public readonly onDaemonStopStart: EventEmitter<void> = new EventEmitter<void>();
   public readonly onDaemonStopEnd: EventEmitter<void> = new EventEmitter<void>();
@@ -95,7 +104,10 @@ export class DaemonService {
     "Access-Control-Allow-Methods": 'POST,GET' // this states the allowed methods
   };
 
-  constructor(private installer: MoneroInstallerService, private electronService: ElectronService, private i2pService: I2pDaemonService) {
+  constructor(
+    private installer: MoneroInstallerService, private electronService: ElectronService, 
+    private i2pService: I2pDaemonService, private torService: TorDaemonService
+  ) {
     this.openDbPromise = this.openDatabase();
     this.settings = new DaemonSettings();
 
@@ -193,12 +205,17 @@ export class DaemonService {
       this.onDaemonStatusChanged.emit(false);
       this.onDaemonStopEnd.emit();
     };
+    const promises = [];
+    
     if (this.i2pService.running && !this.i2pService.stopping) {
-      this.i2pService.stop().catch((error: any) => console.error(error)).finally(handler);
+      promises.push(this.i2pService.stop());
     }
-    else {
-      handler();
+
+    if (this.torService.running && !this.torService.stopping) {
+      promises.push(this.i2pService.stop());
     }
+
+    Promise.all(promises).catch((error: any) => console.error(error)).finally(handler);
   }
 
   private async openDatabase(): Promise<IDBPDatabase<any>> {
@@ -280,6 +297,10 @@ export class DaemonService {
     const result = await db.get(this.storeName, 1);
     if (result) {
       const settings = DaemonSettings.parse(result);
+
+      if (settings.monerodPath != '' && !await this.checkValidMonerodPath(settings.monerodPath)) {
+        settings.monerodPath = '';
+      }
       
       const enabled = await this.electronService.isAutoLaunchEnabled();
 
@@ -465,16 +486,31 @@ export class DaemonService {
       this.settings.noSync = true;
     }
 
-    if (this.i2pService.settings.enabled) {
-      console.log('starting i2pd service');
-      this.i2pService.settings.port = this.settings.getPort();
-      this.i2pService.settings.rpcPort = this.settings.getRpcPort();
+    if (this.torService.settings.enabled) {
+      console.log('starting tor service');
+      this.torService.settings.port = 1 + this.settings.getPort();
+      this.torService.settings.rpcPort = this.settings.getRpcPort();
 
-      if (!this.i2pService.running) try {
-        await this.i2pService.start();
+      if (!this.torService.running) try {
+        await this.torService.start();
+        console.log('started tor service');
+
+        this.settings.padTransactions = true;
+  
+        if (this.torService.settings.txProxyEnabled) {
+          this.settings.setTxProxy(this.torService.txProxy, 'tor');
+        }
+        if (this.torService.settings.allowIncomingConnections) {
+          const anonInbound = await this.torService.getAnonymousInbound();
+          this.settings.setAnonymousInbound(anonInbound, 'tor');
+        }
+        if (this.torService.settings.proxyAllNetConnections) {
+          this.settings.proxy = this.torService.proxy;
+        }
       }
       catch (error: any) {
         console.error(error);
+        if (this.torService.running) await this.torService.stop();
         window.electronAPI.showNotification({
           title: 'Daemon error',
           body: error instanceof Error ? error.message : `${error}`,
@@ -483,17 +519,43 @@ export class DaemonService {
         this.starting = false;
         throw error;
       }
+    }
 
-      console.log('started i2pd service');
-
-      this.settings.padTransactions = true;
-
-      if (this.i2pService.settings.txProxyEnabled) {
-        this.settings.setTxProxy(this.i2pService.txProxy, 'i2p');
+    if (this.i2pService.settings.enabled) {
+      if (this.i2pService.running) throw new Error("I2P Service should not be running");
+      
+      console.log('starting i2pd service');
+      this.i2pService.settings.port = this.settings.getPort();
+      this.i2pService.settings.rpcPort = this.settings.getRpcPort();
+      if (this.i2pService.settings.torAsOutproxy && this.torService.settings.enabled && this.torService.running) {
+        this.i2pService.settings.outproxy = { host: '127.0.0.1', port: 9050 };
       }
-      if (this.i2pService.settings.allowIncomingConnections) {
-        const anonInbound = await this.i2pService.getAnonymousInbound();
-        this.settings.setAnonymousInbound(anonInbound, 'i2p');
+
+      try {
+        await this.i2pService.start();
+        console.log('started i2pd service');
+
+        this.settings.padTransactions = true;
+  
+        if (this.i2pService.settings.txProxyEnabled) {
+          this.settings.setTxProxy(this.i2pService.txProxy, 'i2p');
+        }
+        if (this.i2pService.settings.allowIncomingConnections) {
+          const anonInbound = await this.i2pService.getAnonymousInbound();
+          this.settings.setAnonymousInbound(anonInbound, 'i2p');
+        }
+      }
+      catch (error: any) {
+        if (this.torService.running) await this.torService.stop();
+        if (this.i2pService.running) await this.i2pService.forceShutdown();
+        console.error(error);
+        window.electronAPI.showNotification({
+          title: 'Daemon error',
+          body: error instanceof Error ? error.message : `${error}`,
+          closeButtonText: 'Dismiss'
+        });
+        this.starting = false;
+        throw error;
       }
     }
 
@@ -1114,6 +1176,14 @@ export class DaemonService {
           console.log('stopping i2pd service');
           await this.i2pService.stop();
           console.log('stopped i2pd service');
+        }
+
+        if (this.torService.running) {
+          console.log("Stopping tor service");
+
+          await this.torService.stop();
+
+          console.log("Stopped tor service");
         }
 
         this.stopping = false;

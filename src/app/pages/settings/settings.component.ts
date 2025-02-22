@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
-import { DaemonSettings, DefaultPrivnetNode2Settings, I2pDaemonSettings, PrivnetDaemonSettings } from '../../../common';
-import { DaemonService, I2pDaemonService, ElectronService } from '../../core/services';
+import { DaemonSettings, DefaultPrivnetNode2Settings, I2pDaemonSettings, PrivnetDaemonSettings, TorDaemonSettings } from '../../../common';
+import { DaemonService, I2pDaemonService, ElectronService, TorDaemonService } from '../../core/services';
 import { DaemonSettingsError } from '../../../common';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { NavbarService } from '../../shared/components';
@@ -13,6 +13,7 @@ import { NavbarService } from '../../shared/components';
     standalone: false
 })
 export class SettingsComponent extends BasePageComponent implements AfterViewInit {
+  // #region Properties
 
   public readonly navbarLinks: NavbarLink[];
 
@@ -69,6 +70,13 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     return this._currentI2pdSettings;
   }
 
+  public originalTorSettings: TorDaemonSettings;
+  private _currentTorSettings: TorDaemonSettings;
+
+  public get currentTorSettings(): TorDaemonSettings {
+    return this._currentTorSettings;
+  }
+
   public get isPrivnet(): boolean {
     return this._currentSettings.isPrivnet;
   }
@@ -91,6 +99,8 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   public seedNodeAddress: string = '';
   public seedNodePort: number = 0;
 
+  // #region Tx Proxy
+
   public torTxProxyIp: string = '';
   public torTxProxyPort: number = 0;
   public torTxProxyMaxConnections: number = 10;
@@ -102,6 +112,10 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     if (!DaemonSettings.isValidTorTxProxy(torTxProxy)) return '';
 
     return torTxProxy;
+  }
+
+  public get validTorTxProxy(): boolean {
+    return this.torTxProxy !== '';
   }
 
   public i2pTxProxyIp: string = '';
@@ -116,6 +130,10 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
 
     return i2pTxProxy;
   }
+
+  //#endregion
+
+  //#region Anonymous Inbound
 
   public torAnonymousInboundAddress: string = '';
   public torAnonymousInboundPort: number = 0;
@@ -143,9 +161,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     return i2pAnonymousInbound;
   }
 
-  private get seedNode(): string {
-    return `${this.seedNodeAddress}:${this.seedNodePort}`;
-  }
+  //#endregion
 
   private get exclusiveNodes(): NodeInfo[] {
     const result: { address: string, port: number }[] = [];
@@ -291,9 +307,32 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     return !this.isPrivnet;
   }
 
+  public get modified(): boolean {
+    if (!this._currentSettings.equals(this.originalSettings)) {
+      return true;
+    }
+    if (!this._currentI2pdSettings.equals(this.originalI2pdSettings)) {
+      return true;
+    }
+    if (!this._currentTorSettings.equals(this.originalTorSettings)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  public get saveDisabled(): boolean {
+    return !this.modified || this.daemonService.restarting || this.daemonService.starting || this.daemonService.stopping;
+  }
+
   // #endregion
 
-  constructor(private daemonService: DaemonService, private i2pdService: I2pDaemonService, private electronService: ElectronService, navbarService: NavbarService, private ngZone: NgZone) {
+  // #endregion
+
+  constructor(
+    private daemonService: DaemonService, private i2pdService: I2pDaemonService, private torService: TorDaemonService,
+    private electronService: ElectronService, navbarService: NavbarService, private ngZone: NgZone
+  ) {
     super(navbarService);
     this.loading = true;
 
@@ -312,16 +351,14 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     this._currentSettings = this.originalSettings.clone();
     this.originalI2pdSettings = this.i2pdService.settings;
     this._currentI2pdSettings = this.originalI2pdSettings.clone();
+    this.originalTorSettings = this.torService.settings;
+    this._currentTorSettings = this.originalTorSettings.clone();
 
     this.load().then(() => {
       console.debug("Settings loaded");
     }).catch((error: any) => {
       console.error(error);
     });
-  }
-
-  public get validTorTxProxy(): boolean {
-    return this.torTxProxy !== '';
   }
 
   public onTorTxProxyChange(): void {
@@ -532,7 +569,16 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
       this.originalI2pdSettings = this.i2pdService.settings;
     }
 
+    if (!this.torService.loaded)
+      {
+        this.originalTorSettings = await this.torService.loadSettings();
+      }
+      else {
+        this.originalTorSettings = this.torService.settings;
+      }
+
     this._currentI2pdSettings = this.originalI2pdSettings.clone();
+    this._currentTorSettings = this.originalTorSettings.clone();
 
     this.originalSettings = await this.daemonService.getSettings();
     this._currentSettings = this.originalSettings.clone();
@@ -584,21 +630,6 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
 
   private loadPriorityNodesTable(loading: boolean = false): void {
     this.loadTable('priorityNodesTable', this.priorityNodes, loading);
-  }
-
-  public get modified(): boolean {
-    if (!this._currentSettings.equals(this.originalSettings)) {
-      return true;
-    }
-    if (!this._currentI2pdSettings.equals(this.originalI2pdSettings)) {
-      return true;
-    }
-
-    return false;
-  }
-
-  public get saveDisabled(): boolean {
-    return !this.modified || this.daemonService.restarting || this.daemonService.starting || this.daemonService.stopping;
   }
 
   public onSeedNodeChange() {
@@ -723,8 +754,12 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
       this.i2pdService.setSettings(this._currentI2pdSettings);
       await this.i2pdService.saveSettings();
 
+      this.torService.setSettings(this._currentTorSettings);
+      await this.torService.saveSettings();
+
       this.originalSettings = this._currentSettings.clone();
       this.originalI2pdSettings = this._currentI2pdSettings.clone();
+      this.originalTorSettings = this._currentTorSettings.clone();
 
       const minimizedChanged: boolean = oldStartMinimized != this.originalSettings.startAtLoginMinimized;
 
@@ -748,23 +783,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     this.savingChanges = false;
   }
 
-  private async getMonerodFileSpec(): Promise<{ extensions?: string[]; mimeType: string; }> {
-    const { platform } = await this.electronService.getOsType();
-
-    if (platform == 'win32') {
-      return { mimeType: 'application/vnd.microsoft.portable-executable', extensions: ['exe']};
-    }
-    else if (platform == 'darwin') {
-      return { mimeType: 'application/octet-stream' };
-    }
-    else if (platform == 'linux') {
-      return { mimeType: 'application/x-executable'};
-    }
-
-    throw new Error("Could not get monerod mime type");
-  }
-
-  private async getI2pdFileSpec(): Promise<{ extensions?: string[]; mimeType: string; }> {
+  private async getExecutableFileSpec(): Promise<{ extensions?: string[]; mimeType: string; }> {
     const { platform } = await this.electronService.getOsType();
 
     if (platform == 'win32') {
@@ -778,6 +797,18 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     }
 
     throw new Error("Could not get i2pd mime type");
+  }
+
+  private async getMonerodFileSpec(): Promise<{ extensions?: string[]; mimeType: string; }> {
+    return await this.getExecutableFileSpec();
+  }
+
+  private async getI2pdFileSpec(): Promise<{ extensions?: string[]; mimeType: string; }> {
+    return await this.getExecutableFileSpec();
+  }
+
+  private async getTorFileSpec(): Promise<{ extensions?: string[]; mimeType: string; }> {
+    return await this.getExecutableFileSpec();
   }
 
   public async importMonerodConfigFile(): Promise<void> {
@@ -852,7 +883,11 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   }
 
   public removeI2pdFile(): void {
-    this._currentSettings.monerodPath = '';
+    this._currentI2pdSettings.path = '';
+  }
+
+  public removeTorFile(): void {
+    this._currentTorSettings.path = '';
   }
 
   public async chooseMonerodFile(): Promise<void> {
@@ -895,7 +930,30 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     }
   }
 
+  public async chooseTorFile(): Promise<void> {
+    const spec = await this.getTorFileSpec();
+    const file = await this.electronService.selectFile(spec.extensions);
+
+    if (file == '') {
+      return;
+    }
+
+    const valid = await this.torService.isValidPath(file);
+    if (valid) {
+      this.ngZone.run(() => {
+        this.currentTorSettings.path = file;
+      });
+    }
+    else {
+      window.electronAPI.showErrorBox('Invalid tor path', `Invalid tor path provided: ${file}`);
+    }
+  }
+
   public onI2pServiceEnabledChange(): void {
+
+  }
+
+  public onTorServiceEnabledChange(): void {
 
   }
 

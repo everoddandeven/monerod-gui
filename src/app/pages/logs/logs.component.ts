@@ -43,6 +43,7 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, A
   
   private readonly monerodLink: NavbarLink = new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', true, 'monerod', false, false);
   private readonly i2pdLink: NavbarLink = new NavbarLink('pills-i2pd-tab', '#pills-i2pd', 'pills-i2pd', false, 'i2pd', false, false);
+  private readonly torLink: NavbarLink = new NavbarLink('pills-tor-tab', '#pills-tor', 'pills-tor', false, 'tor', false, false);
 
   constructor(navbarService: NavbarService, private logsService: LogsService, private daemonService: DaemonService, private ngZone: NgZone) {
     super(navbarService);
@@ -52,7 +53,7 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, A
     });
 
     const links = [
-      this.monerodLink, this.i2pdLink,
+      this.monerodLink, this.torLink, this.i2pdLink,
       new NavbarLink('pills-set-log-level-tab', '#pills-set-log-level', 'pills-set-log-level', false, 'Set Log Level'),
       new NavbarLink('pills-set-log-categories-tab', '#pills-set-log-categories', 'pills-set-log-categories', false, 'Set Log Categories'),
       new NavbarLink('pills-set-log-hash-rate-tab', '#pills-set-log-hash-rate', 'pills-set-log-hash-rate', false, 'Set Log Hash Rate')
@@ -79,7 +80,15 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, A
     return this.initing ? '' : this.i2pdLines.join("\n");
   }
 
-  private onLog(type: 'monerod' | 'i2pd'): void {
+  public get torLines(): string [] {
+    return this.logsService.logs.tor;
+  }
+
+  public get torLogs(): string {
+    return this.initing ? '' : this.torLines.join("\n");
+  }
+
+  private onLog(type: 'monerod' | 'i2pd' | 'tor'): void {
     if (this.scrolling) return;
 
     this.scrollTableContentToBottom(`${type}-log-table`);
@@ -104,10 +113,12 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, A
   private getTableContents(): HTMLElement[] {
     const table1 = document.getElementById('monerod-log-table');
     const table2 = document.getElementById('i2pd-log-table');
+    const table3 = document.getElementById('tor-log-table');
     const result: HTMLElement[] = [];
 
     if (table1) result.push(table1);
     if (table2) result.push(table2);
+    if (table3) result.push(table3);
 
     return result;
   }
@@ -144,6 +155,10 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, A
 
   public clearI2pdLogs(): void{
     this.logsService.clear('i2pd');
+  }
+
+  public clearTorLogs(): void{
+    this.logsService.clear('tor');
   }
 
   public async setLogLevel(): Promise<void> {
@@ -202,14 +217,10 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, A
 
   public override updateTablesContentHeight(): void {
     super.updateTablesContentHeight();
-    //this.updateTableContentHeight('monerod-log-table');
-    //this.updateTableContentHeight('i2pd-log-table');
   }
 
   public scrollTablesContentToBottom(): void {
     this.scrollTableContentToBottom('pills-tabContent');
-    //this.scrollTableContentToBottom('monerod-log-table');
-    //this.scrollTableContentToBottom('i2pd-log-table');
   }
 
   public ngAfterViewInit(): void {

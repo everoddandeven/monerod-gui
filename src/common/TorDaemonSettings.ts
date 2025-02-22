@@ -10,6 +10,7 @@ export class TorDaemonSettings extends Comparable<TorDaemonSettings> {
   public rpcPort: number = 18089;
 
   public outproxy?: { host: string; port: number };
+  public proxyAllNetConnections: boolean = false;
 
   public override clone(): TorDaemonSettings {
     const result = Object.assign(new TorDaemonSettings(), this);
@@ -20,7 +21,7 @@ export class TorDaemonSettings extends Comparable<TorDaemonSettings> {
   }
 
   public static parse(obj: any): TorDaemonSettings {
-    const { allowIncomingConnections, txProxyEnabled, enabled, path, outproxy } = obj;
+    const { allowIncomingConnections, txProxyEnabled, enabled, path, outproxy, proxyAllNetConnections } = obj;
 
     const result = new TorDaemonSettings();
 
@@ -29,6 +30,7 @@ export class TorDaemonSettings extends Comparable<TorDaemonSettings> {
     if (typeof enabled === 'boolean') result.enabled = enabled;
     if (typeof path === 'string') result.path = path;
     if (typeof outproxy === 'object') result.outproxy = { ...outproxy };
+    if (typeof proxyAllNetConnections === 'boolean') result.proxyAllNetConnections = proxyAllNetConnections;
 
     return result;
   }

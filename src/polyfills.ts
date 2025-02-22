@@ -94,6 +94,7 @@ declare global {
       onTorOutput: (callback: (output: {stdout?: string, stderr?: string}) => void) => void;
       checkValidTorPath: (path: string, callback: (valid: boolean) => void) => void;
       onTorClose: (callback: (code: number) => void) => void;
+      getTorHostname: (callback: (result: { hostname?: string; error?: string; }) => void) => void;
 
       isWifiConnected: (callback: (connected: boolean) => void) => void;
 

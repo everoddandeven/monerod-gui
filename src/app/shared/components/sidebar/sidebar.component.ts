@@ -54,7 +54,7 @@ export class SidebarComponent {
       new NavLink('Peers', '/peers', 'bi bi-people', 'bottom'),
       new NavLink('Bans', '/bans', 'bi bi-ban', 'bottom'),
       new NavLink('Logs', '/logs', 'bi bi-terminal', 'bottom'),
-      //new NavLink('TOR', '/torconsole', 'bi bi-bullseye', "bottom"),
+      new NavLink('TOR', '/torconsole', 'bi bi-bullseye', "bottom"),
       new NavLink('I2P', '/i2pwebconsole', 'bi bi-hurricane', 'bottom'),
       new NavLink('Version', '/version', 'bi bi-git', 'bottom'),
       new NavLink('Settings', '/settings', 'bi bi-gear', 'bottom'),

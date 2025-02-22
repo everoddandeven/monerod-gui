@@ -5,6 +5,7 @@ export class I2pDaemonSettings extends Comparable<I2pDaemonSettings> {
   public txProxyEnabled: boolean = true;
   public enabled: boolean = false;
   public path: string = "";
+  public torAsOutproxy: boolean = false;
 
   public port: number = 18085;
   public rpcPort: number = 18089;
@@ -20,7 +21,7 @@ export class I2pDaemonSettings extends Comparable<I2pDaemonSettings> {
   }
 
   public static parse(obj: any): I2pDaemonSettings {
-    const { allowIncomingConnections, txProxyEnabled, enabled, path, outproxy } = obj;
+    const { allowIncomingConnections, txProxyEnabled, enabled, path, outproxy, torAsOutproxy } = obj;
 
     const result = new I2pDaemonSettings();
 
@@ -29,6 +30,7 @@ export class I2pDaemonSettings extends Comparable<I2pDaemonSettings> {
     if (typeof enabled === 'boolean') result.enabled = enabled;
     if (typeof path === 'string') result.path = path;
     if (typeof outproxy === 'object') result.outproxy = { ...outproxy };
+    if (typeof torAsOutproxy === 'boolean') result.torAsOutproxy = torAsOutproxy;
 
     return result;
   }
