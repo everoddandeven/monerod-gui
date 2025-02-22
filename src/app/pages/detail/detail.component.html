@@ -34,7 +34,19 @@
 </div>
 
 <div [hidden]="!daemonRunning || stoppingDaemon" class="tab-content tab-grow" id="pills-tabContent">
+
   <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab" tabindex="0">
+    <div *ngIf="anonymousInbounds.length > 0" class="alert alert-info d-flex align-items-center justify-content-center text-center" role="alert">
+      <div>
+        <i class="bi bi-incognito m-2"></i> Anonymous inbounds:
+        <ul>
+          @for(inbound of anonymousInbounds; track inbound.uri) {
+            <li>{{ inbound.uri }} - {{ inbound.type }}</li>
+          }
+        </ul>
+      </div>
+    </div>
+    
     <div class="row d-flex justify-content-center">
 
       <div class="card text-bg-dark m-3 text-center" style="max-width: 18rem;">

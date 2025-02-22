@@ -574,8 +574,8 @@ try {
     win?.webContents.send(eventId, await detectInstallation(program));
   });
 
-  ipcMain.handle('start-i2pd', async (event: IpcMainInvokeEvent, params: { eventId: string; path: string; port: number; rpcPort: number; }) => {
-    const { eventId, path, port, rpcPort } = params;
+  ipcMain.handle('start-i2pd', async (event: IpcMainInvokeEvent, params: { eventId: string; path: string; port: number; rpcPort: number; outproxy?: { host: string; port: number; } }) => {
+    const { eventId, path, port, rpcPort, outproxy } = params;
     
     let error: string | undefined = undefined;
 
@@ -588,10 +588,18 @@ try {
     else {
       try {
         //i2pdProcess = new I2pdProcess({ i2pdPath: path, flags, isExe: true });
-        i2pdProcess = MoneroI2pdProcess.createSimple(path, port, rpcPort);
+        i2pdProcess = MoneroI2pdProcess.createSimple(path, port, rpcPort, outproxy);
         await i2pdProcess.start();
         i2pdProcess.onStdOut((out: string) => win?.webContents.send('on-ip2d-stdout', out));
         i2pdProcess.onStdErr((out: string) => win?.webContents.send('on-ip2d-stderr', out));
+        i2pdProcess.onClose((_code: number | null) => {
+          const code = _code != null ? _code : -Number.MAX_SAFE_INTEGER;
+          const msg = `Process i2pd ${i2pdProcess?.pid} exited with code: ${code}`;
+          console.log(msg);
+          win?.webContents.send('i2pd-stdout', msg);
+          win?.webContents.send('i2pd-close', code);
+          monerodProcess = null;
+        });
       }
       catch (err: any) {
         error = `${err}`;

@@ -69,16 +69,24 @@ export class NavbarService {
 
   public disableLinks(): void {
     this._navbarLinks.forEach((link) => {
+      if (!link.disableIfNotRunning) return;
       link.disabled = true;
       link.selected = false;
     });
   }
 
   public enableLinks(): void {
+    const hasIndLinkEnabled = this.hasIndipendentLinkEnabled;
+
     this._navbarLinks.forEach((link, index: number) => {
       link.disabled = false
-      link.selected = index == 0;
+      
+      if (!hasIndLinkEnabled) link.selected = index == 0;
     });
+  }
+
+  private get hasIndipendentLinkEnabled(): boolean {
+    return this._navbarLinks.forEach((n) => n.selected && !n.disableIfNotRunning) !== undefined;
   }
 
 }

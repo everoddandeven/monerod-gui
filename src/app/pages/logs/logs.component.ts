@@ -41,6 +41,9 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, A
     return this.logsService.categories;
   }
   
+  private readonly monerodLink: NavbarLink = new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', true, 'monerod', false, false);
+  private readonly i2pdLink: NavbarLink = new NavbarLink('pills-i2pd-tab', '#pills-i2pd', 'pills-i2pd', false, 'i2pd', false, false);
+
   constructor(navbarService: NavbarService, private logsService: LogsService, private daemonService: DaemonService, private ngZone: NgZone) {
     super(navbarService);
 
@@ -49,8 +52,7 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, A
     });
 
     const links = [
-      new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', false, 'monerod'),
-      new NavbarLink('pills-i2pd-tab', '#pills-i2pd', 'pills-i2pd', false, 'i2pd'),
+      this.monerodLink, this.i2pdLink,
       new NavbarLink('pills-set-log-level-tab', '#pills-set-log-level', 'pills-set-log-level', false, 'Set Log Level'),
       new NavbarLink('pills-set-log-categories-tab', '#pills-set-log-categories', 'pills-set-log-categories', false, 'Set Log Categories'),
       new NavbarLink('pills-set-log-hash-rate-tab', '#pills-set-log-hash-rate', 'pills-set-log-hash-rate', false, 'Set Log Hash Rate')
@@ -134,6 +136,14 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, A
   public trackByFn(index: number, item: string): number {
     console.debug(`trackByFn(index: ${index}, ${item})`);
     return index;  // usa l'indice per tracciare gli elementi
+  }
+
+  public async clearMonerodLogs(): Promise<void> {
+    this.logsService.clear('monerod');
+  }
+
+  public async clearI2pdLogs(): Promise<void> {
+    this.logsService.clear('i2pd');
   }
 
   public async setLogLevel(): Promise<void> {

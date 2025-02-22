@@ -9,14 +9,18 @@ export class I2pDaemonSettings extends Comparable<I2pDaemonSettings> {
   public port: number = 18085;
   public rpcPort: number = 18089;
 
+  public outproxy?: { host: string; port: number };
+
   public override clone(): I2pDaemonSettings {
     const result = Object.assign(new I2pDaemonSettings(), this);
+
+    if (this.outproxy) result.outproxy = { ...this.outproxy };
 
     return result;
   }
 
   public static parse(obj: any): I2pDaemonSettings {
-    const { allowIncomingConnections, txProxyEnabled, enabled, path } = obj;
+    const { allowIncomingConnections, txProxyEnabled, enabled, path, outproxy } = obj;
 
     const result = new I2pDaemonSettings();
 
@@ -24,6 +28,7 @@ export class I2pDaemonSettings extends Comparable<I2pDaemonSettings> {
     if (typeof txProxyEnabled === 'boolean') result.txProxyEnabled = txProxyEnabled;
     if (typeof enabled === 'boolean') result.enabled = enabled;
     if (typeof path === 'string') result.path = path;
+    if (typeof outproxy === 'object') result.outproxy = { ...outproxy };
 
     return result;
   }

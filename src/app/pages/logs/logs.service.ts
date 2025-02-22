@@ -35,6 +35,15 @@ export class LogsService {
     return message.replace(/\u001b\[[0-9;]*m/g, '').replace(/[\r\n]+/g, '\n').trim(); // eslint-disable-line
   }
 
+  public clear(program: 'monerod' | 'i2pd'): void {
+    if (program === 'monerod') {
+      this.logs.monerod = [];
+    }
+    else if (program === 'i2pd') {
+      this.logs.i2pd = [];
+    }
+  }
+
   public log(message: string, type: 'monerod' | 'i2pd'): void {
     const lines = type === 'monerod' ? this.logs.monerod : this.logs.i2pd;
     

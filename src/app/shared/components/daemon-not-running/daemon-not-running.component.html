@@ -13,7 +13,7 @@
   <p *ngIf="!installing && !enablingSync && !disablingSync && !startingDaemon && !startingDaemon && !stoppingDaemon && !restartingDaemon  && !daemonConfigured && !upgrading && !quittingDaemon">Configure or install monero daemon</p>
 
   <h2 *ngIf="!installing && !enablingSync && !disablingSync && startingDaemon"><i class="bi bi-play-fill m-4"></i> Daemon is starting</h2>
-  <p *ngIf="!installing && !enablingSync && !disablingSync && startingDaemon">Starting monero daemon</p>
+  <p *ngIf="!installing && !enablingSync && !disablingSync && startingDaemon">{{ startingI2pService ? 'Starting i2p service' : 'Starting monero daemon' }}</p>
   <p *ngIf="!installing && !enablingSync && !disablingSync && restartingDaemon">Restarting monero daemon</p>
   <p *ngIf="!installing && !enablingSync && !disablingSync && upgrading">Upgrading monero daemon to latest version</p>
   <p *ngIf="installing && !enablingSync && !disablingSync && !upgrading">Installing monero daemon</p>
@@ -24,7 +24,7 @@
   <button *ngIf="!cannotRunBecauseBatteryPolicy && !installing && !enablingSync && !disablingSync && !startingDaemon && !stoppingDaemon && !restartingDaemon && !upgrading && daemonConfigured && !quittingDaemon" class="btn btn-outline-light" type="button" (click)="startDaemon()"><i class="bi bi-play-fill"></i> Start</button>
   <button *ngIf="!installing && !enablingSync && !disablingSync && startingDaemon" class="btn btn-outline-light" type="button" disabled>
     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-    Starting monerod
+    {{ startingI2pService ? 'Starting i2pd' : 'Starting monerod' }}
   </button>
 
   <button *ngIf="!installing && !enablingSync && !disablingSync && restartingDaemon" class="btn btn-outline-light" type="button" disabled>
@@ -34,7 +34,7 @@
   
   <button *ngIf="!installing && !enablingSync && !disablingSync && stoppingDaemon && !quittingDaemon" class="btn btn-outline-light" type="button" disabled>
     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-    Stopping monerod
+    {{ stoppingI2pService ? 'Stopping i2pd' : 'Stopping monerod' }}
   </button>
       
   <button *ngIf="!installing && quittingDaemon" class="btn btn-outline-light" type="button" disabled>

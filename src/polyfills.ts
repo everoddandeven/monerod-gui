@@ -83,11 +83,12 @@ declare global {
       onMonerodStdout: (callbak: (out: string) => void) => void;
       unregisterOnMoneroStdout: () => void;
 
-      startI2pd: (path: string, port: number, rpcPort: number, callback: (error?: any) => void) => void;
+      startI2pd: (options: { path: string, port: number, rpcPort: number, outproxy?: { host: string; port: number; } }, callback: (error?: any) => void) => void;
       stopI2pd: (callback: (error?: any) => void) => void;
       onI2pdOutput: (callback: (output: {stdout?: string, stderr?: string}) => void) => void;
       checkValidI2pdPath: (path: string, callback: (valid: boolean) => void) => void;
-      
+      onI2pdClose: (callback: (code: number) => void) => void;
+
       isWifiConnected: (callback: (connected: boolean) => void) => void;
 
       selectFolder: (callback: (path: string) => void) => void;

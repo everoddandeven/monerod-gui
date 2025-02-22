@@ -16,6 +16,9 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
 
   public readonly navbarLinks: NavbarLink[];
 
+  public i2pOutproxyIp: string = '';
+  public i2pOutproxyPort: number = 0;
+
   private removingExclusiveNodes: boolean = false;
   private removingPriorityNodes: boolean = false;
 
@@ -199,7 +202,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   private get dbSyncMode(): string {
     return `${this.databaseSyncSpeed}:${this.databaseSyncMode}:${this.databaseSyncNBytesOrBlocks}${this.databaseSyncNPerMode}`;
   }
-
+  
   // #region Validation
 
   public get validBanListUrl(): boolean {
@@ -1147,6 +1150,14 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     else this._currentSettings.rpcLogin = `${this.rpcLoginUser}:${this.rpcLoginPassword}`;
   }
 
+  public onI2pOutproxyChange(): void {
+    if (this.i2pOutproxyIp != '' && this.i2pOutproxyPort > 0) {
+      this._currentI2pdSettings.outproxy = { host: this.i2pOutproxyIp, port: this.i2pOutproxyPort }; 
+    }
+    else {
+      this._currentI2pdSettings.outproxy = undefined;
+    }
+  }
 }
 
 interface NodeInfo { address: string, port: number };

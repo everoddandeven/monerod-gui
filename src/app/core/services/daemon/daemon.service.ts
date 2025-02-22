@@ -74,6 +74,14 @@ export class DaemonService {
   public enablingSync: boolean = false;
   public startedAt?: Date; 
 
+  public get startingI2pService(): boolean {
+    return this.i2pService.starting;
+  }
+
+  public get stoppingI2pService(): boolean {
+    return this.i2pService.stopping;
+  }
+
   public readonly onDaemonStatusChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
   public readonly onDaemonStopStart: EventEmitter<void> = new EventEmitter<void>();
   public readonly onDaemonStopEnd: EventEmitter<void> = new EventEmitter<void>();
@@ -467,6 +475,11 @@ export class DaemonService {
       }
       catch (error: any) {
         console.error(error);
+        window.electronAPI.showNotification({
+          title: 'Daemon error',
+          body: error instanceof Error ? error.message : `${error}`,
+          closeButtonText: 'Dismiss'
+        });
         this.starting = false;
         throw error;
       }

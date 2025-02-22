@@ -46,6 +46,14 @@ export class DaemonNotRunningComponent implements OnDestroy {
     return this.statusService.restartingDaemon;
   }
 
+  public get startingI2pService(): boolean {
+    return this.statusService.startingI2pService;
+  }
+
+  public get stoppingI2pService(): boolean {
+    return this.statusService.stoppingI2pService;
+  }
+
   public get cannotRunBecauseBatteryPolicy(): boolean {
     return this.statusService.cannotRunBecauseBatteryPolicy;
   }

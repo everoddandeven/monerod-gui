@@ -82,6 +82,14 @@ export class DaemonStatusService {
     return this._batteryTooLow;
   }
 
+  public get startingI2pService(): boolean {
+    return this.daemonService.startingI2pService;
+  }
+
+  public get stoppingI2pService(): boolean {
+    return this.daemonService.stoppingI2pService;
+  }
+
   private subscriptions: Subscription[] = [];
   private settings?: DaemonSettings;
   

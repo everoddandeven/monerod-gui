@@ -18,6 +18,8 @@ export class I2pDaemonService {
   public readonly proxy: string = '127.0.0.1:4447';
   public readonly txProxy: string = 'i2p,127.0.0.1:4447,disable_noise';
 
+  public tunnelsData: TunnelsData = new TunnelsData();
+
   private _settings: I2pDaemonSettings = new I2pDaemonSettings();
   private _running: boolean = false;
   private _starting: boolean = false;
@@ -83,12 +85,38 @@ export class I2pDaemonService {
     });
   }
 
+  private async waitForWebConsole(tries: number = 10): Promise<void> {
+    for(let i = 0; i < tries; i++) {
+      try {
+        await this.getMainData();
+        return;
+      }
+      catch {
+        continue;
+      }
+    }
+
+    throw new Error("Failed connection to i2p webconsole");
+  }
+
+  private async checkI2PAlreadyRunningInSystem(): Promise<boolean> {
+    try {
+      await this.waitForWebConsole(1);
+      return true;
+    }
+    catch {
+      return false;
+    }
+  }
+
   public async start(config?: I2pDaemonSettings): Promise<void> {
     const _config = config ? config : this._settings;
     
     if (this.running) throw new Error("Already running i2pd");
     if (this.stopping) throw new Error("i2pd is stopping");
     if (this.starting) throw new Error("Alrady starting i2pd");
+    if (await this.checkI2PAlreadyRunningInSystem()) throw new Error("Another i2p service is already running");
+
     this._starting = true;
     const promise = new Promise<void>((resolve, reject) => {
       
@@ -103,7 +131,13 @@ export class I2pDaemonService {
         }
       });
 
-      window.electronAPI.startI2pd(_config.path, _config.port, _config.rpcPort, (error?: any) => {
+      window.electronAPI.onI2pdClose((code: number) => {
+        console.log(code);
+        this._running = false;
+        this.onStop.emit();
+      });
+
+      window.electronAPI.startI2pd(_config, (error?: any) => {
         this._starting = false;
         if (error) reject(new Error(`${error}`));
         else resolve();
@@ -111,29 +145,86 @@ export class I2pDaemonService {
     });
 
     await promise;
+    
+    this.tunnelsData = new TunnelsData();
+    this._anonymousInbound = '';
+
+    try {
+      await this.waitForWebConsole();
+      this.tunnelsData = await this.getI2pTunnels();
+      this._anonymousInbound = await this.getAnonymousInbound();
+    }
+    catch (error: any) {
+      console.error(error);
+    }
+
     this.setSettings(_config);
     this._running = true;
     this.onStart.emit();
   }
+
+  private async shutdown(): Promise<void> {
+    if (this.starting) throw new Error("i2pd is starting");
+    if (!this.running) throw new Error("Already stopped i2pd");
+
+    await new Promise<void>((resolve, reject) => {
+      window.electronAPI.onI2pdClose((code: number) => {
+        resolve();
+      });
+
+      this.forceShutdown().then((result) => {
+        if (!result.message.includes('SUCCESS')) reject(new Error(result.message));
+      }).catch((error: any) => reject(error instanceof Error ? error : new Error(`${error}`)));
+    });
+  }
+
+  private async stopGracefully(): Promise<void> {
+    if (this.starting) throw new Error("i2pd is starting");
+    if (!this.running) throw new Error("Already stopped i2pd");
+
+    await new Promise<number>((resolve, reject) => {
+      window.electronAPI.onI2pdClose((code: number) => {
+        resolve(code);
+      });
+
+      this.startGracefulShutdown().then((result) => {
+        if (!result.message.includes('SUCCESS')) reject(new Error(result.message));
+      }).catch((error: any) => reject(error instanceof Error ? error : new Error(`${error}`)));
+    });
+  }
   
-  public async stop(): Promise<void> {
+  public async stop(force: boolean = false): Promise<void> {
     if (this.starting) throw new Error("i2pd is starting");
     if (!this.running) throw new Error("Already stopped i2pd");
     if (this.stopping) throw new Error("Alrady stopping i2pd");
     this._stopping = true;
-    
-    const promise = new Promise<void>((resolve, reject) => {
-      window.electronAPI.stopI2pd((error?: any) => {
-        this._stopping = false;
-        if (error) reject(new Error(`${error}`));
-        else resolve();
-      });
-    });
+    let err: any = null;
 
-    await promise;
+    try {
+      if (force) {
+        const promise = new Promise<void>((resolve, reject) => {
+          window.electronAPI.stopI2pd((error?: any) => {
+            this._stopping = false;
+            if (error) reject(new Error(`${error}`));
+            else resolve();
+          });
+        });
+    
+        await promise;
+      }
+      else {
+        await this.stopGracefully();
+      }
+    }
+    catch (error: any) {
+      err = error;
+      this._stopping = false;
+    }
 
     this._running = false;
     if (!this.restarting) this.onStop.emit();
+
+    if (err) throw err;
   }
 
   public async restart(): Promise<void> {
@@ -251,29 +342,8 @@ export class I2pDaemonService {
       return new Promise<HTMLDivElement>(resolveFunction);
     }
 
-    async function wait(d: number = 5000): Promise<void> {
-      await new Promise<void>((resolve) => setTimeout(resolve, d));
-    }
+    return await createPromise();
 
-    const tries: number = 3;
-    let err: any = null;
-
-    for(let i = 0; i < tries; i++) {
-      try {
-        return await createPromise();
-      }
-      catch (error: any) {
-        err = error;
-
-        if (i != tries - 1) await wait();
-      }
-    }
-
-    if (err) {
-      throw err;
-    }
-
-    throw new Error("Unknown error");
   }
 
   public async getMainData(): Promise<MainData> {

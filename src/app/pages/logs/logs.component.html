@@ -13,6 +13,8 @@
 <div class="tab-content tab-grow" id="pills-tabContent">
 
   <div class="tab-pane fade show active" id="pills-overview" role="tabpanel" aria-labelledby="pills-overview-tab" tabindex="0">
+    <button *ngIf="lines.length > 0" class="w-100 btn btn-primary btn-lg" type="submit" (click)="clearMonerodLogs()">Clear</button>
+
     <div *ngIf="lines.length === 0" class="h-100 p-5 text-bg-dark rounded-3 m-4 text-center">
       <h2><i class="bi bi-exclamation-diamond m-4"></i> No logs</h2>
       <p>Start monero daemon to enable session logging</p>
@@ -22,7 +24,7 @@
         <div class="terminal-output" id="monerod-log-table">
 {{ logs }}
         </div>
-    </div>    
+    </div>
   </div>
 
   <div class="tab-pane fade" id="pills-set-log-level" role="tabpanel" aria-labelledby="pills-set-log-level-tab" tabindex="0">
@@ -767,6 +769,8 @@
   </div>
 
   <div class="tab-pane fade" id="pills-i2pd" role="tabpanel" aria-labelledby="pills-i2pd-tab" tabindex="0">
+    <button *ngIf="i2pdLines.length > 0" class="w-100 btn btn-primary btn-lg" type="submit" (click)="clearI2pdLogs()">Clear</button>
+
     <div *ngIf="i2pdLines.length === 0" class="h-100 p-5 text-bg-dark rounded-3 m-4 text-center">
       <h2><i class="bi bi-exclamation-diamond m-4"></i> No logs</h2>
       <p>Start I2P daemon to enable session logging</p>
@@ -776,7 +780,8 @@
         <div class="terminal-output" id="i2pd-log-table">
 {{ i2pdLogs }}
         </div>
-    </div>    
+    </div>
+    
   </div>
 
 </div>

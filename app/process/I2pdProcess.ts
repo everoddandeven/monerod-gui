@@ -263,7 +263,11 @@ export abstract class MoneroI2pTunnelConfigCreator {
     return 28089;
   }
 
-  public static createSimple(networkType: 'mainnet' | 'stagenet' | 'testnet' = 'mainnet', port?: number, rpcPort?: number): [I2pTunnelConfig, I2pTunnelConfig] {
+  public static createSimple(
+    networkType: 'mainnet' | 'stagenet' | 'testnet' = 'mainnet', 
+    port?: number, 
+    rpcPort?: number
+  ): [I2pTunnelConfig, I2pTunnelConfig] {
     port = port || this.getDefaultNodePort(networkType);
     rpcPort = rpcPort || this.getDefaultRpcPort(networkType);
     return this.create({ host: '127.0.0.1', keys: `monero-${networkType}.dat`, port, rpcPort })
@@ -559,10 +563,14 @@ export class MoneroI2pdProcess extends I2pdProcess {
     ];
   }
 
-  private static createDefaultConfigFile(): void {
+  private static createDefaultConfigFile(outproxy?: { host: string; port: number; }): void {
     if (!fs.existsSync(path.join(this.userDataPath, 'i2pd'))) {
       fs.mkdirSync(path.join(this.userDataPath, 'i2pd'));
     }
+
+    const enabled = outproxy !== undefined ? 'true' : 'false';
+    const host = outproxy ? outproxy.host : '127.0.0.1';
+    const port = outproxy ? outproxy. port : 9050;
 
     fs.writeFileSync(this.defaultConfigPath, `ipv4 = true
 ipv6 = false
@@ -577,10 +585,9 @@ enabled = false
 
 [socksproxy]
 enabled = true
-#outproxy.enabled = true
-#outproxy = exit.stormycloud.i2p
-#outproxy = 127.0.0.1
-#outproxyport = 9050
+outproxy.enabled = ${enabled}
+outproxy = ${host}
+outproxyport = ${port}
 
 [reseed]
 verify = true
@@ -591,7 +598,7 @@ verify = true
     fs.writeFileSync(this.defaultTunnelsConfigPath, ``);
   }
 
-  private static createDefaultTunnelsDir(port: number, rpcPort: number): void {
+  private static createDefaultTunnelsDir(port: number, rpcPort: number, outproxy?: { host: string; port: number; }): void {
     const service = new MoneroI2pTunnelConfigService(path.join(this.defaultTunnelsConfigPath));
     const result = MoneroI2pTunnelConfigCreator.createSimple('mainnet', port, rpcPort);
     service.setConfig(result[0], result[1], true);
@@ -601,8 +608,8 @@ verify = true
     fs.writeFileSync(this.defaultLogPath, ``);
   }
 
-  public static createSimple(i2pdPath: string, port: number = 18080, rpcPort: number = 18081): MoneroI2pdProcess {
-    this.createDefaultConfigFile();
+  public static createSimple(i2pdPath: string, port: number = 18080, rpcPort: number = 18081, outproxy?: { host: string; port: number; }): MoneroI2pdProcess {
+    this.createDefaultConfigFile(outproxy);
 
     if (!fs.existsSync(this.defaultTunnelsConfigPath)) {
       this.createDefaultTunnelsConfigFile();

@@ -26,14 +26,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.once(eventId, handler);
     ipcRenderer.invoke('check-valid-i2pd-path', { eventId, path });
   },
-  startI2pd: (path, port, rpcPort, callback) => {
+  startI2pd: (options, callback) => {
+    const { path, port, rpcPort, outproxy } = options;
     const eventId = `on-start-i2pd-${newId()}`;
     const handler = (event, result) => {
       callback(result);
     };
 
     ipcRenderer.once(eventId, handler);
-    ipcRenderer.invoke('start-i2pd', { eventId, path, port, rpcPort });
+    ipcRenderer.invoke('start-i2pd', { eventId, path, port, rpcPort, outproxy });
   },
   stopI2pd: (callback) => {
     const eventId = `on-stop-i2pd-${newId()}`;
@@ -178,6 +179,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     const handler = (event, result) => callback(result);
     ipcRenderer.on('monero-close', handler);
   },
+  onI2pdClose: (callback) => {
+    const handler = (event, result) => callback(result);
+    ipcRenderer.once('i2pd-close', handler);
+  },
+  
   unregisterOnMoneroStdout: () => {
     ipcRenderer.removeAllListeners('monero-stdout');
   },

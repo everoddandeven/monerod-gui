@@ -1125,6 +1125,21 @@
               <br>
               <small class="text-body-secondary">Enable tx proxy through I2P service</small>
             </div>
+            
+            <div class="col-8">
+              <label for="outproxy" class="form-label">Outproxy IP</label>
+              <input (input)="onI2pOutproxyChange()" [disabled]="!canEditNodeSettings" type="text" class="form-control" id="outproxy" placeholder="127.0.0.1" [(ngModel)]="i2pOutproxyIp" [ngModelOptions]="{standalone: true}">
+              <small class="text-body-secondary">
+                Outproxy ip
+              </small>
+            </div>
+
+            <div class="col-md-4">
+              <label for="outproxy-port" class="form-label">Outproxy Port</label>
+              <input (change)="onI2pOutproxyChange()" [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="outproxy-port" placeholder="9050" [(ngModel)]="i2pOutproxyPort" [ngModelOptions]="{standalone: true}">
+              <small class="text-body-secondary">Outproxy port</small>
+            </div>
+            
           </div>
           
           <hr class="my-4">
@@ -1141,7 +1156,7 @@
 
             <div class="col-md-2">
               <label for="i2p-tx-proxy-port" class="form-label">Socks Port</label>
-              <input (change)="onI2pTxProxyChange()" [disabled]="!canEditNodeSettings || currentI2pdSettings.enabled" type="number" min="0" class="form-control" id="i2p-tx-proxy-port" placeholder="9050" [(ngModel)]="i2pTxProxyPort" [ngModelOptions]="{standalone: true}">
+              <input (change)="onI2pTxProxyChange()" [disabled]="!canEditNodeSettings || currentI2pdSettings.enabled" type="number" min="0" class="form-control" id="i2p-tx-proxy-port" placeholder="4447" [(ngModel)]="i2pTxProxyPort" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">Socks proxy port</small>
             </div>
 

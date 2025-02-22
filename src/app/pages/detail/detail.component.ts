@@ -15,6 +15,48 @@ import { BasePageComponent } from '../base-page/base-page.component';
 })
 export class DetailComponent extends BasePageComponent implements AfterViewInit {
 
+  private parseAnonInboundUri(anonInbound: string): string {
+    const v = anonInbound.split(',');
+    const address = v[0];
+    const socks = v[1];
+    const c = socks.split(':');
+    const port = c[1];
+    return `${address}:${port}`;
+  }
+
+  public get anonymousInbounds(): { uri: string; type: string; }[] {
+    const res: { uri: string; type: string; }[] = [];
+
+    if (this.i2pService.running && this.i2pService.anonymousInbound.length > 0) {
+      const uri = this.parseAnonInboundUri(this.i2pService.anonymousInbound);
+
+      res.push({ 
+        uri,
+        type: 'P2P'
+       });
+    }
+
+    return res;
+  }
+
+  public get anonymousServices(): { uri: string; type: string; }[] {
+    const res: { uri: string; type: string; }[] = [];
+    const servers = this.i2pService.tunnelsData.servers;
+
+    if (this.i2pService.running && servers.length > 0) {
+      for (const server of servers) {
+        if (server.name === 'monero-rpc') {
+          res.push({ uri: `${server.address}`, type: 'RPC' });
+        }
+        else if (server.name === 'monero-node') {
+          res.push({ uri: `${server.address}`, type: 'P2P' });
+        }
+      }
+    }
+
+    return res;
+  }
+
   public get uptime(): { seconds: string, minutes: string, hours: string } {
     const startedAt = this.daemonService.startedAt;
 
