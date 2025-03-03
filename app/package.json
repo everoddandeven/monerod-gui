@@ -12,7 +12,7 @@
   "dependencies": {
     "adm-zip": "^0.5.16",
     "applescript": "^1.0.0",
-    "axios": "^1.7.9",
+    "axios": "^1.8.1",
     "battery-level": "^3.0.0",
     "network": "^0.7.0",
     "os": "^0.1.2",
