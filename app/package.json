@@ -24,7 +24,6 @@
   "devDependencies": {
     "@types/adm-zip": "^0.5.7",
     "@types/auto-launch": "^5.0.5",
-    "@types/axios": "^0.14.4",
     "@types/battery-level": "^3.0.2",
     "@types/pidusage": "^2.0.5",
     "@types/winreg": "^1.2.36"
