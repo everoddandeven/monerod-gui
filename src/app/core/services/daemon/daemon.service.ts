@@ -292,13 +292,13 @@ export class DaemonService {
     return await checkPromise;
   }
 
-  public async getSettings(): Promise<DaemonSettings> {
+  public async getSettings(checkValidPath: boolean = true): Promise<DaemonSettings> {
     const db = await this.openDbPromise;
     const result = await db.get(this.storeName, 1);
     if (result) {
       const settings = DaemonSettings.parse(result);
 
-      if (settings.monerodPath != '' && !await this.checkValidMonerodPath(settings.monerodPath)) {
+      if (checkValidPath && settings.monerodPath != '' && !await this.checkValidMonerodPath(settings.monerodPath)) {
         settings.monerodPath = '';
       }
       

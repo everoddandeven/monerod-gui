@@ -93,9 +93,8 @@ export class DaemonSettings extends Comparable<DaemonSettings> {
   public p2pIgnoreIpv4: boolean = false;
   public p2pExternalPort: number = 0;
   public allowLocalIp: boolean = false;
-  public addPeer: string = '';
-  //public addPriorityNode: string = '';
-  //public addExclusiveNode: string = '';
+
+  public peers: string[] = [];
   public exclusiveNodes: string[] = [];
   public priorityNodes: string[] = [];
 
@@ -134,6 +133,7 @@ export class DaemonSettings extends Comparable<DaemonSettings> {
 
   public rpcBindIp: string = '127.0.0.1';
   public rpcBindIpv6Address: string = '::1';
+  public rpcRestrictedBindIpv6Address: string = '::1';
   public rpcRestrictedBindIp: string = '';
   public rpcUseIpv6: boolean = false;
   public rpcIgnoreIpv4: boolean = false;
@@ -162,6 +162,10 @@ export class DaemonSettings extends Comparable<DaemonSettings> {
 
   public get hasPriorityNodes(): boolean {
     return this.priorityNodes.length > 0;
+  }
+
+  public get hasPeers(): boolean {
+    return this.peers.length > 0;
   }
 
   public get isPrivnet(): boolean {
@@ -250,6 +254,19 @@ export class DaemonSettings extends Comparable<DaemonSettings> {
     this.priorityNodes = this.priorityNodes.filter((n) => n !== node);
   }
 
+  public addPeer(node: string): void {
+    if (this.peers.includes(node)) {
+      throw new DaemonSettingsDuplicatePriorityNodeError(node);
+    }
+
+    this.peers.push(node);
+  }
+
+  public removePeer(node: string): void {
+    this.peers = this.peers.filter((n) => n !== node);
+  }
+
+
   public assertValid(): void {
     if (this.upgradeAutomatically && this.downloadUpgradePath == '') {
       throw new Error('You must set a download path for monerod updates when enabling automatic upgrade');
@@ -305,6 +322,14 @@ export class DaemonSettings extends Comparable<DaemonSettings> {
             }
           }
         }
+        else if (key == 'peers' && obj1 instanceof DaemonSettings && obj2 instanceof DaemonSettings) {
+          if (obj1.peers.length !== obj2.peers.length) return false;
+          else {
+            for(const en of obj1.peers) {
+              if (!obj2.peers.includes(en)) return false;
+            }
+          }
+        }
         else if (!this.deepEqual(obj1[key], obj2[key])) return false;
 
         // Se il valore della proprietà non è uguale, effettua un confronto ricorsivo
@@ -318,9 +343,11 @@ export class DaemonSettings extends Comparable<DaemonSettings> {
 
     result.exclusiveNodes = [];
     result.priorityNodes = [];
+    result.peers = [];
 
     this.exclusiveNodes.forEach((en) => result.addExclusiveNode(en));
     this.priorityNodes.forEach((pn) => result.addPriorityNode(pn));
+    this.peers.forEach((pe) => result.addPeer(pe));
 
     result.txProxies = { ...this.txProxies };
     result.anonymousInbounds = { ...this.anonymousInbounds };
@@ -516,7 +543,7 @@ export class DaemonSettings extends Comparable<DaemonSettings> {
             case 'p2p-use-ipv6': settings.p2pUseIpv6 = boolValue; break;
             case 'p2p-ignore-ipv4': settings.p2pIgnoreIpv4 = boolValue; break;
             case 'p2p-external-port': settings.p2pExternalPort = parseInt(value, 10); break;
-            case 'add-peer': settings.addPeer = value; break;
+            case 'add-peer': settings.addPeer(value); break;
             case 'add-priority-node': settings.addPriorityNode(value); break;
             case 'bootstrap-daemon-address': settings.bootstrapDaemonAddress = value; break;
             case 'bootstrap-daemon-login': settings.bootstrapDaemonLogin = value; break;
@@ -641,9 +668,9 @@ export class DaemonSettings extends Comparable<DaemonSettings> {
     if (this.testDbgLockSleep) options.push(`--test-dbg-lock-sleep`, `${this.testDbgLockSleep}`);
     if (this.regtest) options.push(`--regtest`);
     if (this.keepFakeChain) options.push(`--keep-fakechain`);
-    if (this.fixedDifficulty) options.push(`--fixed-difficulty`, `${this.fixedDifficulty}`);
+    if (!this.noSync && this.fixedDifficulty) options.push(`--fixed-difficulty`, `${this.fixedDifficulty}`);
     if (this.enforceDnsCheckpointing) options.push(`--enforce-dns-checkpointing`);
-    if (this.prepBlocksThreads) options.push(`--prep-blocks-threads`, `${this.prepBlocksThreads}`);
+    if (!this.noSync && this.prepBlocksThreads) options.push(`--prep-blocks-threads`, `${this.prepBlocksThreads}`);
     if (!this.noSync && this.fastBlockSync) options.push(`--fast-block-sync`, `1`);
     if (this.showTimeStats) options.push(`--show-time-stats`);
     if (!this.noSync && this.blockSyncSize) options.push(`--block-sync-size`, `${this.blockSyncSize}`);
@@ -651,7 +678,7 @@ export class DaemonSettings extends Comparable<DaemonSettings> {
     if (this.noFluffyBlocks) options.push(`--no-fluffy-blocks`);
     if (this.offline) options.push(`--offline`);
     if (this.disableDnsCheckpoints) options.push(`--disable-dns-checkpoints`);
-    if (this.blockDownloadMaxSize >= 0) options.push(`--block-download-max-size`, `${this.blockDownloadMaxSize}`);
+    if (!this.noSync && this.blockDownloadMaxSize >= 0) options.push(`--block-download-max-size`, `${this.blockDownloadMaxSize}`);
     if (!this.noSync && this.syncPrunedBlocks) options.push(`--sync-pruned-blocks`);
     if (this.maxTxPoolWeight) options.push(`--max-txpool-weight`, `${this.maxTxPoolWeight}`);
     if (this.blockNotify != '') options.push(`--block-notify`, this.blockNotify);
@@ -670,16 +697,16 @@ export class DaemonSettings extends Comparable<DaemonSettings> {
     if (!this.noSync && this.dbSyncMode != '') options.push(`--db-sync-mode`, `${this.dbSyncMode}`);
     if (this.dbSalvage) options.push(`--db-salvage`);
     if (this.p2pBindIp != '') options.push(`--p2p-bind-ip`, this.p2pBindIp);
-    if (this.p2pBindIpv6Address != '') options.push(`--p2p-bind-ipv6-address`, this.p2pBindIpv6Address);
+    if (this.p2pUseIpv6 && this.p2pBindIpv6Address != '') options.push(`--p2p-bind-ipv6-address`, this.p2pBindIpv6Address);
     if (this.p2pBindPort > 0) options.push(`--p2p-bind-port`, `${this.p2pBindPort}`);
-    if (this.p2pBindPortIpv6 > 0) options.push(`--p2p-bind-port-ipv6`, `${this.p2pBindPortIpv6}`);
+    if (this.p2pUseIpv6 && this.p2pBindPortIpv6 > 0) options.push(`--p2p-bind-port-ipv6`, `${this.p2pBindPortIpv6}`);
     if (this.p2pUseIpv6) options.push(`--p2p-use-ipv6`);
     if (this.p2pIgnoreIpv4) options.push(`--p2p-ignore-ipv4`);
     if (this.p2pExternalPort > 0) options.push(`--p2p-external-port`, `${this.p2pExternalPort}`);
     if (this.allowLocalIp) options.push(`--allow-local-ip`);
-    if (this.addPeer != '') options.push('--add-peer', this.addPeer);
-    if (this.hasPriorityNodes) this.priorityNodes.forEach((node) => options.push(`--add-priority-node`, node));
+    if (!this.hasExclusiveNodes && this.hasPriorityNodes) this.priorityNodes.forEach((node) => options.push(`--add-priority-node`, node));
     if (this.hasExclusiveNodes) this.exclusiveNodes.forEach((node) => options.push(`--add-exclusive-node`, node));
+    if (!this.hasExclusiveNodes && this.hasPeers) this.peers.forEach((node) => options.push(`--add-peer`, node));
     if (this.txProxies.tor && this.txProxies.tor != '') options.push(`--tx-proxy`, this.txProxies.tor);
     if (this.txProxies.i2p && this.txProxies.i2p != '') options.push(`--tx-proxy`, this.txProxies.i2p);
     if (this.anonymousInbounds.tor != '') options.push(`--anonymous-inbound`, this.anonymousInbounds.tor);
@@ -691,12 +718,12 @@ export class DaemonSettings extends Comparable<DaemonSettings> {
     if (this.enableDnsBlocklist) options.push(`--enable-dns-blocklist`);
     if (this.noIgd) options.push(`--no-igd`);
     if (!this.noIgd && this.igd) options.push(`--igd`, this.igd);
-    if (this.outPeers >= 0) options.push(`--out-peers`, `${this.outPeers}`);
-    if (this.inPeers >= 0) options.push(`--in-peers`, `${this.inPeers}`);
+    if (this.outPeers >= -1) options.push(`--out-peers`, `${this.outPeers}`);
+    if (this.inPeers >= -1) options.push(`--in-peers`, `${this.inPeers}`);
     if (this.tosFlag >= 0) options.push(`--tos-flag`, `${this.tosFlag}`);
-    if (this.limitRate >= 0) options.push(`--limit-rate`, `${this.limitRate}`);
-    if (this.limitRateUp >= 0) options.push(`--limit-rate-up`, `${this.limitRateUp}`);
-    if (this.limitRateDown >= 0) options.push(`--limit-rate-down`, `${this.limitRateDown}`);
+    if (this.limitRate >= -1 && !(this.limitRateUp >= -1 || this.limitRateDown >= -1)) options.push(`--limit-rate`, `${this.limitRate}`);
+    if (this.limitRateUp >= -1) options.push(`--limit-rate-up`, `${this.limitRateUp}`);
+    if (this.limitRateDown >= -1) options.push(`--limit-rate-down`, `${this.limitRateDown}`);
     if (this.padTransactions) options.push(`--pad-transactions`);
     if (this.maxConnectionsPerIp >= 0) options.push(`--max-connections-per-ip`, `${this.maxConnectionsPerIp}`);
     if (this.rpcBindIp != '') options.push(`--rpc-bind-ip`, `${this.rpcBindIp}`);
@@ -715,6 +742,8 @@ export class DaemonSettings extends Comparable<DaemonSettings> {
     if (this.rpcAllowedFingerprints != '') options.push(`--rpc-allowed-fingerprints`, this.rpcAllowedFingerprints);
     if (this.rpcSslAllowChained) options.push(`--rpc-ssl-allow-chained`);
     if (this.rpcSslAllowAnyCert) options.push(`--rpc-ssl-allow-any-cert`);
+    if (this.rpcUseIpv6 && this.rpcBindIpv6Address !== '') options.push(`--rpc-bind-ipv6-address`, `${this.rpcBindIpv6Address}`);
+    if (this.rpcUseIpv6 && this.rpcRestrictedBindIpv6Address !== '') options.push(`--rpc-restricted-bind-ipv6-address`, `${this.rpcRestrictedBindIpv6Address}`);
 
     if (this.rpcPaymentAddress != '') options.push(`--rpc-payment-address`, this.rpcPaymentAddress);
     if (this.rpcPaymentDifficuly >= 0) options.push(`--rpc-payment-difficulty`, `${this.rpcPaymentDifficuly}`);

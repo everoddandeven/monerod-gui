@@ -122,25 +122,25 @@
             <small class="text-body-secondary">Maximum number of connections allowed from the same IP address</small>
           </div>
 
-          <div *ngIf="!isPortable" class="form-check form-switch col-md-6">
+          <div *ngIf="!isPortable" class="form-check form-switch col-md-4">
             <label for="start-at-login" class="form-check-label">Start at login</label>
             <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="start-at-login" [checked]="currentSettings.startAtLogin" [(ngModel)]="currentSettings.startAtLogin" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Start monero daemon at login</small>
           </div>
 
-          <div *ngIf="!isPortable" class="form-check form-switch col-md-6">
+          <div *ngIf="!isPortable" class="form-check form-switch col-md-4">
             <label for="start-minimized" class="form-check-label">Start minimized</label>
             <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="start-minimized" [checked]="currentSettings.startAtLoginMinimized" [(ngModel)]="currentSettings.startAtLoginMinimized" [ngModelOptions]="{standalone: true}">
             <br>
             <small class="text-body-secondary">Start monero daemon at login as tray icon</small>
           </div>
 
-          <div class="form-check form-switch col-md-6">
+          <div class="form-check form-switch col-md-4">
             <label for="regtest" class="form-check-label">Regtest</label>
             <input class="form-control form-check-input" type="checkbox" role="switch" id="regtest" [checked]="currentSettings.regtest" [(ngModel)]="currentSettings.regtest" [ngModelOptions]="{standalone: true}">
             <br>
-            <small class="text-body-secondary">Run in a regression testing mode</small>
+            <small class="text-body-secondary">Run monerod in a regression testing mode</small>
           </div>
 
           <div class="col-md-12">
@@ -268,13 +268,6 @@
         <div class="row gy-3">
 
           <div class="form-check form-switch col-md-6">
-            <label for="offline" class="form-check-label">Offline</label>
-            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="offline" [checked]="currentSettings.offline" (change)="OnOfflineChange()">
-            <br>
-            <small class="text-body-secondary">Do not listen for peers, nor connect to any</small>
-          </div>
-
-          <div class="form-check form-switch col-md-6">
             <label for="public-node" class="form-check-label">Public node</label>
             <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="public-node" [checked]="currentSettings.publicNode" (change)="OnPublicNodeChange()">
             <br>
@@ -288,21 +281,21 @@
             <small class="text-body-secondary">Restrict RPC to view-only commands and do not return privacy sensitive data in RPC calls</small>
           </div>
 
-          <div class="form-check form-switch col-md-6">
+          <div class="form-check form-switch col-md-4">
             <label for="confirm-external-bind" class="form-check-label">Confirm external bind</label>
             <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="confirm-external-bind" [checked]="currentSettings.confirmExternalBind" (change)="OnConfirmExternalBindChange()">
             <br>
             <small class="text-body-secondary">Confirm Bind IP is not a loopback (local) IP</small>
           </div>
 
-          <div class="form-check form-switch col-md-6">
+          <div class="form-check form-switch col-md-4">
             <label for="rpc-ignore-ipv4" class="form-check-label">Ignore IPv4</label>
             <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="rpc-ignore-ipv4" [checked]="currentSettings.rpcIgnoreIpv4" (change)="OnIgnoreIPv4Change()">
             <br>
             <small class="text-body-secondary">Ignore unsuccessful IPv4 bind for RPC</small>
           </div>
 
-          <div class="form-check form-switch col-md-6">
+          <div class="form-check form-switch col-md-4">
             <label for="disable-rpc-ban" class="form-check-label">Disable ban</label>
             <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="disable-rpc-ban" [checked]="currentSettings.disableRpcBan" (change)="OnDisableRpcBanChange()">
             <br>
@@ -321,6 +314,12 @@
             <small class="text-body-secondary">18081 for mainnet, 28081 for testnet, 38081 for stagenet</small>
           </div>
 
+        </div>
+
+        <hr class="my-4">
+
+        <div class="row g-3">
+          <h4 class="mb-3">Authentication</h4>
           <div class="col-sm-6">
             <label for="rpc-login-user" class="form-label">Username</label>
             <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="rpc-login-user" placeholder="" [(ngModel)]="rpcLoginUser" [ngModelOptions]="{standalone: true}" (change)="onRpcLoginChange()">
@@ -352,15 +351,15 @@
             <small class="text-body-secondary">Allow IPv6 for RPC</small>
           </div>
 
-          <div class="col-md-6">
+          <div *ngIf="currentSettings.rpcUseIpv6" class="col-md-6">
             <label for="rpc-bind-ipv6-address" class="form-label">Bind IPv6 address</label>
-            <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="rpc-bind-ipv6-address" placeholder="::1" [(ngModel)]="currentSettings.rpcBindIpv6Address" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings || !currentSettings.rpcUseIpv6" type="text" class="form-control" id="rpc-bind-ipv6-address" placeholder="::1" [(ngModel)]="currentSettings.rpcBindIpv6Address" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Specify IPv6 address to bind RPC server</small>
           </div>
 
-          <div class="col-md-6">
+          <div *ngIf="currentSettings.rpcUseIpv6" class="col-md-6">
             <label for="rpc-restricted-bind-ipv6-address" class="form-label">Restricted bind IPv6 address</label>
-            <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="rpc-restricted-bind-ipv6-address" placeholder="::1">
+            <input [disabled]="!canEditNodeSettings || !currentSettings.rpcUseIpv6" type="text" class="form-control" id="rpc-restricted-bind-ipv6-address" placeholder="::1">
             <small class="text-body-secondary">Specify IPv6 address to bind restricted RPC server</small>
           </div>
 
@@ -378,19 +377,19 @@
             <small class="text-body-secondary">Enable ZMQ RPC Server</small>
           </div>
 
-          <div class="col-md-6">
+          <div *ngIf="!currentSettings.noZmq" class="col-md-4">
             <label for="zmq-rpc-bind-ip" class="form-label">Bind IP</label>
             <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="zmq-rpc-bind-ip" placeholder="127.0.0.1" [(ngModel)]="currentSettings.zmqRpcBindIp" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">IP for ZMQ RPC Server to listen on</small>
           </div>
 
-          <div class="col-md-6">
+          <div *ngIf="!currentSettings.noZmq" class="col-md-2">
             <label for="zmq-rpc-bind-port" class="form-label">Bind port</label>
             <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="zmq-rpc-bind-port" placeholder="18082" [(ngModel)]="currentSettings.zmqRpcBindPort" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">18082 for mainnet, 28082 for testnet, 38082 for stagenet</small>
           </div>
 
-          <div class="col-md-6">
+          <div *ngIf="!currentSettings.noZmq" class="col-md-6">
             <label for="zmq-pub" class="form-label">ZMQ Pub</label>
             <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="zmq-pub" placeholder="tcp://ip:port or ipc://path" [(ngModel)]="currentSettings.zmqPub" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Address for ZMQ Pub</small>
@@ -409,19 +408,19 @@
             <small class="text-body-secondary">Restrict RPC to clients sending micropayment to this address</small>
           </div>
 
-          <div class="col-md-6">
+          <div class="col-md-4">
             <label for="rpc-payment-difficulty" class="form-label">Difficulty</label>
             <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="rpc-payment-difficulty" placeholder="1000" [(ngModel)]="currentSettings.rpcPaymentDifficuly" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Restrict RPC to clients sending micropayment at this difficulty</small>
           </div>
 
-          <div class="col-md-6">
+          <div class="col-md-4">
             <label for="rpc-payment-credits" class="form-label">Credits</label>
             <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="rpc-payment-credits" placeholder="100" [(ngModel)]="currentSettings.rpcPaymentCredits" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Restrict RPC to clients sending micropayment, yelds that many credits per payment</small>
           </div>
 
-          <div class="form-check form-switch col-md-6">
+          <div class="form-check form-switch col-md-4">
             <label for="rpc-payment-allow-free-loopback" class="form-check-label">Allow free loopback</label>
             <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="rpc-payment-allow-free-loopback" [checked]="currentSettings.allowLocalIp" [(ngModel)]="currentSettings.rpcPaymentAllowFreeLoopback" [ngModelOptions]="{standalone: true}">
             <br>
@@ -503,7 +502,35 @@
       <div class="col-md-12 col-lg-12">
         <h4 class="mb-3">General</h4>
         <div class="row gy-3">
-          
+
+          <div class="form-check form-switch col-md-6">
+            <label for="allow-local-ip" class="form-check-label">Allow local IP</label>
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="allow-local-ip" [checked]="currentSettings.allowLocalIp" [(ngModel)]="currentSettings.allowLocalIp" [ngModelOptions]="{standalone: true}">
+            <br>
+            <small class="text-body-secondary">Allow local ip add to peer list, mostly in debug process</small>
+          </div>
+
+          <div class="form-check form-switch col-md-6">
+            <label for="p2p-ignore-ipv4" class="form-check-label">Ignore IPv4</label>
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="p2p-ignore-ipv4" [checked]="currentSettings.p2pIgnoreIpv4" [(ngModel)]="currentSettings.p2pIgnoreIpv4">
+            <br>
+            <small class="text-body-secondary">Ignore unsuccessful IPv4 bind for P2P</small>
+          </div>
+
+          <div class="form-check form-switch col-md-6">
+            <label for="hide-my-port" class="form-check-label">Hide my port</label>
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="disable-dns-checkpoints" [checked]="currentSettings.hideMyPort" [(ngModel)]="currentSettings.hideMyPort" [ngModelOptions]="{standalone: true}">
+            <br>
+            <small class="text-body-secondary">Do not announce yourself as peerlist candidate</small>
+          </div>
+
+          <div class="form-check form-switch col-md-6">
+            <label for="offline" class="form-check-label">Offline</label>
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="offline" [checked]="currentSettings.offline" (change)="OnOfflineChange()">
+            <br>
+            <small class="text-body-secondary">Do not listen for peers, nor connect to any</small>
+          </div>
+
           <div class="form-check form-switch col-md-6">
             <label for="no-igd" class="form-check-label">No IGD</label>
             <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="no-igd" [checked]="currentSettings.noIgd" [(ngModel)]="currentSettings.noIgd" [ngModelOptions]="{standalone: true}">
@@ -520,40 +547,19 @@
             </select>
           </div>
 
-          <div class="form-check form-switch col-md-6">
-            <label for="allow-local-ip" class="form-check-label">Allow local IP</label>
-            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="allow-local-ip" [checked]="currentSettings.allowLocalIp" [(ngModel)]="currentSettings.allowLocalIp" [ngModelOptions]="{standalone: true}">
-            <br>
-            <small class="text-body-secondary">Allow local ip add to peer list, mostly in debug process</small>
-          </div>
-
-          <div class="form-check form-switch col-md-6">
-            <label for="p2p-ignore-ipv4" class="form-check-label">Ignore IPv4</label>
-            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="p2p-ignore-ipv4" [checked]="currentSettings.p2pIgnoreIpv4" [(ngModel)]="currentSettings.p2pIgnoreIpv4">
-            <br>
-            <small class="text-body-secondary">Ignore unsuccessful IPv4 bind for P2P</small>
-          </div>
-
-          <div class="form-check form-switch col-md-12">
-            <label for="hide-my-port" class="form-check-label">Hide my port</label>
-            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="disable-dns-checkpoints" [checked]="currentSettings.hideMyPort" [(ngModel)]="currentSettings.hideMyPort" [ngModelOptions]="{standalone: true}">
-            <br>
-            <small class="text-body-secondary">Do not announce yourself as peerlist candidate</small>
-          </div>
-
           <div class="col-md-6">
             <label for="p2p-bind-ip" class="form-label">Bind IP</label>
             <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="p2p-bind-ip" placeholder="0.0.0.0" [(ngModel)]="currentSettings.p2pBindIp" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Interface for p2p network protocol</small>
           </div>
 
-          <div class="col-md-6">
+          <div class="col-md-3">
             <label for="p2p-bind-port" class="form-label">Bind port</label>
             <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="p2p-bind-port" placeholder="18080" [(ngModel)]="currentSettings.p2pBindPort" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">18080 for mainnet, 28080 for testnet, 38080 for stagenet</small>
           </div>
 
-          <div class="col-md-6">
+          <div class="col-md-3">
             <label for="p2p-external-port" class="form-label">External port</label>
             <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="p2p-external-port" placeholder="18080" [(ngModel)]="currentSettings.p2pExternalPort" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">External port for p2p network protocol (if port forwarding used with NAT)</small>
@@ -561,17 +567,55 @@
 
           <hr class="my-4">
           
-          <h4 class="mb-3">IPv6</h4>
-
+          <h4 class="mb-3">Peers</h4>
+          
           <div class="col-md-6">
+            <label for="in-peers" class="form-label">In Peers</label>
+            <input [disabled]="!canEditNodeSettings" type="number" min="-1" class="form-control" id="in-peers" placeholder="-1" [(ngModel)]="currentSettings.inPeers" [ngModelOptions]="{standalone: true}">
+            <small class="text-body-secondary">Set max number of incoming connections (nodes actively connecting to you). By default unlimited. Value -1 represents the code default.</small>
+          </div>
+                    
+          <div class="col-md-6">
+            <label for="out-peers" class="form-label">Out Peers</label>
+            <input [disabled]="!canEditNodeSettings" type="number" min="-1" class="form-control" id="out-peers" placeholder="12" [(ngModel)]="currentSettings.outPeers" [ngModelOptions]="{standalone: true}">
+            <small class="text-body-secondary">Set max number of outgoing connections to other nodes. By default 12. Value -1 represents the code default.</small>
+          </div>
+          <hr class="my-4">
+          
+          <h4 class="mb-3">Network Rate</h4>
+          
+          <div class="col-md-6">
+            <label for="limit-rate-up" class="form-label">Limit Rate Up</label>
+            <input [disabled]="!canEditNodeSettings" type="number" min="-1" class="form-control" id="limit-rate-up" placeholder="2048" [(ngModel)]="currentSettings.limitRateUp" [ngModelOptions]="{standalone: true}">
+            <small class="text-body-secondary">Set outgoing data transfer limit [kB/s]. By default 2048 kB/s. Value -1 represents the code default.</small>
+          </div>
+          
+          <div class="col-md-6">
+            <label for="limit-rate-down" class="form-label">Limit Rate Down</label>
+            <input [disabled]="!canEditNodeSettings" type="number" min="-1" class="form-control" id="limit-rate-down" placeholder="8192" [(ngModel)]="currentSettings.limitRateDown" [ngModelOptions]="{standalone: true}">
+            <small class="text-body-secondary">Set incoming data transfer limit [kB/s]. By default 8192 kB/s. Value -1 represents the code default.</small>
+          </div>
+
+          <hr class="my-4">
+          
+          <h4 class="mb-3">IPv6</h4>
+          
+          <div class="form-check form-switch col-md-12">
+            <label for="p2p-use-ipv6" class="form-check-label">Enabled</label>
+            <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="p2p-use-ipv6" [checked]="currentSettings.p2pUseIpv6" [(ngModel)]="currentSettings.p2pUseIpv6" [ngModelOptions]="{standalone: true}">
+            <br>
+            <small class="text-body-secondary">Allow IPv6 for P2P</small>
+          </div>
+
+          <div *ngIf="currentSettings.p2pUseIpv6" class="col-md-6">
             <label for="p2p-bind-ipv6-address" class="form-label">Bind IPv6 address</label>
-            <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="p2p-bind-ipv6-address" placeholder="::1" [(ngModel)]="currentSettings.p2pBindIpv6Address" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings || !currentSettings.p2pUseIpv6" type="text" class="form-control" id="p2p-bind-ipv6-address" placeholder="::1" [(ngModel)]="currentSettings.p2pBindIpv6Address" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Specify IPv6 address to bind RPC server</small>
           </div>
 
-          <div class="col-md-6">
+          <div *ngIf="currentSettings.p2pUseIpv6" class="col-md-6">
             <label for="p2p-bind-port-ipv6" class="form-label">Bind IPv6 port</label>
-            <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="p2p-bind-port-ipv6" placeholder="18080" [(ngModel)]="currentSettings.p2pBindPortIpv6" [ngModelOptions]="{standalone: true}">
+            <input [disabled]="!canEditNodeSettings || !currentSettings.p2pUseIpv6" type="number" min="0" class="form-control" id="p2p-bind-port-ipv6" placeholder="18080" [(ngModel)]="currentSettings.p2pBindPortIpv6" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">18080 for mainnet, 28080 for testnet, 38080 for stagenet</small>
           </div>
           
@@ -579,7 +623,7 @@
           
           <h4 class="mb-3">Seed Node</h4>
 
-          <div class="col-md-6">
+          <div class="col-md-8">
             <label for="seed-node-address" class="form-label">Node address</label>
             <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="seed-node-address" [(ngModel)]="seedNodeAddress" (change)="onSeedNodeChange()" [ngModelOptions]="{standalone: true}">
             <small class="text-body-secondary">Connect to a node to retrieve other nodes' addresses, and disconnect</small>
@@ -592,16 +636,56 @@
           </div>
 
           <hr class="my-4">
-          
+          <h4 class="mb-3">Peers</h4>
+
+          <div class="col-md-12">
+            <button [disabled]="!canRemovePeers || !canEditNodeSettings" id="remove-selected-peers" type="button" class="btn btn-primary" (click)="removeSelectedPeers()"><i class="bi bi-trash-fill"></i></button>
+            <br><br>
+            <table
+              [hidden]="currentSettings.peers.length === 0"
+              id="peersTable"
+              data-toggle="peersTable"
+              data-max-height="300"
+              data-card-view="true">
+              <thead>
+                <tr>
+                  <th data-field="state" data-checkbox="true">ID</th>
+                  <th data-field="address">Address</th>
+                  <th data-field="port">Port</th>
+                </tr>
+              </thead>
+            </table>
+          </div>
+
+          <div class="col-md-6">
+            <label for="add-peers-address" class="form-label">Peer address</label>
+            <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="add-peers-address" [(ngModel)]="peerAddress" [ngModelOptions]="{standalone: true}">
+            <small class="text-body-secondary">Add node to local peer list</small>
+          </div>
+
+          <div class="col-md-4">
+            <label for="add-peers-port" class="form-label">Peer port</label>
+            <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="add-peers-port" placeholder="18080" [(ngModel)]="peerPort" [ngModelOptions]="{standalone: true}">
+            <small class="text-body-secondary">Specify node port</small>
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label">Add</label>
+            <button [disabled]="!canAddPeer || !canEditNodeSettings" type="button" class="form-control btn btn-primary" (click)="addPeer()"><i class="bi bi-plus-square"></i></button>
+          </div>
+
+          <hr class="my-4">
+
           <h4 class="mb-3">Exclusive Nodes</h4>
 
           <div class="col-md-12">
             <button [disabled]="!canRemoveExclusiveNodes || !canEditNodeSettings" id="remove-selected-exclusive-node" type="button" class="btn btn-primary" (click)="removeSelectedExclusiveNodes()"><i class="bi bi-trash-fill"></i></button>
             <br><br>
             <table
+              [hidden]="currentSettings.exclusiveNodes.length === 0"
               id="exclusiveNodesTable"
               data-toggle="exclusiveNodesTable"
-              data-height="300"
+              data-max-height="300"
               data-card-view="true">
               <thead>
                 <tr>
@@ -638,9 +722,10 @@
             <button [disabled]="!canRemovePriorityNodes || !canEditNodeSettings" id="remove-selected-priority-node" type="button" class="btn btn-primary" (click)="removeSelectedPriorityNodes()"><i class="bi bi-trash-fill"></i></button>
             <br><br>
             <table
+            [hidden]="currentSettings.priorityNodes.length === 0"
               id="priorityNodesTable"
               data-toggle="priorityNodesTable"
-              data-height="300"
+              data-max-height="300"
               data-card-view="true">
               <thead>
                 <tr>
@@ -655,7 +740,7 @@
           <div class="col-md-6">
             <label for="add-priority-node-address" class="form-label">Node address</label>
             <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="add-priority-node-address" placeholder="" [(ngModel)]="priorityNodeAddress" [ngModelOptions]="{standalone: true}">
-            <small class="text-body-secondary">Specify a node to connect to only</small>
+            <small class="text-body-secondary">Specify a node to connect to only and then attempt to keep the connection open.</small>
           </div>
 
           <div class="col-md-4">
@@ -746,87 +831,87 @@
                 <small class="text-body-secondary">Synchronize the blockchain with other peers</small>
               </div>
 
-              <div class="form-check form-switch col-md-6">
+              <div *ngIf="!currentSettings.noSync" class="form-check form-switch col-md-6">
                 <label for="prune-blockchain" class="form-check-label">Prune Blockchain</label>
                 <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="prune-blockchain" [checked]="currentSettings.pruneBlockchain" [(ngModel)]="currentSettings.pruneBlockchain" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">Reduce blockchain disk usage</small>
               </div>
 
-              <div class="form-check form-switch col-md-6">
+              <div *ngIf="!currentSettings.noSync" class="form-check form-switch col-md-6">
                 <label for="sync-pruned-blocks" class="form-check-label">Sync pruned blocks</label>
                 <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="sync-pruned-blocks" [checked]="currentSettings.syncPrunedBlocks" [(ngModel)]="currentSettings.syncPrunedBlocks" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">Allow syncing from nodes with only pruned blocks</small>
               </div>
 
-              <div class="form-check form-switch col-md-6">
+              <div *ngIf="!currentSettings.noSync" class="form-check form-switch col-md-6">
                 <label for="fast-block-sync" class="form-check-label">Fast block sync</label>
                 <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="fast-block-sync" [checked]="currentSettings.fastBlockSync" [(ngModel)]="currentSettings.fastBlockSync" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">Sync up most of the way by using embedded, known block hashes</small>
               </div>
 
-              <div class="form-check form-switch col-md-6">
+              <div *ngIf="!currentSettings.noSync" class="form-check form-switch col-md-6">
                 <label for="relay-fluffly-blocks" class="form-check-label">Relay fluffy blocks</label>
                 <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="relay-fluffly-blocks" [checked]="!currentSettings.noFluffyBlocks" (change)="OnRelayFlufflyBlocksChange()">
                 <br>
                 <small class="text-body-secondary">Relay blocks as fluffy blocks</small>
               </div>
 
-              <div class="form-check form-switch col-md-6">
+              <div *ngIf="!currentSettings.noSync" class="form-check form-switch col-md-6">
                 <label for="keep-alt-blocks" class="form-check-label">Keep alternative blocks</label>
                 <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="keep-alt-blocks" [checked]="currentSettings.keepAltBlocks" [(ngModel)]="currentSettings.keepAltBlocks" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">Keep alternative blocks on restart</small>
               </div>
 
-              <div class="form-check form-switch col-md-12">
+              <div *ngIf="!currentSettings.noSync" class="form-check form-switch col-md-12">
                 <label for="sync-on-wifi" class="form-check-label">Sync on Wi-Fi</label>
                 <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="sync-on-wifi" [checked]="currentSettings.syncOnWifi" [(ngModel)]="currentSettings.syncOnWifi" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">Sync when node is connected to Wi-Fi</small>
               </div>
     
-              <div class="col-md-3">
+              <div *ngIf="!currentSettings.noSync" class="col-md-3">
                 <label for="prep-block-threads" class="form-label">Prep blocks threads</label>
                 <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="prep-block-threds" placeholder="4" [(ngModel)]="currentSettings.prepBlocksThreads" [ngModelOptions]="{standalone: true}">
                 <small class="text-body-secondary">Max number of threads to use when preparing block hashes in groups</small>
               </div>
     
-              <div class="col-md-3">
+              <div *ngIf="!currentSettings.noSync" class="col-md-3">
                   <label for="block-sync-size" class="form-label">Block sync size</label>
                   <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="block-sync-size" placeholder="" [(ngModel)]="currentSettings.blockSyncSize" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">How many blocks to sync at once during chain synchronization (0 = adaptive)</small>
               </div>
       
-              <div class="col-md-3">
+              <div *ngIf="!currentSettings.noSync" class="col-md-3">
                   <label for="block-download-max-size" class="form-label">Block download max size</label>
                   <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="block-download-max-size" placeholder="" [(ngModel)]="currentSettings.blockDownloadMaxSize" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">Set maximum size of block download queue in bytes (0 for default)</small>
               </div>
 
-              <div class="col-md-3">
+              <div *ngIf="!currentSettings.noSync" class="col-md-3">
                 <label for="fixed-difficulty" class="form-label">Fixed difficulty</label>
                 <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="fixed-difficulty" placeholder="" [(ngModel)]="currentSettings.fixedDifficulty" [ngModelOptions]="{standalone: true}">
                   <small class="text-body-secondary">Fixed difficulty used for testing (0 for default)</small>
               </div>
 
-              <div class="form-check form-switch col-md-12">
+              <div *ngIf="!currentSettings.noSync" class="form-check form-switch col-md-12">
                 <label for="sync-period-enabled" class="form-check-label">Sync Period Enabled</label>
                 <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="sync-period-enabled" [checked]="currentSettings.syncPeriodEnabled" [(ngModel)]="currentSettings.syncPeriodEnabled" [ngModelOptions]="{standalone: true}" [disabled]="currentSettings.noSync">
                 <br>
                 <small class="text-body-secondary">Enable syncing in certain hours</small>
               </div>
 
-              <div class="col-md-4">
+              <div *ngIf="!currentSettings.noSync" class="col-md-4">
                 <label for="sync-period-from" class="form-label">From</label>
                 <div class="cs-form">
                   <input [disabled]="!canEditNodeSettings" id="sync-period-from" type="time" class="form-control" value="10:05 AM" [disabled]="!currentSettings.syncPeriodEnabled" [(ngModel)]="currentSettings.syncPeriodFrom" [ngModelOptions]="{standalone: true}" />
                 </div>
               </div>
 
-              <div class="col-md-4">
+              <div *ngIf="!currentSettings.noSync" class="col-md-4">
                 <label for="sync-period-to" class="form-label">To</label>
                 <div class="cs-form">
                   <input [disabled]="!canEditNodeSettings" id="sync-period-to" type="time" class="form-control" value="10:05 AM" [disabled]="!currentSettings.syncPeriodEnabled" [(ngModel)]="currentSettings.syncPeriodTo" [ngModelOptions]="{standalone: true}"/>
@@ -835,9 +920,9 @@
 
           </div>
 
-          <hr class="my-4">
+          <hr *ngIf="!currentSettings.noSync" class="my-4">
 
-          <div class="row g-3">
+          <div *ngIf="!currentSettings.noSync" class="row g-3">
             <h4 class="mb-3">Database Sync Mode</h4>
             
             <div class="col-md-2">
@@ -886,13 +971,13 @@
           <div class="row g-3">
             <h4 class="mb-3">Mining</h4>
             
-            <div class="col-md-12">
+            <div class="col-md-10">
               <label for="mining-address" class="form-label">Address</label>
               <input [disabled]="!canEditNodeSettings" type="text" class="form-control" id="mining-address" [(ngModel)]="currentSettings.startMining" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">Specify wallet address to mining for. This must be a <strong>standard address</strong>! (aka primary address) It can be neither a subaddress nor integrated address.</small>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-2">
               <label for="mining-threads" class="form-label">Threads</label>
               <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="mining-threds" placeholder="1" [(ngModel)]="currentSettings.miningThreads" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">Specify mining threads count. By default only one thread will be used.</small>
@@ -1010,7 +1095,7 @@
           <div class="row g-3">
             <div class="form-check form-switch col-md-6">
               <label for="tor-service-enabled" class="form-check-label">Enabled</label>
-              <input (change)="onTorServiceEnabledChange()" [disabled]="!canEditNodeSettings || currentTorSettings.path === ''" class="form-control form-check-input" type="checkbox" role="switch" id="sync-period-enabled" [checked]="currentTorSettings.enabled" [(ngModel)]="currentTorSettings.enabled" [ngModelOptions]="{standalone: true}">
+              <input (change)="onTorServiceEnabledChange()" [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="sync-period-enabled" [checked]="currentTorSettings.enabled" [(ngModel)]="currentTorSettings.enabled" [ngModelOptions]="{standalone: true}">
               <br>
               <small class="text-body-secondary">Enable TOR Service</small>
             </div>
@@ -1053,7 +1138,7 @@
             <h4 class="mb-3">TOR Tx Proxy</h4>
             
             <div class="col-4">
-              <label for="tor-tx-proxy-ip" class="form-label"></label>
+              <label for="tor-tx-proxy-ip" class="form-label">Socks IP</label>
               <input (input)="onTorTxProxyChange()" [disabled]="!canEditNodeSettings || currentTorSettings.enabled" type="text" class="form-control" id="tx-proxy" placeholder="127.0.0.1" [(ngModel)]="torTxProxyIp" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">
                 Socks proxy ip.
@@ -1061,13 +1146,13 @@
             </div>
 
             <div class="col-md-2">
-              <label for="tor-tx-proxy-port" class="form-label"></label>
+              <label for="tor-tx-proxy-port" class="form-label">Socks Port</label>
               <input (change)="onTorTxProxyChange()" [disabled]="!canEditNodeSettings || currentTorSettings.enabled" type="number" min="0" class="form-control" id="tor-tx-proxy-port" placeholder="9050" [(ngModel)]="torTxProxyPort" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">Socks proxy port</small>
             </div>
 
             <div class="col-md-2">
-              <label for="tor-tx-proxy-max-connections" class="form-label"></label>
+              <label for="tor-tx-proxy-max-connections" class="form-label">Max Connections</label>
               <input (change)="onTorTxProxyChange()" [disabled]="!canEditNodeSettings || currentTorSettings.enabled" type="number" min="0" class="form-control" id="tor-tx-proxy-max-connections" placeholder="10" [(ngModel)]="torTxProxyMaxConnections" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">Max connections</small>
             </div>
@@ -1095,14 +1180,14 @@
             </div>
 
             <div class="col-md-2">
-              <label for="tor-anonymous-inbound-port" class="form-label"></label>
+              <label for="tor-anonymous-inbound-port" class="form-label">Inbound port</label>
               <input (change)="onTorAnonymousInboundChange()" [disabled]="!canEditNodeSettings || currentTorSettings.enabled" type="number" min="0" class="form-control" id="tor-anonymous-inbound-port" placeholder="28083" [(ngModel)]="torAnonymousInboundPort" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">
                 Specify inbound hidden service port for receiving incoming TOR connections
               </small>
             </div>
             
-            <div class="col-10">
+            <div class="col-8">
               <label for="tor-anonymous-inbound-forward-ip" class="form-label">Forward Ip</label>
               <input (input)="onTorAnonymousInboundChange()" [disabled]="!canEditNodeSettings || currentTorSettings.enabled" type="text" class="form-control" id="tor-anonymous-inbound-forward-ip" placeholder="127.0.0.1" [(ngModel)]="torAnonymousInboundForwardIp" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">
@@ -1117,7 +1202,7 @@
             </div>
 
             <div class="col-md-2">
-              <label for="tor-anonymous-inbound-max-connections" class="form-label"></label>
+              <label for="tor-anonymous-inbound-max-connections" class="form-label">Max connections</label>
               <input (change)="onTorAnonymousInboundChange()" [disabled]="!canEditNodeSettings || currentTorSettings.enabled" type="number" min="-1" class="form-control" id="tor-anonymous-inbound-max-connections" placeholder="10" [(ngModel)]="torAnonymousInboundMaxConnections" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">Max connections</small>
             </div>
@@ -1138,7 +1223,7 @@
           <div class="row g-3">
             <div class="form-check form-switch col-md-6">
               <label for="i2p-service-enabled" class="form-check-label">Enabled</label>
-              <input (change)="onI2pServiceEnabledChange()" [disabled]="!canEditNodeSettings || currentI2pdSettings.path === ''" class="form-control form-check-input" type="checkbox" role="switch" id="sync-period-enabled" [checked]="currentI2pdSettings.enabled" [(ngModel)]="currentI2pdSettings.enabled" [ngModelOptions]="{standalone: true}">
+              <input (change)="onI2pServiceEnabledChange()" [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="sync-period-enabled" [checked]="currentI2pdSettings.enabled" [(ngModel)]="currentI2pdSettings.enabled" [ngModelOptions]="{standalone: true}">
               <br>
               <small class="text-body-secondary">Enable I2P Service</small>
             </div>

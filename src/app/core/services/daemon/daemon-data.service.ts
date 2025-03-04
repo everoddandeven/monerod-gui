@@ -348,7 +348,7 @@ export class DaemonDataService {
     this._refreshing = true;
 
     try {
-      const settings = await this.daemonService.getSettings();
+      const settings = await this.daemonService.getSettings(false);
 
       if (this._runningOnBattery && !settings.runOnBattery) {
         await this.daemonService.stopDaemon();

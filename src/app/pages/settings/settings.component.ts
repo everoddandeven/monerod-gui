@@ -22,9 +22,11 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
 
   private removingExclusiveNodes: boolean = false;
   private removingPriorityNodes: boolean = false;
+  private removingPeers: boolean = false;
 
   private addingExclusiveNode: boolean = false;
   private addingPriorityNode: boolean = false;
+  private addingPeer: boolean = false;
   private originalSettings: DaemonSettings = new DaemonSettings();
   private _currentSettings: DaemonSettings;
   private readonly _privnetSettings: DefaultPrivnetNode2Settings = new DefaultPrivnetNode2Settings();
@@ -96,6 +98,9 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   public priorityNodeAddress: string = '';
   public priorityNodePort: number = 0;
 
+  public peerAddress: string = '';
+  public peerPort: number = 0;
+
   public seedNodeAddress: string = '';
   public seedNodePort: number = 0;
 
@@ -162,6 +167,31 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   }
 
   //#endregion
+  private get peers(): NodeInfo[] {
+    const result: { address: string, port: number }[] = [];
+
+    this.currentSettings.peers.forEach((en) => {
+      const components = en.split(":");
+
+      if (components.length !== 2) {
+        return;
+      }
+
+      const [ address, strPort ] = components;
+
+      try {
+        const port = parseInt(strPort);
+
+        result.push({ address: address, port: port });
+      }
+      catch {
+        return;
+      }
+
+    });
+
+    return result;
+  }
 
   private get exclusiveNodes(): NodeInfo[] {
     const result: { address: string, port: number }[] = [];
@@ -255,8 +285,37 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     return true;
   }
 
+  public get canAddPeer(): boolean {
+    if (this.addingPeer) {
+      return false;
+    }
+
+    if (this.peerPort <= 0) {
+      return false;
+    }
+
+    if (this.peerAddress.trim().replace(' ', '') === '' || this.peerAddress.includes(":")) {
+      return false;
+    }
+
+    if (this.peers.find((en) => en.address === this.peerAddress && en.port === this.peerPort)) {
+      return false;
+    }
+
+    return true;
+  }
+
+
   public get canRemoveExclusiveNodes(): boolean {
     if (this.removingExclusiveNodes || this.exclusiveNodes.length === 0) {
+      return false;
+    }
+
+    return true;
+  }
+
+  public get canRemovePeers(): boolean {
+    if (this.removingPeers || this.peers.length === 0) {
       return false;
     }
 
@@ -620,6 +679,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
       this.ngZone.run(() => {
         this.loadExclusiveNodesTable();
         this.loadPriorityNodesTable();
+        this.loadPeersTable();
       });
     }, 500);
   }
@@ -630,6 +690,11 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
 
   private loadPriorityNodesTable(loading: boolean = false): void {
     this.loadTable('priorityNodesTable', this.priorityNodes, loading);
+  }
+
+  
+  private loadPeersTable(loading: boolean = false): void {
+    this.loadTable('peersNodesTable', this.priorityNodes, loading);
   }
 
   public onSeedNodeChange() {
@@ -1161,6 +1226,45 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     this.loadExclusiveNodesTable();
 
     this.removingExclusiveNodes = false;
+  }
+
+  public removeSelectedPeers(): void {
+    if (!this.canRemovePeers) {
+      return;
+    }
+
+    this.removingPeers = true;
+
+    const removed = this.removeTableSelection<NodeInfo>('peersTable', 'address');
+    
+    removed.forEach((r) => {
+      const node = r.port >= 0 ? `${r.address}:${r.port}` : r.address;
+      this._currentSettings.removePeer(node);
+    });
+    
+    this.loadPeersTable();
+
+    this.removingPeers = false;
+  }
+
+  public addPeer(): void {
+    if (!this.canAddPeer) {
+      return;
+    }
+
+    this.addingPeer = true;
+
+    try {
+      const node = `${this.peerAddress}:${this.peerPort}`;
+    
+      this._currentSettings.addPeer(node);
+      this.loadPeersTable();
+    }
+    catch (error: any) {
+      console.error(error);
+    }
+
+    this.addingPeer = false;
   }
 
   public addPriorityNode(): void {

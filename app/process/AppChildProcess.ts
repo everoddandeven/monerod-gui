@@ -219,7 +219,7 @@ export class AppChildProcess {
 
     process.once('close', () => {
       this._running = false;
-      this._process = undefined;
+      //this._process = undefined;
     });
 
     await promise;
