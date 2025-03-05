@@ -3,9 +3,17 @@ import { AppChildProcess } from "./AppChildProcess";
 import * as fs from 'fs';
 import * as path from 'path';
 import { InstallationInfo } from "./InstallationInfo";
+import { TorControlClient } from "./TorControlClient";
 
 
 export interface TorInstallationInfo extends InstallationInfo { configFile?: string; isRunning?: boolean; };
+
+export interface TorProcessParameters {
+  path: string;
+  createConfig?: boolean;
+  port?: number;
+  rpcPort?: number;
+};
 
 export class TorProcess extends AppChildProcess {
 
@@ -25,7 +33,6 @@ export class TorProcess extends AppChildProcess {
     return path.join(this.userDataPath, 'tor', 'hidden_services', 'monero', 'hostname');
   }
 
-
   private static get defaultFlags(): string[] {
     const flags: string[] = [];
 
@@ -34,10 +41,24 @@ export class TorProcess extends AppChildProcess {
     return flags;
   }
 
-  constructor(path: string, port?: number, rpcPort?: number) {
-    TorProcess.createDefaultConfigFile({port, rpcPort});
+  private readonly _control: TorControlClient;
 
+  public get control(): TorControlClient {
+    return this._control;
+  }
+
+  private readonly _createConfig: boolean;
+  private readonly _port?: number;
+  private readonly _rpcPort?: number;
+  private readonly _torControlPassword: string = 'test';
+
+  constructor({ path, port, rpcPort, createConfig } : TorProcessParameters) {
     super({ command: path, args: TorProcess.defaultFlags, isExe: true });
+
+    this._createConfig = typeof createConfig === 'boolean' ? createConfig : true;
+    this._port = port;
+    this._rpcPort = rpcPort;
+    this._control = new TorControlClient(9051, this._torControlPassword);
   }
 
   public override async start(): Promise<void> {
@@ -50,6 +71,12 @@ export class TorProcess extends AppChildProcess {
     }
 
     console.log(message);
+
+    const controlPassword = await this.hashPassword(this._torControlPassword);
+    const port = this._port;
+    const rpcPort = this._rpcPort;
+    if (this._createConfig) TorProcess.createDefaultConfigFile({port, rpcPort, controlPassword});
+
 
     const promise = new Promise<void>((resolve, reject) => {
       let stdOutFound = false;
@@ -95,7 +122,7 @@ export class TorProcess extends AppChildProcess {
     console.log(`Started tor process ${this._process?.pid}`);
   }
 
-  static async isValidPath(executablePath: string): Promise<boolean> {
+  public static async isValidPath(executablePath: string): Promise<boolean> {
     // Verifica se il file esiste
     if (!fs.existsSync(executablePath)) {
       return false;
@@ -134,6 +161,87 @@ export class TorProcess extends AppChildProcess {
       });  
     });
   }
+
+  public async getVersion(): Promise<string> {
+    const proc = new AppChildProcess({
+      command: this._command,
+      args: [ '--version' ],
+      isExe: this._isExe
+    });
+
+    const promise = new Promise<string>((resolve, reject) => {
+      proc.onError((err: Error) => {
+        console.log("TorProcess.getVersion(): proc.onError():");
+        console.error(err);
+        reject(err)
+      });
+      
+      proc.onStdErr((err: string) => {
+        console.log("TorProcess.getVersion(): proc.onStdErr()");
+        console.error(err);
+        reject(new Error(err));
+      });
+
+      proc.onStdOut((version: string) => {
+        if (!version.includes('Tor version ')) {
+          return;
+        }
+
+        const m = version.match(/Tor version (\d+\.\d+\.\d+\.\d+)/);
+
+        if (!m) {
+          reject(new Error('Could not parse tor version'));
+          return;
+        }
+
+        const v = m[1];
+
+        console.log("TorProcess.getVersion(): " + v);
+        resolve(v);
+      });
+    });
+
+    console.log("TorProcess.getVersion(): Before proc.start()");
+    await proc.start();
+    console.log("TorProcess.getVersion(): After proc.start()");
+
+    return await promise;
+  }
+
+  public async hashPassword(password: string): Promise<string> {
+    const proc = new AppChildProcess({
+      command: this._command,
+      args: [ '--hash-password', password ],
+      isExe: this._isExe
+    });
+
+    const promise = new Promise<string>((resolve, reject) => {
+      proc.onError((err: Error) => {
+        console.log("TorProcess.hashPassword(): proc.onError():");
+        console.error(err);
+        reject(err)
+      });
+      
+      proc.onStdErr((err: string) => {
+        console.log("TorProcess.hashPassword(): proc.onStdErr()");
+        console.error(err);
+        reject(new Error(err));
+      });
+
+      proc.onStdOut((hashedPassword: string) => {
+        console.log("TorProcess.hashPassword(): " + hashedPassword);
+        resolve(hashedPassword);
+      });
+    });
+
+    console.log("TorProcess.getVersion(): Before proc.start()");
+    await proc.start();
+    console.log("TorProcess.getVersion(): After proc.start()");
+
+    return await promise;
+  }
+
+  // #region Static Utilities
 
   public static async detectInstalled(): Promise<TorInstallationInfo | undefined> {
     if (this.isLinux) {
@@ -195,9 +303,9 @@ export class TorProcess extends AppChildProcess {
 
   }
   
-  private static createDefaultConfigFile(options: { port?: number, rpcPort?: number }): void {
+  private static createDefaultConfigFile(options: { port?: number, rpcPort?: number, controlPassword?: string; }): void {
     this.createConfigDir();
-    const { port, rpcPort } = options;
+    const { port, rpcPort, controlPassword } = options;
     let content = `DataDirectory ${this.defaultDataDirectory}
 
 ## To send all messages to stderr:
@@ -220,7 +328,16 @@ HiddenServicePort ${rpcPort} 127.0.0.1:${rpcPort}    # interface for wallet RPC
 `;
     }
 
+    if (controlPassword !== undefined) {
+      content = `${content}
+ControlPort 9051
+HashedControlPassword ${controlPassword}
+CookieAuthentication 0
+`;
+    }
+
     fs.writeFileSync(this.defaultConfigPath, content);
   }
   
+  // #endregion
 }

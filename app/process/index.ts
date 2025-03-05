@@ -8,3 +8,4 @@ export { MonerodProcess } from "./MonerodProcess";
 export { PrivateTestnet } from "./PrivateTestnet";
 export * from "./I2pdProcess";
 export * from "./TorProcess";
+export { TorControlClient, TorControlCommand } from "./TorControlClient";

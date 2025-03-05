@@ -247,9 +247,143 @@ export class TorDaemonService {
 
     return `${address},127.0.0.1:${port}`;
   }
+
+  public async getVersion(): Promise<string> {
+    const settings = this.loaded ? this.settings : await this.loadSettings();
+    if (settings.path === '') throw new Error("Tor not configured");
+    return await new Promise<string>((resolve, reject) => {
+      window.electronAPI.getTorVersion(settings.path, (result: { version?: string; error?: string; }) => {
+        const { version, error } = result;
+
+        if (error) reject(new Error(error));
+        else if (version) resolve(version);
+        else reject(new Error("Unkown error"));
+      })
+    });
+  }
+
+  public async getLatestVersion(): Promise<string> {
+    throw new Error("Not implemented");
+  }
+
+  public async authenticate(): Promise<boolean> {
+    return await new Promise<boolean>((resolve, reject) => {
+      window.electronAPI.invokeTorControlCommand('authenticate', (res: { result?: any; error?: string; }) => {
+        const { error, result } = res;
+
+        if (error) reject(new Error(error));
+        else if (result) resolve(result);
+        else reject(new Error("Unknown error"));
+      });
+    });
+  }
+
+  public async getCircuitStatus(): Promise<string> {
+    return await new Promise<string>((resolve, reject) => {
+      window.electronAPI.invokeTorControlCommand('getCircuitStatus', (res: { result?: any; error?: string; }) => {
+        const { error, result } = res;
+
+        if (error) reject(new Error(error));
+        else if (result) resolve(result);
+        else reject(new Error("Unknown error"));
+      });
+    });
+  }
+
+  public async getCircuitEstablished(): Promise<string> {
+    return await new Promise<string>((resolve, reject) => {
+      window.electronAPI.invokeTorControlCommand('getCircuitEstablished', (res: { result?: any; error?: string; }) => {
+        const { error, result } = res;
+
+        if (error) reject(new Error(error));
+        else if (result) resolve(result);
+        else reject(new Error("Unknown error"));
+      });
+    });
+  }
+
+  public async getBootstrapPhase(): Promise<TorBootstrapPhase> {
+    return await new Promise<TorBootstrapPhase>((resolve, reject) => {
+      window.electronAPI.invokeTorControlCommand('getBootstrapPhase', (res: { result?: any; error?: string; }) => {
+        const { error, result } = res;
+
+        if (error) reject(new Error(error));
+        else if (result) resolve(TorBootstrapPhase.parse(result));
+        else reject(new Error("Unknown error"));
+      });
+    });
+  }
+
+  public async getNetworkStatus(): Promise<string> {
+    return await new Promise<string>((resolve, reject) => {
+      window.electronAPI.invokeTorControlCommand('getNetworkStatus', (res: { result?: any; error?: string; }) => {
+        const { error, result } = res;
+
+        if (error) reject(new Error(error));
+        else if (result) resolve(result);
+        else reject(new Error("Unknown error"));
+      });
+    });
+  }
+
+  public async changeIdentity(): Promise<string> {
+    return await new Promise<string>((resolve, reject) => {
+      window.electronAPI.invokeTorControlCommand('changeIdentity', (res: { result?: any; error?: string; }) => {
+        const { error, result } = res;
+
+        if (error) reject(new Error(error));
+        else if (result) resolve(result);
+        else reject(new Error("Unknown error"));
+      });
+    });
+  }
+
+  public async reload(): Promise<string> {
+    return await new Promise<string>((resolve, reject) => {
+      window.electronAPI.invokeTorControlCommand('reload', (res: { result?: any; error?: string; }) => {
+        const { error, result } = res;
+
+        if (error) reject(new Error(error));
+        else if (result) resolve(result);
+        else reject(new Error("Unknown error"));
+      });
+    });
+  }
 }
 
 interface TorStd {
   out: EventEmitter<string>;
   err: EventEmitter<string>;
 };
+
+export class TorBootstrapPhase {
+  public level: 'NOTICE' | 'WARN' | 'ERROR';
+  public progress?: number;
+  public summary?: string;
+
+  constructor(l: 'NOTICE' | 'WARN' | 'ERROR', p?: number, s?: string) {
+    this.level = l;
+    this.progress = p;
+    this.summary = s;
+  }
+
+  public static parse(value: string): TorBootstrapPhase {
+    if (!value.startsWith('status/bootstrap-phase=')) throw new Error("Invalid value provided: " + value);
+
+    const v = value.split(" ");
+    const l = v[0].split("=")[1] as 'NOTICE' | 'WARN' | 'ERROR';
+
+    const fp = v.find((c) => c.startsWith("PROGRESS="));
+    let p: number | undefined;
+
+    if (fp) p = Number(fp.split("=")[1]);
+
+    const fs = v.find((c) => c.startsWith("SUMMARY="));
+    let s: string | undefined;
+    if (fs) s = fs.split("=")[1];
+
+    const phase = new TorBootstrapPhase(l, p, s);
+
+    return phase;
+  }
+}

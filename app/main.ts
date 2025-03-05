@@ -9,7 +9,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
-import { AppMainProcess, I2pdProcess, MonerodProcess, PrivateTestnet, TorProcess } from './process';
+import { AppMainProcess, I2pdProcess, MonerodProcess, PrivateTestnet, TorControlCommand, TorProcess } from './process';
 import { BatteryUtils, FileUtils, NetworkUtils } from './utils';
 import { MoneroI2pdProcess } from './process/I2pdProcess';
 const appName = 'Monero Daemon';
@@ -305,6 +305,19 @@ async function getMonerodVersion(monerodFilePath: string): Promise<void> {
   catch(error: any) {
     const err = (error instanceof Error) ? error.message : `${error}`;
     win?.webContents.send('monero-version', { error: err });
+  }
+}
+
+async function getTorVersion(path: string): Promise<void> {
+  const proc = new TorProcess({ path, createConfig: false });
+
+  try {
+    const version = await proc.getVersion();
+    win?.webContents.send('tor-version', { version });
+  }
+  catch(error: any) {
+    const err = (error instanceof Error) ? error.message : `${error}`;
+    win?.webContents.send('tor-version', { error: err });
   }
 }
 
@@ -663,7 +676,7 @@ try {
     else {
       try {
         //torProcess = new TorProcess({ i2pdPath: path, flags, isExe: true });
-        torProcess = new TorProcess(path, port, rpcPort);
+        torProcess = new TorProcess({ path, port, rpcPort });
         await torProcess.start();
         torProcess.onStdOut((out: string) => win?.webContents.send('on-tor-stdout', out));
         torProcess.onStdErr((out: string) => win?.webContents.send('on-tor-stderr', out));
@@ -703,6 +716,17 @@ try {
     }
 
     win?.webContents.send(eventId, err);
+  });
+
+  ipcMain.handle('invoke-tor-control-command', async (event: IpcMainInvokeEvent, params: { eventId: string, command: TorControlCommand }) => {
+    const { eventId, command } = params;
+    try {
+      if (!torProcess) throw new Error("Tor is not running");
+      win?.webContents.send(eventId, await torProcess.control.invokeCommand(command));
+    }
+    catch (error: any) {
+      win?.webContents.send(eventId, { error: error instanceof Error ? error.message : `${error}` });
+    }
   });
 
   ipcMain.handle('is-on-battery-power', async (event: IpcMainInvokeEvent, params: { eventId: string; }) => {
@@ -790,6 +814,10 @@ try {
 
   ipcMain.handle('get-monero-version', (event: IpcMainInvokeEvent, configFilePath: string) => {
     getMonerodVersion(configFilePath);
+  });
+
+  ipcMain.handle('get-tor-version', (event: IpcMainInvokeEvent, configFilePath: string) => {
+    getTorVersion(configFilePath);
   });
 
   // Gestione IPC

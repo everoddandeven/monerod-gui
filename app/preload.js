@@ -70,6 +70,21 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('on-tor-stderr', handlerStdErr)
     ipcRenderer.on('on-tor-stdout', handlerStdOut);
   },
+  invokeTorControlCommand: (command, callback) => {
+    const eventId = `on-invoke-tor-control-command-${newId()}`;
+    const handler = (event, result) => callback(result);
+
+    ipcRenderer.once(eventId, handler);
+    ipcRenderer.invoke('invoke-tor-control-command', { eventId, command });
+  },
+  getTorVersion: (torPath, callback) => {
+    const handler = (event, result) => {
+      callback(result);
+    };
+
+    ipcRenderer.once('tor-version', handler);
+    ipcRenderer.invoke('get-tor-version', torPath);
+  },
   checkValidI2pdPath: (path, callback) => {
     const eventId = `on-check-valid-i2pd-path-${newId()}`;
 
@@ -221,7 +236,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.once('on-monitor-monerod', handler);
     ipcRenderer.invoke('monitor-monerod');
   },
-  
   unsubscribeOnMonerodStarted: () => {
     ipcRenderer.removeAllListeners('monerod-started');
   },
@@ -252,7 +266,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.once('monero-version', handler);
     ipcRenderer.invoke('get-monero-version', monerodPath);
   },
-
   downloadMonerod: (downloadUrl, destination, progress, complete, error) => {
     const progressHandler = (event, result) => progress(result);
     let errorHandler, completeHandler;

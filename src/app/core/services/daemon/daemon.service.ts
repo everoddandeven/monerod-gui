@@ -297,8 +297,9 @@ export class DaemonService {
     const result = await db.get(this.storeName, 1);
     if (result) {
       const settings = DaemonSettings.parse(result);
+      const running = await this.isRunning();
 
-      if (checkValidPath && settings.monerodPath != '' && !await this.checkValidMonerodPath(settings.monerodPath)) {
+      if (!running && checkValidPath && settings.monerodPath != '' && !await this.checkValidMonerodPath(settings.monerodPath)) {
         settings.monerodPath = '';
       }
       

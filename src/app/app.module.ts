@@ -29,6 +29,7 @@ import { NetworkModule } from './pages/network/network.module';
 import { PeersModule } from './pages/peers/peers.module';
 import { AboutModule } from './pages/about/about.module';
 import { I2pWebconsoleModule } from './pages/i2p-webconsole/i2p-webconsole.module';
+import { TorControlModule } from './pages/tor-control/tor-control.module';
 
 // AoT requires an exported function for factories
 const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new TranslateHttpLoader(http, './assets/i18n/', '.json');
@@ -53,6 +54,7 @@ const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new Transl
         NetworkModule,
         AboutModule,
         I2pWebconsoleModule,
+        TorControlModule,
         TranslateModule,
         AppRoutingModule,
         TranslateModule.forRoot({

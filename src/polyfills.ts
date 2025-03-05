@@ -64,6 +64,7 @@ interface ProcessInfo {
   elapsed: number;
   timestamp: number;
 };
+type TorControlCommand = 'authenticate' | 'getVersion' | 'getCircuitStatus' | 'getNetworkStatus' | 'changeIdentity' | 'reload' | 'getBootstrapPhase' | 'getCircuitEstablished';
 
 declare global {
   interface Window {
@@ -95,7 +96,8 @@ declare global {
       checkValidTorPath: (path: string, callback: (valid: boolean) => void) => void;
       onTorClose: (callback: (code: number) => void) => void;
       getTorHostname: (callback: (result: { hostname?: string; error?: string; }) => void) => void;
-
+      getTorVersion: (path: string, callback: (result: { version?: string; error?: string; }) => void) => void;
+      invokeTorControlCommand: (command: TorControlCommand, callback: (res: { result?: any; error?: string; }) => void) => void;
       isWifiConnected: (callback: (connected: boolean) => void) => void;
 
       selectFolder: (callback: (path: string) => void) => void;

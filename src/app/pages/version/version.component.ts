@@ -2,7 +2,7 @@ import { AfterViewInit, Component, NgZone } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { SimpleBootstrapCard } from '../../shared/utils';
-import { DaemonDataService, ElectronService, MoneroInstallerService } from '../../core/services';
+import { DaemonDataService, ElectronService, MoneroInstallerService, TorDaemonService } from '../../core/services';
 import { DaemonSettings, DaemonVersion } from '../../../common';
 import { StringUtils } from '../../core/utils';
 
@@ -15,9 +15,29 @@ import { StringUtils } from '../../core/utils';
 export class VersionComponent implements AfterViewInit {
   public readonly links: NavbarLink[];
   public cards: SimpleBootstrapCard[];
+  public torCards: SimpleBootstrapCard[];
   public currentVersion?: DaemonVersion;
   public latestVersion?: DaemonVersion;
+  public currentTorVersion?: string;
+  public latestTorVersion?: string;
   public settings: DaemonSettings = new DaemonSettings();
+  public loading: boolean = true;
+
+  public checkingLatestVersion: boolean = false;
+  public upgradeSuccess: boolean = false;
+  public upgradeError: string = '';
+  public downloadStatus : string = '';
+  
+  public checkingLatestTorVersion: boolean = false;
+  public upgradeTorSuccess: boolean = false;
+  public upgradeTorError: string = '';
+  public downloadTorStatus : string = '';
+
+  public get downloadProgress(): string {
+    const ratio = this.moneroInstaller.installing ? this.moneroInstaller.progress.progress : 0;
+
+    return `${ratio <= 100 ? ratio.toFixed(2) : 100} %`;
+  }
 
   public get configured(): boolean {
     return this.settings.monerodPath != '';
@@ -56,12 +76,27 @@ export class VersionComponent implements AfterViewInit {
     return 'Check Updates';
   }
 
-  constructor(private daemonData: DaemonDataService, private daemonService: DaemonService, private electronService: ElectronService, private moneroInstaller: MoneroInstallerService, private ngZone: NgZone) {
+  public get upgrading(): boolean {
+    return this.moneroInstaller.upgrading;
+  }
+
+  public get installing(): boolean {
+    return this.moneroInstaller.installing;
+  }
+
+  constructor(
+    private daemonData: DaemonDataService, private daemonService: DaemonService, 
+    private electronService: ElectronService, private moneroInstaller: MoneroInstallerService, 
+    private torService: TorDaemonService, private ngZone: NgZone) {
     this.links = [
-      new NavbarLink('pills-monero-tab', '#pills-monero', 'pills-monero', true, 'Monero')
+      new NavbarLink('pills-monero-tab', '#pills-monero', 'pills-monero', true, 'Monero', false, false),
+      new NavbarLink('pills-tor-tab', '#pills-tor', 'pills-tor', false, 'TOR', false, false)
     ];
     this.cards = this.createCards();
+    this.torCards = this.createTorCards();
   }
+
+  // #region Cards
 
   private createCards(): SimpleBootstrapCard[] {
     return [
@@ -77,20 +112,31 @@ export class VersionComponent implements AfterViewInit {
     ];
   }
 
+  private createTorCards(): SimpleBootstrapCard[] {
+    return [
+      new SimpleBootstrapCard('Current TOR version', this.currentTorVersion ? this.currentTorVersion : 'Not found', this.loading || this.installing),
+      new SimpleBootstrapCard('Latest TOR version', this.latestTorVersion ? this.latestTorVersion : 'Error', this.loading)
+    ];
+  }
+
+  // #endregion
+
   public ngAfterViewInit(): void {
     this.load()
       .then(() => {
         this.cards = this.createCards();
+        this.torCards = this.createTorCards();
       })
       .catch((error: any) => {
         console.error(error);
         this.currentVersion = undefined;
         this.latestVersion = undefined
+        this.currentTorVersion = undefined;
+        this.latestTorVersion = undefined;
         this.cards = this.createErrorCards();
+        this.torCards = this.createTorCards();
       });
   }
-
-  public loading: boolean = true;
 
   private async refreshCurrentVersion(): Promise<void> {
     try {
@@ -112,6 +158,26 @@ export class VersionComponent implements AfterViewInit {
     }
   }
 
+  private async refreshCurrentTorVersion(): Promise<void> {
+    try {
+      this.currentTorVersion = await this.torService.getVersion();
+    }
+    catch(error: any) {
+      console.error(error);
+      this.currentTorVersion = undefined;
+    }
+  }
+
+  private async refreshLatestTorVersion(force: boolean = false): Promise<void> {
+    try {
+      this.latestTorVersion = await this.torService.getLatestVersion();
+    }
+    catch(error: any) {
+      console.error(error);
+      this.latestTorVersion = undefined;
+    }
+  }
+
   private refreshCards(error: boolean = false): void {
     if (error) {
       this.cards = this.createErrorCards();
@@ -119,6 +185,7 @@ export class VersionComponent implements AfterViewInit {
     }
 
     this.cards = this.createCards();
+    this.torCards = this.createTorCards();
   }
 
   public async load(): Promise<void> {
@@ -129,17 +196,19 @@ export class VersionComponent implements AfterViewInit {
         this.settings = await this.daemonService.getSettings();
         await this.refreshLatestVersion();
         await this.refreshCurrentVersion();
+        await this.refreshCurrentTorVersion();
+        await this.refreshLatestTorVersion();
       }
       catch(error: any) {
         console.error(error);
         this.cards = this.createErrorCards();
+        this.torCards = this.createTorCards();
+
       }
   
       this.loading = false;
     });
   }
-
-  public checkingLatestVersion: boolean = false;
 
   public async checkLatestVersion(): Promise<void> {
     if (this.checkingLatestVersion) return;
@@ -149,25 +218,6 @@ export class VersionComponent implements AfterViewInit {
 
     setTimeout(() => { this.checkingLatestVersion = false; this.refreshCards() }, 500);
   }
-
-  public get upgrading(): boolean {
-    return this.moneroInstaller.upgrading;
-  }
-
-  public get installing(): boolean {
-    return this.moneroInstaller.installing;
-  }
-
-  public upgradeSuccess: boolean = false;
-  public upgradeError: string = '';
-  
-  public get downloadProgress(): string {
-    const ratio = this.moneroInstaller.installing ? this.moneroInstaller.progress.progress : 0;
-
-    return `${ratio <= 100 ? ratio.toFixed(2) : 100} %`;
-  }
-
-  public downloadStatus : string = '';
 
   public async upgrade(): Promise<void> {
     if (this.upgrading || this.installing) {
@@ -216,5 +266,18 @@ export class VersionComponent implements AfterViewInit {
       }
 
     }
+  }
+
+  public async checkLatestTorVersion(): Promise<void> {
+    if (this.checkingLatestTorVersion) return;
+
+    this.checkingLatestTorVersion = true;
+    await this.refreshLatestVersion(true);
+
+    setTimeout(() => { this.checkingLatestTorVersion = false; this.refreshCards() }, 500);
+  }
+
+  public async upgradeTor(): Promise<void> {
+    throw new Error("Not implemented");
   }
 }
