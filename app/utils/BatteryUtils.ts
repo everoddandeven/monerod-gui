@@ -1,8 +1,9 @@
 import * as os from 'os';
 import { exec, ExecException } from "child_process";
 import { powerMonitor } from "electron";
+import { Battery } from "node-battery-ts";
 
-const batteryLevel = require('battery-level');
+//const batteryLevel = require('battery-level');
 
 export abstract class BatteryUtils {
   
@@ -31,7 +32,7 @@ export abstract class BatteryUtils {
 
   public static async getLevel(): Promise<number> {
     try {
-      return batteryLevel();
+      return await Battery.getLevel();
     }
     catch(error: any) {
       console.error(error);

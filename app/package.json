@@ -12,10 +12,9 @@
   "dependencies": {
     "adm-zip": "^0.5.16",
     "applescript": "^1.0.0",
-    "axios": "^1.8.1",
-    "battery-level": "^3.0.0",
-    "net": "^1.0.2",
+    "axios": "^1.8.2",
     "network": "^0.7.0",
+    "node-battery-ts": "^1.0.0",
     "os": "^0.1.2",
     "pidusage": "^4.0.0",
     "tar": "^7.4.3",

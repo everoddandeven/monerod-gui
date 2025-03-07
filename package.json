@@ -128,7 +128,7 @@
     "@types/unbzip2-stream": "1.4.3",
     "@typescript-eslint/eslint-plugin": "8.26.0",
     "@typescript-eslint/parser": "8.26.0",
-    "axios": "1.8.1",
+    "axios": "1.8.2",
     "conventional-changelog-cli": "5.0.0",
     "electron": "35.0.0",
     "electron-builder": "25.1.8",
