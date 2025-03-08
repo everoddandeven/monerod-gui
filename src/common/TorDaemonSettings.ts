@@ -18,7 +18,7 @@ export class TorDaemonSettings extends Comparable<TorDaemonSettings> {
   }
 
   public static parse(obj: any): TorDaemonSettings {
-    const { allowIncomingConnections, txProxyEnabled, enabled, path, outproxy, proxyAllNetConnections } = obj;
+    const { allowIncomingConnections, txProxyEnabled, enabled, path, proxyAllNetConnections } = obj;
 
     const result = new TorDaemonSettings();
 

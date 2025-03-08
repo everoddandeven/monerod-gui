@@ -303,7 +303,7 @@ export class TorDaemonService {
         const { error, result } = res;
 
         if (error) reject(new Error(error));
-        else if (result) resolve(result);
+        else if (result) resolve(result as boolean);
         else reject(new Error("Unknown error"));
       });
     });
@@ -315,7 +315,7 @@ export class TorDaemonService {
         const { error, result } = res;
 
         if (error) reject(new Error(error));
-        else if (result) resolve(result);
+        else if (result) resolve(result as string);
         else reject(new Error("Unknown error"));
       });
     });
@@ -354,7 +354,7 @@ export class TorDaemonService {
         const { error, result } = res;
 
         if (error) reject(new Error(error));
-        else if (result) resolve(TorBootstrapPhase.parse(result));
+        else if (result) resolve(TorBootstrapPhase.parse(result as string));
         else reject(new Error("Unknown error"));
       });
     });
@@ -366,7 +366,7 @@ export class TorDaemonService {
         const { error, result } = res;
 
         if (error) reject(new Error(error));
-        else if (result) resolve(result);
+        else if (result) resolve(result as string);
         else reject(new Error("Unknown error"));
       });
     });
@@ -383,7 +383,7 @@ export class TorDaemonService {
           const { error, result } = res;
   
           if (error) reject(new Error(error));
-          else if (result) resolve(result);
+          else if (result) resolve(result as string);
           else reject(new Error("Unknown error"));
         });
       });
@@ -447,7 +447,7 @@ export class TorDaemonService {
           const { error, result } = res;
   
           if (error) reject(new Error(error));
-          else if (result) resolve(result);
+          else if (result) resolve(result as string);
           else reject(new Error("Unknown error"));
         });
       });
@@ -469,7 +469,7 @@ export class TorDaemonService {
         const { error, result } = res;
 
         if (error) reject(new Error(error));
-        else if (result) resolve(result);
+        else if (result) resolve(result as string);
         else reject(new Error("Unknown error"));
       });
     });
@@ -481,7 +481,7 @@ export class TorDaemonService {
         const { error, result } = res;
 
         if (error) reject(new Error(error));
-        else if (result) resolve(result);
+        else if (result) resolve(result as string);
         else reject(new Error("Unknown error"));
       });
     });

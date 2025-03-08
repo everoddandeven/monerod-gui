@@ -211,5 +211,14 @@ export class TorControlComponent extends BasePageComponent implements AfterViewI
     }
   }
 
+  public async clearDnsCache(): Promise<void> {
+    try {
+      const result = await this.torService.clearDnsCache();
+      console.log('clear dns cache tor result: ', result);
+    }
+    catch (error: any) {
+      console.error(error);
+    }
+  }
   // #endregion
 }
