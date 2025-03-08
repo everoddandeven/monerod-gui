@@ -134,6 +134,8 @@ export class I2pDaemonService {
       window.electronAPI.onI2pdClose((code: number) => {
         console.log(code);
         this._running = false;
+        this._stopping = false;
+        this._starting = false;
         this.onStop.emit();
       });
 

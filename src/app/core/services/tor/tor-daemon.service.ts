@@ -261,6 +261,7 @@ export class TorDaemonService {
 
   public async getAnonymousInbound(): Promise<string> {
     try {
+      if (!this.settings.allowIncomingConnections) return '';
       const address = await this.getHostname();
       const { port } = this.settings;
   

@@ -655,8 +655,8 @@ try {
     }
   });
 
-  ipcMain.handle('start-tor', async (event: IpcMainInvokeEvent, params: { eventId: string; path: string; port?: number; rpcPort?: number; }) => {
-    const { eventId, path, port, rpcPort } = params;
+  ipcMain.handle('start-tor', async (event: IpcMainInvokeEvent, params: { eventId: string; path: string; port?: number; rpcPort?: number; allowIncomingConnections: boolean; }) => {
+    const { eventId, path, port, rpcPort, allowIncomingConnections } = params;
     
     let error: string | undefined = undefined;
 
@@ -669,7 +669,9 @@ try {
     else {
       try {
         //torProcess = new TorProcess({ i2pdPath: path, flags, isExe: true });
-        torProcess = new TorProcess({ path, port, rpcPort });
+
+        if (allowIncomingConnections) torProcess = new TorProcess({ path, port, rpcPort });
+        else torProcess = new TorProcess({ path });
         await torProcess.start();
         torProcess.onStdOut((out: string) => win?.webContents.send('on-tor-stdout', out));
         torProcess.onStdErr((out: string) => win?.webContents.send('on-tor-stderr', out));
