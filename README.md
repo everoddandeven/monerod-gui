@@ -8,10 +8,7 @@
 [![License][license-badge]](LICENSE.md)
 [![Lint Test](https://github.com/everoddandeven/monerod-gui/actions/workflows/lint.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/lint.yml)
 
-[![Linux - AppImage Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/linux_appimage.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/linux_appimage.yml)
-[![Linux - x64 DEB Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/linux_x64_deb.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/linux_x64_deb.yml)
-[![Linux - x86_64 RPM Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/linux_rpm.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/linux_rpm.yml)
-
+[![Linux](https://github.com/everoddandeven/monerod-gui/actions/workflows/linux.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/linux.yml)
 [![MacOS - x64 DMG Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/darwin_dmg.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/darwin_dmg.yml)
 [![Windows Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/windows.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/windows.yml)
 
@@ -81,7 +78,7 @@ https://github.com/user-attachments/assets/c4a50d2f-5bbb-48ac-9425-30ecc20ada7c
 - [X] Detect wired/Wi-Fi connection
 - [X] Detect battery/ac power
 - [ ] Detect preinstalled `monerod`
-  - [ ] Linux
+  - [X] Linux
   - [ ] Windows
   - [ ] MacOs
 - [ ] Detect already running `monerod` instance
@@ -108,7 +105,7 @@ https://github.com/user-attachments/assets/c4a50d2f-5bbb-48ac-9425-30ecc20ada7c
 - [ ] Check for new versions of the GUI
 - [ ] Wallet RPC management
 - [ ] Blockchain tools
-  - [ ] Private testnet
+  - [X] Private testnet
   - [ ] Import blockchain
   - [ ] Export blockchain
   - [ ] Prune blockchain
@@ -123,14 +120,16 @@ https://github.com/user-attachments/assets/c4a50d2f-5bbb-48ac-9425-30ecc20ada7c
   - [ ] P2Pool integration
 - [ ] Network tools
   - [ ] Generate SSL certificate
-  - [ ] Tor integration
-  - [ ] I2P integration
-  - [ ] Automatic malicious node detection
+  - [X] Tor integration
+  - [X] I2P integration
 - [ ] Remote node management
   - [ ] No CORS connection
   - [ ] SSH connection
 - [ ] Move to Tauri
-- [ ] Port and upgrade `battery-level` dependency
+- [X] Port and upgrade `battery-level` dependency
+- [ ] Make this project also deployable in a web server
+- [ ] Option to download/use `cuprated` instead of `monerod`
+- [ ] Restricted RPC GUI mode
 - [ ] Light Wallet Server integration
 
 ## Getting Started
