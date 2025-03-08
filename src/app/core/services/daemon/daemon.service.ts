@@ -1324,7 +1324,7 @@ export class DaemonService {
   }
 
   public getGuiVersion(): string {
-    return "1.2.0-main";
+    return "1.2.0-Shadowness";
   }
 
   public async getProcessStats(): Promise<ProcessStats> {
