@@ -4,6 +4,8 @@ import { EventEmitter, Injectable, NgZone } from '@angular/core';
 import * as childProcess from 'child_process';
 import * as fs from 'fs';
 import { APP_CONFIG } from '../../../../environments/environment';
+import { AxiosHeaders, AxiosResponse } from 'axios';
+import { StringUtils } from '../../utils';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +18,12 @@ export class ElectronService {
   private _isAutoLaunched?: boolean;
   private _online: boolean = false;
   private _isProduction: boolean = false;
+  
+  private readonly headers: { [key: string]: string } = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Headers": "*", // this will allow all CORS requests
+    "Access-Control-Allow-Methods": 'POST,GET' // this states the allowed methods
+  };
 
   public readonly onAcPower: EventEmitter<void> = new EventEmitter<void>();
   public readonly onBatteryPower: EventEmitter<void> = new EventEmitter<void>();
@@ -44,6 +52,74 @@ export class ElectronService {
 
   get isElectron(): boolean {
     return !!(window && window.process && window.process.type);
+  }
+
+  public async get(uri: string): Promise<{[key: string]: any}> {
+    const headers: AxiosHeaders = new AxiosHeaders(this.headers);
+
+    const promise = new Promise<AxiosResponse<any, any>>((resolve, reject) => {
+      const onResponse = (result: { data?: AxiosResponse<any, any>; code: number; status: string, error?: string; }) => {
+        if (result.error) {
+          reject(new Error(result.error));
+        }
+        else if (result.data) {
+          if (result.code != 200) {
+            reject(new Error(result.status));
+          }
+          else resolve(result.data);
+        }
+        else {
+          reject(new Error("Unknown network error"));
+        }
+      };
+
+      const id = StringUtils.generateRandomString();
+
+      window.electronAPI.httpGet({ id, url: uri, config: { headers } }, onResponse);
+    });
+
+    return await promise;
+  }
+
+  public async post(uri: string, params: {[key: string]: any} = {}): Promise<{[key: string]: any}> {
+    const headers: AxiosHeaders = new AxiosHeaders(this.headers);
+
+    /*
+    const login = this.getLogin();
+
+    if (login) {
+      const _headers = { ...this.headers };
+      _headers['Authorization'] = "Basic " + btoa(unescape(encodeURIComponent(`${login.username}:${login.password}`)));
+      headers = new AxiosHeaders(_headers);
+    }
+    else {
+      headers = new AxiosHeaders(this.headers);
+    }
+
+    */
+
+    const promise = new Promise<AxiosResponse<any, any>>((resolve, reject) => {
+      const onResponse = (result: { data?: AxiosResponse<any, any>; code: number; status: string, error?: string; }) => {
+        if (result.error) {
+          reject(new Error(result.error));
+        }
+        else if (result.data) {
+          if (result.code != 200) {
+            reject(new Error(result.status));
+          }
+          else resolve(result.data);
+        }
+        else {
+          reject(new Error("Unknown network error"));
+        }
+      };
+
+      const id = StringUtils.generateRandomString();
+
+      window.electronAPI.httpPost({ id, url: uri, data: params, config: { headers } }, onResponse);
+    });
+
+    return await promise;
   }
 
   public async isWifiConnected(): Promise<boolean> {

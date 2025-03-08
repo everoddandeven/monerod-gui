@@ -9,9 +9,8 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
-import { AppMainProcess, I2pdProcess, MonerodProcess, PrivateTestnet, TorControlCommand, TorProcess } from './process';
+import { ProcessStats, AppMainProcess, I2pdProcess, MonerodProcess, PrivateTestnet, TorControlCommand, TorProcess, MoneroI2pdProcess } from './process';
 import { BatteryUtils, FileUtils, NetworkUtils } from './utils';
-import { MoneroI2pdProcess } from './process/I2pdProcess';
 const appName = 'Monero Daemon';
 app.setName(appName);
 app.setPath('userData', app.getPath('userData').replace(appName, 'MoneroDaemon'));
@@ -402,28 +401,22 @@ async function startMoneroDaemon(commandOptions: string[]): Promise<void> {
   }
 }
 
-async function monitorMonerod(): Promise<void> {
-  if (!monerodProcess) {
-    win?.webContents.send('on-monitor-monerod', { error: 'Monerod not running' });
-    return;
-  }
+async function monitorProcess(process: 'monerod' | 'i2pd' | 'tor'): Promise<ProcessStats> {
+  if (process === 'monerod') {
+    if (!monerodProcess) throw new Error('Process monerod is not running.');
 
-  try {
-    const stats = await monerodProcess.getStats();
-    win?.webContents.send('on-monitor-monerod', { stats });
+    return await monerodProcess.getStats();
   }
-  catch(error: any) {
-    let message: string;
+  else if (process === 'i2pd') {
+    if (!i2pdProcess) throw new Error('Process i2pd is not running.');
+    return await i2pdProcess.getStats();
 
-    if (error instanceof Error) {
-      message = error.message;
-    }
-    else {
-      message = `${error}`;
-    }
-
-    win?.webContents.send('on-monitor-monerod', { error: message });
   }
+  else if (process === 'tor') {
+    if (!torProcess) throw new Error('Process tor is not running.');
+    return await torProcess.getStats();
+  }
+  else throw new Error(`Unknown process ${process}`);
 }
 
 // #endregion
@@ -976,9 +969,25 @@ try {
     win?.webContents.send('got-os-type', { osType });
   })
 
-  ipcMain.handle('monitor-monerod', (event: IpcMainInvokeEvent) => {
-    monitorMonerod();
-  });
+  ipcMain.handle('monitor-process', async (event: IpcMainInvokeEvent, params: { eventId: string, process: 'monerod' | 'i2pd' | 'tor' }) => {
+    const { eventId, process: program } = params;
+    
+    try {
+      const stats = await monitorProcess(program);
+      win?.webContents.send(eventId, { stats });
+    }
+    catch(error: any) {
+      let message: string;
+  
+      if (error instanceof Error) {
+        message = error.message;
+      }
+      else {
+        message = `${error}`;
+      }
+  
+      win?.webContents.send(eventId, { error: message });
+    }  });
 
   ipcMain.handle('check-valid-monerod-path', (event: IpcMainInvokeEvent, path: string) => {
     checkValidMonerodPath(path);
@@ -1087,10 +1096,10 @@ try {
     const eventId = `on-http-get-result-${id}`;
     try {
       const result = await axios.get(url, config);
-      
       win?.webContents.send(eventId, { data: result.data, code: result.status, status: result.statusText });
     }
     catch (error: any) {
+      console.error(error);
       let msg: string;
       if (error instanceof AxiosError) {
         msg = error.message

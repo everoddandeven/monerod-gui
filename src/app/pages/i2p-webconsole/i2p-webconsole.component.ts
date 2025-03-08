@@ -2,7 +2,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { LocalDestinationsData, MainData, TunnelsData } from '../../../common';
 import { NavbarLink, NavbarService } from '../../shared/components';
-import { I2pDaemonService } from '../../core/services';
+import { DaemonService, I2pDaemonService } from '../../core/services';
 
 @Component({
   selector: 'app-i2p-webconsole',
@@ -22,7 +22,7 @@ export class I2pWebconsoleComponent extends BasePageComponent implements OnDestr
   public loggingLevel: 'none' | 'critical' | 'error' | 'warn' | 'info' | 'debug' = 'warn';
 
   public get stopping(): boolean {
-    return this.i2pService.stopping;
+    return this.i2pService.stopping || this.daemonService.stopping;
   }
 
   public get starting(): boolean {
@@ -53,7 +53,7 @@ export class I2pWebconsoleComponent extends BasePageComponent implements OnDestr
     return "";
   }
 
-  constructor(navbarService: NavbarService, private i2pService: I2pDaemonService) {
+  constructor(navbarService: NavbarService, private i2pService: I2pDaemonService, private daemonService: DaemonService) {
     super(navbarService);
 
     const links = [

@@ -64,7 +64,7 @@ interface ProcessInfo {
   elapsed: number;
   timestamp: number;
 };
-type TorControlCommand = 'authenticate' | 'getVersion' | 'getCircuitStatus' | 'getNetworkStatus' | 'changeIdentity' | 'reload' | 'getBootstrapPhase' | 'getCircuitEstablished';
+type TorControlCommand = 'authenticate' | 'getVersion' | 'getCircuitStatus' | 'getNetworkStatus' | 'changeIdentity' | 'reload' | 'getBootstrapPhase' | 'getCircuitEstablished' | 'getUptime' | 'getTrafficInfo' | 'shutdown' | 'clearDnsCache';
 
 declare global {
   interface Window {
@@ -76,7 +76,6 @@ declare global {
       
       startMonerod: (options: string[], callback: (result: {error?: any}) => void) => void;
       stopMonerod: (callback: (result: { error?: string; code?: number; }) => void) => void;
-      monitorMonerod: (callback: (result: {stats?: ProcessInfo, error?: any}) => void) => void;
       getMonerodVersion: (path: string, callback: (result: { version?: string; error?: string; }) => void) => void;
       downloadMonerod: (downloadUrl:string, destination: string, progress: (info: { progress: number, status: string }) => void, complete: (path: string) => void, error: (err: string) => void) => void;
       checkValidMonerodPath: (path: string, callback: (valid: boolean) => void) => void;
@@ -99,6 +98,8 @@ declare global {
       getTorVersion: (path: string, callback: (result: { version?: string; error?: string; }) => void) => void;
       invokeTorControlCommand: (command: TorControlCommand, callback: (res: { result?: any; error?: string; }) => void) => void;
       isWifiConnected: (callback: (connected: boolean) => void) => void;
+
+      monitorProcess: (process: 'monerod' | 'i2pd' | 'tor', callback: (result: {stats?: ProcessInfo, error?: any}) => void) => void;
 
       selectFolder: (callback: (path: string) => void) => void;
       selectFile: (extensions: string[], callback: (path: string) => void) => void;

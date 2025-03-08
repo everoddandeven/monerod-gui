@@ -119,6 +119,8 @@ export class TorProcess extends AppChildProcess {
 
     await promise;
 
+    await this.wait(1000);
+
     console.log(`Started tor process ${this._process?.pid}`);
   }
 
@@ -309,8 +311,8 @@ export class TorProcess extends AppChildProcess {
     let content = `DataDirectory ${this.defaultDataDirectory}
 
 ## To send all messages to stderr:
-Log debug stderr
-Log debug stdout
+## Log debug stderr
+## Log debug stdout
 `;
     if (port !== undefined || rpcPort !== undefined) {
       content = `${content}

@@ -228,13 +228,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.once('on-stop-monerod', handler);
     ipcRenderer.invoke('stop-monerod');
   },
-  monitorMonerod: (callback) => {
+  monitorProcess: (process, callback) => {
+    const eventId = `monitor-process-${newId()}`;
+
     const handler = (event, result) => {
       callback(result);
     };
 
-    ipcRenderer.once('on-monitor-monerod', handler);
-    ipcRenderer.invoke('monitor-monerod');
+    ipcRenderer.once(eventId, handler);
+    ipcRenderer.invoke('monitor-process', { eventId, process });
   },
   unsubscribeOnMonerodStarted: () => {
     ipcRenderer.removeAllListeners('monerod-started');

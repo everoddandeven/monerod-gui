@@ -41,7 +41,7 @@
         <i class="bi bi-incognito m-2"></i> Anonymous inbounds:
         <ul>
           @for(inbound of anonymousInbounds; track inbound.uri) {
-            <li>{{ inbound.uri }} - {{ inbound.type }}</li>
+            <li><i [class]="inbound.icon"></i> {{ inbound.uri }} - {{ inbound.type }}</li>
           }
         </ul>
       </div>

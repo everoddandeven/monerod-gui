@@ -169,6 +169,8 @@ export class VersionComponent implements AfterViewInit {
   }
 
   private async refreshLatestTorVersion(force: boolean = false): Promise<void> {
+    if (!force && this.latestTorVersion !== undefined) return;
+    
     try {
       this.latestTorVersion = await this.torService.getLatestVersion();
     }
@@ -278,6 +280,13 @@ export class VersionComponent implements AfterViewInit {
   }
 
   public async upgradeTor(): Promise<void> {
-    throw new Error("Not implemented");
+    const implemented = false;
+
+    const promise = new Promise<void>((resolve, reject) => {
+      if (!implemented) reject(new Error("Not implemented"));
+      else resolve();
+    });
+
+    await promise;
   }
 }

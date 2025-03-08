@@ -1,15 +1,22 @@
 import { EventEmitter, Injectable } from '@angular/core';
-import { TorDaemonSettings } from '../../../../common';
+import { ProcessStats, TorDaemonSettings } from '../../../../common';
 import { IDBPDatabase, openDB } from 'idb';
+import { ElectronService } from '../electron/electron.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TorDaemonService {
+  private readonly versionApiUrl: string = 'https://gitlab.torproject.org/api/v4/projects/426/repository/tags';
   private _detectedInstallation?: { path: string; configFile?: string; tunnelConfig?: string; tunnelsConfigDir?: string; pidFile?: string; isRunning?: boolean; };
   private readonly dbName = 'TorDaemonSettingsDB';
   private readonly storeName = 'settingsStore';
   private readonly openDbPromise: Promise<IDBPDatabase>;
+  private _anonymousInbound: string = '';
+
+  public get anonymousInbound(): string {
+    return this._anonymousInbound;
+  }
   
   public readonly onStart: EventEmitter<void> = new EventEmitter<void>();
   public readonly onStop: EventEmitter<void> = new EventEmitter<void>();
@@ -24,6 +31,8 @@ export class TorDaemonService {
   private _restarting: boolean = false;
   private _loaded: boolean = false;
   private _logs: string[] = [];
+  private _reloading: boolean = false;
+  private _changingIdentity: boolean = false;
 
   public get running(): boolean {
     return this._running;
@@ -52,8 +61,16 @@ export class TorDaemonService {
   public get loaded(): boolean {
     return this._loaded;
   }
+
+  public get reloading(): boolean {
+    return this._reloading;
+  }
+
+  public get changingIdentity(): boolean {
+    return this._changingIdentity;
+  }
   
-  constructor() {
+  constructor(private electronService: ElectronService) {
     this.openDbPromise = this.openDatabase();
     this.loadSettings().then(() => console.log('Loaded tor settings database')).catch((error: any) => console.error(error));
    }
@@ -105,7 +122,7 @@ export class TorDaemonService {
       });
 
       window.electronAPI.onTorClose((code: number) => {
-        console.log(code);
+        if (code !== 0) console.warn(`Tor exited with code ${code}`);
         this._running = false;
         this.onStop.emit();
       });
@@ -120,6 +137,7 @@ export class TorDaemonService {
     await promise;
 
     this.setSettings(_config);
+    this._anonymousInbound = await this.getAnonymousInbound();
     this._running = true;
     this.onStart.emit();
   }
@@ -242,10 +260,16 @@ export class TorDaemonService {
   }
 
   public async getAnonymousInbound(): Promise<string> {
-    const address = await this.getHostname();
-    const { port } = this.settings;
-
-    return `${address},127.0.0.1:${port}`;
+    try {
+      const address = await this.getHostname();
+      const { port } = this.settings;
+  
+      return `${address},127.0.0.1:${port}`;
+    }
+    catch (error: any) {
+      console.error(error);
+      return '';
+    }
   }
 
   public async getVersion(): Promise<string> {
@@ -263,7 +287,14 @@ export class TorDaemonService {
   }
 
   public async getLatestVersion(): Promise<string> {
-    throw new Error("Not implemented");
+    const tags: any[] = (await this.electronService.get(this.versionApiUrl)) as any[];
+    
+    if (!Array.isArray(tags) || tags.length === 0) {
+      throw new Error("No tor versions found");  
+    }
+    
+    const latestVersion = tags[0].name as string; // Il primo tag dovrebbe essere il più recente
+    return latestVersion;
   }
 
   public async authenticate(): Promise<boolean> {
@@ -290,14 +321,29 @@ export class TorDaemonService {
     });
   }
 
-  public async getCircuitEstablished(): Promise<string> {
-    return await new Promise<string>((resolve, reject) => {
+  public async getCircuitEstablished(): Promise<boolean> {
+    return await new Promise<boolean>((resolve) => {
       window.electronAPI.invokeTorControlCommand('getCircuitEstablished', (res: { result?: any; error?: string; }) => {
         const { error, result } = res;
 
-        if (error) reject(new Error(error));
-        else if (result) resolve(result);
-        else reject(new Error("Unknown error"));
+        if (error) resolve(false);
+        else if (result && typeof result === 'string') {
+          try {
+            const v = result.split('=');
+          
+            if (v.length !== 2) throw new Error("Could not parse result");
+
+            const value = v[1];
+
+            resolve(value === '1');
+          }
+          catch (error: any) {
+            console.error(error);
+            //reject(error instanceof Error ? error : new Error(`${error}`));
+            resolve(false);
+          }
+        }
+        else resolve(false);
       });
     });
   }
@@ -327,8 +373,59 @@ export class TorDaemonService {
   }
 
   public async changeIdentity(): Promise<string> {
-    return await new Promise<string>((resolve, reject) => {
-      window.electronAPI.invokeTorControlCommand('changeIdentity', (res: { result?: any; error?: string; }) => {
+    if (this.changingIdentity) throw new Error('Already changing identity');
+
+    this._changingIdentity = true;
+
+    try {
+      const result = await new Promise<string>((resolve, reject) => {
+        window.electronAPI.invokeTorControlCommand('changeIdentity', (res: { result?: any; error?: string; }) => {
+          const { error, result } = res;
+  
+          if (error) reject(new Error(error));
+          else if (result) resolve(result);
+          else reject(new Error("Unknown error"));
+        });
+      });
+
+      this._changingIdentity = false;
+
+      return result;
+    }
+    catch (error: any) {
+      const err = error instanceof Error ? error : new Error(`${error}`);
+
+      this._changingIdentity = false;
+
+      throw err;
+    }
+  }
+
+  public async getUptime(): Promise<number> {
+    return await new Promise<number>((resolve, reject) => {
+      window.electronAPI.invokeTorControlCommand('getUptime', (res: { result?: any; error?: string; }) => {
+        const { error, result } = res;
+        if (error) reject(new Error(error));
+        else if (result && typeof result === 'string') {
+          try {
+            const v = result.split('=');
+
+            if (v.length !== 2) throw new Error("Could not parse uptime");
+
+            const value = parseInt(v[1]);
+
+            resolve(value);
+          }
+          catch(error: any) { reject(error instanceof Error ? error : new Error(`${error}`)); }          
+        }
+        else reject(new Error("Unknown error"));
+      });
+    });
+  }
+
+  public async getTrafficInfo(): Promise<TorTrafficInfo> {
+    return await new Promise<TorTrafficInfo>((resolve, reject) => {
+      window.electronAPI.invokeTorControlCommand('getTrafficInfo', (res: { result?: TorTrafficInfo; error?: string; }) => {
         const { error, result } = res;
 
         if (error) reject(new Error(error));
@@ -339,8 +436,36 @@ export class TorDaemonService {
   }
 
   public async reload(): Promise<string> {
+    if (this.reloading) throw new Error("Already realoading tor service");
+
+    this._reloading = true;
+    let err: Error | null = null;
+
+    try {
+      const result =  await new Promise<string>((resolve, reject) => {
+        window.electronAPI.invokeTorControlCommand('reload', (res: { result?: any; error?: string; }) => {
+          const { error, result } = res;
+  
+          if (error) reject(new Error(error));
+          else if (result) resolve(result);
+          else reject(new Error("Unknown error"));
+        });
+      });
+
+      this._reloading = false;
+
+      return result;
+    }
+    catch (error: any) {
+      err = error instanceof Error ? error : new Error(`${error}`);
+      this._reloading = false;
+      throw err;
+    }
+  }
+
+  public async clearDnsCache(): Promise<string> {
     return await new Promise<string>((resolve, reject) => {
-      window.electronAPI.invokeTorControlCommand('reload', (res: { result?: any; error?: string; }) => {
+      window.electronAPI.invokeTorControlCommand('clearDnsCache', (res: { result?: any; error?: string; }) => {
         const { error, result } = res;
 
         if (error) reject(new Error(error));
@@ -348,6 +473,41 @@ export class TorDaemonService {
         else reject(new Error("Unknown error"));
       });
     });
+  }
+
+  public async shutdown(): Promise<string> {
+    return await new Promise<string>((resolve, reject) => {
+      window.electronAPI.invokeTorControlCommand('shutdown', (res: { result?: any; error?: string; }) => {
+        const { error, result } = res;
+
+        if (error) reject(new Error(error));
+        else if (result) resolve(result);
+        else reject(new Error("Unknown error"));
+      });
+    });
+  }
+
+  public async getProcessStats(): Promise<ProcessStats> {
+    if (!this.running) {
+      throw new Error("Daemon not running");
+    }
+
+    const getProcessStatsPromise = new Promise<ProcessStats>((resolve, reject) => {
+      window.electronAPI.monitorProcess('tor',(result) => {
+        const { error, stats } = result;
+
+        if (error) {
+          if (error instanceof Error) reject(error);
+          else reject(new Error(`${error}`));
+        }
+        else if (stats) {
+          resolve(stats);
+        }
+      });
+    })
+
+
+    return await getProcessStatsPromise;
   }
 }
 
@@ -387,3 +547,5 @@ export class TorBootstrapPhase {
     return phase;
   }
 }
+
+export interface TorTrafficInfo { sent: number; received: number; };

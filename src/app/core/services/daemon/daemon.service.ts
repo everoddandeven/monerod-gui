@@ -27,8 +27,6 @@ import {
 import { MoneroInstallerService } from '../monero-installer/monero-installer.service';
 import { ElectronService } from '../electron/electron.service';
 import { openDB, IDBPDatabase } from "idb"
-import { AxiosHeaders, AxiosResponse } from 'axios';
-import { StringUtils } from '../../utils';
 import { I2pDaemonService } from '../i2p/i2p-daemon.service';
 import { TorDaemonService } from '../tor/tor-daemon.service';
 
@@ -97,12 +95,6 @@ export class DaemonService {
   public readonly onSavedSettings: EventEmitter<DaemonSettings> = new EventEmitter<DaemonSettings>();
 
   private isRunningPromise?: Promise<boolean>;
-
-  private readonly headers: { [key: string]: string } = {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Headers": "*", // this will allow all CORS requests
-    "Access-Control-Allow-Methods": 'POST,GET' // this states the allowed methods
-  };
 
   constructor(
     private installer: MoneroInstallerService, private electronService: ElectronService, 
@@ -212,7 +204,7 @@ export class DaemonService {
     }
 
     if (this.torService.running && !this.torService.stopping) {
-      promises.push(this.i2pService.stop());
+      promises.push(this.torService.stop());
     }
 
     Promise.all(promises).catch((error: any) => console.error(error)).finally(handler);
@@ -361,70 +353,6 @@ export class DaemonService {
     return undefined;
   }
 
-  private async get(uri: string): Promise<{[key: string]: any}> {
-    const headers: AxiosHeaders = new AxiosHeaders(this.headers);
-
-    const promise = new Promise<AxiosResponse<any, any>>((resolve, reject) => {
-      const onResponse = (result: { data?: AxiosResponse<any, any>; code: number; status: string, error?: string; }) => {
-        if (result.error) {
-          reject(new Error(result.error));
-        }
-        else if (result.data) {
-          if (result.code != 200) {
-            reject(new Error(result.status));
-          }
-          else resolve(result.data);
-        }
-        else {
-          reject(new Error("Unknown network error"));
-        }
-      };
-
-      const id = StringUtils.generateRandomString();
-
-      window.electronAPI.httpGet({ id, url: uri, config: { headers } }, onResponse);
-    });
-
-    return await promise;
-  }
-
-  private async post(uri: string, params: {[key: string]: any} = {}): Promise<{[key: string]: any}> {
-    let headers: AxiosHeaders;
-
-    const login = this.getLogin();
-
-    if (login) {
-      const _headers = { ...this.headers };
-      _headers['Authorization'] = "Basic " + btoa(unescape(encodeURIComponent(`${login.username}:${login.password}`)));
-      headers = new AxiosHeaders(_headers);
-    }
-    else {
-      headers = new AxiosHeaders(this.headers);
-    }
-
-    const promise = new Promise<AxiosResponse<any, any>>((resolve, reject) => {
-      const onResponse = (result: { data?: AxiosResponse<any, any>; code: number; status: string, error?: string; }) => {
-        if (result.error) {
-          reject(new Error(result.error));
-        }
-        else if (result.data) {
-          if (result.code != 200) {
-            reject(new Error(result.status));
-          }
-          else resolve(result.data);
-        }
-        else {
-          reject(new Error("Unknown network error"));
-        }
-      };
-
-      const id = StringUtils.generateRandomString();
-
-      window.electronAPI.httpPost({ id, url: uri, data: params, config: { headers } }, onResponse);
-    });
-
-    return await promise;
-  }
 
   private async callRpc(request: RPCRequest): Promise<{ [key: string]: any }> {
     try {
@@ -437,7 +365,7 @@ export class DaemonService {
         method = request.method;
       }
 
-      const response = await this.post(`${this.url}/${method}`, request.toDictionary());
+      const response = await this.electronService.post(`${this.url}/${method}`, request.toDictionary());
 
       if (response.error) {
         this.raiseRpcError(<RpcError>response.error);
@@ -890,7 +818,7 @@ export class DaemonService {
       return this.mLatestVersion;
     }
     
-    const response = await this.get(this.versionApiUrl);
+    const response = await this.electronService.get(this.versionApiUrl);
 
     if (typeof response.tag_name != 'string') {
       throw new Error("Could not get tag name version");
@@ -1405,7 +1333,7 @@ export class DaemonService {
     }
 
     const getProcessStatsPromise = new Promise<ProcessStats>((resolve, reject) => {
-      window.electronAPI.monitorMonerod((result) => {
+      window.electronAPI.monitorProcess('monerod', (result) => {
         const { error, stats } = result;
 
         if (error) {

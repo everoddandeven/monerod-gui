@@ -1,7 +1,7 @@
 import { Component, AfterViewInit, NgZone } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
-import { DaemonService, DaemonDataService, I2pDaemonService } from '../../core/services';
+import { DaemonService, DaemonDataService, I2pDaemonService, TorDaemonService } from '../../core/services';
 import { Subscription } from 'rxjs';
 import { Connection, Span, Peer } from '../../../common';
 import { SimpleBootstrapCard } from '../../shared/utils';
@@ -24,15 +24,26 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
     return `${address}:${port}`;
   }
 
-  public get anonymousInbounds(): { uri: string; type: string; }[] {
-    const res: { uri: string; type: string; }[] = [];
+  public get anonymousInbounds(): { uri: string; type: string; icon: string; }[] {
+    const res: { uri: string; type: string; icon: string; }[] = [];
 
     if (this.i2pService.running && this.i2pService.anonymousInbound.length > 0) {
       const uri = this.parseAnonInboundUri(this.i2pService.anonymousInbound);
 
       res.push({ 
         uri,
-        type: 'P2P'
+        type: 'P2P',
+        icon: 'bi bi-hurricane m-2'
+       });
+    }
+
+    if (this.torService.running && this.torService.anonymousInbound.length > 0) {
+      const uri = this.parseAnonInboundUri(this.torService.anonymousInbound);
+
+      res.push({ 
+        uri,
+        type: 'P2P',
+        icon: 'bi bi-bullseye m-2'
        });
     }
 
@@ -176,12 +187,30 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
     return this.daemonData.info ? this.daemonData.info.offline ? 'offline' : 'online' : 'offline';
   }
 
-  private get connectionType(): 'Clearnet' | 'I2P' | 'TOR' {
-    if (this.i2pService.settings.enabled) {
-      return 'I2P';
+  private get connectionType(): string {
+    const usingProxy = this.daemonService.settings.proxy !== '';
+
+    if (this.i2pService.settings.enabled && this.torService.settings.enabled) {
+      if (this.i2pService.settings.torAsOutproxy && this.torService.settings.proxyAllNetConnections) {
+        return 'I2P/TOR (full)';
+      }
+
+      return usingProxy ? 'I2P/TOR (proxy)' : 'I2P/TOR (partial)';
+    }
+    else if (this.i2pService.settings.enabled) {
+      if (this.i2pService.settings.outproxy !== undefined) return 'I2P (full)';
+
+      const usingSocksProxy = usingProxy && this.daemonService.settings.proxy === this.i2pService.proxy;
+
+      return usingSocksProxy ? 'I2P (full)' : usingProxy ? 'I2P (proxy)' : 'I2P (partial)';
+    }
+    else if (this.torService.settings.enabled) {
+      if (this.torService.settings.proxyAllNetConnections) return 'TOR (full)';
+
+      return usingProxy ? 'TOR (proxy)' : 'TOR (partial)';
     }
 
-    return 'Clearnet';
+    return usingProxy ? 'proxy' : 'clearnet';
   }
 
   private get txCount(): number {
@@ -249,6 +278,7 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
   constructor(
     private daemonService: DaemonService,
     private i2pService: I2pDaemonService,
+    private torService: TorDaemonService,
     navbarService: NavbarService, 
     private daemonData: DaemonDataService, 
     private ngZone: NgZone) {

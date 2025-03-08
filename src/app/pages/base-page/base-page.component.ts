@@ -254,7 +254,7 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
       const tabContent = this.getTableContent(id);
   
       if (!tabContent) {
-        console.warn("Could not find logs tab");
+        console.warn("Could not find logs tab " + id);
         return;
       }
       

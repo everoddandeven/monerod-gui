@@ -1,5 +1,5 @@
 import { TorControl } from 'tor-ctrl';
-export type TorControlCommand = 'authenticate' | 'getVersion' | 'getCircuitStatus' | 'getNetworkStatus' | 'changeIdentity' | 'reload' | 'getBootstrapPhase' | 'getCircuitEstablished';
+export type TorControlCommand = 'authenticate' | 'getVersion' | 'getCircuitStatus' | 'getNetworkStatus' | 'changeIdentity' | 'reload' | 'getBootstrapPhase' | 'getCircuitEstablished' | 'getUptime' | 'getTrafficInfo' | 'shutdown' | 'clearDnsCache';
 
 export class TorControlClient {
   private controlPort: number;
@@ -51,6 +51,50 @@ export class TorControlClient {
         const phase = await this.ctrl.getInfo('status/bootstrap-phase');
         res.result = phase.data?.message;
       }
+      else if (cmd === 'getUptime') {
+        const uptime = await this.ctrl.getInfo('uptime');
+        res.result = uptime.data?.message;
+      }
+      else if (cmd === 'reload') {
+        res.result = await this.ctrl.signalReload();
+      }
+      else if (cmd === 'shutdown') {
+        res.result = await this.ctrl.signalShutdown();
+      }
+      else if (cmd === 'clearDnsCache') {
+        res.result = await this.ctrl.signalClearDnsCache();
+      }
+      else if (cmd === 'getTrafficInfo') {
+        const read = await this.ctrl.getInfo('traffic/read');
+        const written = await this.ctrl.getInfo('traffic/written');
+
+        let sent = 0;
+        let received = 0;
+
+        if (read.data) {
+          try {
+            const v = read.data.message.split('=');
+
+            if (v.length !== 2) throw new Error();
+
+            received = parseInt(v[1]);
+          }
+          catch {}
+        }
+
+        if (written.data) {
+          try {
+            const v = written.data.message.split('=');
+
+            if (v.length !== 2) throw new Error();
+            
+            sent = parseInt(v[1]);
+          }
+          catch {}
+        }
+
+        res.result = { sent, received };
+      }
 
       await this.ctrl.disconnect();
     }
@@ -62,17 +106,3 @@ export class TorControlClient {
   }
 
 }
-
-// === Esempio di utilizzo ===
-/*
-(async () => {
-  const torClient = new TorControlClient(9051, null); // Usa null per autenticazione via cookie
-  const authenticated = await torClient.authenticate();
-
-  if (authenticated) {
-    console.log(await torClient.getVersion());
-    console.log(await torClient.getCircuitStatus());
-    console.log(await torClient.changeIdentity());
-  }
-})();
-*/
