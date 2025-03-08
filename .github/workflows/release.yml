@@ -1,0 +1,148 @@
+name: Build & Release Electron-Angular
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-windows:
+    strategy:
+      matrix:
+        node-version: [22]
+
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-node-modules
+        with:
+          # npm cache files are stored in `~/.npm`
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install Dependencies
+        run: npm i
+
+      - name: Build the app
+        run: npm run electron:build
+
+      - name: Upload artifacts (Windows)
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/*.exe#monerod-gui-windows-${{ github.ref_name }}.exe
+            release/*.msi#monerod-gui-windows-${{ github.ref_name }}.msi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-macos:
+    strategy:
+      matrix:
+        node-version: [22]
+
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-node-modules
+        with:
+          # npm cache files are stored in `~/.npm` on Linux/macOS
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install Dependencies
+        run: npm i && npm i -D cli-truncate iconv-corefoundation
+
+      - name: Build the app
+        run: npm run electron:build
+
+      - name: List artifacts
+        run: ls release/
+      
+      - name: Upload artifacts
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/*.dmg#monerod-gui-darwin-${{ github.ref_name }}.dmg
+            release/*.pkg#monerod-gui-darwin-${{ github.ref_name }}.pkg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-linux:
+    strategy:
+      matrix:
+        node-version: [22]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-node-modules
+        with:
+          # npm cache files are stored in `~/.npm` on Linux/macOS
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf fakeroot dpkg 
+
+      - name: Install Dependencies
+        run: npm i
+
+      - name: Build DEB package
+        run: npm run electron:build:deb
+
+      - name: Build AppImage package
+        run: npm run electron:build
+
+      - name: Build RPM package
+        run: npm run electron:build:rpm
+
+      - name: Upload artifacts (Linux)
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/*.AppImage#monerod-gui-linux-${{ github.ref_name }}.AppImage
+            dist/installers/*.rpm#monerod-gui-linux-${{ github.ref_name }}.rpm
+            dist/installers/*.deb#monerod-gui-linux-${{ github.ref_name }}.deb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
