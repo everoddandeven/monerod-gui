@@ -1,4 +1,4 @@
-name: Build & Release Electron-Angular
+name: Release
 
 on:
   release:

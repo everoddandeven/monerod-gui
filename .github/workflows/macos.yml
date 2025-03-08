@@ -60,11 +60,21 @@ jobs:
     - name: Upload DMG artifact
       uses: actions/upload-artifact@v4
       with:
-        name: monerod-gui-darwin12-dmg
+        name: monerod-gui-darwin-dmg
         path: release/*.dmg
     
     - name: Upload PKG artifact
       uses: actions/upload-artifact@v4
       with:
-        name: monerod-gui-darwin12-pkg
+        name: monerod-gui-darwin-pkg
         path: release/*.pkg
+
+    - name: Build the app
+      run: npm run electron:build:mac
+
+    - name: Upload DMG artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: monerod-gui-darwin-installer-dmg
+        path: dist/installers/*.dmg
+  
