@@ -9,7 +9,7 @@
 [![Lint Test](https://github.com/everoddandeven/monerod-gui/actions/workflows/lint.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/lint.yml)
 
 [![Linux](https://github.com/everoddandeven/monerod-gui/actions/workflows/linux.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/linux.yml)
-[![MacOS - x64 DMG Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/darwin_dmg.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/darwin_dmg.yml)
+[![MacOS Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/macos.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/macos.yml)
 [![Windows Build](https://github.com/everoddandeven/monerod-gui/actions/workflows/windows.yml/badge.svg)](https://github.com/everoddandeven/monerod-gui/actions/workflows/windows.yml)
 
 [![Watch on GitHub][github-watch-badge]][github-watch]
