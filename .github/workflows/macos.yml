@@ -22,7 +22,7 @@ jobs:
   build:
     strategy:
       matrix:
-        node-version: [20]
+        node-version: [22]
 
     # The type of runner that the job will run on
     runs-on: macos-13
@@ -48,11 +48,8 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     
-    - name: Install MacOS Dependencies
+    - name: Install Dependencies
       run: brew install python-setuptools && npm install -g appdmg && npm i && npm i -D cli-truncate iconv-corefoundation
-
-    - name: Install NPM Dependencies
-      run: npm i && npm i -D cli-truncate iconv-corefoundation
 
     - name: Build DMG and PKG
       run: npm run electron:build

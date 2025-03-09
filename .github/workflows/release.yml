@@ -42,8 +42,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            release/*.exe#monerod-gui-windows-${{ github.ref_name }}.exe
-            release/*.msi#monerod-gui-windows-${{ github.ref_name }}.msi
+            release/*.exe#monerod-gui-windows-${{ github.ref_name }}-portable.exe
+            release/*.msi#monerod-gui-windows-${{ github.ref_name }}-installer.msi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -75,20 +75,24 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Install Dependencies
-        run: npm i && npm i -D cli-truncate iconv-corefoundation
+        run: brew install python-setuptools && npm install -g appdmg && npm i && npm i -D cli-truncate iconv-corefoundation
 
       - name: Build the app
         run: npm run electron:build
 
       - name: List artifacts
         run: ls release/
-      
+
+      - name: Build DMG installer
+        run: npm run electron:build:mac
+
       - name: Upload artifacts
         uses: softprops/action-gh-release@v2
         with:
           files: |
             release/*.dmg#monerod-gui-darwin-${{ github.ref_name }}.dmg
             release/*.pkg#monerod-gui-darwin-${{ github.ref_name }}.pkg
+            dist/installers/*.dmg#monerod-gui-darwin-${{ github.ref_name }}-installer.dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

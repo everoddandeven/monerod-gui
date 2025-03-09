@@ -64,6 +64,10 @@ https://github.com/user-attachments/assets/c4a50d2f-5bbb-48ac-9425-30ecc20ada7c
 
 - Users can choose the installation directory for `monerod`, allowing for greater flexibility in managing the software on different systems.
 
+### 8. Anonymous Network Support
+
+- It is possible to start a `TOR` and/or `I2P` service through the node settings. This allows the user to synchronize, relay txs, and make their node available under an anonymous network in a simple and immediate way, just a few clicks.
+
 ### Usage
 
 1. On the first run, Monerod GUI will detect your operating system and prompt you to download the appropriate version of `monerod`.
@@ -91,14 +95,16 @@ https://github.com/user-attachments/assets/c4a50d2f-5bbb-48ac-9425-30ecc20ada7c
   - [X] Windows
   - [X] MacOS 
 - [ ] Packages
-  - [X] deb
-  - [X] rpm
-  - [X] exe
-  - [X] msi
-  - [X] dmg
-  - [ ] pkg
-  - [ ] flatpack
-  - [ ] snap
+  - [X] Linux DEB
+  - [X] Linux RPM
+  - [X] Linux AppImage
+  - [ ] Linux Flatpack
+  - [ ] Linux Snap
+  - [X] Windows Portable EXE 
+  - [X] Windows Installer MSI
+  - [X] MacOS DMG
+  - [X] MacOS PKG
+  - [X] MacOS DMG Installer
 - [X] Import/export `monerod.conf` node configuration
 - [X] Synchronization in a specific time slot
 - [ ] Prompt user access control for administration operation
@@ -131,6 +137,7 @@ https://github.com/user-attachments/assets/c4a50d2f-5bbb-48ac-9425-30ecc20ada7c
 - [ ] Option to download/use `cuprated` instead of `monerod`
 - [ ] Restricted RPC GUI mode
 - [ ] Light Wallet Server integration
+- [ ] Detect Whonix and use system proxy
 
 ## Getting Started
 
