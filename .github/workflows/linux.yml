@@ -45,13 +45,11 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Install linux dependencies
+    - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf fakeroot dpkg 
-
-    - name: Install Dependencies
-      run: npm i
+        sudo apt-get install -y libgtk-3-dev webkit2gtk-4.0 libappindicator3-dev librsvg2-dev patchelf fakeroot dpkg
+        npm i 
 
     - name: Build DEB package
       run: npm run electron:build:deb
