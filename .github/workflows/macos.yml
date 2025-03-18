@@ -69,12 +69,12 @@ jobs:
         name: monerod-gui-darwin-pkg
         path: release/*.pkg
 
-    - name: Build DMG installer
-      run: npm run electron:build:mac
+#    - name: Build DMG installer
+#      run: npm run electron:build:mac
 
-    - name: Upload DMG installer artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: monerod-gui-darwin-installer-dmg
-        path: dist/installers/*.dmg
+#    - name: Upload DMG installer artifact
+#      uses: actions/upload-artifact@v4
+#      with:
+#        name: monerod-gui-darwin-installer-dmg
+#        path: dist/installers/*.dmg
   
