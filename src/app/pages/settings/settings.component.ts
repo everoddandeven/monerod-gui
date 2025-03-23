@@ -270,7 +270,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
       return false;
     }
 
-    if (this.exclusiveNodePort <= 0) {
+    if (this.exclusiveNodePort < 0) {
       return false;
     }
 
@@ -290,7 +290,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
       return false;
     }
 
-    if (this.peerPort <= 0) {
+    if (this.peerPort < 0) {
       return false;
     }
 
@@ -335,7 +335,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
       return false;
     }
 
-    if (this.priorityNodePort <= 0) {
+    if (this.priorityNodePort < 0) {
       return false;
     }
 
