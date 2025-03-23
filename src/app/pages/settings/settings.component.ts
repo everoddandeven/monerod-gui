@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, NgZone } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonSettings, DefaultPrivnetNode2Settings, I2pDaemonSettings, PrivnetDaemonSettings, TorDaemonSettings } from '../../../common';
 import { DaemonService, I2pDaemonService, ElectronService, TorDaemonService } from '../../core/services';
@@ -12,7 +12,7 @@ import { NavbarService } from '../../shared/components';
     styleUrl: './settings.component.scss',
     standalone: false
 })
-export class SettingsComponent extends BasePageComponent implements AfterViewInit {
+export class SettingsComponent extends BasePageComponent {
   // #region Properties
 
   public readonly navbarLinks: NavbarLink[];
@@ -412,12 +412,6 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     this._currentI2pdSettings = this.originalI2pdSettings.clone();
     this.originalTorSettings = this.torService.settings;
     this._currentTorSettings = this.originalTorSettings.clone();
-
-    this.load().then(() => {
-      console.debug("Settings loaded");
-    }).catch((error: any) => {
-      console.error(error);
-    });
   }
 
   public onTorTxProxyChange(): void {
@@ -581,8 +575,14 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     }
   }
 
-  public ngAfterViewInit(): void {
-    this.loadTables();
+  public override ngAfterContentInit(): void {
+    super.ngAfterContentInit();
+    this.load().then(() => {
+        console.debug("Settings loaded");
+        this.loadTables();
+    }).catch((error: any) => {
+        console.error(error);
+      });
   }
 
   public refreshSyncMode(): void {
@@ -671,7 +671,7 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
     this.refreshTorTxProxy();
     this.refreshI2pAnonymousInbound();
     this.refreshI2pTxProxy();
-    this.updateTablesContentHeight();
+    setTimeout(() => this.updateTablesContentHeight(), 100);
   }
 
   private loadTables(): void {
