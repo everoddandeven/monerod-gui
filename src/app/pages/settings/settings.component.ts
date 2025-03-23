@@ -160,7 +160,7 @@ export class SettingsComponent extends BasePageComponent {
   public i2pAnonymousInboundMaxConnections: number = 0;
 
   public get i2pAnonymousInbound(): string {
-    const i2pAnonymousInbound = `${this.i2pAnonymousInboundAddress}:${this.i2pAnonymousInboundPort},${this.i2pAnonymousInboundForwardIp}:${this.i2pAnonymousInboundForwardPort}${this.i2pTxProxyMaxConnections > -1 ? ',' + this.i2pAnonymousInboundMaxConnections : ''}`;
+    const i2pAnonymousInbound = `${this.i2pAnonymousInboundAddress},${this.i2pAnonymousInboundForwardIp}:${this.i2pAnonymousInboundForwardPort}${this.i2pTxProxyMaxConnections > -1 ? ',' + this.i2pAnonymousInboundMaxConnections : ''}`;
     if (!DaemonSettings.isValidI2pAnonymousInbound(i2pAnonymousInbound)) return '';
 
     return i2pAnonymousInbound;
@@ -431,16 +431,12 @@ export class SettingsComponent extends BasePageComponent {
   }
 
   public onTorAnonymousInboundChange(): void {
-    if (this.torAnonymousInbound == '') return;
-
     const torAnonymousInbound = this.torAnonymousInbound;
     
     this._currentSettings.setAnonymousInbound(torAnonymousInbound, 'tor');
   }
 
   public onI2pAnonymousInboundChange(): void {
-    if (this.i2pAnonymousInbound == '') return;
-
     const i2pAnonymousInbound = this.i2pAnonymousInbound;
     
     this._currentSettings.setAnonymousInbound(i2pAnonymousInbound, 'i2p');

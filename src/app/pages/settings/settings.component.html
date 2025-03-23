@@ -1173,7 +1173,7 @@
             
             <div class="col-10">
               <label for="tor-anonymous-inbound-address" class="form-label">Inbound Address</label>
-              <input (input)="onTorAnonymousInboundChange()" [disabled]="!canEditNodeSettings|| currentTorSettings.enabled" type="text" class="form-control" id="tor-anonymous-inbound-address" placeholder="...sxakefmed.onion" [(ngModel)]="torAnonymousInboundAddress" [ngModelOptions]="{standalone: true}">
+              <input (input)="onTorAnonymousInboundChange()" [disabled]="!canEditNodeSettings|| currentTorSettings.enabled" type="text" class="form-control" id="tor-anonymous-inbound-address" placeholder="yourlongonionaddress.onion" [(ngModel)]="torAnonymousInboundAddress" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">
                 Specify inbound hidden service address for receiving incoming TOR connections
               </small>
