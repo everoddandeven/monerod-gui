@@ -464,19 +464,17 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
       return;
     }
 
-    const components = i2pProxy.replace(`i2p,`, '').split(',');
-    const address = components[0];
-    const port = components[1];
-    const socks = components[2];
-    const socksComponent = socks.split(':');
-    const socksIp = socksComponent[0];
-    const socksPort = socksComponent[1];
-    const maxConnections = components[3];
+    const components = i2pProxy.split(',');
+    const i2pAddress = components[0];
+    const inboundAddress = components[1];
+    const maxConnections = components[2];
+    const c = inboundAddress.split(':');
+    const forwardHost = c[0];
+    const forwardPort = c[1];
 
-    this.i2pAnonymousInboundAddress = address;
-    this.i2pAnonymousInboundPort = parseInt(port);
-    this.i2pAnonymousInboundForwardIp = socksIp;
-    this.i2pAnonymousInboundForwardPort = parseInt(socksPort);
+    this.i2pAnonymousInboundAddress = i2pAddress;
+    this.i2pAnonymousInboundForwardIp = forwardHost;
+    this.i2pAnonymousInboundForwardPort = parseInt(forwardPort);
     
     if (maxConnections) {
       this.i2pAnonymousInboundMaxConnections = parseInt(maxConnections);
@@ -511,9 +509,9 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
   }
 
   private refreshTorAnonymousInbound(): void {
-    const torProxy = this._currentSettings.anonymousInbounds.tor;
+    const anonInbound = this._currentSettings.anonymousInbounds.tor;
 
-    if (!DaemonSettings.isValidTorAnonymousInbound(torProxy)) {
+    if (!DaemonSettings.isValidTorAnonymousInbound(anonInbound)) {
       this.torAnonymousInboundAddress = '';
       this.torAnonymousInboundPort = 0;
       this.torAnonymousInboundForwardIp = '';
@@ -522,19 +520,21 @@ export class SettingsComponent extends BasePageComponent implements AfterViewIni
       return;
     }
 
-    const components = torProxy.replace(`tor,`, '').split(',');
-    const address = components[0];
-    const port = components[1];
-    const socks = components[2];
-    const socksComponent = socks.split(':');
-    const socksIp = socksComponent[0];
-    const socksPort = socksComponent[1];
-    const maxConnections = components[3];
+    const components = anonInbound.split(',');
+    const addressAndPort = components[0];
+    const forwardAddress = components[1];
+    const maxConnections = components[2];
+    const c = forwardAddress.split(':');
+    const forwardHost = c[0];
+    const forwardPort = c[1];
+    const v = addressAndPort.split(':');
+    const onion = v[0];
+    const onionPort = v[1];
 
-    this.torAnonymousInboundAddress = address;
-    this.torAnonymousInboundPort = parseInt(port);
-    this.torAnonymousInboundForwardIp = socksIp;
-    this.torAnonymousInboundForwardPort = parseInt(socksPort);
+    this.torAnonymousInboundAddress = onion;
+    this.torAnonymousInboundPort = parseInt(onionPort);
+    this.torAnonymousInboundForwardIp = forwardHost;
+    this.torAnonymousInboundForwardPort = parseInt(forwardPort);
     
     if (maxConnections) {
       this.torAnonymousInboundMaxConnections = parseInt(maxConnections);

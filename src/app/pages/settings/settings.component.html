@@ -1313,23 +1313,16 @@
           <div *ngIf="!currentI2pdSettings.enabled" class="row g-3">
             <h4 class="mb-3">I2P Anonymous Inbound</h4>
             
-            <div class="col-10">
+            <div class="col-12">
               <label for="i2p-anonymous-inbound-address" class="form-label">Inbound Address</label>
               <input (input)="onI2pAnonymousInboundChange()" [disabled]="!canEditNodeSettings || currentI2pdSettings.enabled" type="text" class="form-control" id="i2p-anonymous-inbound-address" placeholder="...sxakefmed.i2p" [(ngModel)]="i2pAnonymousInboundAddress" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">
                 Specify inbound hidden service address for receiving incoming I2P connections
               </small>
             </div>
-
-            <div class="col-md-2">
-              <label for="i2p-anonymous-inbound-port" class="form-label">Inbound port</label>
-              <input (change)="onI2pAnonymousInboundChange()" [disabled]="!canEditNodeSettings || currentI2pdSettings.enabled" type="number" min="0" class="form-control" id="i2p-anonymous-inbound-port" placeholder="28083" [(ngModel)]="i2pAnonymousInboundPort" [ngModelOptions]="{standalone: true}">
-              <small class="text-body-secondary">
-              </small>
-            </div>
             
             <div class="col-8">
-              <label for="i2p-anonymous-inbound-forward-ip" class="form-label">Forward Ip</label>
+              <label for="i2p-anonymous-inbound-forward-ip" class="form-label">Forward IP</label>
               <input (input)="onI2pAnonymousInboundChange()" [disabled]="!canEditNodeSettings || currentI2pdSettings.enabled" type="text" class="form-control" id="i2p-anonymous-inbound-forward-ip" placeholder="127.0.0.1" [(ngModel)]="i2pAnonymousInboundForwardIp" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">
                 Forward node ip
