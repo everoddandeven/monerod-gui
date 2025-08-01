@@ -32,7 +32,7 @@ import { I2pWebconsoleModule } from './pages/i2p-webconsole/i2p-webconsole.modul
 import { TorControlModule } from './pages/tor-control/tor-control.module';
 
 // AoT requires an exported function for factories
-const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new TranslateHttpLoader(http, './assets/i18n/', '.json');
+const httpLoaderFactory = (http: HttpClient): TranslateHttpLoader =>  new TranslateHttpLoader();
 
 @NgModule({ declarations: [AppComponent],
     bootstrap: [AppComponent], imports: [BrowserModule,
