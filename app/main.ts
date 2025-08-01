@@ -670,8 +670,8 @@ try {
       try {
         //torProcess = new TorProcess({ i2pdPath: path, flags, isExe: true });
 
-        if (allowIncomingConnections) torProcess = new TorProcess({ path, port, rpcPort });
-        else torProcess = new TorProcess({ path });
+        if (allowIncomingConnections) torProcess = new TorProcess({ path, port, rpcPort, createConfig: true });
+        else torProcess = new TorProcess({ path, createConfig: true });
         await torProcess.start();
         torProcess.onStdOut((out: string) => win?.webContents.send('on-tor-stdout', out));
         torProcess.onStdErr((out: string) => win?.webContents.send('on-tor-stderr', out));
