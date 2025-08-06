@@ -76,7 +76,8 @@ export class DaemonService {
   public restarting: boolean = false;
   public disablingSync: boolean = false;
   public enablingSync: boolean = false;
-  public startedAt?: Date; 
+  public startedAt?: Date;
+  public startHeight: number = 0;
 
   public get startingI2pService(): boolean {
     return this.i2pService.starting;
@@ -395,6 +396,7 @@ export class DaemonService {
     this.version = undefined;
 
     this.starting = true;
+    this.startHeight = 0;
 
     console.log("Starting daemon");
 
@@ -497,7 +499,6 @@ export class DaemonService {
 
         if (started) {
           console.log("monerod started");
-
           this.delay(3000).then(() => {
             this.isRunning(true).then((running: boolean) => {
               window.electronAPI.showNotification({

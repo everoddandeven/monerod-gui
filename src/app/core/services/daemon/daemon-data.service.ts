@@ -442,6 +442,9 @@ export class DaemonDataService {
 
       this._gettingDaemonInfo = true;
       this._daemonInfo = await this.daemonService.getInfo();
+      if (this.daemonService.startHeight == 0) {
+        this.daemonService.startHeight = this._daemonInfo.height;
+      }
       this._gettingDaemonInfo = false;
 
       if (this._daemonInfo.synchronized) {

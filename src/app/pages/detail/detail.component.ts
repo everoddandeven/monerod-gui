@@ -153,6 +153,10 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
     return value;
   }
 
+  private get startHeight(): number {
+    return this.daemonService.startHeight;
+  }
+
   private get nextNeededPruningSeed(): number {
     return this.daemonData.syncInfo ? this.daemonData.syncInfo.nextNeededPruningSeed : 0;
   }
@@ -232,13 +236,16 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
   }
 
   private get syncProgress(): string {
+    const startHeight = this.startHeight;
     const targetHeight = this.targetHeight;
     const height = this.height;
+    const blocksLeft = targetHeight - startHeight;
+    const blocksDone = targetHeight - height;
+    const value = 100 - (blocksDone*100/blocksLeft);
+    let progress = `${value.toFixed(2)} %`;
     
-    const progress = `${(height*100/targetHeight).toFixed(2)} %`;
-
-    if (height < targetHeight && progress == '100 %') {
-      return '99.99 %';
+    if (height == targetHeight) {
+      return "100 %"
     }
 
     return progress;
