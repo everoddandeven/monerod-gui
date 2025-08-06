@@ -1,4 +1,4 @@
-import { AfterContentInit, Component, OnDestroy } from '@angular/core';
+import { AfterContentInit, Component, inject, OnDestroy } from '@angular/core';
 import { NavbarLink, NavbarService } from '../../shared/components';
 import { Subscription } from 'rxjs';
 
@@ -7,6 +7,7 @@ import { Subscription } from 'rxjs';
     standalone: false
 })
 export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
+  private navbarService: NavbarService = inject(NavbarService)
 
   private readonly initializedTables: { [key: string]: JQuery<HTMLElement> | undefined } = {};
   private _links: NavbarLink[] = [];
@@ -21,7 +22,7 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
     this.updateTablesContentHeight();
   }, 100);
 
-  constructor(private navbarService: NavbarService) {
+  constructor() {
     this.subscriptions.push(this.navbarService.onDaemonStatusChanged.subscribe((running) => {
       if (running) setTimeout(() => this.updateTablesContentHeight(), 100);
     }));

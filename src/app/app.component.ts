@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ElectronService } from './core/services';
 import { DaemonService } from './core/services/daemon/daemon.service';
 import { DaemonDataService } from './core/services/daemon/daemon-data.service';
@@ -12,6 +12,12 @@ import { DaemonTrayService } from './core/services/daemon/daemon-tray.service';
     standalone: false
 })
 export class AppComponent {
+  private electronService = inject(ElectronService);
+  private daemonService = inject(DaemonService);
+  private daemonData = inject(DaemonDataService);
+  private LogService = inject(LogsService);
+  private trayService = inject(DaemonTrayService);
+
   public loading: boolean = false;
   public daemonRunning: boolean = false;
 
@@ -19,13 +25,7 @@ export class AppComponent {
     return this.daemonData.initializing;
   }
 
-  constructor(
-    private electronService: ElectronService,
-    private daemonService: DaemonService,
-    private daemonData: DaemonDataService,
-    private LogService: LogsService,
-    private trayService: DaemonTrayService
-  ) {
+  constructor() {
     this.load().then().catch((error: any) => console.error(error));
   }
 

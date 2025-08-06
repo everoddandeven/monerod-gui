@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable } from '@angular/core';
+import { EventEmitter, Injectable, inject } from '@angular/core';
 import { ProcessStats, TorDaemonSettings } from '../../../../common';
 import { IDBPDatabase, openDB } from 'idb';
 import { ElectronService } from '../electron/electron.service';
@@ -7,6 +7,8 @@ import { ElectronService } from '../electron/electron.service';
   providedIn: 'root'
 })
 export class TorDaemonService {
+  private electronService = inject(ElectronService);
+
   private readonly versionApiUrl: string = 'https://gitlab.torproject.org/api/v4/projects/426/repository/tags';
   private _detectedInstallation?: { path: string; configFile?: string; tunnelConfig?: string; tunnelsConfigDir?: string; pidFile?: string; isRunning?: boolean; };
   private readonly dbName = 'TorDaemonSettingsDB';
@@ -70,7 +72,7 @@ export class TorDaemonService {
     return this._changingIdentity;
   }
   
-  constructor(private electronService: ElectronService) {
+  constructor() {
     this.openDbPromise = this.openDatabase();
     this.loadSettings().then(() => console.log('Loaded tor settings database')).catch((error: any) => console.error(error));
    }

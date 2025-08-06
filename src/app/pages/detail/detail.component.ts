@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, NgZone } from '@angular/core';
+import { Component, AfterViewInit, NgZone, inject } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { DaemonService, DaemonDataService, I2pDaemonService, TorDaemonService } from '../../core/services';
@@ -14,6 +14,12 @@ import { BasePageComponent } from '../base-page/base-page.component';
     standalone: false
 })
 export class DetailComponent extends BasePageComponent implements AfterViewInit {
+  private daemonService = inject(DaemonService);
+  private i2pService = inject(I2pDaemonService);
+  private torService = inject(TorDaemonService);
+  private daemonData = inject(DaemonDataService);
+  private ngZone = inject(NgZone);
+
 
   private parseAnonInboundUri(anonInbound: string): string {
     const v = anonInbound.split(',');
@@ -275,13 +281,9 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
 
   public cards: SimpleBootstrapCard[];
 
-  constructor(
-    private daemonService: DaemonService,
-    private i2pService: I2pDaemonService,
-    private torService: TorDaemonService,
-    navbarService: NavbarService, 
-    private daemonData: DaemonDataService, 
-    private ngZone: NgZone) {
+  constructor() {
+    const navbarService = inject(NavbarService);
+
     
     super(navbarService);
 

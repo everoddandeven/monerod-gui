@@ -1,12 +1,14 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { DaemonService } from './daemon.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DaemonTrayService {
+  private daemonService = inject(DaemonService);
 
-  constructor(private daemonService: DaemonService) {
+
+  constructor() {
     this.registerIpcEvents();
     this.daemonService.isRunning()
       .then((running: boolean) => this.loadTrayItems(running))

@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, NgZone } from '@angular/core';
+import { AfterViewInit, Component, NgZone, inject } from '@angular/core';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { SimpleBootstrapCard } from '../../shared/utils';
@@ -13,6 +13,10 @@ import { BasePageComponent } from '../base-page/base-page.component';
     standalone: false
 })
 export class HardForkInfoComponent extends BasePageComponent implements AfterViewInit {
+  private daemonData = inject(DaemonDataService);
+  private daemonService = inject(DaemonService);
+  private ngZone = inject(NgZone);
+
   public cards: SimpleBootstrapCard[];
   private earliestHeight: number;
   private enabled: boolean;
@@ -46,7 +50,9 @@ export class HardForkInfoComponent extends BasePageComponent implements AfterVie
 
   public loading: boolean = false;
 
-  constructor(private daemonData: DaemonDataService, private daemonService: DaemonService, navbarService: NavbarService, private ngZone: NgZone) {
+  constructor() {
+    const navbarService = inject(NavbarService);
+
     super(navbarService);
 
     this.setLinks([

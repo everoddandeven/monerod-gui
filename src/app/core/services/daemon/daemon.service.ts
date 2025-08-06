@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { EventEmitter, Injectable } from '@angular/core';
+import { EventEmitter, Injectable, inject } from '@angular/core';
 import { 
   GetBlockCountRequest, GetBlockHashRequest, GetBlockTemplateRequest, JsonRPCRequest, 
   SubmitBlockRequest, GenerateBlocksRequest, GetLastBlockHeaderRequest, 
@@ -34,6 +34,11 @@ import { TorDaemonService } from '../tor/tor-daemon.service';
   providedIn: 'root'
 })
 export class DaemonService {
+  private installer = inject(MoneroInstallerService);
+  private electronService = inject(ElectronService);
+  private i2pService = inject(I2pDaemonService);
+  private torService = inject(TorDaemonService);
+
   private readonly versionApiUrl: string = 'https://api.github.com/repos/monero-project/monero/releases/latest';
   private dbName = 'DaemonSettingsDB';
   private storeName = 'settingsStore';
@@ -96,10 +101,7 @@ export class DaemonService {
 
   private isRunningPromise?: Promise<boolean>;
 
-  constructor(
-    private installer: MoneroInstallerService, private electronService: ElectronService, 
-    private i2pService: I2pDaemonService, private torService: TorDaemonService
-  ) {
+  constructor() {
     this.openDbPromise = this.openDatabase();
     this.settings = new DaemonSettings();
 

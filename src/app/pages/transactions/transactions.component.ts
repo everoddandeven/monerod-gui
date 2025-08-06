@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, NgZone } from '@angular/core';
+import { AfterViewInit, Component, NgZone, inject } from '@angular/core';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
@@ -16,6 +16,10 @@ import { BasePageComponent } from '../base-page/base-page.component';
     standalone: false
 })
 export class TransactionsComponent extends BasePageComponent implements AfterViewInit {
+  private daemonData = inject(DaemonDataService);
+  private daemonService = inject(DaemonService);
+  private ngZone = inject(NgZone);
+
 
   public canRelay: boolean;
   
@@ -85,7 +89,9 @@ export class TransactionsComponent extends BasePageComponent implements AfterVie
     return new TxPoolStats(0, 0, 0, 0, 0, new TxPoolHisto(0, 0), 0, 0, 0, 0, 0, 0, 0)
   }
 
-  constructor(private daemonData: DaemonDataService, private daemonService: DaemonService, navbarService: NavbarService, private ngZone: NgZone) {
+  constructor() {
+    const navbarService = inject(NavbarService);
+
     super(navbarService);
 
     this.setLinks([

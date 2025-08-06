@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, inject } from '@angular/core';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { NavbarLink, NavbarService } from '../../shared/components';
 import { DaemonService, TorBootstrapPhase, TorDaemonService } from '../../core/services';
@@ -11,6 +11,9 @@ import { ProcessStats } from '../../../common';
   standalone: false
 })
 export class TorControlComponent extends BasePageComponent implements AfterViewInit, OnDestroy {
+  private torService = inject(TorDaemonService);
+  private daemonService = inject(DaemonService);
+
 
   public get running(): boolean {
     return this.torService.running;
@@ -102,7 +105,9 @@ export class TorControlComponent extends BasePageComponent implements AfterViewI
 
   private readonly refreshHandler: () => void = () => this.refresh();
   
-  constructor(navbarService: NavbarService, private torService: TorDaemonService, private daemonService: DaemonService) {
+  constructor() {
+    const navbarService = inject(NavbarService);
+
     super(navbarService);
 
     const links = [

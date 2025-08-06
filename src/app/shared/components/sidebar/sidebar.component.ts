@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { I2pDaemonService } from '../../../core/services';
 
@@ -9,6 +9,9 @@ import { I2pDaemonService } from '../../../core/services';
     standalone: false
 })
 export class SidebarComponent {
+  private router = inject(Router);
+  private i2pService = inject(I2pDaemonService);
+
   @Input() public isDaemonRunning: boolean = false;
 
   public navLinks: NavLink[] = [];
@@ -27,7 +30,7 @@ export class SidebarComponent {
     return this.i2pService.settings.enabled;
   }
 
-  constructor(private router: Router, private i2pService: I2pDaemonService) {
+  constructor() {
     this.updateLinks();
     this.isLoading = false;
     this.errorMessage = '';

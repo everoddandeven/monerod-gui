@@ -1,10 +1,13 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { ElectronService } from '../electron/electron.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MoneroInstallerService {
+  private electronService = inject(ElectronService);
+  private ngZone = inject(NgZone);
+
   private readonly resources = {
     win32: 'https://downloads.getmonero.org/cli/win32',
     win64: 'https://downloads.getmonero.org/cli/win64',
@@ -34,8 +37,6 @@ export class MoneroInstallerService {
   public get progress(): { progress: number, status: string } {
     return this._progress;
   }
-
-  constructor(private electronService: ElectronService, private ngZone: NgZone) {}
 
   public async downloadMonero(destination: string, alreadyConfigured: boolean): Promise<string> {
     this.alreadyConfigured = alreadyConfigured;

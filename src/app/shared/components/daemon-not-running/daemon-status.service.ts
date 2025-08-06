@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { DaemonDataService, DaemonService, ElectronService, MoneroInstallerService } from '../../../core/services';
 import { Subscription } from 'rxjs';
 import { DaemonSettings } from '../../../../common';
@@ -7,6 +7,12 @@ import { DaemonSettings } from '../../../../common';
   providedIn: 'root'
 })
 export class DaemonStatusService {
+  private installer = inject(MoneroInstallerService);
+  private daemonData = inject(DaemonDataService);
+  private daemonService = inject(DaemonService);
+  private electronService = inject(ElectronService);
+  private ngZone = inject(NgZone);
+
 
   public get upgrading(): boolean {
     return this.installer.upgrading && !this.quittingDaemon;
@@ -97,11 +103,7 @@ export class DaemonStatusService {
   private _batteryTooLow: boolean = false;
   private _batteryLevel: number = 0;
 
-  constructor(
-    private installer: MoneroInstallerService, private daemonData: DaemonDataService, 
-    private daemonService: DaemonService, private electronService: ElectronService,
-    private ngZone: NgZone
-  ) {
+  constructor() {
     const onSavedSettingsSub: Subscription = this.daemonService.onSavedSettings.subscribe(() => {
       this.refresh();
     });

@@ -1,4 +1,4 @@
-import { Component, NgZone } from '@angular/core';
+import { Component, NgZone, inject } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
@@ -13,6 +13,10 @@ import { BasePageComponent } from '../base-page/base-page.component';
     standalone: false
 })
 export class OutputsComponent extends BasePageComponent {
+  private daemonData = inject(DaemonDataService);
+  private daemonService = inject(DaemonService);
+  private ngZone = inject(NgZone);
+
 
   public get daemonRunning(): boolean {
     return this.daemonData.running;
@@ -98,7 +102,9 @@ export class OutputsComponent extends BasePageComponent {
     return <number[]>JSON.parse(this.getOutDistributionAmountsJsonString);
   }
 
-  constructor(private daemonData: DaemonDataService, private daemonService: DaemonService, navbarService: NavbarService, private ngZone: NgZone) {
+  constructor() {
+    const navbarService = inject(NavbarService);
+
     super(navbarService);
 
     this.setLinks([

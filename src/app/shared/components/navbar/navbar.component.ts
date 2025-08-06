@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, NgZone, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, NgZone, OnDestroy, inject } from '@angular/core';
 import { NavbarService } from './navbar.service';
 import { NavbarLink } from './navbar.model';
 import { DaemonService } from '../../../core/services/daemon/daemon.service';
@@ -15,6 +15,13 @@ import { DaemonStatusService } from '../daemon-not-running/daemon-status.service
     standalone: false
 })
 export class NavbarComponent implements AfterViewInit, OnDestroy {
+  private navbarService = inject(NavbarService);
+  private daemonService = inject(DaemonService);
+  private daemonData = inject(DaemonDataService);
+  private installerService = inject(MoneroInstallerService);
+  private statusService = inject(DaemonStatusService);
+  private ngZone = inject(NgZone);
+
 
   private _running: boolean = false;
 
@@ -76,7 +83,7 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
     return this.statusService.cannotRunBecauseBatteryPolicy;
   }
 
-  constructor(private navbarService: NavbarService, private daemonService: DaemonService, private daemonData: DaemonDataService, private installerService: MoneroInstallerService, private statusService: DaemonStatusService, private ngZone: NgZone) {
+  constructor() {
     const onSavedSettingsSub: Subscription = this.daemonService.onSavedSettings.subscribe((settings: DaemonSettings) => {
       this.daemonSettings = settings;
     });

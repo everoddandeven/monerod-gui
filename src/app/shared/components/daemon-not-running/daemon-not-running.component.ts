@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { DaemonStatusService } from './daemon-status.service';
 
@@ -9,6 +9,8 @@ import { DaemonStatusService } from './daemon-status.service';
     standalone: false
 })
 export class DaemonNotRunningComponent implements OnDestroy {
+  private statusService = inject(DaemonStatusService);
+
 
   public get upgrading(): boolean {
     return this.statusService.upgrading;
@@ -71,10 +73,6 @@ export class DaemonNotRunningComponent implements OnDestroy {
   }
 
   private subscriptions: Subscription[] = [];
-
-  constructor(private statusService: DaemonStatusService) {
-
-  }
 
   public ngOnDestroy(): void {
     this.subscriptions.forEach((sub: Subscription) =>  sub.unsubscribe());

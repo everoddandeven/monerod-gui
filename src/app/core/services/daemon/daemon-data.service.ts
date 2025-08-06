@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable, NgZone } from '@angular/core';
+import { EventEmitter, Injectable, NgZone, inject } from '@angular/core';
 import { DaemonService } from './daemon.service';
 import { BlockCount, BlockHeader, Chain, CoreIsBusyError, DaemonInfo, MinerData, MiningStatus, NetHashRateHistory, NetStats, NetStatsHistory, ProcessStats, SyncInfo, TimeUtils, TxBacklogEntry, TxPool, TxPoolStats } from '../../../../common';
 import { ElectronService } from '../electron/electron.service';
@@ -7,6 +7,10 @@ import { ElectronService } from '../electron/electron.service';
   providedIn: 'root'
 })
 export class DaemonDataService {
+  private daemonService = inject(DaemonService);
+  private electronService = inject(ElectronService);
+  private ngZone = inject(NgZone);
+
 
   private refreshTimeoutMs: number = 5000;
   private refreshInterval?: NodeJS.Timeout;
@@ -74,7 +78,7 @@ export class DaemonDataService {
   public readonly netStatsRefreshStart: EventEmitter<void> = new EventEmitter<void>();
   public readonly netStatsRefreshEnd: EventEmitter<void> = new EventEmitter<void>();
 
-  constructor(private daemonService: DaemonService, private electronService: ElectronService, private ngZone: NgZone) {
+  constructor() {
 
     this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
       this.ngZone.run(() => {

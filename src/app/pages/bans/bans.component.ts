@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, NgZone } from '@angular/core';
+import { AfterViewInit, Component, NgZone, inject } from '@angular/core';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
@@ -13,7 +13,11 @@ import { BasePageComponent } from '../base-page/base-page.component';
     styleUrl: './bans.component.scss',
     standalone: false
 })
-export class BansComponent extends BasePageComponent implements AfterViewInit {  
+export class BansComponent extends BasePageComponent implements AfterViewInit {
+  private daemonData = inject(DaemonDataService);
+  private daemonService = inject(DaemonService);
+  private ngZone = inject(NgZone);
+  
   public refreshingBansTable: boolean = false;
   
   public get daemonRunning(): boolean {
@@ -63,7 +67,9 @@ export class BansComponent extends BasePageComponent implements AfterViewInit {
     return bans;
   }
 
-  constructor(private daemonData: DaemonDataService, private daemonService: DaemonService, navbarService: NavbarService, private ngZone: NgZone) {
+  constructor() {
+    const navbarService = inject(NavbarService);
+
     super(navbarService);
 
     this.setLinks([

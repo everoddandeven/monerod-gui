@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable, NgZone } from '@angular/core';
+import { EventEmitter, Injectable, NgZone, inject } from '@angular/core';
 import { LogCategories } from '../../../common';
 import { I2pDaemonService, TorDaemonService } from '../../core/services';
 
@@ -6,6 +6,10 @@ import { I2pDaemonService, TorDaemonService } from '../../core/services';
   providedIn: 'root'
 })
 export class LogsService {
+  private ngZone = inject(NgZone);
+  private i2pService = inject(I2pDaemonService);
+  private torService = inject(TorDaemonService);
+
   
   private readonly torLogHandler: (message: string) => void = (message: string) => {
     this.log(message, 'tor');
@@ -32,7 +36,7 @@ export class LogsService {
   public readonly maxLines: number = 250;
   public readonly categories: LogCategories = new LogCategories();
   
-  constructor(private ngZone: NgZone, private i2pService: I2pDaemonService, private torService: TorDaemonService) {
+  constructor() {
     window.electronAPI.onMonerodStdout(this.monerodLogHandler);
     this.i2pService.std.out.subscribe(this.i2pdLogHandler);
     this.i2pService.std.err.subscribe(this.i2pdLogHandler);

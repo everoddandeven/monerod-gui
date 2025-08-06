@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, inject } from '@angular/core';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { DaemonDataService, DaemonService } from '../../core/services';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
@@ -14,6 +14,9 @@ import { BasePageComponent } from '../base-page/base-page.component';
     standalone: false
 })
 export class NetworkComponent extends BasePageComponent implements AfterViewInit, OnDestroy {
+  private daemonService = inject(DaemonService);
+  private daemonData = inject(DaemonDataService);
+
 
   private connections?: Connection[];
   private netStatsBytesInChart?: Chart;
@@ -38,7 +41,9 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
   public getConnectionsError: string = '';
   public refreshingConnectionsTable: boolean = false;
 
-  constructor(navbarService: NavbarService, private daemonService: DaemonService, private daemonData: DaemonDataService) {
+  constructor() {
+    const navbarService = inject(NavbarService);
+
     super(navbarService);
     this.setLinks([
       new NavbarLink('pills-net-stats-tab', '#pills-net-stats', 'pills-net-stats', false, 'Statistics'),

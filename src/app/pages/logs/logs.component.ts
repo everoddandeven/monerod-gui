@@ -1,4 +1,4 @@
-import { AfterContentInit, AfterViewInit, Component, NgZone, OnDestroy } from '@angular/core';
+import { AfterContentInit, AfterViewInit, Component, NgZone, OnDestroy, inject } from '@angular/core';
 import { LogsService } from './logs.service';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
@@ -14,6 +14,10 @@ import { Subscription } from 'rxjs';
     standalone: false
 })
 export class LogsComponent extends BasePageComponent implements AfterViewInit, AfterContentInit, OnDestroy {
+  private logsService = inject(LogsService);
+  private daemonService = inject(DaemonService);
+  private ngZone = inject(NgZone);
+
   private initing: boolean = false;
   private scrollEventsRegistered: boolean = false;
   
@@ -45,7 +49,9 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, A
   private readonly i2pdLink: NavbarLink = new NavbarLink('pills-i2pd-tab', '#pills-i2pd', 'pills-i2pd', false, 'i2pd', false, false);
   private readonly torLink: NavbarLink = new NavbarLink('pills-tor-tab', '#pills-tor', 'pills-tor', false, 'tor', false, false);
 
-  constructor(navbarService: NavbarService, private logsService: LogsService, private daemonService: DaemonService, private ngZone: NgZone) {
+  constructor() {
+    const navbarService = inject(NavbarService);
+
     super(navbarService);
 
     const onLogSub: Subscription = this.logsService.onLog.subscribe(({ type } : { message: string; type: 'monerod' | 'i2pd'; }) => {

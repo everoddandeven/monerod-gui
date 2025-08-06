@@ -1,4 +1,4 @@
-import { Component, NgZone } from '@angular/core';
+import { Component, NgZone, inject } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonSettings, DefaultPrivnetNode2Settings, I2pDaemonSettings, PrivnetDaemonSettings, TorDaemonSettings } from '../../../common';
 import { DaemonService, I2pDaemonService, ElectronService, TorDaemonService } from '../../core/services';
@@ -13,6 +13,12 @@ import { NavbarService } from '../../shared/components';
     standalone: false
 })
 export class SettingsComponent extends BasePageComponent {
+  private daemonService = inject(DaemonService);
+  private i2pdService = inject(I2pDaemonService);
+  private torService = inject(TorDaemonService);
+  private electronService = inject(ElectronService);
+  private ngZone = inject(NgZone);
+
   // #region Properties
 
   public readonly navbarLinks: NavbarLink[];
@@ -388,10 +394,9 @@ export class SettingsComponent extends BasePageComponent {
 
   // #endregion
 
-  constructor(
-    private daemonService: DaemonService, private i2pdService: I2pDaemonService, private torService: TorDaemonService,
-    private electronService: ElectronService, navbarService: NavbarService, private ngZone: NgZone
-  ) {
+  constructor() {
+    const navbarService = inject(NavbarService);
+
     super(navbarService);
     this.loading = true;
 

@@ -1,4 +1,4 @@
-import { AfterContentInit, AfterViewInit, Component, NgZone, OnDestroy } from '@angular/core';
+import { AfterContentInit, AfterViewInit, Component, NgZone, OnDestroy, inject } from '@angular/core';
 import { DaemonService, DaemonDataService } from '../../core/services';
 import { NavbarLink, NavbarService } from '../../shared/components';
 import { AddedAuxPow, AuxPoW, BlockTemplate, GeneratedBlocks, MiningStatus, MinerData, Chain, NetHashRateHistoryEntry } from '../../../common';
@@ -14,6 +14,10 @@ import { Subscription } from 'rxjs';
     standalone: false
 })
 export class MiningComponent extends BasePageComponent implements AfterViewInit, AfterContentInit, OnDestroy {
+  private daemonService = inject(DaemonService);
+  private daemonData = inject(DaemonDataService);
+  private ngZone = inject(NgZone);
+
 
   public get coreBusy(): boolean {
     return this.daemonData.info? !this.daemonData.info.coreSynchronized : true;
@@ -162,7 +166,9 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     return this.startMiningMinerAddress != '';
   }
 
-  constructor(private daemonService: DaemonService, private daemonData: DaemonDataService, navbarService: NavbarService, private ngZone: NgZone) {
+  constructor() {
+    const navbarService = inject(NavbarService);
+
     super(navbarService)
     this.cards = [];
 

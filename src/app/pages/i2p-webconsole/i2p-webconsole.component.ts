@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, inject } from '@angular/core';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { LocalDestinationsData, MainData, TunnelsData } from '../../../common';
 import { NavbarLink, NavbarService } from '../../shared/components';
@@ -11,6 +11,9 @@ import { DaemonService, I2pDaemonService } from '../../core/services';
   standalone: false
 })
 export class I2pWebconsoleComponent extends BasePageComponent implements OnDestroy {
+  private i2pService = inject(I2pDaemonService);
+  private daemonService = inject(DaemonService);
+
 
   private refreshing: boolean = false;
   private refreshInterval?: NodeJS.Timeout;
@@ -53,7 +56,9 @@ export class I2pWebconsoleComponent extends BasePageComponent implements OnDestr
     return "";
   }
 
-  constructor(navbarService: NavbarService, private i2pService: I2pDaemonService, private daemonService: DaemonService) {
+  constructor() {
+    const navbarService = inject(NavbarService);
+
     super(navbarService);
 
     const links = [

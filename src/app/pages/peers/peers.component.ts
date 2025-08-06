@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, NgZone } from '@angular/core';
+import { AfterViewInit, Component, NgZone, inject } from '@angular/core';
 import { DaemonDataService, DaemonService } from '../../core/services';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { NavbarService } from '../../shared/components/navbar/navbar.service';
@@ -13,6 +13,10 @@ import { PeerInfo, PublicNode } from '../../../common';
     standalone: false
 })
 export class PeersComponent extends BasePageComponent implements AfterViewInit {
+  private daemonService = inject(DaemonService);
+  private daemonData = inject(DaemonDataService);
+  private ngZone = inject(NgZone);
+
 
   public limitInPeers: number = 0;
   public limitingInPeers: boolean = false;
@@ -43,7 +47,9 @@ export class PeersComponent extends BasePageComponent implements AfterViewInit {
   private peerList?: PeerInfo[];
   private publicNodes?: PublicNode[];
 
-  constructor(private daemonService: DaemonService, private daemonData: DaemonDataService, navbarService: NavbarService, private ngZone: NgZone) {
+  constructor() {
+    const navbarService = inject(NavbarService);
+
     super(navbarService);
     this.setLinks([
       new NavbarLink('pills-peer-list-tab', '#pills-peer-list', 'pills-peer-list', false, 'Peer List'),

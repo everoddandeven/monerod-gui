@@ -1,4 +1,4 @@
-import { Component, NgZone } from '@angular/core';
+import { Component, NgZone, inject } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { Block, BlockHeader, SyncInfo } from '../../../common';
@@ -13,6 +13,10 @@ import { BasePageComponent } from '../base-page/base-page.component';
     standalone: false
 })
 export class BlockchainComponent extends BasePageComponent {
+  private daemonService = inject(DaemonService);
+  private daemonData = inject(DaemonDataService);
+  private ngZone = inject(NgZone);
+
   
   public get daemonRunning(): boolean {
     return this.daemonData.running;
@@ -76,7 +80,9 @@ export class BlockchainComponent extends BasePageComponent {
     return this.daemonData.syncInfo ? this.daemonData.syncInfo.overview.split('').filter((status: string) => status != '[' && status != ']') : [];
   }
 
-  constructor(private daemonService: DaemonService, private daemonData: DaemonDataService, navbarService: NavbarService, private ngZone: NgZone) {
+  constructor() {
+    const navbarService = inject(NavbarService);
+
     super(navbarService);
     this.setLinks([
       new NavbarLink('pills-block-queue-tab', '#pills-block-queue', 'pills-block-queue', true, 'Block Queue'),

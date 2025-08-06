@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services';
 
@@ -9,6 +9,8 @@ import { DaemonService } from '../../core/services';
     standalone: false
 })
 export class AboutComponent {
+  private daemonService = inject(DaemonService);
+
   public readonly links: NavbarLink[] = [
     new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', true, 'License', false),
     new NavbarLink('pills-contact-tab', '#pills-contact', 'pills-contact', false, 'Contact', false),
@@ -24,8 +26,6 @@ export class AboutComponent {
   public get guiVersion(): string {
     return this.daemonService.getGuiVersion();
   }
-
-  constructor(private daemonService: DaemonService) { }
 
   public copyAddressToClipboard(): void {
     window.electronAPI.copyToClipboard(this.donateCrypto == 'XMR' ? this.XMRAddress : this.donateCrypto == 'WOW' ? this.WOWAddress : this.BTCAddress);
