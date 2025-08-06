@@ -50,7 +50,7 @@ export class PeersComponent extends BasePageComponent implements AfterViewInit {
   constructor() {
     const navbarService = inject(NavbarService);
 
-    super(navbarService);
+    super();
     this.setLinks([
       new NavbarLink('pills-peer-list-tab', '#pills-peer-list', 'pills-peer-list', false, 'Peer List'),
       new NavbarLink('pills-public-nodes-tab', '#pills-public-nodes', 'pills-public-nodes', false, 'Public Nodes'),

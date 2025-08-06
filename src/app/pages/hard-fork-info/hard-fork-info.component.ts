@@ -53,7 +53,7 @@ export class HardForkInfoComponent extends BasePageComponent implements AfterVie
   constructor() {
     const navbarService = inject(NavbarService);
 
-    super(navbarService);
+    super();
 
     this.setLinks([
       new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', false, 'Overview'),

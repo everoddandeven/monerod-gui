@@ -92,7 +92,7 @@ export class TransactionsComponent extends BasePageComponent implements AfterVie
   constructor() {
     const navbarService = inject(NavbarService);
 
-    super(navbarService);
+    super();
 
     this.setLinks([
       new NavbarLink('pills-tx-pool-tab', '#pills-tx-pool', 'pills-tx-pool', false, 'Pool'),

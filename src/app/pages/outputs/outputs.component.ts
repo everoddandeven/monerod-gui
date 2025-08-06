@@ -105,7 +105,7 @@ export class OutputsComponent extends BasePageComponent {
   constructor() {
     const navbarService = inject(NavbarService);
 
-    super(navbarService);
+    super();
 
     this.setLinks([
       new NavbarLink('pills-outputs-get-outs-tab', '#pills-outputs-get-outs', 'outputs-get-outs', false, 'Get Outs'),

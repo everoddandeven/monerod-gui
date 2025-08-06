@@ -285,7 +285,7 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
     const navbarService = inject(NavbarService);
 
     
-    super(navbarService);
+    super();
 
     this.setLinks([
       new NavbarLink('pills-home-tab', '#pills-home', 'pills-home', false, 'Overview', true),

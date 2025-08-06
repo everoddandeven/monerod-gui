@@ -70,7 +70,7 @@ export class BansComponent extends BasePageComponent implements AfterViewInit {
   constructor() {
     const navbarService = inject(NavbarService);
 
-    super(navbarService);
+    super();
 
     this.setLinks([
       new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', false, 'Overview', true),

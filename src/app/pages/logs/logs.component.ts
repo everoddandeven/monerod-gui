@@ -52,7 +52,7 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, A
   constructor() {
     const navbarService = inject(NavbarService);
 
-    super(navbarService);
+    super();
 
     const onLogSub: Subscription = this.logsService.onLog.subscribe(({ type } : { message: string; type: 'monerod' | 'i2pd'; }) => {
       this.onLog(type);

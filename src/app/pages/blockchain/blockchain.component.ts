@@ -83,7 +83,7 @@ export class BlockchainComponent extends BasePageComponent {
   constructor() {
     const navbarService = inject(NavbarService);
 
-    super(navbarService);
+    super();
     this.setLinks([
       new NavbarLink('pills-block-queue-tab', '#pills-block-queue', 'pills-block-queue', true, 'Block Queue'),
       new NavbarLink('pills-last-block-header-tab', '#pills-last-block-header', 'pills-last-block-header', false, 'Last Block Header'),

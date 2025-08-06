@@ -397,7 +397,7 @@ export class SettingsComponent extends BasePageComponent {
   constructor() {
     const navbarService = inject(NavbarService);
 
-    super(navbarService);
+    super();
     this.loading = true;
 
     this.navbarLinks = [

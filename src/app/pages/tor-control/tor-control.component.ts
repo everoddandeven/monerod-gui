@@ -108,7 +108,7 @@ export class TorControlComponent extends BasePageComponent implements AfterViewI
   constructor() {
     const navbarService = inject(NavbarService);
 
-    super(navbarService);
+    super();
 
     const links = [
       new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', true, 'Overview', false, false),

@@ -169,7 +169,7 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   constructor() {
     const navbarService = inject(NavbarService);
 
-    super(navbarService)
+    super();
     this.cards = [];
 
     this.setLinks([

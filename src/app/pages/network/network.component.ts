@@ -44,7 +44,7 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
   constructor() {
     const navbarService = inject(NavbarService);
 
-    super(navbarService);
+    super();
     this.setLinks([
       new NavbarLink('pills-net-stats-tab', '#pills-net-stats', 'pills-net-stats', false, 'Statistics'),
       new NavbarLink('pills-connections-tab', '#pills-connections', 'connections', false, 'Connetions'),
