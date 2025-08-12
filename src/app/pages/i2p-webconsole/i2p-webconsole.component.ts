@@ -57,8 +57,6 @@ export class I2pWebconsoleComponent extends BasePageComponent implements OnDestr
   }
 
   constructor() {
-    const navbarService = inject(NavbarService);
-
     super();
 
     const links = [

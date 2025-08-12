@@ -51,8 +51,6 @@ export class HardForkInfoComponent extends BasePageComponent implements AfterVie
   public loading: boolean = false;
 
   constructor() {
-    const navbarService = inject(NavbarService);
-
     super();
 
     this.setLinks([

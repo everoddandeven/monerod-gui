@@ -106,8 +106,6 @@ export class TorControlComponent extends BasePageComponent implements AfterViewI
   private readonly refreshHandler: () => void = () => this.refresh();
   
   constructor() {
-    const navbarService = inject(NavbarService);
-
     super();
 
     const links = [

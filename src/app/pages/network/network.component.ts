@@ -42,8 +42,6 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
   public refreshingConnectionsTable: boolean = false;
 
   constructor() {
-    const navbarService = inject(NavbarService);
-
     super();
     this.setLinks([
       new NavbarLink('pills-net-stats-tab', '#pills-net-stats', 'pills-net-stats', false, 'Statistics'),

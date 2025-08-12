@@ -50,8 +50,6 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, A
   private readonly torLink: NavbarLink = new NavbarLink('pills-tor-tab', '#pills-tor', 'pills-tor', false, 'tor', false, false);
 
   constructor() {
-    const navbarService = inject(NavbarService);
-
     super();
 
     const onLogSub: Subscription = this.logsService.onLog.subscribe(({ type } : { message: string; type: 'monerod' | 'i2pd'; }) => {

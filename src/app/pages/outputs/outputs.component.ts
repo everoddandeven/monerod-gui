@@ -103,8 +103,6 @@ export class OutputsComponent extends BasePageComponent {
   }
 
   constructor() {
-    const navbarService = inject(NavbarService);
-
     super();
 
     this.setLinks([

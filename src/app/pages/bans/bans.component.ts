@@ -68,8 +68,6 @@ export class BansComponent extends BasePageComponent implements AfterViewInit {
   }
 
   constructor() {
-    const navbarService = inject(NavbarService);
-
     super();
 
     this.setLinks([

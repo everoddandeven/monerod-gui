@@ -288,10 +288,7 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
 
   public cards: SimpleBootstrapCard[];
 
-  constructor() {
-    const navbarService = inject(NavbarService);
-
-    
+  constructor() {    
     super();
 
     this.setLinks([

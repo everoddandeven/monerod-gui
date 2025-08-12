@@ -395,8 +395,6 @@ export class SettingsComponent extends BasePageComponent {
   // #endregion
 
   constructor() {
-    const navbarService = inject(NavbarService);
-
     super();
     this.loading = true;
 
