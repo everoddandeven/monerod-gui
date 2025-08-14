@@ -84,7 +84,7 @@
                 <li class="list-group-item"><strong>Nonce:</strong> {{ lastBlockHeader.nonce }}</li>
                 <li class="list-group-item"><strong>Number of Transactions:</strong> {{ lastBlockHeader.numTxes }}</li>
                 <li class="list-group-item"><strong>Reward:</strong> {{ lastBlockHeader.rewardXMR }} XMR</li>
-                <li class="list-group-item"><strong>Timestamp:</strong> {{ lastBlockHeader.timestamp | date:'medium' }}</li>
+                <li class="list-group-item"><strong>Timestamp:</strong> {{ lastBlockHeader.timestampMs | date:'medium' }}</li>
               </ul>
             </div>
             <div class="col-md-6">
@@ -192,7 +192,7 @@
                     <li class="list-group-item"><strong>Previous Hash:</strong> {{ block.blockHeader.prevHash }}</li>
                     <li class="list-group-item"><strong>Miner Transaction Hash:</strong> {{ block.blockHeader.minerTxHash }}</li>
                     <li class="list-group-item"><strong>Difficulty:</strong> {{ block.blockHeader.difficulty }}</li>
-                    <li class="list-group-item"><strong>Timestamp:</strong> {{ block.blockHeader.timestamp | date:'medium' }}</li>
+                    <li class="list-group-item"><strong>Timestamp:</strong> {{ block.blockHeader.timestampMs | date:'medium' }}</li>
                   </ul>
                 </div>
               </div>
@@ -208,7 +208,7 @@
                   <ul class="list-group">
                     <li class="list-group-item"><strong>Major Version:</strong> {{ block.details.majorVersion }}</li>
                     <li class="list-group-item"><strong>Minor Version:</strong> {{ block.details.minorVersion }}</li>
-                    <li class="list-group-item"><strong>Timestamp:</strong> {{ block.details.timestamp | date:'medium' }}</li>
+                    <li class="list-group-item"><strong>Timestamp:</strong> {{ block.details.timestampMs | date:'medium' }}</li>
                     <li class="list-group-item"><strong>Previous ID:</strong> {{ block.details.prevId }}</li>
                     <li class="list-group-item"><strong>Nonce:</strong> {{ block.details.nonce }}</li>
                     <li class="list-group-item"><strong>Transaction Hashes:</strong>
@@ -327,7 +327,7 @@
                 <li class="list-group-item"><strong>Nonce:</strong> {{ blockHeader.nonce }}</li>
                 <li class="list-group-item"><strong>Number of Transactions:</strong> {{ blockHeader.numTxes }}</li>
                 <li class="list-group-item"><strong>Reward:</strong> {{ blockHeader.rewardXMR }} XMR</li>
-                <li class="list-group-item"><strong>Timestamp:</strong> {{ blockHeader.timestamp | date:'medium' }}</li>
+                <li class="list-group-item"><strong>Timestamp:</strong> {{ blockHeader.timestampMs | date:'medium' }}</li>
               </ul>
             </div>
             <div class="col-md-6">

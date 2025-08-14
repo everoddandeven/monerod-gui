@@ -9,6 +9,10 @@ export class BlockDetails {
     public minerTx: MinerTx;
     public txHashes: string[];
 
+    public get timestampMs(): number {
+        return this.timestamp * 1000;
+    }
+
     constructor(majorVersion: number, minorVersion: number, timestamp: number, prevId: string, nonce: number, minerTx: MinerTx, txHashes: string[]) {
         this.majorVersion = majorVersion;
         this.minorVersion = minorVersion;

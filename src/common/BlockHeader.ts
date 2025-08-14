@@ -49,6 +49,10 @@ export class BlockHeader {
     public readonly wideCumulativeDifficulty: string;
     public readonly wideDifficulty: string;
 
+    public get timestampMs(): number {
+        return this.timestamp * 1000;        
+    }
+
     public get rewardXMR(): number {
       return this.reward / 1e12;
     }
