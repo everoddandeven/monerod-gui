@@ -1,4 +1,4 @@
-import { Component, NgZone, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { Block, BlockHeader, SyncInfo } from '../../../common';
@@ -14,8 +14,6 @@ import { BasePageComponent } from '../base-page/base-page.component';
 export class BlockchainComponent extends BasePageComponent {
   private daemonService = inject(DaemonService);
   private daemonData = inject(DaemonDataService);
-  private ngZone = inject(NgZone);
-
   
   public get daemonRunning(): boolean {
     return this.daemonData.running;

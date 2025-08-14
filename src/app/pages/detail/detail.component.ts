@@ -241,7 +241,7 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
     const blocksLeft = targetHeight - startHeight;
     const blocksDone = targetHeight - height;
     const value = 100 - (blocksDone*100/blocksLeft);
-    let progress = `${value.toFixed(2)} %`;
+    const progress = `${value.toFixed(2)} %`;
     
     if (height == targetHeight) {
       return "100 %"
