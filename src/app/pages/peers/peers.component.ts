@@ -1,7 +1,6 @@
 import { AfterViewInit, Component, NgZone, inject } from '@angular/core';
 import { DaemonDataService, DaemonService } from '../../core/services';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
-import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { Subscription } from 'rxjs';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { PeerInfo, PublicNode } from '../../../common';

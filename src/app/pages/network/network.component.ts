@@ -1,5 +1,4 @@
 import { AfterViewInit, Component, OnDestroy, inject } from '@angular/core';
-import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { DaemonDataService, DaemonService } from '../../core/services';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { Chart, ChartData } from 'chart.js/auto'

@@ -1,7 +1,6 @@
 import { Component, NgZone, inject } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
-import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { HistogramEntry, Output, OutputDistribution } from '../../../common';
 import { DaemonDataService } from '../../core/services';
 import { BasePageComponent } from '../base-page/base-page.component';

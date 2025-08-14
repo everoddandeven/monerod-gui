@@ -1,5 +1,4 @@
 import { AfterViewInit, Component, NgZone, inject } from '@angular/core';
-import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonDataService } from '../../core/services';

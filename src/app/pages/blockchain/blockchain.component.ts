@@ -3,7 +3,6 @@ import { NavbarLink } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { Block, BlockHeader, SyncInfo } from '../../../common';
 import { DaemonDataService } from '../../core/services';
-import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { BasePageComponent } from '../base-page/base-page.component';
 
 @Component({

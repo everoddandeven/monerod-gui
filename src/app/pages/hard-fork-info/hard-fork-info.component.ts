@@ -1,6 +1,5 @@
 import { AfterViewInit, Component, NgZone, inject } from '@angular/core';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
-import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { SimpleBootstrapCard } from '../../shared/utils';
 import { DaemonDataService } from '../../core/services';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';

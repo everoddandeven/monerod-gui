@@ -1,6 +1,5 @@
 import { Component, AfterViewInit, NgZone, inject } from '@angular/core';
 import { NavbarLink } from '../../shared/components/navbar/navbar.model';
-import { NavbarService } from '../../shared/components/navbar/navbar.service';
 import { DaemonService, DaemonDataService, I2pDaemonService, TorDaemonService } from '../../core/services';
 import { Subscription } from 'rxjs';
 import { Connection, Span, Peer } from '../../../common';

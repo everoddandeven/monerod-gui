@@ -4,7 +4,6 @@ import { DaemonSettings, DefaultPrivnetNode2Settings, I2pDaemonSettings, Privnet
 import { DaemonService, I2pDaemonService, ElectronService, TorDaemonService } from '../../core/services';
 import { DaemonSettingsError } from '../../../common';
 import { BasePageComponent } from '../base-page/base-page.component';
-import { NavbarService } from '../../shared/components';
 
 @Component({
     selector: 'app-settings',
