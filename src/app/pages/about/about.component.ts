@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { NavbarLink } from '../../shared/components/navbar/navbar.model';
+import { NavbarPill } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services';
 
 @Component({
@@ -11,10 +11,10 @@ import { DaemonService } from '../../core/services';
 export class AboutComponent {
   private daemonService = inject(DaemonService);
 
-  public readonly links: NavbarLink[] = [
-    new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', true, 'License', false),
-    new NavbarLink('pills-contact-tab', '#pills-contact', 'pills-contact', false, 'Contact', false),
-    new NavbarLink('pills-donate-tab', '#pills-donate', 'pills-donate', false, 'Donate', false)
+  public readonly links: NavbarPill[] = [
+    new NavbarPill('pills-overview-tab', '#pills-overview', 'pills-overview', true, 'License', false),
+    new NavbarPill('pills-contact-tab', '#pills-contact', 'pills-contact', false, 'Contact', false),
+    new NavbarPill('pills-donate-tab', '#pills-donate', 'pills-donate', false, 'Donate', false)
   ];
 
   public donateCrypto: 'XMR' | 'BTC' | 'WOW' = 'XMR';

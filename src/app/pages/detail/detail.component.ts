@@ -1,5 +1,5 @@
 import { Component, AfterViewInit, NgZone, inject } from '@angular/core';
-import { NavbarLink } from '../../shared/components/navbar/navbar.model';
+import { NavbarPill } from '../../shared/components/navbar/navbar.model';
 import { DaemonService, DaemonDataService, I2pDaemonService, TorDaemonService } from '../../core/services';
 import { Subscription } from 'rxjs';
 import { Connection, Span, Peer } from '../../../common';
@@ -291,10 +291,10 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
     super();
 
     this.setLinks([
-      new NavbarLink('pills-home-tab', '#pills-home', 'pills-home', false, 'Overview', true),
-      new NavbarLink('pills-peers-tab', '#pills-peers', 'pills-peers', false, 'Peers', true),
-      new NavbarLink('pills-spans-tab', '#pills-spans', 'pills-spans', false, 'Spans', true),
-      new NavbarLink('pills-bootstrap-tab', '#pills-bootstrap', 'pills-bootstrap', false, 'Bootstrap')
+      new NavbarPill('pills-home-tab', '#pills-home', 'pills-home', false, 'Overview', true),
+      new NavbarPill('pills-peers-tab', '#pills-peers', 'pills-peers', false, 'Peers', true),
+      new NavbarPill('pills-spans-tab', '#pills-spans', 'pills-spans', false, 'Spans', true),
+      new NavbarPill('pills-bootstrap-tab', '#pills-bootstrap', 'pills-bootstrap', false, 'Bootstrap')
     ]);
 
     this.cards = this.createCards();

@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, NgZone, inject } from '@angular/core';
-import { NavbarLink } from '../../shared/components/navbar/navbar.model';
+import { NavbarPill } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { SimpleBootstrapCard } from '../../shared/utils';
 import { DaemonDataService, ElectronService, MoneroInstallerService, TorDaemonService } from '../../core/services';
@@ -20,7 +20,7 @@ export class VersionComponent implements AfterViewInit {
   private torService = inject(TorDaemonService);
   private ngZone = inject(NgZone);
 
-  public readonly links: NavbarLink[];
+  public readonly links: NavbarPill[];
   public cards: SimpleBootstrapCard[];
   public torCards: SimpleBootstrapCard[];
   public currentVersion?: DaemonVersion;
@@ -93,8 +93,8 @@ export class VersionComponent implements AfterViewInit {
 
   constructor() {
     this.links = [
-      new NavbarLink('pills-monero-tab', '#pills-monero', 'pills-monero', true, 'Monero', false, false),
-      new NavbarLink('pills-tor-tab', '#pills-tor', 'pills-tor', false, 'TOR', false, false)
+      new NavbarPill('pills-monero-tab', '#pills-monero', 'pills-monero', true, 'Monero', false, false),
+      new NavbarPill('pills-tor-tab', '#pills-tor', 'pills-tor', false, 'TOR', false, false)
     ];
     this.cards = this.createCards();
     this.torCards = this.createTorCards();

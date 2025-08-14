@@ -1,5 +1,5 @@
 import { Component, NgZone, inject } from '@angular/core';
-import { NavbarLink } from '../../shared/components/navbar/navbar.model';
+import { NavbarPill } from '../../shared/components/navbar/navbar.model';
 import { DaemonSettings, DefaultPrivnetNode2Settings, I2pDaemonSettings, PrivnetDaemonSettings, TorDaemonSettings } from '../../../common';
 import { DaemonService, I2pDaemonService, ElectronService, TorDaemonService } from '../../core/services';
 import { DaemonSettingsError } from '../../../common';
@@ -20,7 +20,7 @@ export class SettingsComponent extends BasePageComponent {
 
   // #region Properties
 
-  public readonly navbarLinks: NavbarLink[];
+  public readonly navbarLinks: NavbarPill[];
 
   public i2pOutproxyIp: string = '';
   public i2pOutproxyPort: number = 0;
@@ -398,15 +398,15 @@ export class SettingsComponent extends BasePageComponent {
     this.loading = true;
 
     this.navbarLinks = [
-      new NavbarLink('pills-general-tab', '#pills-general', 'pills-general', true, 'General', false),
-      new NavbarLink('pills-node-tab', '#pills-node', 'pills-node', false, 'Node', false),
-      new NavbarLink('pills-rpc-tab', '#pills-rpc', 'pills-rpc', false, 'RPC', false),
-      new NavbarLink('pills-p2p-tab', '#pills-p2p', 'pills-p2p', false, 'P2P', false),
-      new NavbarLink('pills-blockchain-tab', '#pills-blockchain', 'pills-blockchain', false, 'Blockchain', false),
-      new NavbarLink('pills-mining-tab', '#pills-mining', 'pills-mining', false, 'Mining', false),
-      new NavbarLink('pills-logs-tab', '#pills-logs', 'pills-logs', false, 'Logs', false),
-      new NavbarLink('pills-tor-tab', '#pills-tor', 'pills-tor', false, 'Tor', false),
-      new NavbarLink('pills-i2p-tab', '#pills-i2p', 'pills-i2p', false, 'I2P', false)
+      new NavbarPill('pills-general-tab', '#pills-general', 'pills-general', true, 'General', false),
+      new NavbarPill('pills-node-tab', '#pills-node', 'pills-node', false, 'Node', false),
+      new NavbarPill('pills-rpc-tab', '#pills-rpc', 'pills-rpc', false, 'RPC', false),
+      new NavbarPill('pills-p2p-tab', '#pills-p2p', 'pills-p2p', false, 'P2P', false),
+      new NavbarPill('pills-blockchain-tab', '#pills-blockchain', 'pills-blockchain', false, 'Blockchain', false),
+      new NavbarPill('pills-mining-tab', '#pills-mining', 'pills-mining', false, 'Mining', false),
+      new NavbarPill('pills-logs-tab', '#pills-logs', 'pills-logs', false, 'Logs', false),
+      new NavbarPill('pills-tor-tab', '#pills-tor', 'pills-tor', false, 'Tor', false),
+      new NavbarPill('pills-i2p-tab', '#pills-i2p', 'pills-i2p', false, 'I2P', false)
     ];
     
     this._currentSettings = this.originalSettings.clone();

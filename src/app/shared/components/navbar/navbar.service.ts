@@ -1,5 +1,5 @@
 import { EventEmitter, Injectable, NgZone, inject } from '@angular/core';
-import { NavbarLink } from './navbar.model';
+import { NavbarPill } from './navbar.model';
 import { DaemonService } from '../../../core/services';
 
 @Injectable({
@@ -9,10 +9,10 @@ export class NavbarService {
   private daemonService = inject(DaemonService);
   private zone = inject(NgZone);
 
-  private _navbarLinks: NavbarLink[] = [];
+  private _navbarLinks: NavbarPill[] = [];
   private daemonRunning: boolean = false;
 
-  public get links(): NavbarLink[] {
+  public get links(): NavbarPill[] {
     return this._navbarLinks;
   }
 
@@ -51,15 +51,15 @@ export class NavbarService {
     })
   }
 
-  public addLink(... navbarLinks: NavbarLink[]): void {
-    navbarLinks.forEach((navLink: NavbarLink) => this._navbarLinks.push(navLink));
+  public addLink(... navbarLinks: NavbarPill[]): void {
+    navbarLinks.forEach((navLink: NavbarPill) => this._navbarLinks.push(navLink));
   }
 
   private get enabled(): boolean {
     return this.daemonRunning && !this.daemonService.stopping && !this.daemonService.starting && !this.daemonService.restarting;
   }
 
-  public setLinks(navbarLinks: NavbarLink[]): void {
+  public setLinks(navbarLinks: NavbarPill[]): void {
     this._navbarLinks = navbarLinks;
 
     if (this.enabled) this.enableLinks();

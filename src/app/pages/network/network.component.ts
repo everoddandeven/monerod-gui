@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, OnDestroy, inject } from '@angular/core';
 import { DaemonDataService, DaemonService } from '../../core/services';
-import { NavbarLink } from '../../shared/components/navbar/navbar.model';
+import { NavbarPill } from '../../shared/components/navbar/navbar.model';
 import { Chart, ChartData } from 'chart.js/auto'
 import { Connection, NetStats, NetStatsHistoryEntry } from '../../../common';
 import { Subscription } from 'rxjs';
@@ -43,9 +43,9 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
   constructor() {
     super();
     this.setLinks([
-      new NavbarLink('pills-net-stats-tab', '#pills-net-stats', 'pills-net-stats', false, 'Statistics'),
-      new NavbarLink('pills-connections-tab', '#pills-connections', 'connections', false, 'Connetions'),
-      new NavbarLink('pills-limits-tab', '#pills-limit', 'pills-limit', false, 'Limit')
+      new NavbarPill('pills-net-stats-tab', '#pills-net-stats', 'pills-net-stats', false, 'Statistics'),
+      new NavbarPill('pills-connections-tab', '#pills-connections', 'connections', false, 'Connetions'),
+      new NavbarPill('pills-limits-tab', '#pills-limit', 'pills-limit', false, 'Limit')
     ]);
 
     const lastNetStats = this.daemonData.netStatsHistory.last;

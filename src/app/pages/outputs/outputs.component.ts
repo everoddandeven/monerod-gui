@@ -1,5 +1,5 @@
 import { Component, NgZone, inject } from '@angular/core';
-import { NavbarLink } from '../../shared/components/navbar/navbar.model';
+import { NavbarPill } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { HistogramEntry, Output, OutputDistribution } from '../../../common';
 import { DaemonDataService } from '../../core/services';
@@ -105,10 +105,10 @@ export class OutputsComponent extends BasePageComponent {
     super();
 
     this.setLinks([
-      new NavbarLink('pills-outputs-get-outs-tab', '#pills-outputs-get-outs', 'outputs-get-outs', false, 'Get Outs'),
-      new NavbarLink('pills-outputs-histogram-tab', '#pills-outputs-histogram', 'outputs-histogram', false, 'Histogram'),
-      new NavbarLink('pills-outputs-distribution-tab', '#pills-outputs-distribution', 'outputs-distribution', false, 'Distribution'),
-      new NavbarLink('pills-is-key-image-spent-tab', '#pills-is-key-image-spent', 'is-key-image-spent', false, 'Is Key Image Spent')
+      new NavbarPill('pills-outputs-get-outs-tab', '#pills-outputs-get-outs', 'outputs-get-outs', false, 'Get Outs'),
+      new NavbarPill('pills-outputs-histogram-tab', '#pills-outputs-histogram', 'outputs-histogram', false, 'Histogram'),
+      new NavbarPill('pills-outputs-distribution-tab', '#pills-outputs-distribution', 'outputs-distribution', false, 'Distribution'),
+      new NavbarPill('pills-is-key-image-spent-tab', '#pills-is-key-image-spent', 'is-key-image-spent', false, 'Is Key Image Spent')
     ]);
   }
 

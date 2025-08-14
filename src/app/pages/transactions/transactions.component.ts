@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, NgZone, inject } from '@angular/core';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
-import { NavbarLink } from '../../shared/components/navbar/navbar.model';
+import { NavbarPill } from '../../shared/components/navbar/navbar.model';
 import { TxBacklogEntry } from '../../../common';
 import { SimpleBootstrapCard } from '../../shared/utils';
 import { DaemonDataService } from '../../core/services';
@@ -92,14 +92,14 @@ export class TransactionsComponent extends BasePageComponent implements AfterVie
     super();
 
     this.setLinks([
-      new NavbarLink('pills-tx-pool-tab', '#pills-tx-pool', 'pills-tx-pool', false, 'Pool'),
-      new NavbarLink('pills-relay-tx-tab', '#pills-relay-tx', 'pills-relay-tx', false, 'Relay Tx'),
-      new NavbarLink('pills-send-raw-tx-tab', '#pills-send-raw-tx', 'pills-send-raw-tx', false, 'Send Raw Tx'),
-      new NavbarLink('pills-get-fee-estimate-tab', '#pills-get-fee-estimate', 'pills-get-fee-estimate', false, 'Get Fee Estimate'),
-      new NavbarLink('pills-tx-pool-backlog-tab', '#pills-tx-pool-backlog', 'pills-tx-pool-backlog', false, 'Tx Pool Backlog'),
-      new NavbarLink('pills-coinbase-tx-sum-tab', '#pills-coinbase-tx-sum', 'pills-coinbase-tx-sum', false, 'Coinbase Tx Sum'),
-      new NavbarLink('pills-flush-tx-pool-tab', '#pills-flush-tx-pool', 'pills-flush-tx-pool', false, 'Flush Tx Pool'),
-      new NavbarLink('pills-flush-cahe-tab', '#pills-flush-cache', 'pills-flush-cache', false, 'Flush Cache')
+      new NavbarPill('pills-tx-pool-tab', '#pills-tx-pool', 'pills-tx-pool', false, 'Pool'),
+      new NavbarPill('pills-relay-tx-tab', '#pills-relay-tx', 'pills-relay-tx', false, 'Relay Tx'),
+      new NavbarPill('pills-send-raw-tx-tab', '#pills-send-raw-tx', 'pills-send-raw-tx', false, 'Send Raw Tx'),
+      new NavbarPill('pills-get-fee-estimate-tab', '#pills-get-fee-estimate', 'pills-get-fee-estimate', false, 'Get Fee Estimate'),
+      new NavbarPill('pills-tx-pool-backlog-tab', '#pills-tx-pool-backlog', 'pills-tx-pool-backlog', false, 'Tx Pool Backlog'),
+      new NavbarPill('pills-coinbase-tx-sum-tab', '#pills-coinbase-tx-sum', 'pills-coinbase-tx-sum', false, 'Coinbase Tx Sum'),
+      new NavbarPill('pills-flush-tx-pool-tab', '#pills-flush-tx-pool', 'pills-flush-tx-pool', false, 'Flush Tx Pool'),
+      new NavbarPill('pills-flush-cahe-tab', '#pills-flush-cache', 'pills-flush-cache', false, 'Flush Cache')
     ]);
     this.height = 0;
     this.count = 0;

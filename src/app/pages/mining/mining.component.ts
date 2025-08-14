@@ -1,6 +1,6 @@
 import { AfterContentInit, AfterViewInit, Component, NgZone, OnDestroy, inject } from '@angular/core';
 import { DaemonService, DaemonDataService } from '../../core/services';
-import { NavbarLink } from '../../shared/components';
+import { NavbarPill } from '../../shared/components';
 import { AddedAuxPow, AuxPoW, BlockTemplate, GeneratedBlocks, MiningStatus, MinerData, Chain, NetHashRateHistoryEntry } from '../../../common';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { SimpleBootstrapCard } from '../../shared/utils';
@@ -171,15 +171,15 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     this.cards = [];
 
     this.setLinks([
-      new NavbarLink('pills-mining-status-tab', '#pills-mining-status', 'mining-status', false, 'Status'),
-      new NavbarLink('pills-miner-data-tab', '#pills-miner-data', 'miner-data', false, 'Miner Data'),
-      new NavbarLink('pills-hashrate-tab', '#pills-hashrate', 'hashrate', false, 'Hashrate'),
-      new NavbarLink('pills-alternate-chains-tab', '#pills-alternate-chains', 'alternate-chains', false, 'Alternate Chains'),
-      new NavbarLink('pills-block-template-tab', '#pills-block-template', 'block-template', false, 'Block Template'),
-      new NavbarLink('pills-generate-blocks-tab', '#pills-generate-blocks', 'generate-blocks', false, 'Generate Blocks'),
-      new NavbarLink('pills-submit-block-tab', '#pills-submit-block', 'submit-block', false, 'Submit Block'),
-      new NavbarLink('pills-calc-pow-tab', '#pills-calc-pow', 'calc-pow', false, 'Calculate PoW Hash'),
-      new NavbarLink('pills-add-aux-pow-tab', '#pills-add-aux-pow', 'add-aux-pow', false, 'Add Aux PoW')
+      new NavbarPill('pills-mining-status-tab', '#pills-mining-status', 'mining-status', false, 'Status'),
+      new NavbarPill('pills-miner-data-tab', '#pills-miner-data', 'miner-data', false, 'Miner Data'),
+      new NavbarPill('pills-hashrate-tab', '#pills-hashrate', 'hashrate', false, 'Hashrate'),
+      new NavbarPill('pills-alternate-chains-tab', '#pills-alternate-chains', 'alternate-chains', false, 'Alternate Chains'),
+      new NavbarPill('pills-block-template-tab', '#pills-block-template', 'block-template', false, 'Block Template'),
+      new NavbarPill('pills-generate-blocks-tab', '#pills-generate-blocks', 'generate-blocks', false, 'Generate Blocks'),
+      new NavbarPill('pills-submit-block-tab', '#pills-submit-block', 'submit-block', false, 'Submit Block'),
+      new NavbarPill('pills-calc-pow-tab', '#pills-calc-pow', 'calc-pow', false, 'Calculate PoW Hash'),
+      new NavbarPill('pills-add-aux-pow-tab', '#pills-add-aux-pow', 'add-aux-pow', false, 'Add Aux PoW')
     ]);
     
     const syncEndSub: Subscription = this.daemonData.syncEnd.subscribe(() => {

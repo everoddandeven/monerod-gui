@@ -1,5 +1,5 @@
 import { AfterContentInit, Component, inject, OnDestroy } from '@angular/core';
-import { NavbarLink, NavbarService } from '../../shared/components';
+import { NavbarPill, NavbarService } from '../../shared/components';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -10,9 +10,9 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
   private navbarService: NavbarService = inject(NavbarService)
 
   private readonly initializedTables: { [key: string]: JQuery<HTMLElement> | undefined } = {};
-  private _links: NavbarLink[] = [];
+  private _links: NavbarPill[] = [];
 
-  public get links(): NavbarLink[] {
+  public get links(): NavbarPill[] {
     return this.navbarService.links;
   }
 
@@ -34,7 +34,7 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
     this.updateTableContentHeight('pills-tabContent');
   }
 
-  protected setLinks(links: NavbarLink[] = []): void {
+  protected setLinks(links: NavbarPill[] = []): void {
     this._links = links;
   }
 

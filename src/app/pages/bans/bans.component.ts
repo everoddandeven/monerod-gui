@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, NgZone, inject } from '@angular/core';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
-import { NavbarLink } from '../../shared/components/navbar/navbar.model';
+import { NavbarPill } from '../../shared/components/navbar/navbar.model';
 import { DaemonDataService } from '../../core/services';
 import { Ban } from '../../../common';
 import { BasePageComponent } from '../base-page/base-page.component';
@@ -70,8 +70,8 @@ export class BansComponent extends BasePageComponent implements AfterViewInit {
     super();
 
     this.setLinks([
-      new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', false, 'Overview', true),
-      new NavbarLink('pills-set-bans-tab', '#pills-set-bans', 'pills-set-bans', false, 'Set Bans', true)
+      new NavbarPill('pills-overview-tab', '#pills-overview', 'pills-overview', false, 'Overview', true),
+      new NavbarPill('pills-set-bans-tab', '#pills-set-bans', 'pills-set-bans', false, 'Set Bans', true)
     ]);
   }
 

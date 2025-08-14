@@ -2,7 +2,7 @@ import { AfterViewInit, Component, NgZone, inject } from '@angular/core';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
 import { SimpleBootstrapCard } from '../../shared/utils';
 import { DaemonDataService } from '../../core/services';
-import { NavbarLink } from '../../shared/components/navbar/navbar.model';
+import { NavbarPill } from '../../shared/components/navbar/navbar.model';
 import { BasePageComponent } from '../base-page/base-page.component';
 
 @Component({
@@ -53,7 +53,7 @@ export class HardForkInfoComponent extends BasePageComponent implements AfterVie
     super();
 
     this.setLinks([
-      new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', false, 'Overview'),
+      new NavbarPill('pills-overview-tab', '#pills-overview', 'pills-overview', false, 'Overview'),
     ]);
     this.cards = [];
     this.enabled = false;

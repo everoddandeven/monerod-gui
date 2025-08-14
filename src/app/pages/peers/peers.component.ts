@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, NgZone, inject } from '@angular/core';
 import { DaemonDataService, DaemonService } from '../../core/services';
-import { NavbarLink } from '../../shared/components/navbar/navbar.model';
+import { NavbarPill } from '../../shared/components/navbar/navbar.model';
 import { Subscription } from 'rxjs';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { PeerInfo, PublicNode } from '../../../common';
@@ -49,10 +49,10 @@ export class PeersComponent extends BasePageComponent implements AfterViewInit {
   constructor() {
     super();
     this.setLinks([
-      new NavbarLink('pills-peer-list-tab', '#pills-peer-list', 'pills-peer-list', false, 'Peer List'),
-      new NavbarLink('pills-public-nodes-tab', '#pills-public-nodes', 'pills-public-nodes', false, 'Public Nodes'),
-      new NavbarLink('pills-in-peers-tab', '#pills-in-peers', 'pills-in-peers', false, 'In Peers'),
-      new NavbarLink('pills-out-peers-tab', '#pills-out-peers', 'pills-out-peers', false, 'Out Peers')
+      new NavbarPill('pills-peer-list-tab', '#pills-peer-list', 'pills-peer-list', false, 'Peer List'),
+      new NavbarPill('pills-public-nodes-tab', '#pills-public-nodes', 'pills-public-nodes', false, 'Public Nodes'),
+      new NavbarPill('pills-in-peers-tab', '#pills-in-peers', 'pills-in-peers', false, 'In Peers'),
+      new NavbarPill('pills-out-peers-tab', '#pills-out-peers', 'pills-out-peers', false, 'Out Peers')
     ]);
   }
 

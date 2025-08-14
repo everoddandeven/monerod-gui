@@ -1,7 +1,7 @@
 import { Component, OnDestroy, inject } from '@angular/core';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { LocalDestinationsData, MainData, TunnelsData } from '../../../common';
-import { NavbarLink } from '../../shared/components';
+import { NavbarPill } from '../../shared/components';
 import { DaemonService, I2pDaemonService } from '../../core/services';
 
 @Component({
@@ -60,10 +60,10 @@ export class I2pWebconsoleComponent extends BasePageComponent implements OnDestr
     super();
 
     const links = [
-      new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', false, 'Overview'),
-      new NavbarLink('pills-router-commands-tab', '#pills-router-commands', 'pills-router-commands', false, 'Commands'),
-      new NavbarLink('pills-local-destinations-tab', '#pills-local-destinations', 'pills-local-destinations', false, 'Local Destinations'),
-      new NavbarLink('pills-i2p-tunnels-tab', '#pills-i2p-tunnels', 'pills-i2p-tunnels', false, 'I2P Tunnels'),
+      new NavbarPill('pills-overview-tab', '#pills-overview', 'pills-overview', false, 'Overview'),
+      new NavbarPill('pills-router-commands-tab', '#pills-router-commands', 'pills-router-commands', false, 'Commands'),
+      new NavbarPill('pills-local-destinations-tab', '#pills-local-destinations', 'pills-local-destinations', false, 'Local Destinations'),
+      new NavbarPill('pills-i2p-tunnels-tab', '#pills-i2p-tunnels', 'pills-i2p-tunnels', false, 'I2P Tunnels'),
     ];
 
     this.setLinks(links);

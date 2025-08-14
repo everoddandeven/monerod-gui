@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, NgZone, OnDestroy, inject } from '@angular/core';
 import { NavbarService } from './navbar.service';
-import { NavbarLink } from './navbar.model';
+import { NavbarPill } from './navbar.model';
 import { DaemonService } from '../../../core/services/daemon/daemon.service';
 import { DaemonDataService, MoneroInstallerService } from '../../../core/services';
 import { DaemonSettings } from '../../../../common';
@@ -37,7 +37,7 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
     return this.daemonService.quitting;
   }
 
-  public get navbarLinks(): NavbarLink[] {
+  public get navbarLinks(): NavbarPill[] {
     return this.navbarService.links;
   }
 

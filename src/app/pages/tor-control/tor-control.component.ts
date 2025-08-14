@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, OnDestroy, inject } from '@angular/core';
 import { BasePageComponent } from '../base-page/base-page.component';
-import { NavbarLink } from '../../shared/components';
+import { NavbarPill } from '../../shared/components';
 import { DaemonService, TorBootstrapPhase, TorDaemonService } from '../../core/services';
 import { ProcessStats } from '../../../common';
 
@@ -109,8 +109,8 @@ export class TorControlComponent extends BasePageComponent implements AfterViewI
     super();
 
     const links = [
-      new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', true, 'Overview', false, false),
-      new NavbarLink('pills-commands-tab', '#pills-commands', 'pills-commands', true, 'Commands')
+      new NavbarPill('pills-overview-tab', '#pills-overview', 'pills-overview', true, 'Overview', false, false),
+      new NavbarPill('pills-commands-tab', '#pills-commands', 'pills-commands', true, 'Commands')
     ];
 
     this.setLinks(links);

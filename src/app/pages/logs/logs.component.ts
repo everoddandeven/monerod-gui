@@ -1,6 +1,6 @@
 import { AfterContentInit, AfterViewInit, Component, NgZone, OnDestroy, inject } from '@angular/core';
 import { LogsService } from './logs.service';
-import { NavbarLink } from '../../shared/components/navbar/navbar.model';
+import { NavbarPill } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services';
 import { LogCategories } from '../../../common';
 import { BasePageComponent } from '../base-page/base-page.component';
@@ -44,9 +44,9 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, A
     return this.logsService.categories;
   }
   
-  private readonly monerodLink: NavbarLink = new NavbarLink('pills-overview-tab', '#pills-overview', 'pills-overview', true, 'monerod', false, false);
-  private readonly i2pdLink: NavbarLink = new NavbarLink('pills-i2pd-tab', '#pills-i2pd', 'pills-i2pd', false, 'i2pd', false, false);
-  private readonly torLink: NavbarLink = new NavbarLink('pills-tor-tab', '#pills-tor', 'pills-tor', false, 'tor', false, false);
+  private readonly monerodLink: NavbarPill = new NavbarPill('pills-overview-tab', '#pills-overview', 'pills-overview', true, 'monerod', false, false);
+  private readonly i2pdLink: NavbarPill = new NavbarPill('pills-i2pd-tab', '#pills-i2pd', 'pills-i2pd', false, 'i2pd', false, false);
+  private readonly torLink: NavbarPill = new NavbarPill('pills-tor-tab', '#pills-tor', 'pills-tor', false, 'tor', false, false);
 
   constructor() {
     super();
@@ -57,9 +57,9 @@ export class LogsComponent extends BasePageComponent implements AfterViewInit, A
 
     const links = [
       this.monerodLink, this.torLink, this.i2pdLink,
-      new NavbarLink('pills-set-log-level-tab', '#pills-set-log-level', 'pills-set-log-level', false, 'Set Log Level'),
-      new NavbarLink('pills-set-log-categories-tab', '#pills-set-log-categories', 'pills-set-log-categories', false, 'Set Log Categories'),
-      new NavbarLink('pills-set-log-hash-rate-tab', '#pills-set-log-hash-rate', 'pills-set-log-hash-rate', false, 'Set Log Hash Rate')
+      new NavbarPill('pills-set-log-level-tab', '#pills-set-log-level', 'pills-set-log-level', false, 'Set Log Level'),
+      new NavbarPill('pills-set-log-categories-tab', '#pills-set-log-categories', 'pills-set-log-categories', false, 'Set Log Categories'),
+      new NavbarPill('pills-set-log-hash-rate-tab', '#pills-set-log-hash-rate', 'pills-set-log-hash-rate', false, 'Set Log Hash Rate')
     ];
 
     this.setLinks(links);
