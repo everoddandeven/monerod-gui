@@ -49,8 +49,6 @@ export class SidebarComponent {
     this.navLinks = [
       new NavLink('Dashboard', '/detail', 'bi bi-speedometer2'),
       new NavLink('Blockchain', '/blockchain', 'bi bi-bounding-box'),
-      new NavLink('Transactions', '/transactions', 'bi bi-credit-card-2-front'),
-      new NavLink('Outputs', '/outputs', 'bi bi-circle-fill'),
       new NavLink('Mining', '/mining', 'bi bi-minecart-loaded'),
       new NavLink('Hard Fork Info', '/hardforkinfo', 'bi bi-signpost-split'),
       new NavLink('Network', '/network', 'bi bi-hdd-network', 'bottom'),

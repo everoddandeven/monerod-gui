@@ -15,6 +15,9 @@ import { DaemonStatusService } from '../daemon-not-running/daemon-status.service
     standalone: false
 })
 export class NavbarComponent implements AfterViewInit, OnDestroy {
+  
+  // #region Attributes
+
   private navbarService = inject(NavbarService);
   private daemonService = inject(DaemonService);
   private daemonData = inject(DaemonDataService);
@@ -22,8 +25,17 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
   private statusService = inject(DaemonStatusService);
   private ngZone = inject(NgZone);
 
-
   private _running: boolean = false;
+  private daemonSettings: DaemonSettings = new DaemonSettings();
+  private subscriptions: Subscription[] = [];
+  private tooltips: Tooltip[] = [];
+
+  public disablingSync: boolean = false;
+  public enablingSync: boolean = false;
+
+  // #endregion
+
+  // #region Getters
 
   public get installing(): boolean {
     return this.installerService.installing;
@@ -73,15 +85,11 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
     return this.daemonData.syncDisabledByWifiPolicy;
   }
 
-  public disablingSync: boolean = false;
-  public enablingSync: boolean = false;
-
-  private daemonSettings: DaemonSettings = new DaemonSettings();
-  private subscriptions: Subscription[] = [];
-
   public get cannotStart(): boolean {
     return this.statusService.cannotRunBecauseBatteryPolicy;
   }
+
+  // #endregion
 
   constructor() {
     const onSavedSettingsSub: Subscription = this.daemonService.onSavedSettings.subscribe((settings: DaemonSettings) => {
@@ -117,15 +125,15 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
     this.subscriptions.push(onSavedSettingsSub, onStatusChangedSub);
   }
 
-  private lastTooltips: Tooltip[] = [];
+  // #region Private Methods
 
   private disposeTooltips(): void {
-    this.lastTooltips.forEach((tooltip) => {
+    this.tooltips.forEach((tooltip) => {
       tooltip.hide();
       tooltip.dispose();
     });
 
-    this.lastTooltips = [];
+    this.tooltips = [];
   }
 
   private enableToolTips(): void {
@@ -142,9 +150,27 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
         placement: 'bottom'
       }));
   
-      this.lastTooltips = tooltipList;
+      this.tooltips = tooltipList;
     }, 0);
   }
+
+  // #endregion
+
+  // #region Public Methods
+
+  //#region Angular Methods
+
+  public ngAfterViewInit(): void {
+    this.enableToolTips();
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriptions.forEach((sub: Subscription) => sub.unsubscribe());
+    this.subscriptions = [];
+    this.disposeTooltips();
+  }
+
+  // #endregion
 
   public async startDaemon(): Promise<void> {
     try {
@@ -196,13 +222,5 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
     await this.daemonService.quit();
   }
 
-  public ngAfterViewInit(): void {
-    this.enableToolTips();
-  }
-
-  public ngOnDestroy(): void {
-    this.subscriptions.forEach((sub: Subscription) => sub.unsubscribe());
-    this.subscriptions = [];
-    this.disposeTooltips();
-  }
+  // #endregion
 }

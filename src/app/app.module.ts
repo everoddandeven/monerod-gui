@@ -19,8 +19,6 @@ import { AppComponent } from './app.component';
 import { LoadComponent } from "./shared/components/load/load.component";
 import { BansModule } from './pages/bans/bans.module';
 import { MiningModule } from './pages/mining/mining.module';
-import { TransactionsModule } from './pages/transactions/transactions.module';
-import { OutputsModule } from './pages/outputs/outputs.module';
 import { SettingsModule } from './pages/settings/settings.module';
 import { LogsModule } from './pages/logs/logs.module';
 import { VersionModule } from './pages/version/version.module';
@@ -44,8 +42,6 @@ const httpLoaderFactory = (): TranslateHttpLoader =>  new TranslateHttpLoader();
         BlockchainModule,
         BansModule,
         MiningModule,
-        TransactionsModule,
-        OutputsModule,
         LogsModule,
         SettingsModule,
         HardForkInfoModule,

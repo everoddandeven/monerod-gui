@@ -148,8 +148,8 @@ async function createWindow(): Promise<BrowserWindow> {
       contextIsolation: true,
       devTools: !app.isPackaged,
       sandbox: true,
-      defaultFontSize: process.platform == 'win32' ? 12 : 16,
-      defaultMonospaceFontSize: process.platform == 'win32' ? 11 : 13
+      defaultFontSize: process.platform == 'win32' ? 12 : 12,
+      defaultMonospaceFontSize: process.platform == 'win32' ? 11 : 11
     },
     show: false,
     autoHideMenuBar: true,

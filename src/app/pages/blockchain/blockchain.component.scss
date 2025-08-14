@@ -16,8 +16,8 @@
 }
 
 .block {
-  width: 35px;
-  height: 35px;
+  width: 24px;
+  height: 24px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -30,6 +30,13 @@
 
 .requested {
   background-color: #6c757d; /* Gray for requested */
+  --bs-spinner-width: 2rem;
+  --bs-spinner-height: 2rem;
+  --bs-spinner-vertical-align: -0.125em;
+  --bs-spinner-animation-speed: 2.00s;
+  --bs-spinner-animation-name: spinner-grow;
+  vertical-align: var(--bs-spinner-vertical-align);
+  animation: var(--bs-spinner-animation-speed) linear infinite var(--bs-spinner-animation-name);
 }
 
 .received {
@@ -54,10 +61,24 @@
 .target {
   background-color: #ffc107; /* Yellow to highlight the target */
   border: 1px solid #ffeb3b;
+  --bs-spinner-width: 2rem;
+  --bs-spinner-height: 2rem;
+  --bs-spinner-vertical-align: -0.125em;
+  --bs-spinner-animation-speed: 1.30s;
+  --bs-spinner-animation-name: spinner-grow;
+  vertical-align: var(--bs-spinner-vertical-align);
+  animation: var(--bs-spinner-animation-speed) linear infinite var(--bs-spinner-animation-name);
 }
 
 /* Future blocks beyond the current sync height */
 .future {
   background-color: #e0e0e0; /* Light grey for future blocks */
   color: #6c757d;
+  --bs-spinner-width: 2rem;
+  --bs-spinner-height: 2rem;
+  --bs-spinner-vertical-align: -0.125em;
+  --bs-spinner-animation-speed: 3.50s;
+  --bs-spinner-animation-name: spinner-grow;
+  vertical-align: var(--bs-spinner-vertical-align);
+  animation: var(--bs-spinner-animation-speed) linear infinite var(--bs-spinner-animation-name);
 }

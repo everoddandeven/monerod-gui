@@ -156,36 +156,12 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
     return this.daemonService.startHeight;
   }
 
-  private get nextNeededPruningSeed(): number {
-    return this.daemonData.syncInfo ? this.daemonData.syncInfo.nextNeededPruningSeed : 0;
-  }
-
-  private get overview(): string {
-    return this.daemonData.syncInfo ? this.daemonData.syncInfo.overview : '[]';
-  }
-
   //#endregion
-
-  private get blockCount(): number {
-    return this.daemonData.blockCount ? this.daemonData.blockCount.count : 0;
-  }
 
   //#region Daemon Info 
 
   private get version(): string {
     return this.daemonData.info ? this.daemonData.info.version : 'Unknown';
-  }
-
-  private get blockchainSize(): number {
-    return this.daemonData.info ? parseFloat((this.daemonData.info.databaseSize / 1000 / 1000 / 1000).toFixed(2)) : 0;
-  }
-
-  private get capacity(): number {
-    return this.daemonData.info ? this.daemonData.info.freeSpace + this.daemonData.info.databaseSize : 0;
-  }
-
-  private get diskUsage(): number {
-    return this.daemonData.info ? parseFloat((this.daemonData.info.databaseSize * 100 / this.capacity).toFixed(2)) : 0;
   }
 
   private get networkType(): string {
@@ -222,13 +198,6 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
     return usingProxy ? 'proxy' : 'clearnet';
   }
 
-  private get txCount(): number {
-    return this.daemonData.info ? this.daemonData.info.txCount : 0;
-  }
-
-  private get poolSize(): number {
-    return this.daemonData.info ? this.daemonData.info.txPoolSize : 0;
-  }
 
   private get nodeType(): string {
     return this.daemonData.isBlockchainPruned ? 'pruned' : 'full';
@@ -250,40 +219,9 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
     return progress;
   }
 
-  private get wasBootstrapEverUsed(): boolean {
-    return this.daemonData.info ? this.daemonData.info.wasBoostrapEverUsed : false;
-  }
 
-  private get _bootstrapDaemonAddress(): string {
-    return this.daemonData.info && this.daemonData.info.bootstrapDaemonAddress != '' ? this.daemonData.info.bootstrapDaemonAddress : 'Not set';
-  }
-
-  private get heightWithoutBootstrap(): number {
-    return this.daemonData.info ? this.daemonData.info.heightWithoutBootstrap : 0;
-  }
 
   //#endregion 
-
-  //#region Bootstrap Daemon 
-
-  public boostrapCards: SimpleBootstrapCard[] = [];
-  public settingBootstrapDaemon: boolean = false;
-  public bootstrapDaemonAddress: string = '';
-  public bootstrapDaemonUsername: string = '';
-  public bootstrapDaemonPassword: string = '';
-  public bootstrapDaemonProxy: string = '';
-  public setBootstrapDaemonSuccess: boolean = false;
-  public setBootstrapDaemonError: string = '';
-
-  public get canSetBootstrapDaemon(): boolean {
-    if (this.settingBootstrapDaemon) {
-      return false;
-    }
-
-    return this.bootstrapDaemonAddress != '';
-  }
-
-  //#endregion
 
   public cards: SimpleBootstrapCard[];
 
@@ -293,12 +231,10 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
     this.setLinks([
       new NavbarPill('home', 'Overview', false, true),
       new NavbarPill('peers', 'Peers', false, true),
-      new NavbarPill('spans', 'Spans', false, true),
-      new NavbarPill('bootstrap', 'Bootstrap')
+      new NavbarPill('spans', 'Spans', false, true)
     ]);
 
     this.cards = this.createCards();
-    this.boostrapCards = this.createBootstrapCards();
   }
 
   private registerEventListeners(): void {
@@ -309,7 +245,6 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
       
       this.ngZone.run(() => {
         this.cards = this.createCards();
-        this.boostrapCards = this.createBootstrapCards();
         this.loadTables(true);
       });
     });
@@ -322,7 +257,6 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
 
     const syncInfoRefreshEndSub: Subscription = this.daemonData.syncInfoRefreshEnd.subscribe(() => {
       this.cards = this.createCards();
-      this.boostrapCards = this.createBootstrapCards();
       this.loadTables();
     });
 
@@ -364,13 +298,7 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
       new SimpleBootstrapCard('Node Type', this.nodeType, loading),
       new SimpleBootstrapCard('Sync progress', this.syncProgress, loading),
       new SimpleBootstrapCard('Scan Height', `${this.height} / ${this.targetHeight}`, loading),
-      new SimpleBootstrapCard('Next needed pruning seed', `${this.nextNeededPruningSeed}`, loading),
-      new SimpleBootstrapCard('Block count', `${this.blockCount}`, loading),
       new SimpleBootstrapCard('Monero version', this.version, loading),
-      new SimpleBootstrapCard('Blockchain size', `${this.blockchainSize} GB`, loading),
-      new SimpleBootstrapCard('Transaction count', `${this.txCount}`, loading),
-      new SimpleBootstrapCard('Pool size', `${this.poolSize}`, loading),
-      new SimpleBootstrapCard('Disk usage', `${this.diskUsage} %`, loading)
     );
 
     if (this.daemonData.processStats) {
@@ -385,23 +313,6 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
         new SimpleBootstrapCard('Memory usage', ``, true)
       );
     }
-
-    return cards;
-  }
-
-  private createBootstrapCards(): SimpleBootstrapCard[] {
-    if (!this.daemonRunning && !this.daemonService.starting) {
-      return [];
-    }
-    const loading = this.daemonData.initializing || this.daemonService.starting || this.daemonData.info === undefined || this.daemonData.syncInfo === undefined;
-
-    const cards: SimpleBootstrapCard[] = [];
-
-    cards.push(
-      new SimpleBootstrapCard('Was Bootstrap Ever Used', `${this.wasBootstrapEverUsed}`, loading),
-      new SimpleBootstrapCard('Boostrap Daemon Address', this._bootstrapDaemonAddress, loading),
-      new SimpleBootstrapCard('Height Without Bootstrap', `${this.heightWithoutBootstrap}`, loading)
-    );
 
     return cards;
   }
@@ -422,53 +333,6 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
     return this.daemonData.syncInfo.spans;
   }
 
-  public async setBootstrapDaemon(): Promise<void> {
-    this.settingBootstrapDaemon = true;
 
-    try {
-      await this.daemonService.setBootstrapDaemon(this.bootstrapDaemonAddress, this.bootstrapDaemonUsername, this.bootstrapDaemonPassword, this.bootstrapDaemonProxy);
-      this.setBootstrapDaemonError = '';
-      this.setBootstrapDaemonSuccess = true;
-    }
-    catch(error: any) {
-      this.setBootstrapDaemonSuccess = false;
-      this.setBootstrapDaemonError = `${error}`;
-    }
-
-    this.settingBootstrapDaemon = false;
-  }
-
-  public removingBootstrapDaemon: boolean = false;
-  public removeBootstrapDaemonSuccess: boolean = false;
-  public get canRemoveBootstrapDaemon(): boolean {
-    return this.daemonData.info ? this.daemonData.info.bootstrapDaemonAddress != '' : false;
-  }
-
-  public async removeBootstrapDaemon(): Promise<void> {
-    this.removingBootstrapDaemon = true;
-
-    try {
-      if (!this.canRemoveBootstrapDaemon) {
-        throw new Error("Bootstrap daemon not set");
-      }
-
-      await this.daemonService.removeBootstrapDaemon();
-      this.setBootstrapDaemonError = '';
-      this.removeBootstrapDaemonSuccess = true;
-    }
-
-    catch(error: any) {
-      console.error(error);
-
-      if (error instanceof Error) {
-        this.setBootstrapDaemonError = error.message;
-      }
-      else {
-        this.setBootstrapDaemonError = `${error}`;
-      }
-    }
-
-    this.removingBootstrapDaemon = false;
-  }
 
 }

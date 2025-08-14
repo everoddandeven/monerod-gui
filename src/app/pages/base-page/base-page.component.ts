@@ -1,6 +1,8 @@
 import { AfterContentInit, Component, inject, OnDestroy } from '@angular/core';
 import { NavbarPill, NavbarService } from '../../shared/components';
 import { Subscription } from 'rxjs';
+import { Tooltip } from 'bootstrap';
+
 
 @Component({
     template: '',
@@ -8,19 +10,19 @@ import { Subscription } from 'rxjs';
 })
 export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
   private navbarService: NavbarService = inject(NavbarService)
-
+  private tooltips: Tooltip[] = [];
   private readonly initializedTables: { [key: string]: JQuery<HTMLElement> | undefined } = {};
   private _links: NavbarPill[] = [];
-
-  public get links(): NavbarPill[] {
-    return this.navbarService.links;
-  }
 
   protected subscriptions: Subscription[] = [];
 
   private readonly mResizeHandler: () => void = () => setTimeout(() => {
     this.updateTablesContentHeight();
   }, 100);
+
+  public get links(): NavbarPill[] {
+    return this.navbarService.links;
+  }
 
   constructor() {
     this.subscriptions.push(this.navbarService.onDaemonStatusChanged.subscribe((running) => {
@@ -30,8 +32,37 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
     window.addEventListener('resize', this.mResizeHandler);
   }
 
-  public updateTablesContentHeight(): void {
-    this.updateTableContentHeight('pills-tabContent');
+  // #region Private Methods
+
+  private setTableInitialized(id: string, table: JQuery<HTMLElement>): void {
+    this.initializedTables[id] = table;
+  }
+
+  protected disposeTooltips(): void {
+    this.tooltips.forEach((tooltip) => {
+      tooltip.hide();
+      tooltip.dispose();
+    });
+
+    this.tooltips = [];
+  }
+
+  protected enableToolTips(): void {
+    setTimeout(() => {
+      this.disposeTooltips();
+
+      const tooltipTriggerList: Element[] = [] ;
+    
+      const queryResult = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      
+      queryResult.forEach((el) => tooltipTriggerList.push(el));
+
+      const tooltipList: Tooltip[] = tooltipTriggerList.map(tooltipTriggerEl => new Tooltip(tooltipTriggerEl, {
+        placement: 'bottom'
+      }));
+  
+      this.tooltips = tooltipList;
+    }, 0);
   }
 
   protected setLinks(links: NavbarPill[] = []): void {
@@ -113,10 +144,6 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
     }
   }
 
-  private setTableInitialized(id: string, table: JQuery<HTMLElement>): void {
-    this.initializedTables[id] = table;
-  }
-
   protected isTableInitialized(id: string): boolean {
     const initalized: JQuery<HTMLElement> | undefined = this.initializedTables[id];
 
@@ -183,10 +210,18 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
     return selection;
   }
 
+  // #endregion
+
+  // #region Public Methods
+
+
+  // #region Angular Methods
+
   public ngAfterContentInit(): void {
     this.navbarService.setLinks(this._links);
 
     setTimeout(() => this.updateTablesContentHeight(), 100);
+    this.enableToolTips();
   }
 
   public ngOnDestroy(): void {
@@ -198,6 +233,13 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
     window.removeEventListener('resize', this.mResizeHandler);
 
     this.destroyTables();
+    this.disposeTooltips();
+  }
+
+  // #endregion
+
+  public updateTablesContentHeight(): void {
+    this.updateTableContentHeight('pills-tabContent');
   }
 
   public getTableContent(id: string): HTMLElement | undefined {
@@ -264,4 +306,6 @@ export abstract class BasePageComponent implements AfterContentInit, OnDestroy {
       }
     }, 100);
   }
+
+  // #endregion
 }

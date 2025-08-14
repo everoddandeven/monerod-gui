@@ -68,8 +68,8 @@ export class TxPoolHisto {
   public readonly bytes: number;
 
   constructor(txs: number, bytes: number) {
-    this.txs = txs;
-    this.bytes = bytes;
+    this.txs = typeof txs === 'number' ? txs : 0;
+    this.bytes = typeof bytes === 'number' ? bytes : 0;
   }
 
   public static parse(object: any): TxPoolHisto {

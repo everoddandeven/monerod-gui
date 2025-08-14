@@ -46,14 +46,6 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   public getBlockTemplateError: string = '';
 
   public blockTemplate?: BlockTemplate;
-
-  public submittingBlock: boolean = false;
-  public submitBlockError: string = '';
-  public submitBlockSuccess: boolean = false;
-  public submitBlockBlobDataJsonString: string = '';
-  public get modifiedSubmitBlockBlobData(): boolean {
-    return this.submitBlockBlobDataJsonString != '';
-  }
   
   public gettingCalcPow: boolean = false;
   public calcPowBlobData: string = '';
@@ -177,7 +169,6 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
       new NavbarPill('alternate-chains', 'Alternate Chains'),
       new NavbarPill('block-template', 'Block Template'),
       new NavbarPill('generate-blocks', 'Generate Blocks'),
-      new NavbarPill('submit-block', 'Submit Block'),
       new NavbarPill('calc-pow', 'Calculate PoW Hash'),
       new NavbarPill('add-aux-pow', 'Add Aux PoW')
     ]);
@@ -316,47 +307,6 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     }
 
     this.gettingBlockTemplate = false;
-  }
-
-  public async submitBlock(): Promise<void> {
-    if (!this.validBlobData()) {
-      return;
-    }
-
-    this.submittingBlock = true;
-
-    try {
-      const blobData: string[] = JSON.parse(this.submitBlockBlobDataJsonString);
-      await this.daemonService.submitBlock(...blobData);
-      this.submitBlockError = '';
-      this.submitBlockSuccess = true;
-    }
-    catch(error: any) {
-      console.error(error);
-      this.submitBlockError = `${error}`;
-    }
-    this.submittingBlock = false;
-  }
-
-  public validBlobData(): boolean {
-    try {
-      const parsed: any[] = JSON.parse(this.submitBlockBlobDataJsonString);
-
-      if (!Array.isArray(parsed)) {
-        throw new Error();
-      }
-
-      parsed.forEach((blob) => {
-        if (typeof blob != 'string') {
-          return false;
-        }
-      })
-
-      return true;
-
-    } catch {
-      return false;
-    }
   }
 
   private refresh(): void {

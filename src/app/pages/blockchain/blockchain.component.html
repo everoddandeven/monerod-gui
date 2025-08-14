@@ -13,35 +13,129 @@
 </div>
 <div *ngIf="daemonRunning && !daemonStopping && !daemonStarting" class="tab-content tab-grow" id="pills-tabContent">
   
-  <div class="tab-pane fade show active" id="pills-block-queue" role="tabpanel" aria-labelledby="pills-block-queue-tab" tabindex="0">
-    <h4 class="mb-3">Overview of current block set queue</h4>
-
+  <div class="tab-pane fade show active" id="pills-blockchain-info" role="tabpanel" aria-labelledby="pills-blockchain-info-tab" tabindex="0">
     <div class="card p-1">
       <div class="card-header bg-primary text-white d-flex">
-        <h4>Block Queue</h4>
+        <h4><i class="bi bi-diagram-3"></i>&nbsp;&nbsp;Overview</h4>
       </div>
       <div class="card-body">
         <div class="row">
-          <div class="col-md-12">
-            <h6>Legend</h6>
-            <ul class="list-group">
-              <li class="list-group-item"><span class="block requested">.</span> Set requested but not received</li>
-              <li class="list-group-item"><span class="block received">o</span> Set received</li>
-              <li class="list-group-item"><span class="block matched">m</span> Received set that matches the next blocks needed</li>
-              <li class="list-group-item"><span class="block target">&#60;</span> Needed set in order to continue synchronization</li>
-              <li class="list-group-item"><span class="block future">_</span> Set beyond current sync height</li>
-            </ul>
+          <div class="col-md-4">
+              <h6>Synchronization</h6>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="blockchain-state-info">State</span>
+                <input type="text" class="form-control" aria-label="State" aria-describedby="blockchain-state-info" [value]="syncState" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="blockchain-scan-height-info">Scan Height</span>
+                <input type="text" class="form-control" aria-label="Scan Height" aria-describedby="blockchain-scan-height-info" [value]="scanHeight" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="blockchain-sync-progress-info">Sync Progress</span>
+                <input type="text" class="form-control" aria-label="Sync Progress" aria-describedby="blockchain-sync-progress-info" [value]="syncProgress" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="blockchain-sync-progress-total-info">Total Progress</span>
+                <input type="text" class="form-control" aria-label="Total Progress" aria-describedby="blockchain-sync-progress-total-info" [value]="syncProgressTotal" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="blockchain-inout-peers-info">Peers (In/Out)</span>
+                <input type="text" class="form-control" aria-label="Peers (In/Out)" aria-describedby="blockchain-inout-peers-info" [value]="inOutPeers" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="blockchain-bootstrap-enabled-info">Bootstrap</span>
+                <input type="text" class="form-control" aria-label="Total Progress" aria-describedby="blockchain-bootstrap-enabled-info" [value]="bootstrapEnabled" readonly>
+              </div>
+
+          </div>
+
+          <div class="col-md-4">
+              <h6>Statistics</h6>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="blockchain-supply-info">Current Supply</span>
+                <input type="text" class="form-control" aria-label="Current Supply" aria-describedby="blockchain-supply-info" [value]="alreadyGeneratedCoins" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="blockchain-block-count-info">Block Count</span>
+                <input type="text" class="form-control" aria-label="Block Count" aria-describedby="blockchain-block-count-info" [value]="blockCount" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="blockchain-tx-count-info">Tx Count</span>
+                <input type="text" class="form-control" aria-label="Tx Count" aria-describedby="blockchain-tx-count-info" [value]="txCount" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="blockchain-pool-size-info">Txs in Pool</span>
+                <input type="text" class="form-control" aria-label="Pool Size" aria-describedby="blockchain-pool-size-info" [value]="poolSize" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="blockchain-total-hashrate-info">Net Hashrate</span>
+                <input type="text" class="form-control" aria-label="Tot Hashrate" aria-describedby="blockchain-total-hashrate-info" [value]="hashRate" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="blockchain-alt-chains-info">Alternative Chains</span>
+                <input type="text" class="form-control" aria-label="Alternative Chains" aria-describedby="blockchain-alt-chains-info" [value]="altChains" readonly>
+              </div>
+          </div>
+
+          <div class="col-md-4">
+              <h6>Blockhain Info</h6>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="blockchain-height-info">Height</span>
+                <input type="text" class="form-control" aria-label="Network" aria-describedby="blockchain-height-info" [value]="heightWithoutBootstrap" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="blockchain-network-info">Network</span>
+                <input type="text" class="form-control" aria-label="Network" aria-describedby="blockchain-network-info" [value]="networkType" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="blockchain-type-info">Type</span>
+                <input type="text" class="form-control" aria-label="Blockchain Type" aria-describedby="blockchain-type-info" [value]="nodeType" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="blockchain-size-info">Size</span>
+                <input type="text" class="form-control" aria-label="Blockchain Size" aria-describedby="blockchain-size-info" [value]="blockchainSize" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="blockchain-disk-usage-info">Disk Usage</span>
+                <input type="text" class="form-control" aria-label="Disk Usage" aria-describedby="blockchain-disk-usage-info" [value]="diskUsage" readonly>
+              </div>
+
           </div>
         </div>
 
         <div class="row mt-4">
           <div class="col-md-12">
-            <h6>Queue</h6>
+            <h6>Block Queue</h6>
             <div class="card">
               <div class="card-body">
-                <div class="block-queue">
+                <div class="block-queue" style="max-height: 600px;">
+                  @if (overviewArray.length == 0) {
+                    <div class="alert alert-dark" role="alert">
+                      No blocks to queue, blockchain is synchronized
+                    </div>
+                  }
+                  @else {
+
+                  }
                   <ng-container *ngFor="let block of overviewArray; let i = index">
-                    <span [ngClass]="getBlockClass(block)" class="block">
+                    <span [ngClass]="getBlockClass(block)" class="block" data-bs-toggle="tooltip" [attr.data-bs-title]="getBlockTooltip(block)">
                       {{ block }}
                     </span>
                     <!-- Show connector except after the last block -->
@@ -56,65 +150,142 @@
       </div>
     </div>
 
-
-  </div>
-
-  <div class="tab-pane fade" id="pills-last-block-header" role="tabpanel" aria-labelledby="pills-last-block-header-tab" tabindex="0">
     <div *ngIf="getLastBlockError !== ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
       <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
       <div>
         {{getLastBlockError}}
       </div>
     </div>
+    <br />
     <div *ngIf="getLastBlockError === ''" class="card p-1">
-      <div class="card-header bg-primary text-white d-flex">
-        <h4>Block Header Details</h4>
-      </div>
+      @if(lastBlockHeader) {
+        <div class="card-header bg-primary text-white d-flex">
+          <h4><i class="bi bi-box"></i>&nbsp;&nbsp;Last Block #{{ lastBlockHeader.height }}</h4>
+        </div>
+      }
+      @else {
+        <div class="card-header bg-primary text-white d-flex">
+          <h4>Last Block </h4>&nbsp;&nbsp;
+          <div class="spinner-grow" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      }
       <div class="card-body">
         @if(lastBlockHeader) {
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <h6>Block Information</h6>
-              <ul class="list-group">
-                <li class="list-group-item"><strong>Block Size:</strong> {{ lastBlockHeader.blockSize }} bytes</li>
-                <li class="list-group-item"><strong>Block Weight:</strong> {{ lastBlockHeader.blockWeight }} units</li>
-                <li class="list-group-item"><strong>Height:</strong> {{ lastBlockHeader.height }}</li>
-                <li class="list-group-item"><strong>Major Version:</strong> {{ lastBlockHeader.majorVersion }}</li>
-                <li class="list-group-item"><strong>Minor Version:</strong> {{ lastBlockHeader.minorVersion }}</li>
-                <li class="list-group-item"><strong>Nonce:</strong> {{ lastBlockHeader.nonce }}</li>
-                <li class="list-group-item"><strong>Number of Transactions:</strong> {{ lastBlockHeader.numTxes }}</li>
-                <li class="list-group-item"><strong>Reward:</strong> {{ lastBlockHeader.rewardXMR }} XMR</li>
-                <li class="list-group-item"><strong>Timestamp:</strong> {{ lastBlockHeader.timestampMs | date:'medium' }}</li>
-              </ul>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="block-size-info">Block Size</span>
+                <input type="text" class="form-control" aria-label="Block Size" aria-describedby="block-size-info" [value]="lastBlockHeader.blockSize + ' bytes'" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="block-weight-info">Block Weight</span>
+                <input type="text" class="form-control" aria-label="Block Weight" aria-describedby="block-size-info" [value]="lastBlockHeader.blockWeight + ' units'" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="block-height-info">Height</span>
+                <input type="text" class="form-control" aria-label="Block Height" aria-describedby="block-height-info" [value]="lastBlockHeader.height" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="block-version-info">Version</span>
+                <input type="text" class="form-control" aria-label="Version" aria-describedby="block-version-info" [value]="lastBlockHeader.majorVersion + '.' + lastBlockHeader.minorVersion" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="block-nonce-info">Nonce</span>
+                <input type="text" class="form-control" aria-label="Nonce" aria-describedby="block-nonce-info" [value]="lastBlockHeader.nonce" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="block-txs-info">Transactions</span>
+                <input type="text" class="form-control" aria-label="Transactions" aria-describedby="block-txs-info" [value]="lastBlockHeader.numTxes" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="block-reward-info">Reward</span>
+                <input type="text" class="form-control" aria-label="Reward" aria-describedby="block-reward-info" [value]="lastBlockHeader.rewardXMR + ' XMR'" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="block-timestamp-info">Timestamp</span>
+                <input type="text" class="form-control" aria-label="Timestamp" aria-describedby="block-timestamp-info" [value]="lastBlockHeader.timestampMs | date:'medium'" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="block-orphan-info">Is Orphan</span>
+                <input type="text" class="form-control" aria-label="Is Orphan" aria-describedby="block-orphan-info" [value]="lastBlockHeader.orphanStatus ? 'Yes' : 'No'" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="block-depth-info">Depth</span>
+                <input type="text" class="form-control" aria-label="Depth" aria-describedby="block-depth-info" [value]="lastBlockHeader.depth" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="block-long-term-weight-info">Long Term Weight</span>
+                <input type="text" class="form-control" aria-label="Long Term Weight" aria-describedby="block-long-term-weight-info" [value]="lastBlockHeader.longTermWeight" readonly>
+              </div>
+
             </div>
-            <div class="col-md-6">
-              <h6>Hashes & Difficulty</h6>
-              <ul class="list-group">
-                <li class="list-group-item"><strong>Block Hash:</strong> {{ lastBlockHeader.hash }}</li>
-                <li class="list-group-item"><strong>Previous Hash:</strong> {{ lastBlockHeader.prevHash }}</li>
-                <li class="list-group-item"><strong>PoW Hash:</strong> {{ lastBlockHeader.powHash }}</li>
-                <li class="list-group-item"><strong>Miner Transaction Hash:</strong> {{ lastBlockHeader.minerTxHash }}</li>
-                <li class="list-group-item"><strong>Cumulative Difficulty:</strong> {{ lastBlockHeader.cumulativeDifficulty }}</li>
-                <li class="list-group-item"><strong>Wide Cumulative Difficulty:</strong> {{ lastBlockHeader.wideCumulativeDifficulty }}</li>
-                <li class="list-group-item"><strong>Difficulty:</strong> {{ lastBlockHeader.difficulty }}</li>
-                <li class="list-group-item"><strong>Wide Difficulty:</strong> {{ lastBlockHeader.wideDifficulty }}</li>
-              </ul>
-            </div>
-          </div>
-          <div class="row mt-4">
-            <div class="col-md-12">
-              <h6>Miscellaneous</h6>
-              <ul class="list-group">
-                <li class="list-group-item"><strong>Orphan Status:</strong> {{ lastBlockHeader.orphanStatus ? 'Yes' : 'No' }}</li>
-                <li class="list-group-item"><strong>Depth:</strong> {{ lastBlockHeader.depth }}</li>
-                <li class="list-group-item"><strong>Long Term Weight:</strong> {{ lastBlockHeader.longTermWeight }}</li>
-              </ul>
+            <div class="col-md-8">
+              <h6>Hashes</h6>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="block-hash-info">Block Hash</span>
+                <input type="text" class="form-control" aria-label="Block Hash" aria-describedby="block-hash-info" [value]="lastBlockHeader.hash" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="block-previous-hash-info">Previous Hash</span>
+                <input type="text" class="form-control" aria-label="Previous Hash" aria-describedby="block-previous-hash-info" [value]="lastBlockHeader.prevHash" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="block-pow-hash-info">PoW Hash</span>
+                <input type="text" class="form-control" aria-label="PoW Hash" aria-describedby="block-pow-hash-info" [value]="lastBlockHeader.powHash" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="block-miner-tx-hash-info">Miner Tx Hash</span>
+                <input type="text" class="form-control" aria-label="Miner Tx Hash" aria-describedby="block-miner-tx-hash-info" [value]="lastBlockHeader.minerTxHash" readonly>
+              </div>
+
+              <br />
+
+              <h6>Difficulty</h6>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="block-cumulative-difficulty-info">Cumulative Difficulty</span>
+                <input type="text" class="form-control" aria-label="Cumulative Difficulty" aria-describedby="block-cumulative-difficulty-info" [value]="lastBlockHeader.cumulativeDifficulty" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="block-wide-cumulative-difficulty-info">Wide Cumulative Difficulty</span>
+                <input type="text" class="form-control" aria-label="Wide Cumulative Difficulty" aria-describedby="block-wide-cumulative-difficulty-info" [value]="lastBlockHeader.wideCumulativeDifficulty" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="block-difficulty-info">Difficulty</span>
+                <input type="text" class="form-control" aria-label="Difficulty" aria-describedby="block-difficulty-info" [value]="lastBlockHeader.difficulty" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="block-wide-difficulty-info">Wide Difficulty</span>
+                <input type="text" class="form-control" aria-label="Wide Difficulty" aria-describedby="block-wide-difficulty-info" [value]="lastBlockHeader.wideDifficulty" readonly>
+              </div>
+
             </div>
           </div>
         }
         @else {
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <h6>Block Information</h6>
               <ul class="list-group">
                 <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
@@ -124,25 +295,22 @@
                 <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
                 <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
                 <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-              </ul>
-            </div>
-            <div class="col-md-6">
-              <h6>Hashes & Difficulty</h6>
-              <ul class="list-group">
-                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
                 <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
                 <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
                 <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
               </ul>
             </div>
-          </div>
-          <div class="row mt-4">
-            <div class="col-md-12">
-              <h6>Miscellaneous</h6>
+            <div class="col-md-8">
+              <h6>Hashes</h6>
               <ul class="list-group">
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+              </ul>
+
+              <h6>Difficulty</h6>
+              <ul class="list-group">
+                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
                 <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
                 <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
                 <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
@@ -152,388 +320,1712 @@
         }
       </div>
     </div>
+
   </div>
 
-  <div class="tab-pane fade" id="pills-get-block" role="tabpanel" aria-labelledby="pills-get-block-tab" tabindex="0">
-    <h4 class="mb-3">Get full block information by block height or hash</h4>
-    <br>
-    <div *ngIf="getBlockError !== ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
-      <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
-      <div>
-        {{getBlockError}}
+  <div class="tab-pane fade" id="pills-tx-pool" role="tabpanel" aria-labelledby="pills-tx-pool-tab" tabindex="0">
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <ul class="nav nav-pills m-3" id="pills-tab" role="tablist">
+        
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentPoolTab === 'statistics' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="statisticsLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentPoolTab('statistics')">Statistics</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentPoolTab === 'transactions' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="transactionsLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentPoolTab('transactions')">Transactions</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentPoolTab === 'keyImages' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="keyImagesLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentPoolTab('keyImages')">Key Images</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentPoolTab === 'backlog' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="backlogLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentPoolTab('backlog')">Backlog</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentPoolTab === 'flush' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="flushLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentPoolTab('flush')">Flush</button>
+        </li>
+
+      </ul>
+    </div>
+
+    <br />
+
+    <div class="card p-1" [hidden]="currentPoolTab !== 'statistics'">
+      <div class="card-header bg-primary text-white d-flex">
+        <h4><i class="bi bi-bar-chart-line"></i>&nbsp;&nbsp;Pool Statistics</h4>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4">
+            <h6>Info</h6>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-stats-txs">Txs in Pool</span>
+              <input type="text" class="form-control" aria-label="Old Txs in Pool" aria-describedby="pool-stats-txs" [value]="txPoolStats.txsTotal" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-stats-key-images">Key Images in Pool</span>
+              <input type="text" class="form-control" aria-label="Old Txs in Pool" aria-describedby="pool-stats-key-images" [value]="keyImagesTotal" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-stats-10-minutes">10 Minutes Old Txs in Pool</span>
+              <input type="text" class="form-control" aria-label="10 Minutes Old Txs in Pool" aria-describedby="pool-stats-10-minutes" [value]="txPoolStats.num10m" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-stats-double-spends">Double Spend Txs</span>
+              <input type="text" class="form-control" aria-label="Double Spend Txs" aria-describedby="pool-stats-double-spends" [value]="txPoolStats.numDoubleSpends" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-stats-failing-txs">Failing Txs</span>
+              <input type="text" class="form-control" aria-label="Failing Txs" aria-describedby="pool-stats-failing-txs" [value]="txPoolStats.numFailing" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-stats-unrelayed-txs">Not Relayed Txs</span>
+              <input type="text" class="form-control" aria-label="Failing Txs" aria-describedby="pool-stats-unrelayed-txs" [value]="txPoolStats.numNotRelayed" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-stats-fees-total">Fees Total</span>
+              <input type="text" class="form-control" aria-label="Failing Txs" aria-describedby="pool-stats-fees-total" [value]="txPoolStats.feeTotalXMR + ' XMR'" readonly>
+            </div>
+
+          </div>
+
+          <div class="col-md-4">
+            <h6>Memory</h6>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-stats-bytes-max">Max</span>
+              <input type="text" class="form-control" aria-label="Bytes Max" aria-describedby="pool-stats-bytes-max" [value]="txPoolStats.bytesMax + ' bytes'" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-stats-bytes-min">Min</span>
+              <input type="text" class="form-control" aria-label="Bytes Min" aria-describedby="pool-stats-bytes-min" [value]="txPoolStats.bytesMin + ' bytes'" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-stats-bytes-med">Med</span>
+              <input type="text" class="form-control" aria-label="Bytes Med" aria-describedby="pool-stats-bytes-med" [value]="txPoolStats.bytesMed + ' bytes'" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-stats-bytes-total">Total</span>
+              <input type="text" class="form-control" aria-label="Bytes Total" aria-describedby="pool-stats-bytes-total" [value]="txPoolStats.bytesTotal + ' bytes'" readonly>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <h6>Histo</h6>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-stats-histo-txs">Transactions</span>
+              <input type="text" class="form-control" aria-label="Histo Transactions" aria-describedby="pool-stats-histo-txs" [value]="txPoolStats.histo.txs" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-stats-histo-bytes">Memory</span>
+              <input type="text" class="form-control" aria-label="Histo Memory" aria-describedby="pool-stats-histo-bytes" [value]="txPoolStats.histo.bytes + ' bytes'" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-stats-histo-younger">98% Younger Tx Time</span>
+              <input type="text" class="form-control" aria-label="Histo 98%" aria-describedby="pool-stats-histo-younger" [value]="txPoolStats.histo98pc + ' s'" readonly>
+            </div>
+            
+            <br />
+            <h6>Network Fees</h6>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-stats-fee-per-byte">Fee Per Byte</span>
+              <input type="text" class="form-control" aria-label="Fee Per Byte" aria-describedby="pool-stats-fee-per-byte" [value]="feeEstimate.feeXMR + ' XMR'" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-stats-quantization-mask">Quantization Mask</span>
+              <input type="text" class="form-control" aria-label="Quantization Mask" aria-describedby="pool-stats-quantization-mask" [value]="feeEstimate.quantizationMaskXMR + ' XMR'" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-stats-fee-priority-low">Low Priority Fee</span>
+              <input type="text" class="form-control" aria-label="Low Priority Fee" aria-describedby="pool-stats-fee-priority-low" [value]="feeEstimate.feesXMR[0] + ' XMR'" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-stats-fee-priority-normal">Default Priority Fee</span>
+              <input type="text" class="form-control" aria-label="Default Priority Fee" aria-describedby="pool-stats-fee-priority-normal" [value]="feeEstimate.feesXMR[1] + ' XMR'" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-stats-fee-priority-fast">Fast Priority Fee</span>
+              <input type="text" class="form-control" aria-label="Fast Priority Fee" aria-describedby="pool-stats-fee-priority-fast" [value]="feeEstimate.feesXMR[2] + ' XMR'" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-stats-fee-priority-fastest">Fastest Priority Fee</span>
+              <input type="text" class="form-control" aria-label="Fastest Priority Fee" aria-describedby="pool-stats-fee-priority-fastest" [value]="feeEstimate.feesXMR[3] + ' XMR'" readonly>
+            </div>
+
+          </div>
+
+        </div>
+        
       </div>
     </div>
 
-    <div *ngIf="block" class="card">
-      <div class="card-header bg-dark text-white">
-        <h4>Block Details</h4>
+    <div class="card p-1" [hidden]="currentPoolTab !== 'transactions'">
+      <div class="card-header bg-primary text-white d-flex">
+        <h4>Transactions in Pool</h4>
       </div>
       <div class="card-body">
-        <!-- Placeholder mentre i dati sono in caricamento -->
-        <ng-container *ngIf="block && !gettingLastBlock; else loading">
-          <div class="row">
-            <div class="col-md-12">
-              <h6>Block Blob</h6>
-              <p class="text-break bg-dark p-2">{{ block.blob }}</p>
+
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <li class="list-group-item">
+            <div class="m-3">
+              <table
+                id="transactionsTable"
+                data-toggle="transactionsTable"
+                data-toolbar="#toolbar"
+                data-search="true"
+                data-pagination="true"
+                data-show-columns="true"
+                data-show-columns-search="true"
+                >
+                <thead>
+                  <tr>
+                    <th data-field="idHash">ID Hash</th>
+                    <th data-field="relayed">Relayed</th>
+                    <th data-field="blobSize">Blob Size</th>
+                    <th data-field="doNotRelay" data-visible="false">Do Not Relay</th>
+                    <th data-field="doubleSpendSeen">Double Spend Seen</th>
+                    <th data-field="fee">Fee</th>
+                    <th data-field="keptByBlock" data-visible="false">Kept By Block</th>
+                    <th data-field="lastFailedHeight" data-visible="false">Last Failed Height</th>
+                    <th data-field="lastFailedIdHash" data-visible="false">Last Failed Id Hash</th>
+                    <th data-field="lastRelayedTime">Last Relayed Time</th>
+                    <th data-field="maxUsedBlockHeight" data-visible="false">Max Used Block Height</th>
+                    <th data-field="maxUsedBlockIdHash" data-visible="false">Max Used Block Id Hash</th>
+                    <th data-field="receiveTime">Receive Time</th>
+                    <th data-field="txBlob" data-visible="false">Tx Blob</th>
+                  </tr>
+                </thead>
+              </table>
             </div>
+            </li>
           </div>
-          
-          <!-- Dettagli del BlockHeader -->
-          <div class="row mt-4">
-            <div class="col-md-12">
-              <h6>Block Header</h6>
-              <div class="card">
-                <div class="card-body">
-                  <ul class="list-group">
-                    <li class="list-group-item"><strong>Block Size:</strong> {{ block.blockHeader.blockSize }} bytes</li>
-                    <li class="list-group-item"><strong>Block Weight:</strong> {{ block.blockHeader.blockWeight }} units</li>
-                    <li class="list-group-item"><strong>Height:</strong> {{ block.blockHeader.height }}</li>
-                    <li class="list-group-item"><strong>Hash:</strong> {{ block.blockHeader.hash }}</li>
-                    <li class="list-group-item"><strong>Previous Hash:</strong> {{ block.blockHeader.prevHash }}</li>
-                    <li class="list-group-item"><strong>Miner Transaction Hash:</strong> {{ block.blockHeader.minerTxHash }}</li>
-                    <li class="list-group-item"><strong>Difficulty:</strong> {{ block.blockHeader.difficulty }}</li>
-                    <li class="list-group-item"><strong>Timestamp:</strong> {{ block.blockHeader.timestampMs | date:'medium' }}</li>
-                  </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-1" [hidden]="currentPoolTab !== 'keyImages'">
+      <div class="card-header bg-primary text-white d-flex">
+        <h4>Spent Key Images in Pool</h4>
+      </div>
+      <div class="card-body">
+
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <li class="list-group-item">
+            <div class="m-3">
+              <table
+                id="spentKeyImagesTable"
+                data-toggle="spentKeyImagesTable"
+                data-toolbar="#toolbar"
+                data-search="true"
+                data-pagination="true"
+                data-show-columns="true"
+                data-show-columns-search="true"
+                >
+                <thead>
+                  <tr>
+                    <th data-field="idHash">ID Hash</th>
+                  </tr>
+                </thead>
+              </table>
+            </div>
+            </li>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-1" [hidden]="currentPoolTab !== 'backlog'">
+      <div class="card-header bg-primary text-white d-flex">
+        <h4>Backlog of All Transactions in Pool</h4>
+      </div>
+      <div class="card-body">
+
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <li class="list-group-item">
+            <div class="m-3">
+              <table
+                id="txPoolBacklogTable"
+                data-toggle="txPoolBacklogTable"
+                data-toolbar="#toolbar"
+                data-pagination="true"
+                data-search="true"
+                data-show-columns="true"
+                data-show-columns-search="true"
+                >
+                <thead>
+                <tr>
+                    <th data-field="height">Blob Size</th>
+                    <th data-field="key">Fee</th>
+                    <th data-field="mask">Time In Pool</th>
+                </tr>
+                </thead>
+              </table>
+            </div>
+            </li>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-1" [hidden]="currentPoolTab !== 'flush'">
+      <div class="card-header bg-primary text-white d-flex">
+        <h4>Flush Transaction Pool</h4>
+      </div>
+      <div class="card-body">
+        <div *ngIf="flushSuccess" class="alert alert-success d-flex align-items-center justify-content-center text-center" role="alert">
+          <h4><i class="bi bi-check-circle m-2"></i></h4>&nbsp;&nbsp;
+          <div>
+            Successfully flushed txs
+          </div>
+        </div>
+        
+        <div *ngIf="flushError !== ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+          <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+          <div>
+            {{flushError}}
+          </div>
+        </div>
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <li class="list-group-item">
+            <div class="m-3">
+              <form class="needs-validation" novalidate="">
+                <div class="row g-3">
+            
+                  <div class="col-12">
+                      <label for="flush-tx-ids" class="form-label">Tx Ids</label>
+                      <textarea type="text" class="form-control" id="flush-tx-ids" placeholder="[
+  'tx_hash_1',
+  'tx_hash_2',
+  ... ,
+  'tx_hash_n'
+]"
+                        rows="10" cols="15" [(ngModel)]="flushTxIdsJsonString" [ngModelOptions]="{ standalone: true }"></textarea>
+                      <small class="text-body-secondary">List of transaction IDs to flush in tx pool</small>
+                  </div>
+
+                  <button *ngIf="!flushing" class="w-100 btn btn-primary btn-lg" type="button" (click)="flush()">Flush</button>
+                </div>
+
+              </form>
+            </div>
+            </li>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="tab-pane fade" id="pills-explorer" role="tabpanel" aria-labelledby="pills-explorer" tabindex="0">
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <ul class="nav nav-pills m-3" id="pills-tab" role="tablist">
+        
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentExplorerTab === 'getBlock' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="getBlockLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentExplorerTab('getBlock')">Search Block</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentExplorerTab === 'getTransaction' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="getTransactionLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentExplorerTab('getTransaction')">Search Transaction</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentExplorerTab === 'getOuts' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="getOutsLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentExplorerTab('getOuts')">Search Output</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentExplorerTab === 'checkKeyImage' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="checkKeyImageLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentExplorerTab('checkKeyImage')">Check Key Image</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentExplorerTab === 'histogram' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="getHistogramLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentExplorerTab('histogram')">Get Histogram</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentExplorerTab === 'distribution' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="getDistributionLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentExplorerTab('distribution')">Get Distribution</button>
+        </li>
+
+      </ul>
+    </div>
+    
+    <div [hidden]="currentExplorerTab !== 'getBlock'">
+      <div *ngIf="getBlockError !== ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+        <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+        <div>
+          {{getBlockError}}
+        </div>
+      </div>
+
+      <div class="row g-5 p-3">
+        <div class="col-md-12 col-lg-12">
+          <div class="row gy-3">
+
+            <div class="form-check form-switch col-md-4">
+              <label for="get-block-by-hash" class="form-check-label">Search by Hash</label>
+              <input class="form-control form-check-input" type="checkbox" role="switch" id="get-block-by-hash" [checked]="getBlockByHash" [(ngModel)]="getBlockByHash" [ngModelOptions]="{standalone: true}">
+              <br>
+              <small class="text-body-secondary">Get block information by hash</small>
+            </div>
+
+            <div class="form-check form-switch col-md-4">
+              <label for="fill-pow-hash" class="form-check-label">PoW Hash</label>
+              <input class="form-control form-check-input" type="checkbox" role="switch" id="fill-pow-hash" [checked]="fillPoWHash" [(ngModel)]="fillPoWHash" [ngModelOptions]="{standalone: true}">
+              <br>
+              <small class="text-body-secondary">Add PoW hash to block header response</small>
+            </div>
+
+            <div class="form-check form-switch col-md-4">
+              <label for="get-full-block" class="form-check-label">Full</label>
+              <input class="form-control form-check-input" type="checkbox" role="switch" id="get-full-block" [checked]="fullBlock" [(ngModel)]="fullBlock" [ngModelOptions]="{standalone: true}">
+              <br>
+              <small class="text-body-secondary">Get full block information</small>
+            </div>
+            
+            <div *ngIf="getBlockByHash" class="col-sm-6">
+              <label for="get-block-hash" class="form-label">Block Hash</label>
+              <input type="text" class="form-control" id="get-block-hash" placeholder="" [(ngModel)]="getBlockHash" [ngModelOptions]="{standalone: true}" [disabled]="!getBlockByHash">
+              <small class="text-body-secondary">Block hash</small>
+            </div>
+
+            <div *ngIf="!getBlockByHash" class="col-sm-6">
+              <label for="get-block-height" class="form-label">Block Height</label>
+              <input type="number" min="0" class="form-control" id="get-block-height" placeholder="" [(ngModel)]="getBlockHeight" [ngModelOptions]="{standalone: true}" [disabled]="getBlockByHash">
+              <small class="text-body-secondary">Block height</small>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <button *ngIf="!gettingLastBlock" class="w-100 btn btn-primary btn-lg" type="button" (click)="getBlock()">Get Block</button>
+      <button *ngIf="gettingLastBlock" class="w-100 btn btn-primary btn-lg" type="button" disabled>Getting Block ...</button>
+
+      <hr *ngIf="block" class="my-4">
+
+      <div *ngIf="block" class="card">
+        <div class="card-header bg-dark text-white">
+          <h4><i class="bi bi-box"></i>&nbsp;&nbsp;Block Details (#{{ block.blockHeader.height }})</h4>
+        </div>
+        <div class="card-body">
+          @if(block) {
+            <div class="row">
+              <div class="col-md-4">
+                <h6>Block Information</h6>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-size-info">Block Size</span>
+                  <input type="text" class="form-control" aria-label="Block Size" aria-describedby="get-block-size-info" [value]="block.blockHeader.blockSize + ' bytes'" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-weight-info">Block Weight</span>
+                  <input type="text" class="form-control" aria-label="Block Weight" aria-describedby="get-block-size-info" [value]="block.blockHeader.blockWeight + ' units'" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-height-info">Height</span>
+                  <input type="text" class="form-control" aria-label="Block Height" aria-describedby="get-block-height-info" [value]="block.blockHeader.height" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-version-info">Version</span>
+                  <input type="text" class="form-control" aria-label="Version" aria-describedby="get-block-version-info" [value]="block.blockHeader.majorVersion + '.' + block.blockHeader.minorVersion" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-nonce-info">Nonce</span>
+                  <input type="text" class="form-control" aria-label="Nonce" aria-describedby="get-block-nonce-info" [value]="block.blockHeader.nonce" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-txs-info">Transactions</span>
+                  <input type="text" class="form-control" aria-label="Transactions" aria-describedby="get-block-txs-info" [value]="block.blockHeader.numTxes" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-reward-info">Reward</span>
+                  <input type="text" class="form-control" aria-label="Reward" aria-describedby="get-block-reward-info" [value]="block.blockHeader.rewardXMR + ' XMR'" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-timestamp-info">Timestamp</span>
+                  <input type="text" class="form-control" aria-label="Timestamp" aria-describedby="get-block-timestamp-info" [value]="block.blockHeader.timestampMs | date:'medium'" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-orphan-info">Is Orphan</span>
+                  <input type="text" class="form-control" aria-label="Is Orphan" aria-describedby="get-block-orphan-info" [value]="block.blockHeader.orphanStatus ? 'Yes' : 'No'" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-depth-info">Depth</span>
+                  <input type="text" class="form-control" aria-label="Depth" aria-describedby="get-block-depth-info" [value]="block.blockHeader.depth" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-long-term-weight-info">Long Term Weight</span>
+                  <input type="text" class="form-control" aria-label="Long Term Weight" aria-describedby="get-block-long-term-weight-info" [value]="block.blockHeader.longTermWeight" readonly>
+                </div>
+              </div>
+              <div class="col-md-8">
+                <h6>Hashes</h6>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-hash-info">Block Hash</span>
+                  <input type="text" class="form-control" aria-label="Block Hash" aria-describedby="get-block-hash-info" [value]="block.blockHeader.hash" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-previous-hash-info">Previous Hash</span>
+                  <input type="text" class="form-control" aria-label="Previous Hash" aria-describedby="get-block-previous-hash-info" [value]="block.blockHeader.prevHash" readonly>
+                </div>
+
+                <div *ngIf="fillPoWHash" class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-pow-hash-info">PoW Hash</span>
+                  <input type="text" class="form-control" aria-label="PoW Hash" aria-describedby="get-block-pow-hash-info" [value]="block.blockHeader.powHash" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-miner-tx-hash-info">Miner Tx Hash</span>
+                  <input type="text" class="form-control" aria-label="Miner Tx Hash" aria-describedby="get-block-miner-tx-hash-info" [value]="block.blockHeader.minerTxHash" readonly>
+                </div>
+
+                <br />
+
+                <h6>Difficulty</h6>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-cumulative-difficulty-info">Cumulative Difficulty</span>
+                  <input type="text" class="form-control" aria-label="Cumulative Difficulty" aria-describedby="get-block-cumulative-difficulty-info" [value]="block.blockHeader.cumulativeDifficulty" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-wide-cumulative-difficulty-info">Wide Cumulative Difficulty</span>
+                  <input type="text" class="form-control" aria-label="Wide Cumulative Difficulty" aria-describedby="get-block-wide-cumulative-difficulty-info" [value]="block.blockHeader.wideCumulativeDifficulty" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-difficulty-info">Difficulty</span>
+                  <input type="text" class="form-control" aria-label="Difficulty" aria-describedby="get-block-difficulty-info" [value]="block.blockHeader.difficulty" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-wide-difficulty-info">Wide Difficulty</span>
+                  <input type="text" class="form-control" aria-label="Wide Difficulty" aria-describedby="get-block-wide-difficulty-info" [value]="block.blockHeader.wideDifficulty" readonly>
+                </div>
+
+              </div>
+            </div>
+            <div *ngIf="gotFullBlock && block" class="row mt-4">
+              <div *ngIf="block.details && block.details.minerTx" class="col-md-4">
+                <h6>Miner Tx</h6>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-miner-tx-version-info">Version</span>
+                  <input type="text" class="form-control" aria-label="Version" aria-describedby="get-miner-tx-version-info" [value]="block.details.minerTx.version" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-miner-tx-unlock-time-info">Unlock Time</span>
+                  <input type="text" class="form-control" aria-label="Unlock Time" aria-describedby="get-miner-tx-unlock-time-info" [value]="block.details.minerTx.unlockTime" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-miner-tx-inputs-info">Tx Inputs</span>
+                  <input type="text" class="form-control" aria-label="Tx Inputs" aria-describedby="get-miner-tx-inputs-info" [value]="block.details.minerTx.vin.length" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-miner-tx-outputs-info">Tx Outputs</span>
+                  <input type="text" class="form-control" aria-label="Tx Outputs" aria-describedby="get-miner-tx-outputs-info" [value]="block.details.minerTx.vout.length" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-miner-tx-extra-info">Extra</span>
+                  <input type="text" class="form-control" aria-label="Extra" aria-describedby="get-miner-tx-extra-info" [value]="block.details.minerTx.extra.toString()" readonly>
+                </div>
+
+              </div>
+
+              <div class="col-md-8">
+                <h6>Block Blob</h6>
+
+                <div class="input-group">
+                  <span class="input-group-text">Hex</span>
+                  <textarea class="form-control" aria-label="Hex" [value]="block.blob" readonly></textarea>
                 </div>
               </div>
             </div>
-          </div>
-          
-          <!-- Dettagli del BlockDetails -->
-          <div class="row mt-4">
-            <div class="col-md-12">
-              <h6>Block Additional Details</h6>
-              <div class="card">
-                <div class="card-body">
-                  <ul class="list-group">
-                    <li class="list-group-item"><strong>Major Version:</strong> {{ block.details.majorVersion }}</li>
-                    <li class="list-group-item"><strong>Minor Version:</strong> {{ block.details.minorVersion }}</li>
-                    <li class="list-group-item"><strong>Timestamp:</strong> {{ block.details.timestampMs | date:'medium' }}</li>
-                    <li class="list-group-item"><strong>Previous ID:</strong> {{ block.details.prevId }}</li>
-                    <li class="list-group-item"><strong>Nonce:</strong> {{ block.details.nonce }}</li>
-                    <li class="list-group-item"><strong>Transaction Hashes:</strong>
-                      <ul>
-                        <li *ngFor="let hash of block.details.txHashes">{{ hash }}</li>
-                      </ul>
-                    </li>
-                  </ul>
-                </div>
+          }
+          @else {
+            <div class="row">
+              <div class="col-md-4">
+                <h6>Block Information</h6>
+                <ul class="list-group">
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                </ul>
+              </div>
+              <div class="col-md-8">
+                <h6>Hashes</h6>
+                <ul class="list-group">
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                </ul>
+
+                <h6>Difficulty</h6>
+                <ul class="list-group">
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                </ul>
               </div>
             </div>
-          </div>
-        </ng-container>
-  
-        <!-- Placeholder di caricamento -->
-        <ng-template #loading>
-          <div class="row">
-            <div class="col-md-12">
-              <h6>Block Blob</h6>
-              <p class="placeholder-glow bg-light p-2"><span class="placeholder col-8"></span></p>
-            </div>
-          </div>
-  
-          <div class="row mt-4">
-            <div class="col-md-12">
-              <h6>Block Header</h6>
-              <div class="card">
-                <div class="card-body">
-                  <ul class="list-group">
-                    <li class="list-group-item placeholder-glow"><span class="placeholder col-6"></span></li>
-                    <li class="list-group-item placeholder-glow"><span class="placeholder col-6"></span></li>
-                    <li class="list-group-item placeholder-glow"><span class="placeholder col-6"></span></li>
-                    <li class="list-group-item placeholder-glow"><span class="placeholder col-6"></span></li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-  
-          <div class="row mt-4">
-            <div class="col-md-12">
-              <h6>Block Additional Details</h6>
-              <div class="card">
-                <div class="card-body">
-                  <ul class="list-group">
-                    <li class="list-group-item placeholder-glow"><span class="placeholder col-6"></span></li>
-                    <li class="list-group-item placeholder-glow"><span class="placeholder col-6"></span></li>
-                    <li class="list-group-item placeholder-glow"><span class="placeholder col-6"></span></li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </ng-template>
+          }
+        </div>
       </div>
     </div>
     
-    <hr *ngIf="block" class="my-4">
+    <div [hidden]="currentExplorerTab !== 'getTransaction'">
+      <div *ngIf="getTxError !== ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+        <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+        <div>
+          {{getTxError}}
+        </div>
+      </div>
 
-    <div class="row g-5 p-3">
-      <div class="col-md-12 col-lg-12">
-        <div class="row gy-3">
-          <div class="form-check form-switch col-md-6">
-            <label for="get-block-by-hash" class="form-check-label">Look up by hash</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="get-block-by-hash" [checked]="getBlockByHash" [(ngModel)]="getBlockByHash" [ngModelOptions]="{standalone: true}">
-            <br>
-            <small class="text-body-secondary">Get block information by hash</small>
+      <div class="row g-5 p-3">
+        <div class="col-md-12 col-lg-12">
+          <div class="row gy-3">
+            <div class="col-sm-6">
+              <label for="get-tx-hash" class="form-label">Tx Hash</label>
+              <input type="text" class="form-control" id="get-tx-hash" placeholder="" [(ngModel)]="getTxHash" [ngModelOptions]="{standalone: true}">
+              <small class="text-body-secondary">Transaction Hash ID</small>
+            </div>
+            
           </div>
+        </div>
+      </div>
 
-          <div class="form-check form-switch col-md-6">
-            <label for="fill-pow-hash" class="form-check-label">Fill PoW hash</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="fill-pow-hash" [checked]="fillPoWHash" [(ngModel)]="fillPoWHash" [ngModelOptions]="{standalone: true}">
-            <br>
-            <small class="text-body-secondary">Add PoW hash to block header response</small>
+      <hr class="my-4">
+
+      <button *ngIf="!gettingTx" class="w-100 btn btn-primary btn-lg" type="button" (click)="getTx()">Search Tx</button>
+      <button *ngIf="gettingTx" class="w-100 btn btn-primary btn-lg" type="button" disabled>Searching Tx ...</button>
+
+      <hr *ngIf="block" class="my-4">
+    <!-- TODO TX DETAILS
+      <div *ngIf="block" class="card">
+        <div class="card-header bg-dark text-white">
+          <h4><i class="bi bi-box"></i> Block Details (#{{ block.blockHeader.height }})</h4>
+        </div>
+        <div class="card-body">
+          @if(block) {
+            <div class="row">
+              <div class="col-md-4">
+                <h6>Block Information</h6>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-size-info">Block Size</span>
+                  <input type="text" class="form-control" aria-label="Block Size" aria-describedby="get-block-size-info" [value]="block.blockHeader.blockSize + ' bytes'" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-weight-info">Block Weight</span>
+                  <input type="text" class="form-control" aria-label="Block Weight" aria-describedby="get-block-size-info" [value]="block.blockHeader.blockWeight + ' units'" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-height-info">Height</span>
+                  <input type="text" class="form-control" aria-label="Block Height" aria-describedby="get-block-height-info" [value]="block.blockHeader.height" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-version-info">Version</span>
+                  <input type="text" class="form-control" aria-label="Version" aria-describedby="get-block-version-info" [value]="block.blockHeader.majorVersion + '.' + block.blockHeader.minorVersion" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-nonce-info">Nonce</span>
+                  <input type="text" class="form-control" aria-label="Nonce" aria-describedby="get-block-nonce-info" [value]="block.blockHeader.nonce" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-txs-info">Transactions</span>
+                  <input type="text" class="form-control" aria-label="Transactions" aria-describedby="get-block-txs-info" [value]="block.blockHeader.numTxes" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-reward-info">Reward</span>
+                  <input type="text" class="form-control" aria-label="Reward" aria-describedby="get-block-reward-info" [value]="block.blockHeader.rewardXMR + ' XMR'" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-timestamp-info">Timestamp</span>
+                  <input type="text" class="form-control" aria-label="Timestamp" aria-describedby="get-block-timestamp-info" [value]="block.blockHeader.timestampMs | date:'medium'" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-orphan-info">Is Orphan</span>
+                  <input type="text" class="form-control" aria-label="Is Orphan" aria-describedby="get-block-orphan-info" [value]="block.blockHeader.orphanStatus ? 'Yes' : 'No'" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-depth-info">Depth</span>
+                  <input type="text" class="form-control" aria-label="Depth" aria-describedby="get-block-depth-info" [value]="block.blockHeader.depth" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-long-term-weight-info">Long Term Weight</span>
+                  <input type="text" class="form-control" aria-label="Long Term Weight" aria-describedby="get-block-long-term-weight-info" [value]="block.blockHeader.longTermWeight" readonly>
+                </div>
+              </div>
+              <div class="col-md-8">
+                <h6>Hashes</h6>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-hash-info">Block Hash</span>
+                  <input type="text" class="form-control" aria-label="Block Hash" aria-describedby="get-block-hash-info" [value]="block.blockHeader.hash" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-previous-hash-info">Previous Hash</span>
+                  <input type="text" class="form-control" aria-label="Previous Hash" aria-describedby="get-block-previous-hash-info" [value]="block.blockHeader.prevHash" readonly>
+                </div>
+
+                <div *ngIf="fillPoWHash" class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-pow-hash-info">PoW Hash</span>
+                  <input type="text" class="form-control" aria-label="PoW Hash" aria-describedby="get-block-pow-hash-info" [value]="block.blockHeader.powHash" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-miner-tx-hash-info">Miner Tx Hash</span>
+                  <input type="text" class="form-control" aria-label="Miner Tx Hash" aria-describedby="get-block-miner-tx-hash-info" [value]="block.blockHeader.minerTxHash" readonly>
+                </div>
+
+                <br />
+
+                <h6>Difficulty</h6>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-cumulative-difficulty-info">Cumulative Difficulty</span>
+                  <input type="text" class="form-control" aria-label="Cumulative Difficulty" aria-describedby="get-block-cumulative-difficulty-info" [value]="block.blockHeader.cumulativeDifficulty" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-wide-cumulative-difficulty-info">Wide Cumulative Difficulty</span>
+                  <input type="text" class="form-control" aria-label="Wide Cumulative Difficulty" aria-describedby="get-block-wide-cumulative-difficulty-info" [value]="block.blockHeader.wideCumulativeDifficulty" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-difficulty-info">Difficulty</span>
+                  <input type="text" class="form-control" aria-label="Difficulty" aria-describedby="get-block-difficulty-info" [value]="block.blockHeader.difficulty" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-wide-difficulty-info">Wide Difficulty</span>
+                  <input type="text" class="form-control" aria-label="Wide Difficulty" aria-describedby="get-block-wide-difficulty-info" [value]="block.blockHeader.wideDifficulty" readonly>
+                </div>
+
+              </div>
+            </div>
+            <div *ngIf="gotFullBlock && block" class="row mt-4">
+              <div *ngIf="block.details && block.details.minerTx" class="col-md-4">
+                <h6>Miner Tx</h6>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-miner-tx-version-info">Version</span>
+                  <input type="text" class="form-control" aria-label="Version" aria-describedby="get-miner-tx-version-info" [value]="block.details.minerTx.version" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-miner-tx-unlock-time-info">Unlock Time</span>
+                  <input type="text" class="form-control" aria-label="Unlock Time" aria-describedby="get-miner-tx-unlock-time-info" [value]="block.details.minerTx.unlockTime" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-miner-tx-inputs-info">Tx Inputs</span>
+                  <input type="text" class="form-control" aria-label="Tx Inputs" aria-describedby="get-miner-tx-inputs-info" [value]="block.details.minerTx.vin.length" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-miner-tx-outputs-info">Tx Outputs</span>
+                  <input type="text" class="form-control" aria-label="Tx Outputs" aria-describedby="get-miner-tx-outputs-info" [value]="block.details.minerTx.vout.length" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-miner-tx-extra-info">Extra</span>
+                  <input type="text" class="form-control" aria-label="Extra" aria-describedby="get-miner-tx-extra-info" [value]="block.details.minerTx.extra.toString()" readonly>
+                </div>
+
+              </div>
+
+              <div class="col-md-8">
+                <h6>Block Blob</h6>
+
+                <div class="input-group">
+                  <span class="input-group-text">Hex</span>
+                  <textarea class="form-control" aria-label="Hex" [value]="block.blob" readonly></textarea>
+                </div>
+              </div>
+            </div>
+          }
+          @else {
+            <div class="row">
+              <div class="col-md-4">
+                <h6>Block Information</h6>
+                <ul class="list-group">
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                </ul>
+              </div>
+              <div class="col-md-8">
+                <h6>Hashes</h6>
+                <ul class="list-group">
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                </ul>
+
+                <h6>Difficulty</h6>
+                <ul class="list-group">
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                </ul>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    -->
+    </div>
+
+    <div [hidden]="currentExplorerTab !== 'checkKeyImage'">
+      <div *ngIf="checkKeyImageError !== ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+        <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+        <div>
+          {{checkKeyImageError}}
+        </div>
+      </div>
+
+      <div class="row g-5 p-3">
+        <div class="col-md-12 col-lg-12">
+          <div class="row gy-3">
+            <div class="col-sm-6">
+              <label for="get-tx-hash" class="form-label">Key Image</label>
+              <input type="text" class="form-control" id="check-key-image" placeholder="" [(ngModel)]="keyImage" [ngModelOptions]="{standalone: true}">
+              <small class="text-body-secondary">Key image associated with the output to check</small>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <button *ngIf="!checkingKeyImage" class="w-100 btn btn-primary btn-lg" type="button" (click)="checkKeyImage()">Check Key Image</button>
+      <button *ngIf="checkingKeyImage" class="w-100 btn btn-primary btn-lg" type="button" disabled>Checking ...</button>
+
+      <hr *ngIf="block" class="my-4">
+    <!-- TODO TX DETAILS
+      <div *ngIf="block" class="card">
+        <div class="card-header bg-dark text-white">
+          <h4><i class="bi bi-box"></i> Block Details (#{{ block.blockHeader.height }})</h4>
+        </div>
+        <div class="card-body">
+          @if(block) {
+            <div class="row">
+              <div class="col-md-4">
+                <h6>Block Information</h6>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-size-info">Block Size</span>
+                  <input type="text" class="form-control" aria-label="Block Size" aria-describedby="get-block-size-info" [value]="block.blockHeader.blockSize + ' bytes'" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-weight-info">Block Weight</span>
+                  <input type="text" class="form-control" aria-label="Block Weight" aria-describedby="get-block-size-info" [value]="block.blockHeader.blockWeight + ' units'" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-height-info">Height</span>
+                  <input type="text" class="form-control" aria-label="Block Height" aria-describedby="get-block-height-info" [value]="block.blockHeader.height" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-version-info">Version</span>
+                  <input type="text" class="form-control" aria-label="Version" aria-describedby="get-block-version-info" [value]="block.blockHeader.majorVersion + '.' + block.blockHeader.minorVersion" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-nonce-info">Nonce</span>
+                  <input type="text" class="form-control" aria-label="Nonce" aria-describedby="get-block-nonce-info" [value]="block.blockHeader.nonce" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-txs-info">Transactions</span>
+                  <input type="text" class="form-control" aria-label="Transactions" aria-describedby="get-block-txs-info" [value]="block.blockHeader.numTxes" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-reward-info">Reward</span>
+                  <input type="text" class="form-control" aria-label="Reward" aria-describedby="get-block-reward-info" [value]="block.blockHeader.rewardXMR + ' XMR'" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-timestamp-info">Timestamp</span>
+                  <input type="text" class="form-control" aria-label="Timestamp" aria-describedby="get-block-timestamp-info" [value]="block.blockHeader.timestampMs | date:'medium'" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-orphan-info">Is Orphan</span>
+                  <input type="text" class="form-control" aria-label="Is Orphan" aria-describedby="get-block-orphan-info" [value]="block.blockHeader.orphanStatus ? 'Yes' : 'No'" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-depth-info">Depth</span>
+                  <input type="text" class="form-control" aria-label="Depth" aria-describedby="get-block-depth-info" [value]="block.blockHeader.depth" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-long-term-weight-info">Long Term Weight</span>
+                  <input type="text" class="form-control" aria-label="Long Term Weight" aria-describedby="get-block-long-term-weight-info" [value]="block.blockHeader.longTermWeight" readonly>
+                </div>
+              </div>
+              <div class="col-md-8">
+                <h6>Hashes</h6>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-hash-info">Block Hash</span>
+                  <input type="text" class="form-control" aria-label="Block Hash" aria-describedby="get-block-hash-info" [value]="block.blockHeader.hash" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-previous-hash-info">Previous Hash</span>
+                  <input type="text" class="form-control" aria-label="Previous Hash" aria-describedby="get-block-previous-hash-info" [value]="block.blockHeader.prevHash" readonly>
+                </div>
+
+                <div *ngIf="fillPoWHash" class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-pow-hash-info">PoW Hash</span>
+                  <input type="text" class="form-control" aria-label="PoW Hash" aria-describedby="get-block-pow-hash-info" [value]="block.blockHeader.powHash" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-miner-tx-hash-info">Miner Tx Hash</span>
+                  <input type="text" class="form-control" aria-label="Miner Tx Hash" aria-describedby="get-block-miner-tx-hash-info" [value]="block.blockHeader.minerTxHash" readonly>
+                </div>
+
+                <br />
+
+                <h6>Difficulty</h6>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-cumulative-difficulty-info">Cumulative Difficulty</span>
+                  <input type="text" class="form-control" aria-label="Cumulative Difficulty" aria-describedby="get-block-cumulative-difficulty-info" [value]="block.blockHeader.cumulativeDifficulty" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-wide-cumulative-difficulty-info">Wide Cumulative Difficulty</span>
+                  <input type="text" class="form-control" aria-label="Wide Cumulative Difficulty" aria-describedby="get-block-wide-cumulative-difficulty-info" [value]="block.blockHeader.wideCumulativeDifficulty" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-difficulty-info">Difficulty</span>
+                  <input type="text" class="form-control" aria-label="Difficulty" aria-describedby="get-block-difficulty-info" [value]="block.blockHeader.difficulty" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-block-wide-difficulty-info">Wide Difficulty</span>
+                  <input type="text" class="form-control" aria-label="Wide Difficulty" aria-describedby="get-block-wide-difficulty-info" [value]="block.blockHeader.wideDifficulty" readonly>
+                </div>
+
+              </div>
+            </div>
+            <div *ngIf="gotFullBlock && block" class="row mt-4">
+              <div *ngIf="block.details && block.details.minerTx" class="col-md-4">
+                <h6>Miner Tx</h6>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-miner-tx-version-info">Version</span>
+                  <input type="text" class="form-control" aria-label="Version" aria-describedby="get-miner-tx-version-info" [value]="block.details.minerTx.version" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-miner-tx-unlock-time-info">Unlock Time</span>
+                  <input type="text" class="form-control" aria-label="Unlock Time" aria-describedby="get-miner-tx-unlock-time-info" [value]="block.details.minerTx.unlockTime" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-miner-tx-inputs-info">Tx Inputs</span>
+                  <input type="text" class="form-control" aria-label="Tx Inputs" aria-describedby="get-miner-tx-inputs-info" [value]="block.details.minerTx.vin.length" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-miner-tx-outputs-info">Tx Outputs</span>
+                  <input type="text" class="form-control" aria-label="Tx Outputs" aria-describedby="get-miner-tx-outputs-info" [value]="block.details.minerTx.vout.length" readonly>
+                </div>
+
+                <div class="input-group mb-1">
+                  <span class="input-group-text" id="get-miner-tx-extra-info">Extra</span>
+                  <input type="text" class="form-control" aria-label="Extra" aria-describedby="get-miner-tx-extra-info" [value]="block.details.minerTx.extra.toString()" readonly>
+                </div>
+
+              </div>
+
+              <div class="col-md-8">
+                <h6>Block Blob</h6>
+
+                <div class="input-group">
+                  <span class="input-group-text">Hex</span>
+                  <textarea class="form-control" aria-label="Hex" [value]="block.blob" readonly></textarea>
+                </div>
+              </div>
+            </div>
+          }
+          @else {
+            <div class="row">
+              <div class="col-md-4">
+                <h6>Block Information</h6>
+                <ul class="list-group">
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                </ul>
+              </div>
+              <div class="col-md-8">
+                <h6>Hashes</h6>
+                <ul class="list-group">
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                </ul>
+
+                <h6>Difficulty</h6>
+                <ul class="list-group">
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
+                </ul>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    -->
+    </div>
+
+    <div [hidden]="currentExplorerTab !== 'getOuts'">
+      <h4 class="mb-3">Get outputs</h4>
+      <div *ngIf="getOutsError !== ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+        <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+        <div>
+          {{getOutsError}}
+        </div>
+      </div>
+
+      <div [hidden]="!getOutsSuccess">
+        <table
+          id="outsTable"
+          data-toggle="outsTable"
+          data-toolbar="#toolbar"
+          data-pagination="true"
+          data-search="true"
+          data-show-columns="true"
+          data-show-columns-search="true"
+          >
+          <thead>
+          <tr>
+              <th data-field="height">Height</th>
+              <th data-field="key">Key</th>
+              <th data-field="mask">Mask</th>
+              <th data-field="txId">Tx ID</th>
+              <th data-field="unlocked">Unlocked</th>
+          </tr>
+          </thead>
+        </table>
+      </div>
+
+      <div class="row g-5 p-3">
+        <div class="col-md-12 col-lg-12">
+          <div class="row gy-3">
+
+            <div class="col-sm-12">
+
+              <form class="needs-validation" novalidate="">
+                <div class="row g-3">
+                  <div class="col-12">
+                      <label for="get-out-outs" class="form-label">Outputs</label>
+                      <textarea type="text" class="form-control" id="get-out-outs" placeholder="[
+    {
+      'amount': number,
+      'index': number
+    }
+  ]" 
+                        rows="10" cols="15" [(ngModel)]="getOutsJsonString" [ngModelOptions]="{standalone: true}"></textarea>
+                      <small class="text-body-secondary">Array of outputs</small>
+                  </div>        
+                </div>
+              </form>
+            </div>
+
+            <div class="form-check form-switch col-md-6">
+              <label for="get-out-get-txid" class="form-check-label">Get Tx Id</label>
+              <input class="form-control form-check-input" type="checkbox" role="switch" id="get-out-get-txid" [checked]="getOutsGetTxId" [(ngModel)]="getOutsGetTxId" [ngModelOptions]="{standalone: true}">
+              <br>
+              <small class="text-body-secondary">If enabled, a <i>txid</i> will included for each output in the response</small>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <button *ngIf="!gettingOuts" class="w-100 btn btn-primary btn-lg" type="button" [disabled]="!validOuts" (click)="getOuts()">Get Outputs</button>
+      <button *ngIf="gettingOuts" class="w-100 btn btn-primary btn-lg" type="button" disabled>
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        Getting Outputs
+      </button>
+    </div>
+
+    <div [hidden]="currentExplorerTab !== 'histogram'">
+      <h4 class="mb-3">Get a histogram of output amounts</h4>
+
+      <div class="alert alert-info d-flex align-items-center justify-content-center text-center" role="alert">
+        <h4><i class="bi bi-info-circle m-2"></i></h4>&nbsp;&nbsp;
+        <div>
+          For all amounts (possibly filtered by parameters), gives the number of outputs on the chain for that amount. RingCT outputs counts as 0 amount.
+        </div>
+      </div>
+
+      <div *ngIf="getOutDistributionError !== ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+        <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+        <div>
+          {{getOutHistogramError}}
+        </div>
+      </div>
+
+      <div class="row g-5 p-3">
+        <div class="col-md-12 col-lg-12">
+          <div class="row gy-3">
+        
+            <div [hidden]="getOutHistogramResult === undefined">
+              <table
+                id="outHistrogramsTable"
+                data-toggle="outHistogramsTable"
+                data-toolbar="#toolbar"
+                data-pagination="true"
+                data-search="true"
+                data-show-columns="true"
+                data-show-columns-search="true"
+                >
+                <thead>
+                <tr>
+                    <th data-field="amount">Amount</th>
+                    <th data-field="base">Base</th>
+                    <th data-field="startHeight">Start Height</th>
+                    <th data-field="distributions">Distributions</th>
+                </tr>
+                </thead>
+              </table>
+            </div>
+
+            <div class="col-sm-12">
+              
+              <form class="needs-validation" novalidate="">
+                <div class="row g-3">
+                  <div class="col-12">
+                      <label for="get-out-histogram-amounts" class="form-label">Amounts</label>
+                      <textarea type="text" class="form-control" id="get-out-histogram-amounts" placeholder="[
+  '4323154546',
+  '5423442423',
+  ... ,
+  '2346534525'
+]" 
+                        rows="10" cols="15" [(ngModel)]="getOutHistogramAmountsJsonString" [ngModelOptions]="{standalone: true}"></textarea>
+                      <small class="text-body-secondary">Array of unsigned int</small>
+                  </div>        
+                </div>
+              </form>
+            </div>
+            
+            <div class="col-sm-6">
+              <label for="get-out-histogram-min-count" class="form-label">Min count</label>
+              <input type="number" min="0" class="form-control" id="get-out-histogram-min-count" placeholder="" [(ngModel)]="getOutHistogramMinCount" [ngModelOptions]="{standalone: true}">
+              <small class="text-body-secondary"></small>
+            </div>
+
+            <div class="col-sm-6">
+              <label for="get-out-histogram-max-count" class="form-label">Max count</label>
+              <input type="number" min="0" class="form-control" id="get-out-histogram-max-count" placeholder="" [(ngModel)]="getOutHistogramMaxCount" [ngModelOptions]="{standalone: true}">
+              <small class="text-body-secondary"></small>
+            </div>
+
+            <div class="form-check form-switch col-md-6">
+              <label for="get-out-histogram-unlocked" class="form-check-label">Unlocked</label>
+              <input class="form-control form-check-input" type="checkbox" role="switch" id="get-out-histogram-unlocked" [checked]="getOutHistogramUnlocked" [(ngModel)]="getOutHistogramUnlocked" [ngModelOptions]="{standalone: true}">
+              <br>
+              <small class="text-body-secondary"></small>
+            </div>
+
+            <div class="col-sm-6">
+              <label for="get-out-histogram-recent-cutoff" class="form-label">Recent cutoff</label>
+              <input type="number" min="0" class="form-control" id="get-out-histogram-recent-cutoff" placeholder="" [(ngModel)]="getOutHistogramRecentCutoff" [ngModelOptions]="{standalone: true}">
+              <small class="text-body-secondary"></small>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <button *ngIf="!gettingOutHistogram" class="w-100 btn btn-primary btn-lg" type="button" [disabled]="!validOutHistogramAmounts" (click)="getOutHistogram()">Get Output Histogram</button>
+      <button *ngIf="gettingOutHistogram" class="w-100 btn btn-primary btn-lg" type="button" disabled>
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        Getting Output Histogram
+      </button>
+    </div>
+
+    <div [hidden]="currentExplorerTab !== 'distribution'">
+      <div *ngIf="getOutDistributionError !== ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+        <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+        <div>
+          {{getOutDistributionError}}
+        </div>
+      </div>
+
+      <div [hidden]="getOutDistributionResult === undefined">
+        <table
+          id="outDistributionsTable"
+          data-toggle="outDistributionsTable"
+          data-toolbar="#toolbar"
+          data-pagination="true"
+          data-search="true"
+          data-show-columns="true"
+          data-show-columns-search="true"
+          >
+          <thead>
+          <tr>
+              <th data-field="amount">Amount</th>
+              <th data-field="base">Base</th>
+              <th data-field="startHeight">Start Height</th>
+              <th data-field="distributions">Distributions</th>
+          </tr>
+          </thead>
+        </table>
+      </div>
+
+      <div class="row g-5 p-3">
+        <div class="col-md-12 col-lg-12">
+          <div class="row gy-3">
+
+            <div class="col-sm-12">
+              <h4 class="mb-3">Get Outputs</h4>
+              <form class="needs-validation" novalidate="">
+                <div class="row g-3">
+                  <div class="col-12">
+                      <label for="get-out-distribution" class="form-label">Amounts</label>
+                      <textarea type="text" class="form-control" id="get-out-distribution" placeholder="[
+  '4323154546',
+  '5423442423',
+  ... ,
+  '2346534525'
+]" 
+                        rows="10" cols="15" [(ngModel)]="getOutDistributionAmountsJsonString" [ngModelOptions]="{standalone: true}"></textarea>
+                      <small class="text-body-secondary">Array of unsigned int, amounts to look for</small>
+                  </div>        
+                </div>
+              </form>
+            </div>
+            
+            <div class="col-sm-6">
+              <label for="get-out-distribution-from-height" class="form-label">From Height</label>
+              <input type="number" min="0" class="form-control" id="get-out-distribution-from-height" placeholder="" [(ngModel)]="getOutDistributionFromHeight" [ngModelOptions]="{standalone: true}">
+              <small class="text-body-secondary">Starting height to check from</small>
+            </div>
+
+            <div class="col-sm-6">
+              <label for="get-out-distribution-to-height" class="form-label">To Height</label>
+              <input type="number" min="0" class="form-control" id="get-out-distribution-to-height" placeholder="" [(ngModel)]="getOutDistributionToHeight" [ngModelOptions]="{standalone: true}">
+              <small class="text-body-secondary">Ending height to check up to</small>
+            </div>
+
+            <div class="form-check form-switch col-md-6">
+              <label for="get-out-distribution-cumulative" class="form-check-label">Cumulative</label>
+              <input class="form-control form-check-input" type="checkbox" role="switch" id="get-out-distribution-cumulative" [checked]="getOutDistributionCumulative" [(ngModel)]="getOutDistributionCumulative" [ngModelOptions]="{standalone: true}">
+              <br>
+              <small class="text-body-secondary">Cumulative result</small>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <button *ngIf="!gettingOutDistribution" class="w-100 btn btn-primary btn-lg" type="button" [disabled]="!validOutDistributionAmounts" (click)="getOutDistribution()">Get Out Distribution</button>
+      <button *ngIf="gettingOutDistribution" class="w-100 btn btn-primary btn-lg" type="button" disabled>
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        Getting Output Distribution
+      </button>
+    </div>
+
+  </div>
+
+  <div class="tab-pane fade" id="pills-blockchain-tools" role="tabpanel" aria-labelledby="pills-blockchain-tools-tab" tabindex="0">
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <ul class="nav nav-pills m-3" id="pills-tab" role="tablist">
+        
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentToolsTab === 'broadcast' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="broadcastLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentToolsTab('broadcast')">Broadcast Tx</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentToolsTab === 'submitBlock' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="submitBlockLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentToolsTab('submitBlock')">Submit Block</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentToolsTab === 'bootstrap' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="bootstrapLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentToolsTab('bootstrap')">Bootstrap</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentToolsTab === 'coinbaseSum' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="coinbaseSumLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentToolsTab('coinbaseSum')">Coinbase Sum</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentatio-n">
+          <button [class]="currentToolsTab === 'popBlocks' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="popBlocksLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentToolsTab('popBlocks')">Pop Blocks</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentToolsTab === 'cache' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="cacheLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentToolsTab('cache')">Cache</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentToolsTab === 'prune' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="pruneLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentToolsTab('prune')">Prune</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentToolsTab === 'save' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="saveLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentToolsTab('save')">Save</button>
+        </li>
+
+      </ul>
+    </div>
+
+    <div [hidden]="currentToolsTab !== 'submitBlock'">
+      <div class="row g-5 p-3">
+        <h4 class="mb-3">Submit a mined block to the network</h4>
+        <div *ngIf="submitBlockError !== ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+          <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+          <div>
+            {{ submitBlockError }}
+          </div>
+        </div>
+        <div *ngIf="submitBlockSuccess" class="alert alert-success d-flex align-items-center justify-content-center text-center" role="alert">
+          <h4><i class="bi bi-send-check m-2"></i></h4>&nbsp;&nbsp;
+          <div>
+            Successfully submitted block
+          </div>
+        </div>
+
+        <div class="row g-5 p-3">
+          <div class="col-md-12 col-lg-12">
+            <div class="col-md-12 col-lg-12">
+
+              <h4 class="mb-3">Submit a mined block to the network</h4>
+              <form class="needs-validation" novalidate="">
+                <div class="row g-3">
+            
+                  <div class="col-12">
+                      <label for="submit-block-blob-data" class="form-label">Block blob data</label>
+                      <textarea [(ngModel)]="submitBlockBlobDataJsonString" [ngModelOptions]="{standalone: true}" type="text" [class]="!modifiedSubmitBlockBlobData ? 'form-control' : validBlobData() ? 'form-control' : 'form-control is-invalid'" id="tx_ids" placeholder="[
+  '0707e6bdfedc053771512f1bc27c62731ae9e8f2443db64ce742f4e57f5cf8d393de28551e441a0000000002fb830a01ffbf830a018cfe88bee283060274c0aae2ef5730e680308d9c00b6da59187ad0352efe3c71d36eeeb28782f29f2501bd56b952c3ddc3e350c2631d3a5086cac172c56893831228b17de296ff4669de020200000000'
+]" 
+                      rows="10" cols="15" ></textarea>
+                      <div class="invalid-feedback">
+                        Invalid blob data.
+                      </div>
+                      <small class="text-body-secondary">list of block blobs which have been mined. See get_block_template to get a blob on which to mine</small>
+                  </div>      
+                </div>
+
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-4">
+
+        <button *ngIf="!submittingBlock" class="w-100 btn btn-primary btn-lg" type="button" (click)="submitBlock()" [disabled]="!validBlobData()">Submit Block</button>
+        <button *ngIf="submittingBlock" class="w-100 btn btn-primary btn-lg" type="button" disabled>Submitting Block ...</button>
+      </div>
+    </div>
+
+    <div [hidden]="currentToolsTab !== 'broadcast'">
+      <div class="row g-5 p-3">
+        <h4 class="mb-3">Broadcast a transaction to the network</h4>
+
+        <div class="row gy-3">  
+
+          <div *ngIf="broadcastSuccess" class="alert alert-success d-flex align-items-center justify-content-center text-center" role="alert">
+            <h4><i class="bi bi-send-check m-2"></i></h4>&nbsp;&nbsp;
+            <div>
+              Txs sent successfully
+            </div>
           </div>
           
-          <div *ngIf="getBlockByHash" class="col-sm-6">
-            <label for="get-block-hash" class="form-label">Block hash</label>
-            <input type="text" class="form-control" id="get-block-hash" placeholder="" [(ngModel)]="getBlockHash" [ngModelOptions]="{standalone: true}" [disabled]="!getBlockByHash">
-            <small class="text-body-secondary">Block hash</small>
+          <div *ngIf="broadcastError" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+            <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+            <div>
+              {{broadcastError}}
+            </div>
           </div>
 
-          <div *ngIf="!getBlockByHash" class="col-sm-3">
-            <label for="get-block-height" class="form-label">Block height</label>
-            <input type="number" min="0" class="form-control" id="get-block-height" placeholder="" [(ngModel)]="getBlockHeight" [ngModelOptions]="{standalone: true}" [disabled]="getBlockByHash">
-            <small class="text-body-secondary">Block height</small>
+          <div class="row gy-3">
+            
+            <div class="form-check form-switch col-md-6">
+              <label for="send-raw-tx-do-not-relay" class="form-check-label">By Hash</label>
+              <input class="form-control form-check-input" type="checkbox" role="switch" id="send-raw-tx-do-not-relay" [checked]="broadcastByHash" [(ngModel)]="broadcastByHash" [ngModelOptions]="{standalone: true}">
+              <br>
+              <small class="text-body-secondary">Broadcast by transaction hash ID</small>
+            </div>
+
+            <div class="col-sm-12" [hidden]="!broadcastByHash">
+              <label for="tx_ids" class="form-label">Tx Ids</label>
+              <textarea [(ngModel)]="txIdsJsonString" [ngModelOptions]="{standalone: true}" type="text" [class]="!modifiedTxIds ? 'form-control' : validTxIds ? 'form-control' : 'form-control is-invalid'" id="tx_ids" placeholder="[
+'tx_hash_1',
+'tx_hash_2',
+... ,
+'tx_hash_n'
+]" 
+              rows="10" cols="15" ></textarea>
+              <div class="invalid-feedback">
+                Invalid transaction IDs.
+              </div>
+              <small class="text-body-secondary">List of transaction IDs to relay</small>
+            </div>
+
+            <div class="col-sm-12" [hidden]="broadcastByHash">
+                <label for="send-raw-tx-tx-as-hex" class="form-label">Tx as hex</label>
+                <textarea [(ngModel)]="rawTxJsonString" [ngModelOptions]="{standalone: true}" type="text" class="form-control" id="send-raw-tx-tx-as-hex" placeholder="de6a3..." 
+                rows="10" cols="15" ></textarea>
+                <div class="invalid-feedback">
+                  Invalid transaction hex.
+                </div>
+                <small class="text-body-secondary">Full transaction information as hexadecimal string</small>
+            </div>
+
+            <div class="form-check form-switch col-md-6" [hidden]="broadcastByHash">
+              <label for="send-raw-tx-do-not-relay" class="form-check-label">Do not relay</label>
+              <input class="form-control form-check-input" type="checkbox" role="switch" id="send-raw-tx-do-not-relay" [checked]="sendRawTxDoNotRelay" [(ngModel)]="sendRawTxDoNotRelay" [ngModelOptions]="{standalone: true}">
+              <br>
+              <small class="text-body-secondary">Stop relaying transaction to other nodes</small>
+            </div>
           </div>
+
+        </div>
+
+        <div class="col-md-6">
+          <button [disabled]="broadcasting" class="w-100 btn btn-primary btn-lg" type="button" (click)="broadcastTx()">Broadcast Tx</button>
         </div>
       </div>
     </div>
 
-    <hr class="my-4">
-
-    <button *ngIf="!gettingLastBlock" class="w-100 btn btn-primary btn-lg" type="button" (click)="getBlock()">Get Block</button>
-    <button *ngIf="gettingLastBlock" class="w-100 btn btn-primary btn-lg" type="button" disabled>Getting Block ...</button>
-  
-  </div>
-
-  <div class="tab-pane fade" id="pills-get-block-header" role="tabpanel" aria-labelledby="pills-get-block-header-tab" tabindex="0">
-    <h4 class="mb-3">Get block header information by block height or hash</h4>
-    <div *ngIf="blockHeader" class="card p-1">
-      <div class="card-header bg-primary text-white d-flex">
-        <h4>Block Header Details</h4>
-      </div>
-      <div class="card-body">
-        @if(blockHeader) {
-          <div class="row">
-            <div class="col-md-6">
-              <h6>Block Information</h6>
-              <ul class="list-group">
-                <li class="list-group-item"><strong>Block Size:</strong> {{ blockHeader.blockSize }} bytes</li>
-                <li class="list-group-item"><strong>Block Weight:</strong> {{ blockHeader.blockWeight }} units</li>
-                <li class="list-group-item"><strong>Height:</strong> {{ blockHeader.height }}</li>
-                <li class="list-group-item"><strong>Major Version:</strong> {{ blockHeader.majorVersion }}</li>
-                <li class="list-group-item"><strong>Minor Version:</strong> {{ blockHeader.minorVersion }}</li>
-                <li class="list-group-item"><strong>Nonce:</strong> {{ blockHeader.nonce }}</li>
-                <li class="list-group-item"><strong>Number of Transactions:</strong> {{ blockHeader.numTxes }}</li>
-                <li class="list-group-item"><strong>Reward:</strong> {{ blockHeader.rewardXMR }} XMR</li>
-                <li class="list-group-item"><strong>Timestamp:</strong> {{ blockHeader.timestampMs | date:'medium' }}</li>
-              </ul>
-            </div>
-            <div class="col-md-6">
-              <h6>Hashes & Difficulty</h6>
-              <ul class="list-group">
-                <li class="list-group-item"><strong>Block Hash:</strong> {{ blockHeader.hash }}</li>
-                <li class="list-group-item"><strong>Previous Hash:</strong> {{ blockHeader.prevHash }}</li>
-                <li class="list-group-item"><strong>PoW Hash:</strong> {{ blockHeader.powHash }}</li>
-                <li class="list-group-item"><strong>Miner Transaction Hash:</strong> {{ blockHeader.minerTxHash }}</li>
-                <li class="list-group-item"><strong>Cumulative Difficulty:</strong> {{ blockHeader.cumulativeDifficulty }}</li>
-                <li class="list-group-item"><strong>Wide Cumulative Difficulty:</strong> {{ blockHeader.wideCumulativeDifficulty }}</li>
-                <li class="list-group-item"><strong>Difficulty:</strong> {{ blockHeader.difficulty }}</li>
-                <li class="list-group-item"><strong>Wide Difficulty:</strong> {{ blockHeader.wideDifficulty }}</li>
-              </ul>
-            </div>
-          </div>
-          <div class="row mt-4">
-            <div class="col-md-12">
-              <h6>Miscellaneous</h6>
-              <ul class="list-group">
-                <li class="list-group-item"><strong>Orphan Status:</strong> {{ blockHeader.orphanStatus ? 'Yes' : 'No' }}</li>
-                <li class="list-group-item"><strong>Depth:</strong> {{ blockHeader.depth }}</li>
-                <li class="list-group-item"><strong>Long Term Weight:</strong> {{ blockHeader.longTermWeight }}</li>
-              </ul>
-            </div>
-          </div>
-        }
-        @else {
-          <div class="row">
-            <div class="col-md-6">
-              <h6>Block Information</h6>
-              <ul class="list-group">
-                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-              </ul>
-            </div>
-            <div class="col-md-6">
-              <h6>Hashes & Difficulty</h6>
-              <ul class="list-group">
-                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-              </ul>
-            </div>
-          </div>
-          <div class="row mt-4">
-            <div class="col-md-12">
-              <h6>Miscellaneous</h6>
-              <ul class="list-group">
-                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-              </ul>
-            </div>
-          </div>
-        }
-      </div>
-    </div>
-
-    <hr *ngIf="blockHeader" class="my-4">
-
-    <div class="row g-5 p-3">
-      <div class="col-md-12 col-lg-12">
-        <div class="row gy-3">
-          <div class="form-check form-switch col-md-6">
-            <label for="get-block-header-by-hash" class="form-check-label">Look up by hash</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="get-block-header-by-hash" [checked]="getBlockHeaderByHash" [(ngModel)]="getBlockHeaderByHash" [ngModelOptions]="{standalone: true}">
-            <br>
-            <small class="text-body-secondary">Get block header information by hash</small>
-          </div>
-
-          <div class="form-check form-switch col-md-6">
-            <label for="fill-pow-hash" class="form-check-label">Fill PoW hash</label>
-            <input class="form-control form-check-input" type="checkbox" role="switch" id="fill-pow-hash" [checked]="fillPoWHash" [(ngModel)]="fillPoWHash" [ngModelOptions]="{standalone: true}">
-            <br>
-            <small class="text-body-secondary">Add PoW hash to block header response</small>
-          </div>
-          
-          <div *ngIf="getBlockHeaderByHash" class="col-sm-6">
-            <label for="get-block-header-hash" class="form-label">Block header hash</label>
-            <input type="text" class="form-control" id="get-block-header-hash" placeholder="" [(ngModel)]="getBlockHeaderHash" [ngModelOptions]="{standalone: true}" [disabled]="!getBlockHeaderByHash">
-            <small class="text-body-secondary">Block header hash</small>
-          </div>
-
-          <div *ngIf="!getBlockHeaderByHash" class="col-sm-3">
-            <label for="get-block-header-height" class="form-label">Block header height</label>
-            <input type="number" min="0" class="form-control" id="get-block-header-height" placeholder="" [(ngModel)]="getBlockHeaderHeight" [ngModelOptions]="{standalone: true}" [disabled]="getBlockHeaderByHash">
-            <small class="text-body-secondary">Block header height</small>
-          </div>
+    <div [hidden]="currentToolsTab !== 'bootstrap'">
+      <div *ngIf="setBootstrapDaemonError !== ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+        <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+        <div>
+          {{setBootstrapDaemonError}}
         </div>
       </div>
-    </div>
 
-    <hr class="my-4">
-
-    <button *ngIf="!gettingBlockHeader" class="w-100 btn btn-primary btn-lg" type="button" (click)="getBlockHeader()">Get Block Header</button>
-    <button *ngIf="gettingBlockHeader" class="w-100 btn btn-primary btn-lg" type="button" disabled>Getting Block Header ...</button>
-  
-  </div>
-
-  <div class="tab-pane fade" id="pills-pop-blocks" role="tabpanel" aria-labelledby="pills-pop-blocks-tab" tabindex="0">
-    <h4 class="mb-3">Pop blockchain blocks</h4>
-    <div *ngIf="popBlocksError !== ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
-      <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
-      <div>
-        {{popBlocksError}}
+      <div *ngIf="setBootstrapDaemonSuccess || removeBootstrapDaemonSuccess" class="alert alert-success d-flex align-items-center justify-content-center text-center" role="alert">
+        <h4><i class="bi bi-check-circle m-2"></i></h4>&nbsp;&nbsp;
+        <div>
+          {{ setBootstrapDaemonSuccess ? 'Successfully set bootstrap daemon' : removeBootstrapDaemonSuccess ? 'Successfully removed bootstrap daemon' : 'Unknown' }}
+        </div>
       </div>
-    </div>
 
-    <div *ngIf="popBlocksResult !== undefined" class="alert alert-success d-flex align-items-center justify-content-center text-center" role="alert">
-      <h4><i class="bi bi-check-circle m-2"></i></h4>&nbsp;&nbsp;
-      <div>
-        New blockchain height: {{popBlocksResult}}
-      </div>
-    </div>
+      <div class="row g-5 p-3">
+        <h4 class="mb-3">Bootstrap Daemon</h4>
 
-    <div class="row g-5 p-3">
-      <div class="col-md-12 col-lg-12">
         <div class="row gy-3">
+          <div class="col-md-6">
+            <label for="address" class="form-label">Address</label>
+            <input type="text" class="form-control" id="address" placeholder="Use 'auto' to enable automatic discovering and switching" [(ngModel)]="bootstrapDaemonAddress" [ngModelOptions]="{standalone: true}">
+            <small class="text-body-secondary">URL of a bootstrap remote daemon that the connected wallets can use while this daemon is still not fully synced.</small>
+          </div>
 
           <div class="col-sm-6">
-            <label for="pop-blocks-nblocks" class="form-label">Blocks to pop</label>
-            <input type="number" min="0" class="form-control" id="pop-blocks-nblocks" placeholder="" [(ngModel)]="popBlocksNBlocks" [ngModelOptions]="{standalone: true}" [disabled]="getBlockHeaderByHash">
-            <small class="text-body-secondary">Number of blocks top pop from blockchain</small>
+            <button *ngIf="!settingBootstrapDaemon && !removingBootstrapDaemon" class="w-25 btn btn-primary" type="submit" [disabled]="!canSetBootstrapDaemon" (click)="setBootstrapDaemon()">Set</button>
+            <button *ngIf="!settingBootstrapDaemon && !removingBootstrapDaemon" class="w-25 btn btn-primary" type="submit" [disabled]="!canRemoveBootstrapDaemon" (click)="removeBootstrapDaemon()">Remove</button>
+
+            <button *ngIf="settingBootstrapDaemon || removingBootstrapDaemon" class="w-25 btn btn-primary" type="button" disabled>
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              {{ settingBootstrapDaemon ? 'Setting Bootstrap Daemon' : removingBootstrapDaemon ? 'Removing Bootstrap Daemon' : 'Unknown' }}
+            </button>
+          </div>
+
+          <div class="col-sm-3">
+            <label for="firstName" class="form-label">Username</label>
+            <input type="text" class="form-control" id="firstName" placeholder="">
+            <small class="text-body-secondary">Specify username for the bootstrap daemon login</small>
+          </div>
+
+          <div class="col-sm-3">
+            <label for="lastName" class="form-label">Password</label>
+            <input type="password" class="form-control" id="lastName" placeholder="" value="">
+            <small class="text-body-secondary">Specify password for the bootstrap daemon login</small>
+
+          </div>
+
+          <div class="col-sm-6">
+            <label for="bootstrap-daemon-proxy" class="form-label">Proxy</label>
+            <input type="text" class="form-control" id="bootstrap-daemon-proxy" placeholder="ip:port" [(ngModel)]="bootstrapDaemonProxy" [ngModelOptions]="{standalone: true}">
+            <small class="text-body-secondary">Socks proxy to use for bootstrap daemon connection</small>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div [hidden]="currentToolsTab !== 'coinbaseSum'">
+      <div *ngIf="getCoinbaseTxSumError !== ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+        <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+        <div>
+          {{getCoinbaseTxSumError}}
+        </div>
+      </div>
+
+      <div class="row g-5 p-3">
+          <div class="col-md-12 col-lg-12">
+
+            <h4 class="mb-3">Get coinbase tx sum</h4>
+            <form class="needs-validation" novalidate="">
+              <div class="row g-3">
+          
+                <div class="col-md-6">
+                  <label for="height" class="form-label">Height</label>
+                  <input type="number" min="0" class="form-control" id="height" placeholder="" [(ngModel)]="coinbaseTxSumHeight" [ngModelOptions]="{standalone: true}">
+                  <small class="text-body-secondary">Block height from which getting the amounts</small>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="count" class="form-label">Count</label>
+                  <input type="number" min="0" class="form-control" id="count" placeholder="" [(ngModel)]="coinbaseTxSumCount" [ngModelOptions]="{standalone: true}">
+                  <small class="text-body-secondary">Number of blocks to include in the sum</small>
+                </div>
+        
+              <hr class="my-4">
+              </div>
+
+            </form>
+          </div>
+      </div>
+      <button class="w-100 btn btn-primary btn-lg" type="button" (click)="onGetCoinbaseTxSum()">Get Coinbase Tx Sum</button>
+
+    </div>
+
+    <div [hidden]="currentToolsTab !== 'popBlocks'">
+      <div *ngIf="popBlocksError !== ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+        <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+        <div>
+          {{popBlocksError}}
+        </div>
+      </div>
+
+      <div *ngIf="popBlocksResult !== undefined" class="alert alert-success d-flex align-items-center justify-content-center text-center" role="alert">
+        <h4><i class="bi bi-check-circle m-2"></i></h4>&nbsp;&nbsp;
+        <div>
+          New blockchain height: {{popBlocksResult}}
+        </div>
+      </div>
+
+      <div class="row g-5 p-3">
+        <div class="col-md-12 col-lg-12">
+          <div class="row gy-3">
+
+            <div class="col-sm-6">
+              <label for="pop-blocks-nblocks" class="form-label">Blocks to pop</label>
+              <input type="number" min="0" class="form-control" id="pop-blocks-nblocks" placeholder="" [(ngModel)]="popBlocksNBlocks" [ngModelOptions]="{standalone: true}">
+              <small class="text-body-secondary">Pop a number of blocks from the top of the blockchain, the node will eventually re-sync the popped blocks.</small>
+            </div>
+
+            <div class="col-sm-6">
+              <button *ngIf="!poppingBlocks" class="w-25 btn btn-primary" type="button" (click)="popBlocks()" [disabled]="popBlocksNBlocks > 0" [disabled]="savingBlockchain || pruningBlockchain">Pop Blocks</button>
+              <button *ngIf="poppingBlocks" class="w-25 btn btn-primary" type="button" disabled>Popping Blocks ...</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div [hidden]="currentToolsTab !== 'cache'">
+      <div *ngIf="clearCacheSuccess" class="alert alert-success d-flex align-items-center justify-content-center text-center" role="alert">
+        <h4><i class="bi bi-check-circle m-2"></i></h4>&nbsp;&nbsp;
+        <div>
+          Successfully cleared cache
+        </div>
+      </div>
+      
+      <div *ngIf="clearCacheError !== ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+        <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+        <div>
+          {{clearCacheError}}
+        </div>
+      </div>
+
+      <div class="row g-5 p-3">
+
+        <div class="form-check form-switch col-md-3">
+          <label for="flush-cache-bad-txs" class="form-check-label">Bad txs</label>
+          <input class="form-control form-check-input" type="checkbox" role="switch" id="flush-cache-bad-txs" [checked]="clearBadTxs" [(ngModel)]="clearBadTxs" [ngModelOptions]="{standalone: true}">
+          <br>
+          <small class="text-body-secondary">Flush bad transactions from cache</small>
+        </div>
+
+    
+        <div class="form-check form-switch col-md-3">
+          <label for="flush-cache-bad-blocks" class="form-check-label">Bad blocks</label>
+          <input class="form-control form-check-input" type="checkbox" role="switch" id="flush-cache-bad-blocks" [checked]="clearBadBlocks" [(ngModel)]="clearBadBlocks" [ngModelOptions]="{standalone: true}">
+          <br>
+          <small class="text-body-secondary">Flush bad blocks from cache</small>
+        </div>
+
+        <div class="col-md-6">
+          <button *ngIf="!clearingCache" class="w-25 btn btn-primary" type="button" (click)="clearCache()">Clear</button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div [hidden]="currentToolsTab !== 'prune'">
+      <div *ngIf="pruneBlockchainError !== ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+        <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+        <div>
+          {{pruneBlockchainError}}
+        </div>
+      </div>
+
+      <div *ngIf="blockchainPruned" class="alert alert-success d-flex align-items-center justify-content-center text-center" role="alert">
+        <h4><i class="bi bi-check-circle m-2"></i></h4>&nbsp;&nbsp;
+        <div>
+          Successfully initiated blockchain pruning
+        </div>
+      </div>
+
+      <div class="row g-5 p-3">
+        <div class="col-md-12 col-lg-12">
+          <div class="row gy-3">
+
+            <div class="col-sm-6">
+              <label for="blockchain-location" class="form-label">Blockchain location</label>
+              <input type="text" class="form-control" id="blockchain-location" placeholder="" [value]="blockchainDataDir" disabled="true">
+              <small class="text-body-secondary"><i>Pruning</i> allows node operators to save 2/3 of storage space while keeping the full transaction history.</small>
+            </div>
+
+            <div class="col-sm-6">
+              <button *ngIf="!pruningBlockchain" class="w-25 btn btn-primary" type="button" (click)="pruneBlockchain()" [disabled]="savingBlockchain || poppingBlocks">Prune</button>
+              <button *ngIf="pruningBlockchain" class="w-25 btn btn-primary" type="button" disabled>Pruning ...</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div [hidden]="currentToolsTab !== 'save'">
+
+      <div *ngIf="saveBlockchainError !== ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+        <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+        <div>
+          {{saveBlockchainError}}
+        </div>
+      </div>
+
+      <div *ngIf="blockchainSaved" class="alert alert-success d-flex align-items-center justify-content-center text-center" role="alert">
+        <h4><i class="bi bi-check-circle m-2"></i></h4>&nbsp;&nbsp;
+        <div>
+          Successfully saved blockchain
+        </div>
+      </div>
+
+      <div class="row g-5 p-3">
+        <div class="col-md-12 col-lg-12">
+          <div class="row gy-3">
+
+            <div class="col-sm-6">
+              <label for="blockchain-location" class="form-label">Blockchain location</label>
+              <input type="text" class="form-control" id="blockchain-location" placeholder="" [value]="blockchainDataDir" disabled="true">
+              <small class="text-body-secondary"><i>Saving</i> the blockchain triggers a sync to flush the filesystem cache onto the disk for safety purposes against Operating System or Hardware crashes.</small>
+            </div>
+
+            <div class="col-sm-6">
+                <button *ngIf="!savingBlockchain" class="w-25 btn btn-primary" type="button" (click)="saveBlockchain()" [disabled]="pruningBlockchain || poppingBlocks">Save</button>
+                <button *ngIf="savingBlockchain" class="w-25 btn btn-primary" type="button" disabled>Saving ...</button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-
-    <hr class="my-4">
-
-    <button *ngIf="!poppingBlocks" class="w-100 btn btn-primary btn-lg" type="button" (click)="popBlocks()">Pop Blocks</button>
-    <button *ngIf="poppingBlocks" class="w-100 btn btn-primary btn-lg" type="button" disabled>Popping Blocks ...</button>
-  
-  </div>
-
-  <div class="tab-pane fade" id="pills-prune-blockchain" role="tabpanel" aria-labelledby="pills-prune-blockchain-tab" tabindex="0">
-    <h4 class="mb-3">Prune Blockchain</h4>
-    <br>
-
-    <div class="alert alert-info d-flex align-items-center justify-content-center text-center" role="alert">
-      <h4><i class="bi bi-info-circle m-2"></i></h4>&nbsp;&nbsp;
-      <div>
-        <i>Pruning</i> allows node operators to save 2/3 of storage space while keeping the full transaction history
-      </div>
-    </div>
-
-    <div *ngIf="pruneBlockchainError !== ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
-      <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
-      <div>
-        {{pruneBlockchainError}}
-      </div>
-    </div>
-
-    <div *ngIf="blockchainPruned" class="alert alert-success d-flex align-items-center justify-content-center text-center" role="alert">
-      <h4><i class="bi bi-check-circle m-2"></i></h4>&nbsp;&nbsp;
-      <div>
-        Successfully initiated blockchain pruning
-      </div>
-    </div>
-
-    <hr class="my-4">
-
-    <button *ngIf="!pruningBlockchain" class="w-100 btn btn-primary btn-lg" type="button" (click)="pruneBlockchain()">Prune Blockchain</button>
-    <button *ngIf="pruningBlockchain" class="w-100 btn btn-primary btn-lg" type="button" disabled>Pruning Blockchain ...</button>
-  
-  </div>
-
-  <div class="tab-pane fade" id="pills-save-bc" role="tabpanel" aria-labelledby="pills-save-bc-tab" tabindex="0">
-    <h4 class="mb-3">Save the blockchain</h4>
-    <br>
-
-    <div class="alert alert-info d-flex align-items-center justify-content-center text-center" role="alert">
-      <h4><i class="bi bi-info-circle m-2"></i></h4>&nbsp;&nbsp;
-      <div>
-        The blockchain does not need saving and is always saved when modified, however it does a sync to flush the filesystem cache onto the disk for safety purposes against Operating System or Hardware crashes.      
-      </div>
-    </div>
-
-    <div *ngIf="saveBlockchainError !== ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
-      <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
-      <div>
-        {{saveBlockchainError}}
-      </div>
-    </div>
-
-    <div *ngIf="blockchainSaved" class="alert alert-success d-flex align-items-center justify-content-center text-center" role="alert">
-      <h4><i class="bi bi-check-circle m-2"></i></h4>&nbsp;&nbsp;
-      <div>
-        Successfully saved blockchain
-      </div>
-    </div>
-
-    <hr class="my-4">
-
-    <button *ngIf="!savingBlockchain" class="w-100 btn btn-primary btn-lg" type="button" (click)="saveBlockchain()">Save Blockchain</button>
-    <button *ngIf="savingBlockchain" class="w-100 btn btn-primary btn-lg" type="button" disabled>Saving Blockchain ...</button>
   
   </div>
 
