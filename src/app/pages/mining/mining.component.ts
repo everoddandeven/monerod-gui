@@ -1,6 +1,6 @@
 import { AfterContentInit, AfterViewInit, Component, NgZone, OnDestroy, inject } from '@angular/core';
 import { DaemonService, DaemonDataService } from '../../core/services';
-import { NavbarLink, NavbarService } from '../../shared/components';
+import { NavbarLink } from '../../shared/components';
 import { AddedAuxPow, AuxPoW, BlockTemplate, GeneratedBlocks, MiningStatus, MinerData, Chain, NetHashRateHistoryEntry } from '../../../common';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { SimpleBootstrapCard } from '../../shared/utils';

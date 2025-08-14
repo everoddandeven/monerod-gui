@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, OnDestroy, inject } from '@angular/core';
 import { BasePageComponent } from '../base-page/base-page.component';
-import { NavbarLink, NavbarService } from '../../shared/components';
+import { NavbarLink } from '../../shared/components';
 import { DaemonService, TorBootstrapPhase, TorDaemonService } from '../../core/services';
 import { ProcessStats } from '../../../common';
 

@@ -1,7 +1,7 @@
 import { Component, OnDestroy, inject } from '@angular/core';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { LocalDestinationsData, MainData, TunnelsData } from '../../../common';
-import { NavbarLink, NavbarService } from '../../shared/components';
+import { NavbarLink } from '../../shared/components';
 import { DaemonService, I2pDaemonService } from '../../core/services';
 
 @Component({
