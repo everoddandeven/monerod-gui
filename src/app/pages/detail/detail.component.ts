@@ -291,10 +291,10 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
     super();
 
     this.setLinks([
-      new NavbarPill('pills-home-tab', '#pills-home', 'pills-home', false, 'Overview', true),
-      new NavbarPill('pills-peers-tab', '#pills-peers', 'pills-peers', false, 'Peers', true),
-      new NavbarPill('pills-spans-tab', '#pills-spans', 'pills-spans', false, 'Spans', true),
-      new NavbarPill('pills-bootstrap-tab', '#pills-bootstrap', 'pills-bootstrap', false, 'Bootstrap')
+      new NavbarPill('home', 'Overview', false, true),
+      new NavbarPill('peers', 'Peers', false, true),
+      new NavbarPill('spans', 'Spans', false, true),
+      new NavbarPill('bootstrap', 'Bootstrap')
     ]);
 
     this.cards = this.createCards();

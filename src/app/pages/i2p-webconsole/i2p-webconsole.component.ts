@@ -60,10 +60,10 @@ export class I2pWebconsoleComponent extends BasePageComponent implements OnDestr
     super();
 
     const links = [
-      new NavbarPill('pills-overview-tab', '#pills-overview', 'pills-overview', false, 'Overview'),
-      new NavbarPill('pills-router-commands-tab', '#pills-router-commands', 'pills-router-commands', false, 'Commands'),
-      new NavbarPill('pills-local-destinations-tab', '#pills-local-destinations', 'pills-local-destinations', false, 'Local Destinations'),
-      new NavbarPill('pills-i2p-tunnels-tab', '#pills-i2p-tunnels', 'pills-i2p-tunnels', false, 'I2P Tunnels'),
+      new NavbarPill('overview', 'Overview'),
+      new NavbarPill('router-commands', 'Commands'),
+      new NavbarPill('local-destinations', 'Local Destinations'),
+      new NavbarPill('i2p-tunnels', 'I2P Tunnels'),
     ];
 
     this.setLinks(links);

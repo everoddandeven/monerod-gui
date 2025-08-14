@@ -53,7 +53,7 @@ export class HardForkInfoComponent extends BasePageComponent implements AfterVie
     super();
 
     this.setLinks([
-      new NavbarPill('pills-overview-tab', '#pills-overview', 'pills-overview', false, 'Overview'),
+      new NavbarPill('overview', 'Overview'),
     ]);
     this.cards = [];
     this.enabled = false;

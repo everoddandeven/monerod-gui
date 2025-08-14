@@ -398,15 +398,15 @@ export class SettingsComponent extends BasePageComponent {
     this.loading = true;
 
     this.navbarLinks = [
-      new NavbarPill('pills-general-tab', '#pills-general', 'pills-general', true, 'General', false),
-      new NavbarPill('pills-node-tab', '#pills-node', 'pills-node', false, 'Node', false),
-      new NavbarPill('pills-rpc-tab', '#pills-rpc', 'pills-rpc', false, 'RPC', false),
-      new NavbarPill('pills-p2p-tab', '#pills-p2p', 'pills-p2p', false, 'P2P', false),
-      new NavbarPill('pills-blockchain-tab', '#pills-blockchain', 'pills-blockchain', false, 'Blockchain', false),
-      new NavbarPill('pills-mining-tab', '#pills-mining', 'pills-mining', false, 'Mining', false),
-      new NavbarPill('pills-logs-tab', '#pills-logs', 'pills-logs', false, 'Logs', false),
-      new NavbarPill('pills-tor-tab', '#pills-tor', 'pills-tor', false, 'Tor', false),
-      new NavbarPill('pills-i2p-tab', '#pills-i2p', 'pills-i2p', false, 'I2P', false)
+      new NavbarPill('general', 'General', true, false),
+      new NavbarPill('node', 'Node', false, false),
+      new NavbarPill('rpc', 'RPC', false, false),
+      new NavbarPill('p2p', 'P2P', false, false),
+      new NavbarPill('blockchain', 'Blockchain', false, false),
+      new NavbarPill('mining', 'Mining', false, false),
+      new NavbarPill('logs', 'Logs', false, false),
+      new NavbarPill('tor', 'Tor', false, false),
+      new NavbarPill('i2p', 'I2P', false, false)
     ];
     
     this._currentSettings = this.originalSettings.clone();

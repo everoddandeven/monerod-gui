@@ -70,8 +70,8 @@ export class BansComponent extends BasePageComponent implements AfterViewInit {
     super();
 
     this.setLinks([
-      new NavbarPill('pills-overview-tab', '#pills-overview', 'pills-overview', false, 'Overview', true),
-      new NavbarPill('pills-set-bans-tab', '#pills-set-bans', 'pills-set-bans', false, 'Set Bans', true)
+      new NavbarPill('overview', 'Overview'),
+      new NavbarPill('set-bans', 'Set Bans')
     ]);
   }
 

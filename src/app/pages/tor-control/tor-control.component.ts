@@ -109,8 +109,8 @@ export class TorControlComponent extends BasePageComponent implements AfterViewI
     super();
 
     const links = [
-      new NavbarPill('pills-overview-tab', '#pills-overview', 'pills-overview', true, 'Overview', false, false),
-      new NavbarPill('pills-commands-tab', '#pills-commands', 'pills-commands', true, 'Commands')
+      new NavbarPill('overview', 'Overview', true, false),
+      new NavbarPill('commands', 'Commands')
     ];
 
     this.setLinks(links);

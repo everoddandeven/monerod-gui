@@ -105,10 +105,10 @@ export class OutputsComponent extends BasePageComponent {
     super();
 
     this.setLinks([
-      new NavbarPill('pills-outputs-get-outs-tab', '#pills-outputs-get-outs', 'outputs-get-outs', false, 'Get Outs'),
-      new NavbarPill('pills-outputs-histogram-tab', '#pills-outputs-histogram', 'outputs-histogram', false, 'Histogram'),
-      new NavbarPill('pills-outputs-distribution-tab', '#pills-outputs-distribution', 'outputs-distribution', false, 'Distribution'),
-      new NavbarPill('pills-is-key-image-spent-tab', '#pills-is-key-image-spent', 'is-key-image-spent', false, 'Is Key Image Spent')
+      new NavbarPill('outputs-get-outs', 'Get Outs'),
+      new NavbarPill('outputs-histogram', 'Histogram'),
+      new NavbarPill('outputs-distribution', 'Distribution'),
+      new NavbarPill('is-key-image-spent', 'Is Key Image Spent')
     ]);
   }
 

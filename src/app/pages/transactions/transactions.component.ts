@@ -92,14 +92,14 @@ export class TransactionsComponent extends BasePageComponent implements AfterVie
     super();
 
     this.setLinks([
-      new NavbarPill('pills-tx-pool-tab', '#pills-tx-pool', 'pills-tx-pool', false, 'Pool'),
-      new NavbarPill('pills-relay-tx-tab', '#pills-relay-tx', 'pills-relay-tx', false, 'Relay Tx'),
-      new NavbarPill('pills-send-raw-tx-tab', '#pills-send-raw-tx', 'pills-send-raw-tx', false, 'Send Raw Tx'),
-      new NavbarPill('pills-get-fee-estimate-tab', '#pills-get-fee-estimate', 'pills-get-fee-estimate', false, 'Get Fee Estimate'),
-      new NavbarPill('pills-tx-pool-backlog-tab', '#pills-tx-pool-backlog', 'pills-tx-pool-backlog', false, 'Tx Pool Backlog'),
-      new NavbarPill('pills-coinbase-tx-sum-tab', '#pills-coinbase-tx-sum', 'pills-coinbase-tx-sum', false, 'Coinbase Tx Sum'),
-      new NavbarPill('pills-flush-tx-pool-tab', '#pills-flush-tx-pool', 'pills-flush-tx-pool', false, 'Flush Tx Pool'),
-      new NavbarPill('pills-flush-cahe-tab', '#pills-flush-cache', 'pills-flush-cache', false, 'Flush Cache')
+      new NavbarPill('tx-pool', 'Pool'),
+      new NavbarPill('relay-tx', 'Relay Tx'),
+      new NavbarPill('send-raw-tx', 'Send Raw Tx'),
+      new NavbarPill('get-fee-estimate', 'Get Fee Estimate'),
+      new NavbarPill('tx-pool-backlog', 'Tx Pool Backlog'),
+      new NavbarPill('coinbase-tx-sum', 'Coinbase Tx Sum'),
+      new NavbarPill('flush-tx-pool', 'Flush Tx Pool'),
+      new NavbarPill('flush-cahe', 'Flush Cache')
     ]);
     this.height = 0;
     this.count = 0;

@@ -43,9 +43,9 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
   constructor() {
     super();
     this.setLinks([
-      new NavbarPill('pills-net-stats-tab', '#pills-net-stats', 'pills-net-stats', false, 'Statistics'),
-      new NavbarPill('pills-connections-tab', '#pills-connections', 'connections', false, 'Connetions'),
-      new NavbarPill('pills-limits-tab', '#pills-limit', 'pills-limit', false, 'Limit')
+      new NavbarPill('net-stats', 'Statistics'),
+      new NavbarPill('connections', 'Connetions'),
+      new NavbarPill('limit', 'Limit')
     ]);
 
     const lastNetStats = this.daemonData.netStatsHistory.last;

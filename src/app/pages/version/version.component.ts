@@ -93,8 +93,8 @@ export class VersionComponent implements AfterViewInit {
 
   constructor() {
     this.links = [
-      new NavbarPill('pills-monero-tab', '#pills-monero', 'pills-monero', true, 'Monero', false, false),
-      new NavbarPill('pills-tor-tab', '#pills-tor', 'pills-tor', false, 'TOR', false, false)
+      new NavbarPill('monero', 'Monero', true, false),
+      new NavbarPill('tor', 'TOR', false, false)
     ];
     this.cards = this.createCards();
     this.torCards = this.createTorCards();

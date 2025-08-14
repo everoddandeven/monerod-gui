@@ -49,10 +49,10 @@ export class PeersComponent extends BasePageComponent implements AfterViewInit {
   constructor() {
     super();
     this.setLinks([
-      new NavbarPill('pills-peer-list-tab', '#pills-peer-list', 'pills-peer-list', false, 'Peer List'),
-      new NavbarPill('pills-public-nodes-tab', '#pills-public-nodes', 'pills-public-nodes', false, 'Public Nodes'),
-      new NavbarPill('pills-in-peers-tab', '#pills-in-peers', 'pills-in-peers', false, 'In Peers'),
-      new NavbarPill('pills-out-peers-tab', '#pills-out-peers', 'pills-out-peers', false, 'Out Peers')
+      new NavbarPill('peer-list', 'Peer List'),
+      new NavbarPill('public-nodes', 'Public Nodes'),
+      new NavbarPill('in-peers', 'In Peers'),
+      new NavbarPill('out-peers', 'Out Peers')
     ]);
   }
 

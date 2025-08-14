@@ -171,15 +171,15 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     this.cards = [];
 
     this.setLinks([
-      new NavbarPill('pills-mining-status-tab', '#pills-mining-status', 'mining-status', false, 'Status'),
-      new NavbarPill('pills-miner-data-tab', '#pills-miner-data', 'miner-data', false, 'Miner Data'),
-      new NavbarPill('pills-hashrate-tab', '#pills-hashrate', 'hashrate', false, 'Hashrate'),
-      new NavbarPill('pills-alternate-chains-tab', '#pills-alternate-chains', 'alternate-chains', false, 'Alternate Chains'),
-      new NavbarPill('pills-block-template-tab', '#pills-block-template', 'block-template', false, 'Block Template'),
-      new NavbarPill('pills-generate-blocks-tab', '#pills-generate-blocks', 'generate-blocks', false, 'Generate Blocks'),
-      new NavbarPill('pills-submit-block-tab', '#pills-submit-block', 'submit-block', false, 'Submit Block'),
-      new NavbarPill('pills-calc-pow-tab', '#pills-calc-pow', 'calc-pow', false, 'Calculate PoW Hash'),
-      new NavbarPill('pills-add-aux-pow-tab', '#pills-add-aux-pow', 'add-aux-pow', false, 'Add Aux PoW')
+      new NavbarPill('mining-status', 'Status'),
+      new NavbarPill('miner-data', 'Miner Data'),
+      new NavbarPill('hashrate', 'Hashrate'),
+      new NavbarPill('alternate-chains', 'Alternate Chains'),
+      new NavbarPill('block-template', 'Block Template'),
+      new NavbarPill('generate-blocks', 'Generate Blocks'),
+      new NavbarPill('submit-block', 'Submit Block'),
+      new NavbarPill('calc-pow', 'Calculate PoW Hash'),
+      new NavbarPill('add-aux-pow', 'Add Aux PoW')
     ]);
     
     const syncEndSub: Subscription = this.daemonData.syncEnd.subscribe(() => {

@@ -12,9 +12,9 @@ export class AboutComponent {
   private daemonService = inject(DaemonService);
 
   public readonly links: NavbarPill[] = [
-    new NavbarPill('pills-overview-tab', '#pills-overview', 'pills-overview', true, 'License', false),
-    new NavbarPill('pills-contact-tab', '#pills-contact', 'pills-contact', false, 'Contact', false),
-    new NavbarPill('pills-donate-tab', '#pills-donate', 'pills-donate', false, 'Donate', false)
+    new NavbarPill('overview', 'License', true),
+    new NavbarPill('contact', 'Contact'),
+    new NavbarPill('donate', 'Donate')
   ];
 
   public donateCrypto: 'XMR' | 'BTC' | 'WOW' = 'XMR';

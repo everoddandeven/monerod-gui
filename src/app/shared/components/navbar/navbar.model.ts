@@ -9,10 +9,10 @@ export class NavbarPill {
   public disabled: boolean;
   public disableIfNotRunning: boolean;
 
-  constructor(id: string, target: string, controls: string, selected: boolean, name: string, disabled: boolean = true, disableIfNotRunning: boolean = true) {
-    this.id = id;
-    this.target = target;
-    this.controls = controls;
+  constructor(id: string, name: string, selected: boolean = false, disabled: boolean = true, disableIfNotRunning: boolean = true) {
+    this.id = `pills-${id}-tab`;
+    this.target = `#pills-${id}`;
+    this.controls = id;
     this.selected = selected;
     this.name = name;
     this.disabled = disabled;

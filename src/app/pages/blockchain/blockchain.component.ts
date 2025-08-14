@@ -80,13 +80,13 @@ export class BlockchainComponent extends BasePageComponent {
   constructor() {
     super();
     this.setLinks([
-      new NavbarPill('pills-block-queue-tab', '#pills-block-queue', 'pills-block-queue', true, 'Block Queue'),
-      new NavbarPill('pills-last-block-header-tab', '#pills-last-block-header', 'pills-last-block-header', false, 'Last Block Header'),
-      new NavbarPill('pills-get-block-tab', '#pills-get-block', 'pills-get-block', false, 'Get Block'),
-      new NavbarPill('pills-get-block-header-tab', '#pills-get-block-header', 'pills-get-block-header', false, 'Get Block Header'),
-      new NavbarPill('pills-pop-blocks-tab', '#pills-pop-blocks', 'pills-pop-blocks', false, 'Pop Blocks'),
-      new NavbarPill('pills-prune-blockchain-tab', '#pills-prune-blockchain', 'pills-prune-blockchain', false, 'Prune'),
-      new NavbarPill('pills-save-bc-tab', '#pills-save-bc', 'pills-save-bc', false, 'Save')
+      new NavbarPill('block-queue', 'Block Queue', true),
+      new NavbarPill('last-block-header', 'Last Block Header'),
+      new NavbarPill('get-block', 'Get Block'),
+      new NavbarPill('get-block-header', 'Get Block Header'),
+      new NavbarPill('pop-blocks', 'Pop Blocks'),
+      new NavbarPill('prune-blockchain', 'Prune'),
+      new NavbarPill('save-bc', 'Save')
     ]);
   }
 
