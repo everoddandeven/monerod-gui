@@ -23,7 +23,7 @@
         <div class="card-body">
           <h5 class="card-subtitle mb-2 text-muted">Version: {{ guiVersion }}</h5>
           <p class="card-text">
-            Copyright &#169; 2024, everoddandeven
+            Copyright &#169; 2024-2025, everoddandeven
             <br>
             <br>
             Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -35,7 +35,7 @@
             THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.          </p>
     
           <div class="card-footer text-muted d-flex justify-content-between align-items-center">
-            <span>&copy; 2024 Monerod GUI</span>
+            <span>&copy; 2024-2025 Monerod GUI</span>
           </div>
         </div>
       </div>
@@ -76,31 +76,12 @@
         <div class="card-body">
           <ul class="list-group">
             <li class="list-group-item text-center">
-                                      
-              <div class="col-md-2 mx-auto">
-                <select class="form-select" id="log-level" [(ngModel)]="donateCrypto" [ngModelOptions]="{standalone: true}">
-                  <option [ngValue]="'XMR'">XMR</option>
-                  <option [ngValue]="'BTC'">BTC</option>
-                  <option [ngValue]="'WOW'">WOW</option>
-                </select>
-              </div>
-
-              <br>
-              <p *ngIf="donateCrypto === 'XMR'" class="text-center">
+              <p class="text-center">
                 <img src="assets/donations/xmr.png" width="200" height="200"/><br>
                 <br>
                 <code>{{XMRAddress}}</code>
               </p>
-              <p *ngIf="donateCrypto === 'BTC'" class="text-center">
-                <img src="assets/donations/btc.png" width="200" height="200"/><br>
-                <br>
-                <code>{{BTCAddress}}</code>
-              </p>
-              <p *ngIf="donateCrypto === 'WOW'" class="text-center">
-                <img src="assets/donations/wow.png" width="200" height="200"/><br>
-                <br>
-                <code>{{WOWAddress}}</code>
-              </p>
+            
               <button *ngIf="!addressCopied" type="button" class="btn btn-secondary btn-sm" (click)="copyAddressToClipboard()"><i class="bi bi-clipboard"></i> Copy to clipboard</button>
               <button *ngIf="addressCopied" type="button" class="btn btn-success btn-sm" ><i class="bi bi-clipboard-check"></i> Copied to clipboard</button>
             </li>                   
