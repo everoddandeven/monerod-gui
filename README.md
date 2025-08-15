@@ -15,8 +15,7 @@
 [![Watch on GitHub][github-watch-badge]][github-watch]
 [![Star on GitHub][github-star-badge]][github-star]
 
-[![XMR Donated](https://img.shields.io/badge/donated-8.757300489601_XMR-blue?logo=monero)](https://github.com/everoddandeven/monerod-gui?tab=readme-ov-file#monero)
-[![BTC Donated][bitcoin-donated-badge]][bitcoin-donated]
+[![XMR Donated](https://img.shields.io/badge/donated-23.757300489601_XMR-blue?logo=monero)](https://github.com/everoddandeven/monerod-gui?tab=readme-ov-file#monero)
 
 </div>
 
@@ -230,20 +229,6 @@ Please consider donating to support the development of this project.
  <code>84Q1SdQgFWaEWRn5KcvSPCQUa3NF39EJ3HPCTaiM86RHLLftqgTZpkP24jXrK5YpeedWbQAjHcFcDLpFJfr9TypfAU7pPjA</code>
 </p>
 
-### Bitcoin
-
-<p align="center">
- <img src="donate_btc.png" width="115" height="115" alt="btcQrCode"/><br>
- <code>bc1qndc2lesy0sse9vj33a35pnfrqz4znlhhs58vfp</code>
-</p>
-
-### Wownero
-
-<p align="center">
- <img src="donate_wow.png" width="115" height="115" alt="wowQrCode"/><br>
- <code>WW33Zj3xu6EGTyKVWaz8EQZmqsTXKdK5eG7PDRaiPuJ1LyREhGHLCRDX3AaLx4r9NFCThRvsbq99KATbswJaxd3T1iwQLJ3Tw</code>
-</p>
-
 [maintained-badge]: https://img.shields.io/badge/maintained-yes-brightgreen
 [license-badge]: https://img.shields.io/badge/license-MIT-blue.svg
 [prs-badge]: https://img.shields.io/badge/PRs-welcome-red.svg
@@ -258,6 +243,3 @@ Please consider donating to support the development of this project.
 [github-watch]: https://github.com/everoddandeven/monerod-gui/watchers
 [github-star-badge]: https://img.shields.io/github/stars/everoddandeven/monerod-gui.svg?style=social
 [github-star]: https://github.com/everoddandeven/monerod-gui/stargazers
-
-[bitcoin-donated]: https://github.com/everoddandeven/monerod-gui?tab=readme-ov-file#bitcoin
-[bitcoin-donated-badge]: https://img.shields.io/badge/dynamic/json?url=https://explorer.viawallet.com/res/btc/addresses/bc1qndc2lesy0sse9vj33a35pnfrqz4znlhhs58vfp&query=$.data.balance&suffix=%20BTC&logo=bitcoin&label=donated
