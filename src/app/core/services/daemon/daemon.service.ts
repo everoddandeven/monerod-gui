@@ -691,7 +691,7 @@ export class DaemonService {
 
   public async getBlockHeadersRange(startHeight: number, endHeight: number, fillPowHash: boolean = false): Promise<BlockHeader[]> {
     const response = await this.callRpc(new GetBlockHeadersRangeRequest(startHeight, endHeight, fillPowHash));
-    const block_headers: any[] = response.block_headers;
+    const block_headers: any[] = response.result?.headers ? response.result.headers : [];
     const result: BlockHeader[] = [];
 
     block_headers.forEach((block_header: any) => result.push(BlockHeader.parse(block_header)));
