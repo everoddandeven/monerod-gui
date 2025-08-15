@@ -12,7 +12,7 @@ export class AboutComponent {
   private daemonService = inject(DaemonService);
 
   public readonly links: NavbarPill[] = [
-    new NavbarPill('overview', 'License', true),
+    new NavbarPill('overview', 'License', true, false),
     new NavbarPill('contact', 'Contact', false, false),
     new NavbarPill('donate', 'Donate', false, false)
   ];

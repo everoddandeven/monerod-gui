@@ -43,4 +43,9 @@ export class NetStats {
 
     return new NetStats(startTime, totalPacketsIn, totalBytesIn, totalBytesOut);
   }
+
+  public clone(): NetStats {
+    return new NetStats(this.startTime, this.totalPacketsIn, this.totalBytesIn, this.totalBytesOut);
+  }
+
 }

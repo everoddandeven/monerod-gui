@@ -50,13 +50,8 @@ export class SidebarComponent {
       new NavLink('Dashboard', '/detail', 'bi bi-speedometer2'),
       new NavLink('Blockchain', '/blockchain', 'bi bi-bounding-box'),
       new NavLink('Mining', '/mining', 'bi bi-minecart-loaded'),
-      new NavLink('Hard Fork Info', '/hardforkinfo', 'bi bi-signpost-split'),
       new NavLink('Network', '/network', 'bi bi-hdd-network', 'bottom'),
-      new NavLink('Peers', '/peers', 'bi bi-people', 'bottom'),
-      new NavLink('Bans', '/bans', 'bi bi-ban', 'bottom'),
       new NavLink('Logs', '/logs', 'bi bi-terminal', 'bottom'),
-      new NavLink('TOR', '/torcontrol', 'bi bi-bullseye', "bottom"),
-      new NavLink('I2P', '/i2pwebconsole', 'bi bi-hurricane', 'bottom'),
       new NavLink('Version', '/version', 'bi bi-git', 'bottom'),
       new NavLink('Settings', '/settings', 'bi bi-gear', 'bottom'),
       new NavLink('About', '/about', 'bi bi-info-circle', 'bottom')

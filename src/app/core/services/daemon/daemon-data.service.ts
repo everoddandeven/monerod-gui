@@ -382,7 +382,6 @@ export class DaemonDataService {
       }
       else if (!settings.noSync && syncAlreadyDisabled && !settings.syncOnWifi) {
         const wifiConnected = await this.electronService.isWifiConnected();
-  
         if (!wifiConnected) {
           console.log("Enabling sync ...");
   

@@ -17,17 +17,12 @@ import { BlockchainModule } from './pages/blockchain/blockchain.module';
 
 import { AppComponent } from './app.component';
 import { LoadComponent } from "./shared/components/load/load.component";
-import { BansModule } from './pages/bans/bans.module';
 import { MiningModule } from './pages/mining/mining.module';
 import { SettingsModule } from './pages/settings/settings.module';
 import { LogsModule } from './pages/logs/logs.module';
 import { VersionModule } from './pages/version/version.module';
-import { HardForkInfoModule } from './pages/hard-fork-info/hard-fork-info.module';
 import { NetworkModule } from './pages/network/network.module';
-import { PeersModule } from './pages/peers/peers.module';
 import { AboutModule } from './pages/about/about.module';
-import { I2pWebconsoleModule } from './pages/i2p-webconsole/i2p-webconsole.module';
-import { TorControlModule } from './pages/tor-control/tor-control.module';
 
 // AoT requires an exported function for factories
 const httpLoaderFactory = (): TranslateHttpLoader =>  new TranslateHttpLoader();
@@ -40,17 +35,12 @@ const httpLoaderFactory = (): TranslateHttpLoader =>  new TranslateHttpLoader();
         HomeModule,
         DetailModule,
         BlockchainModule,
-        BansModule,
         MiningModule,
         LogsModule,
         SettingsModule,
-        HardForkInfoModule,
-        PeersModule,
         VersionModule,
         NetworkModule,
         AboutModule,
-        I2pWebconsoleModule,
-        TorControlModule,
         TranslateModule,
         AppRoutingModule,
         TranslateModule.forRoot({

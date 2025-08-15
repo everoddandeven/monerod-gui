@@ -11,9 +11,551 @@
   </div>
 </div>
 
-<div *ngIf="daemonRunning && !daemonStopping" class="tab-content tab-grow" id="pills-tabContent">
+<div [hidden]="!daemonRunning || daemonStopping" class="tab-content tab-grow" id="pills-tabContent">
 
-  <div class="tab-pane fade show active" id="pills-net-stats" role="tabpanel" aria-labelledby="pills-net-stats-tab" tabindex="0">
+  <div class="tab-pane fade show active" id="pills-net-overview" role="tabpanel" aria-labelledby="pills-net-overview-tab" tabindex="0">
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <ul class="nav nav-pills m-3" id="pills-tab" role="tablist">
+        
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentOverviewTab === 'overview' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="netOverviewLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentOverviewTab('overview')">Dashboard</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentOverviewTab === 'connections' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="netConnectionsLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentOverviewTab('connections')">Connections</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentOverviewTab === 'hardfork' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="hardForkLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentOverviewTab('hardfork')">Hard Fork</button>
+        </li>
+
+      </ul>
+    </div>
+
+    <div class="card p-1" [hidden]="currentOverviewTab !== 'overview'">
+      <div class="card-header bg-primary text-white d-flex">
+        <h4><i class="bi bi-diagram-3"></i>&nbsp;&nbsp;Dashboard</h4>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4">
+              <h6>Info</h6>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-status-info">Status</span>
+                <input type="text" class="form-control" aria-label="Status" aria-describedby="net-status-info" [value]="networkStatus" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-connection-type-info">Connection Type</span>
+                <input type="text" class="form-control" aria-label="Connection Type" aria-describedby="net-connection-type-info" [value]="connectionType" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-proxy-info">Proxy</span>
+                <input type="text" class="form-control" aria-label="Proxy" aria-describedby="net-proxy-info" [value]="currentProxy" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-tx-padding-info">Tx Padding</span>
+                <input type="text" class="form-control" aria-label="Tx Padding" aria-describedby="net-tx-padding-info" [value]="txPadding" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-p2p-host-info">P2P Endpoint</span>
+                <input type="text" class="form-control" aria-label="P2P Endpoint" aria-describedby="net-p2p-host-info" [value]="p2pHost" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-rpc-host-info">RPC Endpoint</span>
+                <input type="text" class="form-control" aria-label="RPC Endpoint" aria-describedby="net-rpc-host-info" [value]="rpcHost" readonly>
+              </div>
+
+          </div>
+
+          <div class="col-md-4">
+              <h6>Statistics</h6>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-white-peers-info">White Peers</span>
+                <input type="text" class="form-control" aria-label="White Peers" aria-describedby="net-white-peers-info" [value]="whitePeers" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-grey-peers-info">Grey Peers</span>
+                <input type="text" class="form-control" aria-label="Grey Peers" aria-describedby="net-grey-peers-info" [value]="greyPeers" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-download-info">Total Download</span>
+                <input type="text" class="form-control" aria-label="Download" aria-describedby="net-download-info" [value]="totalDownloadGB" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-upload-info">Total Upload</span>
+                <input type="text" class="form-control" aria-label="Upload" aria-describedby="net-upload-info" [value]="totalUploadGB" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-rpc-connections-info">RPC Connections</span>
+                <input type="text" class="form-control" aria-label="RPC Connections" aria-describedby="net-rpc-connections-info" [value]="rpcConnections" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-inout-peers-info">Connections (In/Out)</span>
+                <input type="text" class="form-control" aria-label="Peers (In/Out)" aria-describedby="net-inout-peers-info" [value]="inOutPeers" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-total-connections-info">Total Connections</span>
+                <input type="text" class="form-control" aria-label="Total Connections" aria-describedby="net-total-connections-info" [value]="totalConnections" readonly>
+              </div>
+
+          </div>
+
+          <div class="col-md-4">
+              <h6>Limits</h6>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-upload-limit-info">Upload</span>
+                <input type="text" class="form-control" aria-label="Upload" aria-describedby="net-upload-limit-info" [value]="uploadLimit" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-download-limit-info">Download</span>
+                <input type="text" class="form-control" aria-label="Download" aria-describedby="net-download-limit-info" [value]="downloadLimit" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-in-peers-limit-info">In Peers</span>
+                <input type="text" class="form-control" aria-label="In Peers" aria-describedby="net-in-peers-limit-info" [value]="inPeersLimit" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-out-peers-limit-info">Out Peers</span>
+                <input type="text" class="form-control" aria-label="Out Peers" aria-describedby="net-out-peers-limit-info" [value]="outPeersLimit" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-max-connections-per-ip-info">Max Connections Per IP</span>
+                <input type="text" class="form-control" aria-label="Disk Usage" aria-describedby="net-max-connections-per-ip-info" [value]="maxConnectionsPerIp" readonly>
+              </div>
+
+          </div>
+
+          <div class="col-md-6 mt-1">
+              <h6>Tor</h6>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-tor-status-info">Status</span>
+                <input type="text" class="form-control" aria-label="TOR Status" aria-describedby="net-tor-status-info" [value]="torStatus" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-tor-p2p-endpoint-info">P2P Endpoint</span>
+                <input type="text" class="form-control" aria-label="P2P Endpoint" aria-describedby="net-tor-p2p-endpoint-info" [value]="torP2pHost" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-tor-p2p-endpoint-info">RPC Endpoint</span>
+                <input type="text" class="form-control" aria-label="RPC Endpoint" aria-describedby="net-tor-p2p-endpoint-info" [value]="torRpcHost" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="tor-tx-proxy-info">Tx Proxy</span>
+                <input type="text" class="form-control" aria-label="Tx Proxy" aria-describedby="tor-tx-proxy-info" [value]="torTxProxyEnabled" readonly>
+              </div>
+
+          </div>
+
+          <div class="col-md-6">
+              <h6>I2P</h6>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-i2p-status-info">Status</span>
+                <input type="text" class="form-control" aria-label="I2P Status" aria-describedby="net-i2p-status-info" [value]="i2pStatus" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-i2p-p2p-endpoint-info">P2P Endpoint</span>
+                <input type="text" class="form-control" aria-label="P2P Endpoint" aria-describedby="net-i2p-p2p-endpoint-info" [value]="i2pP2pHost" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-i2p-p2p-endpoint-info">RPC Endpoint</span>
+                <input type="text" class="form-control" aria-label="RPC Endpoint" aria-describedby="net-i2p-p2p-endpoint-info" [value]="i2pRpcHost" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="i2p-tx-proxy-info">Tx Proxy</span>
+                <input type="text" class="form-control" aria-label="Tx Proxy" aria-describedby="i2p-tx-proxy-info" [value]="i2pTxProxyEnabled" readonly>
+              </div>
+
+          </div>
+
+        </div>
+
+
+      </div>
+    </div>
+
+    <div class="card p-1" [hidden]="currentOverviewTab !== 'connections'">
+      <div class="card-header bg-primary text-white d-flex">
+        <h4>Connections</h4>
+      </div>
+      <div class="card-body">
+
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <li class="list-group-item">
+              <div class="m-3">
+                <table
+                  id="connectionsTable"
+                  data-toggle="connectionsTable"
+                  data-toolbar="#toolbar"
+                  data-pagination="true"
+                  data-search="true"
+                  data-show-columns="true"
+                  data-show-columns-search="true"
+                  >
+                  <thead>
+                    <tr>
+                      <th data-field="connectionId" data-visible="false">ID</th>
+                      <th data-field="peerId" data-visible="false">Peer ID</th>
+                      <th data-field="address">Address</th>
+                      <th data-field="host" data-visible="false">Host</th>
+                      <th data-field="ip" data-visible="false">IP</th>
+                      <th data-field="port" data-visible="false">Port</th>
+                      <th data-field="state">State</th>
+                      <th data-field="avgDownload" data-visible="false">Avg Download</th>
+                      <th data-field="avgUpload" data-visible="false">Avg Upload</th>
+                      <th data-field="currentDownload">Current Download</th>
+                      <th data-field="currentUpload">Current Upload</th>
+                      <th data-field="height" data-visible="false">Height</th>
+                      <th data-field="incoming">Incoming</th>
+                      <th data-field="liveTime">Live Time</th>
+                      <th data-field="recvCount" data-visible="false">Recv Count</th>
+                      <th data-field="recvIdleTime" data-visible="false">Recv Idle Time</th>
+                      <th data-field="sendCount" data-visible="false">Send Count</th>
+                      <th data-field="sendIdleTime" data-visible="false">Send Idle Time</th>
+                      <th data-field="supportFlags" data-visible="false">Support Flags</th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+            </li>
+          </div>
+        </div>
+      </div>
+      <hr class="my-4">
+
+      <button *ngIf="!refreshingConnectionsTable" class="w-100 btn btn-primary btn-lg" type="button" (click)="refreshConnectionsTable()">Refresh Connections</button>
+      <button *ngIf="refreshingConnectionsTable" class="w-100 btn btn-primary btn-lg" type="button" disabled>Refreshing Connections ...</button>
+    </div>
+
+    <div class="card p-1" [hidden]="currentOverviewTab !== 'hardfork'">
+      <div class="card-header bg-primary text-white d-flex">
+        <h4><i class="bi bi-signpost-split"></i>&nbsp;&nbsp;Hard Fork</h4>
+      </div>
+      <div class="card-body">
+        <div *ngIf="hardForkState !== ''" class="alert alert-info d-flex align-items-center justify-content-center text-center" role="alert">
+          <h4><i class="bi bi-info-circle m-2"></i></h4>&nbsp;&nbsp;
+          <div>
+            {{ hardForkState }}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+              <h6>Info</h6>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="hard-fork-status-info">Status</span>
+                <input type="text" class="form-control" aria-label="Status" aria-describedby="hard-fork-status-info" [value]="hardForkStatus" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="hard-fork-eh-info">Earliest Height</span>
+                <input type="text" class="form-control" aria-label="Earliest Height" aria-describedby="hard-fork-eh-info" [value]="hardForkEarliestHeight" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="hard-fork-block-version-info">Block Version</span>
+                <input type="text" class="form-control" aria-label="Block Version" aria-describedby="hard-fork-block-version-info" [value]="hardForkBlockVersion" readonly>
+              </div>
+
+          </div>
+
+          <div class="col-md-6">
+              <h6>Fork</h6>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="hard-fork-voting-info">Voting</span>
+                <input type="text" class="form-control" aria-label="Voting" aria-describedby="hard-fork-voting-info" [value]="hardForkVoting" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="hard-fork-votes-info">Votes</span>
+                <input type="text" class="form-control" aria-label="Votes" aria-describedby="hard-fork-votes-info" [value]="hardForkVotes" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="hard-fork-window-info">Window</span>
+                <input type="text" class="form-control" aria-label="Window" aria-describedby="hard-fork-window-info" [value]="hardForkWindow" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="hard-fork-threshold-info">Threshold</span>
+                <input type="text" class="form-control" aria-label="Threshold" aria-describedby="hard-fork-threshold-info" [value]="hardForkThreshold" readonly>
+              </div>
+
+          </div>
+
+        </div>
+
+
+      </div>
+    </div>
+
+  </div>
+
+  <div class="tab-pane fade" id="pills-net-peers" role="tabpanel" aria-labelledby="pills-net-peers-tab" tabindex="0">
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <ul class="nav nav-pills m-3" id="pills-tab" role="tablist">
+        
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentPeersTab === 'p2p' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="peersP2pLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentPeersTab('p2p')">P2P Peer List</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentPeersTab === 'rpc' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="peersRpcLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentPeersTab('rpc')">RPC Peer List</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentPeersTab === 'inPeers' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="inPeersLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentPeersTab('inPeers')">In Peers</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentPeersTab === 'outPeers' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="outPeersLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentPeersTab('outPeers')">Out Peers</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentPeersTab === 'bans' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="peersBansLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentPeersTab('bans')">Bans</button>
+        </li>
+
+      </ul>
+    </div>
+
+    <div class="card p-1" [hidden]="currentPeersTab !== 'p2p'">
+      <div class="card-header bg-primary text-white d-flex">
+        <h4>P2P Peers</h4>
+      </div>
+      <div class="card-body">
+
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <li class="list-group-item">
+              <div class="m-3">
+
+                <table
+                  id="peerListTable"
+                  data-toggle="peerListTable"
+                  data-toolbar="#toolbar"
+                  data-pagination="true"
+                  data-search="true"
+                  data-show-columns="true"
+                  data-show-columns-search="true"
+                  >
+                  <thead>
+                    <tr>
+                      <th data-field="host">Host</th>
+                      <th data-field="id">ID</th>
+                      <th data-field="ip">IP</th>
+                      <th data-field="lastSeen">Last Seen</th>
+                      <th data-field="port">Port</th>
+                      <th data-field="type">Type</th>
+                    </tr>
+                  </thead>
+                </table>
+
+              </div>
+            </li>
+          </div>
+        </div>
+      </div>
+      
+      <hr class="my-4">
+
+      <button *ngIf="!refreshingPeerList" class="w-100 btn btn-primary btn-lg" type="button" (click)="refreshPeerListTable()">Refresh Peer List</button>
+      <button *ngIf="refreshingPeerList" class="w-100 btn btn-primary btn-lg" type="button" disabled>Refreshing Peer List ...</button>
+    </div>
+
+    <div class="card p-1" [hidden]="currentPeersTab !== 'rpc'">
+      <div class="card-header bg-primary text-white d-flex">
+        <h4>RPC Peers</h4>
+      </div>
+      <div class="card-body">
+
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <li class="list-group-item">
+              <div class="m-3">
+
+                <table
+                  id="publicNodesTable"
+                  data-toggle="publicNodesTable"
+                  data-toolbar="#toolbar"
+                  data-search="true"
+                  data-pagination="true"
+                  data-show-columns="true"
+                  data-show-columns-search="true"
+                  >
+                  <thead>
+                    <tr>
+                      <th data-field="host">Host</th>
+                      <th data-field="lastSeenDateTime">Last Seen</th>
+                      <th data-field="rpcCreditsPerHash">RPC Credits per Hash</th>
+                      <th data-field="rpcPort">RPC Port</th>
+                      <th data-field="type">Type</th>
+                    </tr>
+                  </thead>
+                </table>
+
+              </div>
+            </li>
+          </div>
+        </div>
+      </div>
+      
+      <hr class="my-4">
+
+      <button *ngIf="!refreshingPublicNodes" class="w-100 btn btn-primary btn-lg" type="button" (click)="refreshPublicNodesTable()">Refresh Public Nodes</button>
+      <button *ngIf="refreshingPublicNodes" class="w-100 btn btn-primary btn-lg" type="button" disabled>Refreshing Public Nodes ...</button>
+
+    </div>
+
+    <div class="card p-1" [hidden]="currentPeersTab !== 'inPeers'">
+      <div class="card-header bg-primary text-white d-flex">
+        <h4>In Peers</h4>
+      </div>
+      <div class="card-body">
+
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <li class="list-group-item">
+              <div class="m-3">
+                <table
+                  id="peersTable"
+                  data-toggle="peersTable"
+                  data-search="true"
+                  data-pagination="true"
+                  data-show-columns="true"
+                  data-show-columns-search="true"
+                  >
+                  <thead>
+                    <tr>
+                      <th data-field="address">Remote Host</th>
+                      <th data-field="peerId">Peer ID</th>
+                      <th data-field="height">Height</th>
+                      <th data-field="pruningSeed">Prune Seed</th>
+                      <th data-field="state">State</th>
+                      <th data-field="currentDownload">Download</th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+            </li>
+          </div>
+        </div>
+        <hr class="my-4">
+        <button class="w-100 btn btn-primary btn-lg" type="button" (click)="loadPeersTable()">Refresh</button>
+      </div>
+
+    </div>
+
+    <div class="card p-1" [hidden]="currentPeersTab !== 'outPeers'">
+      <div class="card-header bg-primary text-white d-flex">
+        <h4>Out Peers</h4>
+      </div>
+      <div class="card-body">
+
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <li class="list-group-item">
+              <div class="m-3">
+                <table
+                  id="spansTable"
+                  data-toggle="spansTable"
+                  data-toolbar="#toolbar"
+                  data-search="true"
+                  data-pagination="true"
+                  data-show-columns="true"
+                  data-show-columns-search="true"
+                  >
+                  <thead>
+                    <tr>
+                      <th data-field="connectionId">Connection ID</th>
+                      <th data-field="nBlocks">Blocks</th>
+                      <th data-field="remoteAddress">Remote Address</th>
+                      <th data-field="size">Size</th>
+                      <th data-field="speed">Speed</th>
+                      <th data-field="rate">Rate</th>
+                      <th data-field="startBlockHeight">Start Block Height</th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+            </li>
+          </div>
+        </div>
+      </div>
+      <hr class="my-4">
+      <button class="w-100 btn btn-primary btn-lg" type="button" (click)="loadSpansTable()">Refresh</button>
+    </div>
+
+
+    <div class="card p-1" [hidden]="currentPeersTab !== 'bans'">
+      <div class="card-header bg-primary text-white d-flex">
+        <h4>Banned Peers</h4>
+      </div>
+      <div class="card-body">
+
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <li class="list-group-item">
+              <div class="m-3">
+                <table
+                  id="bansTable"
+                  data-toggle="bansTable"
+                  data-toolbar="#toolbar"
+                  data-search="true"
+                  data-pagination="true"
+                  data-show-columns="true"
+                  data-show-columns-search="true"
+                  >
+                  <thead>
+                  <tr>
+                      <th data-field="host">Host</th>
+                      <th data-field="ip">Ip</th>
+                      <th data-field="seconds">Seconds</th>
+                  </tr>
+                  </thead>
+                </table>
+              </div>
+            </li>
+          </div>
+        </div>
+      </div>
+        
+      <hr class="my-4">
+
+      <button *ngIf="!refreshingBansTable" class="w-100 btn btn-primary btn-lg" type="button" (click)="refreshBansTable()">Refresh Bans</button>
+      <button *ngIf="refreshingBansTable" class="w-100 btn btn-primary btn-lg" type="button" disabled>Refreshing Bans ...</button>
+
+    </div>
+
+  </div>
+
+  <div class="tab-pane fade" id="pills-net-stats" role="tabpanel" aria-labelledby="pills-net-stats-tab" tabindex="0">
     <h2><i class="bi bi-cloud-arrow-down m-4"></i> Download ({{ currentNetStats.totalGigaBytesIn.toFixed(2) }} GB)</h2>
     <canvas class="my-4 w-100" id="netStatsBytesInChart" width="900" height="380"></canvas>
 
@@ -21,98 +563,500 @@
     <canvas class="my-4 w-100" id="netStatsBytesOutChart" width="900" height="380"></canvas>
   </div>
 
-  <div class="tab-pane fade" id="pills-connections" role="tabpanel" aria-labelledby="pills-connections-tab" tabindex="0">
-    <h4 class="mb-3">Information about incoming and outgoing connections to your node</h4>
-    <div class="m-3">
-      <table
-        id="connectionsTable"
-        data-toggle="connectionsTable"
-        data-toolbar="#toolbar"
-        data-pagination="true"
-        data-search="true"
-        data-show-columns="true"
-        data-show-columns-search="true"
-        >
-        <thead>
-          <tr>
-            <th data-field="connectionId" data-visible="false">ID</th>
-            <th data-field="peerId" data-visible="false">Peer ID</th>
-            <th data-field="address">Address</th>
-            <th data-field="host" data-visible="false">Host</th>
-            <th data-field="ip" data-visible="false">IP</th>
-            <th data-field="port" data-visible="false">Port</th>
-            <th data-field="state">State</th>
-            <th data-field="avgDownload" data-visible="false">Avg Download</th>
-            <th data-field="avgUpload" data-visible="false">Avg Upload</th>
-            <th data-field="currentDownload">Current Download</th>
-            <th data-field="currentUpload">Current Upload</th>
-            <th data-field="height" data-visible="false">Height</th>
-            <th data-field="incoming">Incoming</th>
-            <th data-field="liveTime">Live Time</th>
-            <th data-field="recvCount" data-visible="false">Recv Count</th>
-            <th data-field="recvIdleTime" data-visible="false">Recv Idle Time</th>
-            <th data-field="sendCount" data-visible="false">Send Count</th>
-            <th data-field="sendIdleTime" data-visible="false">Send Idle Time</th>
-            <th data-field="supportFlags" data-visible="false">Support Flags</th>
-          </tr>
-        </thead>
-      </table>
+  <div class="tab-pane fade" id="pills-net-tor" role="tabpanel" aria-labelledby="pills-net-tor-tab" tabindex="0">
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <ul class="nav nav-pills m-3" id="pills-tab" role="tablist">
+        
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentTorTab === 'dashboard' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="torDashboardLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentTorTab('dashboard')">Dashboard</button>
+        </li>
+        
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentTorTab === 'logs' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="torLogsLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentTorTab('logs')">Logs</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentTorTab === 'commands' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="torCommandsLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentTorTab('commands')">Commands</button>
+        </li>
+      </ul>
     </div>
 
+    <div class="card p-1" [hidden]="currentTorTab !== 'dashboard'">
+      <div class="card-header bg-primary text-white d-flex">
+        <h4><i class="bi bi-diagram-3"></i>&nbsp;&nbsp;Dashboard</h4>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4">
+              <h6>Info</h6>
 
-    <hr class="my-4">
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="tor-uptime-info">Uptime</span>
+                <input type="text" class="form-control" aria-label="Uptime" aria-describedby="tor-uptime-info" [value]="torUptime" readonly>
+              </div>
 
-    <button *ngIf="!refreshingConnectionsTable" class="w-100 btn btn-primary btn-lg" type="button" (click)="refreshConnectionsTable()">Refresh Connections</button>
-    <button *ngIf="refreshingConnectionsTable" class="w-100 btn btn-primary btn-lg" type="button" disabled>Refreshing Connections ...</button>
-  
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="tor-circuit-info">Circuit</span>
+                <input type="text" class="form-control" aria-label="Circuit" aria-describedby="tor-circuit-info" [value]="torCircuit" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="tor-bootstrap-info">Bootstrap</span>
+                <input type="text" class="form-control" aria-label="Bootstrap" aria-describedby="tor-bootstrap-info" [value]="torBootstrap" readonly>
+              </div>
+
+          </div>
+
+          <div class="col-md-4">
+              <h6>Statistics</h6>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="tor-pid-info">PID</span>
+                <input type="text" class="form-control" aria-label="Tor PID" aria-describedby="tor-pid-info" [value]="torPid" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="tor-cpu-info">CPU</span>
+                <input type="text" class="form-control" aria-label="Tor CPU" aria-describedby="tor-cpu-info" [value]="torCpu" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="tor-ram-info">RAM</span>
+                <input type="text" class="form-control" aria-label="Download" aria-describedby="tor-ram-info" [value]="torRam" readonly>
+              </div>
+
+          </div>
+
+          <div class="col-md-4">
+              <h6>Traffic</h6>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="tor-upload-info">Upload</span>
+                <input type="text" class="form-control" aria-label="Upload" aria-describedby="tor-upload-info" [value]="torSent" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="tor-download-info">Download</span>
+                <input type="text" class="form-control" aria-label="Download" aria-describedby="tor-download-info" [value]="torReceived" readonly>
+              </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <div [hidden]="currentTorTab !== 'logs'">
+      <button *ngIf="torLines.length > 0" class="w-100 btn btn-primary btn-lg" type="submit" (click)="clearTorLogs()">Clear</button>
+
+      <div *ngIf="torLines.length === 0" class="h-100 p-5 text-bg-dark rounded-3 m-4 text-center">
+        <h2><i class="bi bi-exclamation-diamond m-4"></i> No logs</h2>
+        <p>Start TOR daemon to enable session logging</p>
+      </div>
+      
+      <div *ngIf="torLogs.length > 0" class="terminal bg-dark text-light p-3 m-4" #logTerminal>
+          <div class="terminal-output" id="tor-log-table">
+{{ torLogs }}
+          </div>
+      </div>
+    </div>
+
+    <div [hidden]="currentTorTab !== 'commands'">
+      <div class="row g-5 p-3">
+        <div class="col-md-12 col-lg-12">
+
+          <h4 class="mb-3">Commands</h4>
+
+          <div class="row g-3">
+
+            <div class="col-md-4">
+              <label for="reload-tor" class="form-label">Reload</label>
+              <div class="input-group mb-3">
+                <button type="button" class="btn btn-secondary btn-sm" (click)="reloadTor()"><i class="bi bi-play-fill"></i> Run</button>
+              </div>
+              <small class="text-body-secondary">Switch to clean circuits, so new application requests don't share any circuits with old ones.</small>
+            </div>
+            
+            <div class="col-md-4">
+              <label for="change-identity" class="form-label">Change identity</label>
+              <div class="input-group mb-3">
+                <button type="button" class="btn btn-secondary btn-sm" (click)="torChangeIdentity()"><i class="bi bi-play-fill"></i> Run</button>
+              </div>
+              <small class="text-body-secondary">Change TOR identity</small>
+            </div>
+
+            <div class="col-md-4">
+              <label for="clear-dns-cache" class="form-label">Clear DNS Cache</label>
+              <div class="input-group mb-3">
+                <button type="button" class="btn btn-secondary btn-sm" (click)="torClearDnsCache()"><i class="bi bi-play-fill"></i> Run</button>
+              </div>
+              <small class="text-body-secondary">Forget the client-side cached IPs for all hostnames.</small>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="tab-pane fade" id="pills-limit" role="tabpanel" aria-labelledby="pills-limit-tab" tabindex="0">
-    <h4 class="mb-4">Set daemon bandwidth limits</h4>
-    <br>
+  <div class="tab-pane fade" id="pills-net-i2p" role="tabpanel" aria-labelledby="pills-net-i2p-tab" tabindex="0">
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <ul class="nav nav-pills m-3" id="pills-tab" role="tablist">
+        
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentI2pTab === 'dashboard' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="i2pDashboardLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentI2pTab('dashboard')">Dashboard</button>
+        </li>
 
-    <div *ngIf="setLimitError !== ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
-      <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
-      <div>
-        {{setLimitError}}
-      </div>
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentI2pTab === 'tunnels' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="i2pTunnelsLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentI2pTab('tunnels')">Tunnels</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentI2pTab === 'localDestinations' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="i2pLocalDestinationsLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentI2pTab('localDestinations')">Local Destinations</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentI2pTab === 'logs' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="i2pLogsLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentI2pTab('logs')">Logs</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentI2pTab === 'commands' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="i2pCommandsLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentI2pTab('commands')">Commands</button>
+        </li>
+
+      </ul>
+
     </div>
 
-    <div *ngIf="setLimitSuccess" class="alert alert-success d-flex align-items-center justify-content-center text-center" role="alert">
-      <h4><i class="bi bi-check-circle m-2"></i></h4>&nbsp;&nbsp;
-      <div>
-        Limit set to <strong>UP:</strong>{{setLimitResult?.limitUp}}, <strong>DOWN:</strong>{{setLimitResult?.limitDown}}
-      </div>
-    </div>
-
-    <div class="row g-5 p-3">
-      <div class="col-md-12 col-lg-12">
-        <div class="row gy-3">
-
-          <div class="col-sm-6">
-            <label for="limit-down" class="form-label">Limit Down</label>
-            <input type="number" min="-1" class="form-control" id="limit-down" placeholder="" [(ngModel)]="limitDown" [ngModelOptions]="{standalone: true}">
-            <small class="text-body-secondary">Download limit in kBytes per second (-1 reset to default, 0 don't change the current limit)</small>
+    <div [hidden]="currentI2pTab !== 'dashboard'">
+      <div class="card p-1">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <h6>Info</h6>
+              <ul class="list-group">
+                <li class="list-group-item"><strong>Uptime:</strong> {{ mainData.uptime }}</li>
+                <li class="list-group-item"><strong>Network Status:</strong> {{ mainData.networkStatus }}</li>
+                <li class="list-group-item"><strong>Client Tunnels:</strong> {{ mainData.clientTunnels }}</li>
+                <li class="list-group-item"><strong>Transit Tunnels:</strong> {{ mainData.transitTunnels }}</li>
+                <li class="list-group-item"><strong>Tunnel Creation Success Rate:</strong> {{ mainData.tunnelCreationSuccessRate }}</li>
+                <li class="list-group-item"><strong>Data Path:</strong> {{ mainData.dataPath }}</li>
+                <li class="list-group-item"><strong>Router Identity:</strong> {{ mainData.routerIdent }}</li>
+                <li class="list-group-item"><strong>Router Caps:</strong> {{ mainData.routerCaps }}</li>
+                <li class="list-group-item"><strong>Routers:</strong> {{ mainData.routers }}</li>
+                <li class="list-group-item"><strong>Version:</strong> {{ mainData.version }}</li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <h6>Services</h6>
+              <ul class="list-group">
+                <li class="list-group-item"><strong>HTTP Proxy:</strong> {{ mainData.services.httpProxy ? 'Enabled' : 'Disabled' }}</li>
+                <li class="list-group-item"><strong>SOCKS Proxy:</strong> {{ mainData.services.socksProxy ? 'Enabled' : 'Disabled' }}</li>
+                <li class="list-group-item"><strong>BOB:</strong> {{ mainData.services.bob ? 'Enabled' : 'Disabled' }}</li>
+                <li class="list-group-item"><strong>SAME:</strong> {{ mainData.services.same ? 'Enabled' : 'Disabled' }}</li>
+                <li class="list-group-item"><strong>I2CP:</strong> {{ mainData.services.i2cp ? 'Enabled' : 'Disabled' }}</li>
+                <li class="list-group-item"><strong>I2PControl:</strong> {{ mainData.services.i2pControl ? 'Enabled' : 'Disabled' }}</li>
+              </ul>
+            </div>
           </div>
-
-          <div class="col-sm-6">
-            <label for="limit-up" class="form-label">Limit Up</label>
-            <input type="number" min="-1" class="form-control" id="limit-up" placeholder="" [(ngModel)]="limitUp" [ngModelOptions]="{standalone: true}">
-            <small class="text-body-secondary">Upload limit in kBytes per second (-1 reset to default, 0 don't change the current limit)</small>
+          <div class="row mt-4">
+            <div class="col-md-12">
+              <h6>Network</h6>
+              <ul class="list-group">
+                <li class="list-group-item"><strong>Sent:</strong> {{ mainData.sent }}</li>
+                <li class="list-group-item"><strong>Received:</strong> {{ mainData.received }}</li>
+              </ul>
+            </div>
           </div>
-          
         </div>
       </div>
     </div>
 
-    <hr class="my-4">
+    <div class="card p-1" [hidden]="currentI2pTab !== 'tunnels'">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Client Tunnels</h6>
+            <ul class="list-group">
+              @for(client of i2pTunnels.clients; track client.name) {
+                <li class="list-group-item"><strong>{{ client.name }}:</strong> {{ client.address }}</li>
+              }
+            </ul>
+          </div>
+          <div class="col-md-6">
+            <h6>Server Tunnels</h6>
+            <ul class="list-group">
+              @for(server of i2pTunnels.servers; track server.name) {
+                <li class="list-group-item"><strong>{{ server.name }}:</strong> {{ server.address }}</li>
+              }
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <button *ngIf="!limiting" class="w-100 btn btn-primary btn-lg" type="button" (click)="setLimit()">Set Limit</button>
-    <button *ngIf="limiting" class="w-100 btn btn-primary btn-lg" type="button" disabled>Setting Limit ...</button>
-  
+    <div class="card p-1" [hidden]="currentI2pTab !== 'localDestinations'">
+      <div class="card-body">
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <h6>Local Destinations</h6>
+            <ul class="list-group">
+              @for(dest of localDestinations.destinations; track dest) {
+                <li class="list-group-item">{{ dest }}</li>
+              }
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div [hidden]="currentI2pTab !== 'logs'">
+      <button *ngIf="i2pdLines.length > 0" class="w-100 btn btn-primary btn-lg" type="submit" (click)="clearI2pdLogs()">Clear</button>
+
+      <div *ngIf="i2pdLines.length === 0" class="h-100 p-5 text-bg-dark rounded-3 m-4 text-center">
+        <h2><i class="bi bi-exclamation-diamond m-4"></i> No logs</h2>
+        <p>Start I2P daemon to enable session logging</p>
+      </div>
+      
+      <div *ngIf="i2pdLogs.length > 0" class="terminal bg-dark text-light p-3 m-4" #logTerminal>
+          <div class="terminal-output" id="i2pd-log-table">
+{{ i2pdLogs }}
+          </div>
+      </div>
+    </div>
+
+    <div [hidden]="currentI2pTab !== 'commands'">
+      <div class="row g-5 p-3">
+        <div class="col-md-12 col-lg-12">
+
+          <h4 class="mb-3">Commands</h4>
+
+          <div class="row g-3">
+
+            <div class="col-md-4">
+              <label for="import-config-file" class="form-label">Run peer test</label>
+              <div class="input-group mb-3">
+                <button type="button" class="btn btn-secondary btn-sm" (click)="runPeerTest()"><i class="bi bi-play-fill"></i> Run</button>
+              </div>
+              <small class="text-body-secondary">Check network connectivity</small>
+            </div>
+            
+            <div class="col-md-4">
+              <label for="export-config-file" class="form-label">Reload tunnels configuration</label>
+              <div class="input-group mb-3">
+                <button type="button" class="btn btn-secondary btn-sm" (click)="reloadTunnelsConfiguration()"><i class="bi bi-play-fill"></i> Run</button>
+              </div>
+              <small class="text-body-secondary">Reload configuration and restart tunnels</small>
+            </div>
+
+            <div class="col-md-4">
+              <label for="export-config-file" class="form-label">Decline transit tunnels</label>
+              <div class="input-group mb-3">
+                <button type="button" class="btn btn-secondary btn-sm" (click)="declineTransitTunnels()"><i class="bi bi-play-fill"></i> Run</button>
+              </div>
+              <small class="text-body-secondary">Stop connectivity to transit tunnels</small>
+            </div>
+
+          </div> 
+
+          <hr class="my-4">
+          <h4 class="mb-3">Miscellaneous</h4>
+
+          <div class="row g-3">
+
+            <div class="col-md-4">
+              <label for="log-level" class="form-label">Logging Level</label>
+              <select class="form-select" id="log-level" [(ngModel)]="loggingLevel" [ngModelOptions]="{standalone: true}">
+                <option [ngValue]="'none'">none</option>
+                <option [ngValue]="'critical'">critical</option>
+                <option [ngValue]="'error'">error</option>
+                <option [ngValue]="'warn'">warn</option>
+                <option [ngValue]="'info'">info</option>
+                <option [ngValue]="'debug'">debug</option>
+              </select>
+            </div>
+
+            <div class="col-md-8">
+              <label for="export-config-file" class="form-label">Update Logging Level</label>
+              <div class="input-group mb-3">
+                <button type="button" class="btn btn-secondary btn-sm" (click)="setLogLevel()"><i class="bi bi-play-fill"></i> Update</button>
+              </div>
+            </div>
+
+          </div> 
+
+
+        </div>
+      </div>
+    </div>
   </div>
 
-  
+  <div class="tab-pane fade" id="pills-net-tools" role="tabpanel" aria-labelledby="pills-net-tools-tab" tabindex="0">
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <ul class="nav nav-pills m-3" id="pills-tab" role="tablist">
+        
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentToolsTab === 'limitBandwidth' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="limitBandwidthLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentToolsTab('limitBandwidth')">Limit Bandwidth</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentToolsTab === 'limitPeers' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="limitPeersLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentToolsTab('limitPeers')">Limit Peers</button>
+        </li>
+
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentToolsTab === 'setBans' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="banPeersLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentToolsTab('setBans')">Ban Peers</button>
+        </li>
+
+      </ul>
+    </div>
+
+    <div [hidden]="currentToolsTab !== 'limitBandwidth'">
+      <h4 class="mb-4">Set daemon bandwidth limits</h4>
+      <br>
+
+      <div *ngIf="setLimitError !== ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+        <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+        <div>
+          {{setLimitError}}
+        </div>
+      </div>
+
+      <div *ngIf="setLimitSuccess" class="alert alert-success d-flex align-items-center justify-content-center text-center" role="alert">
+        <h4><i class="bi bi-check-circle m-2"></i></h4>&nbsp;&nbsp;
+        <div>
+          Limit set to <strong>UP:</strong>{{setLimitResult?.limitUp}}, <strong>DOWN:</strong>{{setLimitResult?.limitDown}}
+        </div>
+      </div>
+
+      <div class="row g-5 p-3">
+        <div class="col-md-12 col-lg-12">
+          <div class="row gy-3">
+
+            <div class="col-sm-6">
+              <label for="limit-down" class="form-label">Limit Down</label>
+              <input type="number" min="-1" class="form-control" id="limit-down" placeholder="" [(ngModel)]="limitDown" [ngModelOptions]="{standalone: true}">
+              <small class="text-body-secondary">Download limit in kBytes per second (-1 reset to default, 0 don't change the current limit)</small>
+            </div>
+
+            <div class="col-sm-6">
+              <label for="limit-up" class="form-label">Limit Up</label>
+              <input type="number" min="-1" class="form-control" id="limit-up" placeholder="" [(ngModel)]="limitUp" [ngModelOptions]="{standalone: true}">
+              <small class="text-body-secondary">Upload limit in kBytes per second (-1 reset to default, 0 don't change the current limit)</small>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <button *ngIf="!limiting" class="w-100 btn btn-primary btn-lg" type="button" (click)="setLimit()">Set Limit</button>
+      <button *ngIf="limiting" class="w-100 btn btn-primary btn-lg" type="button" disabled>Setting Limit ...</button>
+    
+    </div>
+
+    <div [hidden]="currentToolsTab !== 'limitPeers'">
+      <h4 class="mb3">Limit number of Incoming peers</h4>
+      <div *ngIf="limitPeersError !== ''" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+        <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+        <div>
+          {{limitPeersError}}
+        </div>
+      </div>
+
+      <div *ngIf="limitPeersSuccess" class="alert alert-success d-flex align-items-center justify-content-center text-center" role="alert">
+        <h4><i class="bi bi-check-circle m-2"></i></h4>&nbsp;&nbsp;
+        <div>
+          Incoming peers limit set to {{limitPeersResult}}
+        </div>
+      </div>
+
+      <div class="row g-5 p-3">
+        <div class="col-md-12 col-lg-12">
+          <div class="row gy-3">
+
+            <div class="col-sm-6">
+              <label for="limit-in-peers" class="form-label">In Peers</label>
+              <input type="number" min="0" class="form-control" id="limit-in-peers" placeholder="" [(ngModel)]="limitInPeers" [ngModelOptions]="{standalone: true}">
+              <small class="text-body-secondary">Max number of incoming peers</small>
+            </div>
+
+            <div class="col-sm-6">
+              <label for="limit-out-peers" class="form-label">Out Peers</label>
+              <input type="number" min="0" class="form-control" id="limit-out-peers" placeholder="" [(ngModel)]="limitOutPeers" [ngModelOptions]="{standalone: true}">
+              <small class="text-body-secondary">Max number of outgoing peers</small>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <button *ngIf="!limitingPeers" class="w-100 btn btn-primary btn-lg" type="button" (click)="limitPeers()">Limit Peers</button>
+      <button *ngIf="limitingPeers" class="w-100 btn btn-primary btn-lg" type="button" disabled>Limiting Peers ...</button>
+    
+    </div>
+
+    <div [hidden]="currentToolsTab !== 'setBans'">
+      <h4 class="mb-3">Ban another node by IP</h4>
+
+      <div class="row g-5 p-3">
+        <div class="col-md-12 col-lg-12">
+          <div *ngIf="setBansSuccess" class="alert alert-success d-flex align-items-center justify-content-center text-center" role="alert">
+            <h4><i class="bi bi-check-circle m-2"></i></h4>&nbsp;&nbsp;
+            <div>
+              Successfully set bans
+            </div>
+          </div>
+          
+          <div *ngIf="setBansError" class="alert alert-danger d-flex align-items-center justify-content-center text-center" role="alert">
+            <h4><i class="bi bi-exclamation-triangle m-2"></i></h4>&nbsp;&nbsp;
+            <div>
+              {{setBansError}}
+            </div>
+          </div>
+
+          <form class="needs-validation" novalidate="">
+            <div class="row g-3">
+        
+              <div class="col-12">
+                  <label for="bans" class="form-label">Bans</label>
+                  <textarea [(ngModel)]="setBansBansJsonString" [ngModelOptions]="{standalone: true}" type="text" class="form-control" id="bans" placeholder="[
+{
+  'host': <string>,
+  'ip': <number>,
+  'ban': <boolean>,
+  'seconds': <number>
+},
+... ,
+{
+  'host': <string>,
+  'ip': <number>,
+  'ban': <boolean>,
+  'seconds': <number>
+}
+]" 
+                  rows="10" cols="15" ></textarea>
+                  <div class="invalid-feedback">
+                    Invalid bans provided.
+                  </div>
+                  <small class="text-body-secondary">List of nodes to ban</small>
+              </div>    
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <button *ngIf="!settingBans" class="w-100 btn btn-primary btn-lg" type="button" (click)="setBans()">Set Bans</button>
+      <button *ngIf="settingBans" class="w-100 btn btn-primary btn-lg" type="button" disabled>Setting Bans ...</button>
+    </div>
+
+  </div>
 
 </div>
 

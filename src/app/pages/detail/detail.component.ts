@@ -229,9 +229,7 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
     super();
 
     this.setLinks([
-      new NavbarPill('home', 'Overview', false, true),
-      new NavbarPill('peers', 'Peers', false, true),
-      new NavbarPill('spans', 'Spans', false, true)
+      new NavbarPill('home', 'Overview', false, true)
     ]);
 
     this.cards = this.createCards();
@@ -245,7 +243,6 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
       
       this.ngZone.run(() => {
         this.cards = this.createCards();
-        this.loadTables(true);
       });
     });
 
@@ -257,7 +254,6 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
 
     const syncInfoRefreshEndSub: Subscription = this.daemonData.syncInfoRefreshEnd.subscribe(() => {
       this.cards = this.createCards();
-      this.loadTables();
     });
 
     this.subscriptions.push(syncStartSub, syncInfoRefreshEndSub, daemonStatusSub);
@@ -266,21 +262,7 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
   public ngAfterViewInit(): void {
     this.ngZone.run(() => {
       this.registerEventListeners();
-      this.loadTables();
     });
-  }
-
-  private loadPeersTable(loading: boolean = false): void {
-    this.loadTable('peersTable', this.getPeers(), loading);
-  }
-
-  private loadSpansTable(loading: boolean = false): void {
-    this.loadTable('spansTable', this.getSpans(), loading);
-  }
-
-  private loadTables(loading: boolean = false): void {
-    this.loadPeersTable(loading);
-    this.loadSpansTable(loading);
   }
 
   private createCards(): SimpleBootstrapCard[] {
@@ -317,21 +299,7 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
     return cards;
   }
 
-  private getPeers(): Connection[] {
-    if (!this.daemonData.syncInfo) return [];
-    const infos: Connection[] = [];
-
-    this.daemonData.syncInfo.peers.forEach((peer: Peer) => {
-      infos.push(peer.info);
-    });
-
-    return infos;
-  }
-
-  private getSpans(): Span[] {
-    if (!this.daemonData.syncInfo) return [];    
-    return this.daemonData.syncInfo.spans;
-  }
+  
 
 
 

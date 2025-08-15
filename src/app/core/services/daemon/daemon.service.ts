@@ -48,7 +48,37 @@ export class DaemonService {
   private get url(): string {
     return `http://127.0.0.1:${this.port}`;
   }
+
   public settings: DaemonSettings;
+  private _limits?: { 
+    peers: { in: number, out: number },
+    bandwidth: { in: number, out: number }
+  };
+
+  public get limits(): { 
+    peers: { in: number, out: number },
+    bandwidth: { in: number, out: number }
+  } {
+    if (this._limits) return this._limits;
+
+    const settings = this.settings;
+
+    const { inPeers, outPeers, limitRate, limitRateUp, limitRateDown } = settings;
+    let inBand = 0, outBand = 0;
+
+    if (limitRate != -1) inBand = outBand = limitRate;
+    else {
+      inBand = limitRateUp;
+      outBand = limitRateDown;
+    }
+
+    this._limits = {
+      peers: { in: inPeers, out: outPeers },
+      bandwidth: { in: inBand, out: outBand }
+    };
+
+    return this._limits;
+  }
 
   private get port(): number {
     if (this.settings.rpcBindPort > 0) {
@@ -1153,6 +1183,9 @@ export class DaemonService {
   public async setLimit(limitDown: number, limitUp: number): Promise<{ limitDown: number, limitUp: number }> {
     const response = await this.callRpc(new SetLimitRequest(limitDown, limitUp));
 
+    this.limits.bandwidth.in = limitDown;
+    this.limits.bandwidth.out = limitUp;
+
     return {
       limitDown: response.limit_down,
       limitUp: response.limit_up
@@ -1166,6 +1199,8 @@ export class DaemonService {
       throw new Error("Could not parse in peers count");
     }
     
+    this.limits.peers.in = inPeers;
+
     return response.in_peers;
   }
 
@@ -1175,6 +1210,8 @@ export class DaemonService {
     if (typeof response.out_peers != 'number') {
       throw new Error("Could not parse out peers count");
     }
+
+    this.limits.peers.out = outPeers;
 
     return response.out_peers;
   }
