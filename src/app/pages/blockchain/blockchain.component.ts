@@ -184,7 +184,7 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
     const height = this.height;
     const blocksLeft = targetHeight - startHeight;
     const blocksDone = targetHeight - height;
-    const value = (blocksDone*100/blocksLeft);
+    const value = 100 - (blocksDone*100/blocksLeft);
     const progress = `${value.toFixed(2)} %`;
     
     if (height === targetHeight) {
@@ -197,7 +197,7 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
   public get syncProgressTotal(): string {
     const targetHeight = this.targetHeight;
     const height = this.height;
-    const value = 100 - (height*100/targetHeight);
+    const value = (height*100/targetHeight);
     const progress = `${value.toFixed(2)} %`;
     
     if (height === targetHeight) {
