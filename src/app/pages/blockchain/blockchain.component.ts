@@ -539,8 +539,8 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
 
   private onRefresh(): void {
     setTimeout(() => {
-      this.estimateFee();
       this.enableToolTips();
+      this.estimateFee().then().catch((error: any) => console.error(error));
     }, 350);
   }
 

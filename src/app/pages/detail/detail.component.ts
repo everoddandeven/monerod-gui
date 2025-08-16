@@ -2,7 +2,6 @@ import { Component, AfterViewInit, NgZone, inject } from '@angular/core';
 import { NavbarPill } from '../../shared/components/navbar/navbar.model';
 import { DaemonService, DaemonDataService, I2pDaemonService, TorDaemonService } from '../../core/services';
 import { Subscription } from 'rxjs';
-import { Connection, Span, Peer } from '../../../common';
 import { SimpleBootstrapCard } from '../../shared/utils';
 import { BasePageComponent } from '../base-page/base-page.component';
 

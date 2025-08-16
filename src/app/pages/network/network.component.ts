@@ -549,7 +549,7 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
 
     const netStatsRefreshStartSub: Subscription = this.daemonData.netStatsRefreshEnd.subscribe(() => {
       this.refreshNetStatsHistory();
-      if (!this.hardForkInfo) this.refreshHardForkInfo();
+      if (!this.hardForkInfo) this.refreshHardForkInfo().then().catch((err: any) => console.error(err));
     });
 
     const daemonStatusSub: Subscription = this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
@@ -568,7 +568,7 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
       else {
         this.initNetStatsHistoryChart();
         this.loadConnectionsTable();
-        this.refreshHardForkInfo();
+        this.refreshHardForkInfo().then().catch((err: any) => console.error(err));
       }
     });
 
@@ -626,7 +626,7 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
     this.loadPublicNodesTable();
     this.loadPeersTable();
     this.loadSpansTable();
-    this.refreshBansTable();
+    this.refreshBansTable().then().catch((err: any) => console.error(err));
   }
 
   public async refreshConnectionsTable(): Promise<void> {
