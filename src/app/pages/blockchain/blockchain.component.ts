@@ -650,12 +650,13 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
     this.gettingTx = true;
 
     try {
+      throw new Error("Not implemented");
       // TODO implement getTx()
       //const txs = await this.daemonService.getTransactions([this.getTxHash]);      
       //if (txs.length === 0) throw new Error("No transaction found");
       //this.tx = txs[0];
       
-      this.getTxError = '';
+      //this.getTxError = '';
     } catch (error: any) {
       console.error(error);
       this.getTxError = `${error}`;
@@ -911,10 +912,11 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
 
   public async onGetCoinbaseTxSum(): Promise<void> {
     try {
-      const coinbaseTxSum = await this.daemonService.getCoinbaseTxSum(this.coinbaseTxSumHeight, this.coinbaseTxSumCount);
+      throw new Error("Not implemented");
+      //const coinbaseTxSum = await this.daemonService.getCoinbaseTxSum(this.coinbaseTxSumHeight, this.coinbaseTxSumCount);
       // TO DO Implement
-      this.getCoinbaseTxSumSuccess = true;
-      this.getCoinbaseTxSumError = '';
+      //this.getCoinbaseTxSumSuccess = true;
+      //this.getCoinbaseTxSumError = '';
     }
     catch(error: any) {
       console.error(error);

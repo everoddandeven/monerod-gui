@@ -3,9 +3,10 @@ import { DaemonService, DaemonDataService } from '../../core/services';
 import { NavbarPill } from '../../shared/components';
 import { AddedAuxPow, AuxPoW, BlockTemplate, GeneratedBlocks, MiningStatus, MinerData, Chain, NetHashRateHistoryEntry } from '../../../common';
 import { BasePageComponent } from '../base-page/base-page.component';
-import { SimpleBootstrapCard } from '../../shared/utils';
 import { Chart, ChartData } from 'chart.js';
 import { Subscription } from 'rxjs';
+
+type ToolsTab = 'generateBlocks' | 'getBlockTemplate' | 'calculatePoW' | 'addAuxPoW';
 
 @Component({
     selector: 'app-mining',
@@ -14,31 +15,14 @@ import { Subscription } from 'rxjs';
     standalone: false
 })
 export class MiningComponent extends BasePageComponent implements AfterViewInit, AfterContentInit, OnDestroy {
+  
+  // #region Attributes
+  
   private daemonService = inject(DaemonService);
   private daemonData = inject(DaemonDataService);
   private ngZone = inject(NgZone);
 
-
-  public get coreBusy(): boolean {
-    return this.daemonData.info? !this.daemonData.info.coreSynchronized : true;
-  }
-
-  public get synchronized(): boolean {
-    return this.daemonData.info ? this.daemonData.info.synchronized : false;
-  }
-
-  public get miningStatus(): MiningStatus | undefined {
-    return this.daemonData.miningStatus;
-  }
-
-  public get minerData(): MinerData | undefined {
-    return this.daemonData.minerData;
-  }
-
-  public get miningStatusLoading(): boolean
-  {
-    return this.startMiningSuccess && !this.miningStatus;
-  }
+  public currentToolsTab: ToolsTab = 'generateBlocks';
 
   public gettingBlockTemplate: boolean = false;
   public getBlockTemplateAddress: string = '';
@@ -63,6 +47,31 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   public generateBlockPrevBlock: string = '';
   public generateStartingNonce: number = 0;
 
+  private netHashRateChart?: Chart;
+
+  public startMiningDoBackgroundMining: boolean = false;
+  public startMiningIgnoreBattery: boolean = false;
+  public startMiningMinerAddress: string = '';
+  public startMiningThreadsCount: number = 0;
+  public startingMining: boolean = false;
+  public startMiningSuccess: boolean = false;
+  public startMiningError: string = '';
+
+  public stoppingMining: boolean = false;
+  public stopMiningError: string = '';
+  public stopMiningSuccess: boolean = false;
+
+  public addAuxPowAuxPowJsonString: string = '';
+  public addAuxPowBlockTemplateBlob: string = '';
+  public addingAuxPow: boolean = false;
+  public addAuxPowSuccess: boolean = false;
+  public addAuxPowError: string = '';
+  public addAuxPowResult?: AddedAuxPow;
+
+  // #endregion
+
+  // #region Getters
+
   public get majorVersion(): number {
     return this.minerData ? this.minerData.majorVersion : 0;
   }
@@ -73,22 +82,6 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
 
   public get prevId(): string {
     return this.minerData ? this.minerData.prevId : '';
-  }
-
-  private get seedHash(): string {
-    return this.minerData ? this.minerData.seedHash : '';
-  }
-
-  private get difficulty(): number {
-    return this.minerData ? this.minerData.difficulty : 0;
-  }
-
-  private get medianWeight(): number {
-    return this.minerData ? this.minerData.medianWeight : 0;
-  }
-
-  private get alreadyGeneratedCoins(): number {
-    return this.minerData ? this.minerData.alreadyGeneratedCoins : 0;
   }
 
   private get alternateChains(): Chain[] {
@@ -123,54 +116,174 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     return "0 GH/s";
   }
 
-  private netHashRateChart?: Chart;
+  public get coreBusy(): boolean {
+    return this.daemonData.info? !this.daemonData.info.coreSynchronized : true;
+  }
 
-  //private txBacklog: MineableTxBacklog[]
-  public cards: SimpleBootstrapCard[];
+  public get synchronized(): boolean {
+    return this.daemonData.info ? this.daemonData.info.synchronized : false;
+  }
+
+  public get miningStatus(): MiningStatus | undefined {
+    return this.daemonData.miningStatus;
+  }
+
+  public get minerData(): MinerData | undefined {
+    return this.daemonData.minerData;
+  }
+
+  public get miningStatusLoading(): boolean
+  {
+    return this.startMiningSuccess && !this.miningStatus;
+  }
 
   public get daemonRunning(): boolean {
     return this.daemonData.running;
   }
+
   public get daemonStopping(): boolean {
     return this.daemonService.stopping;
   }
-
-  public startMiningDoBackgroundMining: boolean = false;
-  public startMiningIgnoreBattery: boolean = false;
-  public startMiningMinerAddress: string = '';
-  public startMiningThreadsCount: number = 0;
-  public startingMining: boolean = false;
-  public startMiningSuccess: boolean = false;
-  public startMiningError: string = '';
-
-  public stoppingMining: boolean = false;
-  public stopMiningError: string = '';
-  public stopMiningSuccess: boolean = false;
-
-  public addAuxPowAuxPowJsonString: string = '';
-  public addAuxPowBlockTemplateBlob: string = '';
-  public addingAuxPow: boolean = false;
-  public addAuxPowSuccess: boolean = false;
-  public addAuxPowError: string = '';
-  public addAuxPowResult?: AddedAuxPow;
 
   public get validStartMiningMinerAddress(): boolean {
     return this.startMiningMinerAddress != '';
   }
 
+  public get validAuxPowArray(): boolean {
+    try {
+      const auxPowArray: any[] = JSON.parse(this.addAuxPowAuxPowJsonString);
+
+      if (!Array.isArray(auxPowArray) || auxPowArray.length == 0) {
+        return false;
+      }
+
+      auxPowArray.forEach((auxPow: any) => AuxPoW.parse(auxPow));
+
+      return true;
+    }
+    catch {
+      return false;
+    }
+  }
+
+  public get auxPowArray(): AuxPoW[] {
+    if (!this.validAuxPowArray) {
+      return [];
+    }
+    
+    const _auxPowArray: any[] = JSON.parse(this.addAuxPowAuxPowJsonString);
+
+    const auxPowArray: AuxPoW[] = [];
+
+    _auxPowArray.forEach((auxPow: any) => auxPowArray.push(AuxPoW.parse(auxPow)));
+
+    return auxPowArray;
+  }
+
+  public get miningState(): string {
+    if (this.miningStatusLoading) return "Loading ...";
+    const d = this.miningStatus;
+
+    if (!d) return "disabled";
+    
+    return d.active ? 'mining' : 'not mining';
+  }
+
+  public get powAlgorithm(): string {
+    const d = this.miningStatus;
+    if (!d) return "RandomX";
+    return d.powAlgorithm;
+  }
+
+  public get miningHeight(): number {
+    const d = this.minerData;
+    return d ? d.height : 0;
+  }
+
+  public get miningForkVersion(): string {
+    const d = this.minerData;
+    if (!d) return "unknown";
+    return d.majorVersion.toString();
+  }
+
+  public get miningMedBlockWeight(): number {
+    const d = this.minerData;
+    return d ? d.medianWeight : 0;
+  }
+
+  public get miningDifficulty(): number {
+    const d = this.miningStatus;
+    if (!d) return 0;
+    return d.difficulty;
+  }
+
+  public get miningMintedCoins(): string {
+    const d = this.minerData;
+    if (!d) return '0 XMR';
+    return `${(d.alreadyGeneratedCoins / 1e12).toFixed(2)} XMR`;
+  }
+
+  public get miningWideDifficulty(): number {
+    const d = this.miningStatus;
+    if (!d) return 0;
+    return d.difficulty;
+  }
+
+  public get miningSpeed(): string {
+    const d = this.miningStatus;
+    if (!d) return "0 H/s";
+    return `${d.speed} H/s`;
+  }
+
+  public get miningThreadsCount(): number {
+    const d = this.miningStatus;
+    return d ? d.threadsCount : 0;
+  }
+
+  public get miningBlockReward(): string {
+    const d = this.miningStatus;
+    return d ? `${(d.blockReward / 1e12).toFixed(6)} XMR` : '0 XMR';
+  }
+
+  public get miningBlockTarget(): number {
+    const d = this.miningStatus;
+    return d ? d.blockTarget : 0;
+  }
+
+  public get miningBgEnabled(): string {
+    const d = this.miningStatus;
+    if (!d) return "disabled";
+    return d.isBackgroundMiningEnabled ? "enabled" : "disabled";
+  }
+
+  public get miningBgIdleThreshold(): string {
+    const d = this.miningStatus;
+    if (!d) return "0 %";
+    return `${d.bgIdleThreshold} %`;
+  }
+
+  public get miningBgMinIdleSeconds(): number {
+    const d = this.miningStatus;
+    if (!d) return 0;
+    return d.bgMinIdleSeconds;
+  }
+
+  public get miningBgTarget(): number {
+    const d = this.miningStatus;
+    if (!d) return 0;
+    return d.bgTarget;
+  }
+
+  // #endregion
+
   constructor() {
     super();
-    this.cards = [];
 
     this.setLinks([
       new NavbarPill('mining-status', 'Status'),
-      new NavbarPill('miner-data', 'Miner Data'),
-      new NavbarPill('hashrate', 'Hashrate'),
+      new NavbarPill('hashrate', 'Statistics'),
       new NavbarPill('alternate-chains', 'Alternate Chains'),
-      new NavbarPill('block-template', 'Block Template'),
-      new NavbarPill('generate-blocks', 'Generate Blocks'),
-      new NavbarPill('calc-pow', 'Calculate PoW Hash'),
-      new NavbarPill('add-aux-pow', 'Add Aux PoW')
+      new NavbarPill('mining-tools', 'Tools')
     ]);
     
     const syncEndSub: Subscription = this.daemonData.syncEnd.subscribe(() => {
@@ -179,6 +292,8 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
 
     this.subscriptions.push(syncEndSub);
   }
+
+  // #region Private Methods
 
   private initNetHashRateChart(): void {
     setTimeout(() => {
@@ -264,26 +379,6 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     };
   }
 
-  public ngAfterViewInit(): void {
-    this.loadTables();
-    this.initNetHashRateChart();
-  }
-
-  public override ngAfterContentInit(): void {
-    super.ngAfterContentInit();
-
-    this.cards = this.createCards();
-  }
-
-  public override ngOnDestroy(): void {
-    if (this.netHashRateChart) {
-      this.netHashRateChart.destroy();
-      this.netHashRateChart = undefined;
-    }
-
-    super.ngOnDestroy();
-  }
-
   private loadTables(): void {
     this.loadChainsTable();
   }
@@ -295,6 +390,34 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   private loadAuxPowTable(): void {
     this.loadTable('auxPowTable', this.addAuxPowResult ? this.addAuxPowResult.auxPoW : []);
   }
+
+  private refresh(): void {
+    this.loadChainsTable();
+    this.refreshNetHashRateHistory();
+  }
+
+  // #endregion
+
+  // #region Public Methods
+
+  // #region Angular Methods
+
+  public ngAfterViewInit(): void {
+    this.loadTables();
+    this.initNetHashRateChart();
+  }
+
+  public override ngOnDestroy(): void {
+    if (this.netHashRateChart) {
+      this.netHashRateChart.destroy();
+      this.netHashRateChart = undefined;
+    }
+
+    super.ngOnDestroy();
+  }
+
+  // #endregion
+
 
   public async getBlockTemplate(): Promise<void> {
     this.gettingBlockTemplate = true;
@@ -309,29 +432,7 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     this.gettingBlockTemplate = false;
   }
 
-  private refresh(): void {
-    this.loadChainsTable();
-    this.refreshNetHashRateHistory();
-    this.cards = this.createCards();
-  }
-
-  private createCards(): SimpleBootstrapCard[] {
-    if (this.coreBusy) {
-      return [
-      ]
-    }
-    return [
-      new SimpleBootstrapCard('Major Fork Version', `${this.majorVersion}`),
-      new SimpleBootstrapCard('Current block height', `${this.height}`),
-      new SimpleBootstrapCard('Previous Block Id', `${this.prevId}`),
-      new SimpleBootstrapCard('Seed hash', `${this.seedHash}`),
-      new SimpleBootstrapCard('Network difficulty', `${this.difficulty}`),
-      new SimpleBootstrapCard('Median block weight', `${this.medianWeight}`),
-      new SimpleBootstrapCard('Generated Coins', `${this.alreadyGeneratedCoins / 1e12} XMR`)
-    ];
-  }
-
-  public async calcPowHash() {
+  public async calcPowHash(): Promise<void> {
     this.gettingCalcPow = true;
 
     try {
@@ -394,37 +495,6 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     this.stoppingMining = false;
   }
 
-  public get validAuxPowArray(): boolean {
-    try {
-      const auxPowArray: any[] = JSON.parse(this.addAuxPowAuxPowJsonString);
-
-      if (!Array.isArray(auxPowArray) || auxPowArray.length == 0) {
-        return false;
-      }
-
-      auxPowArray.forEach((auxPow: any) => AuxPoW.parse(auxPow));
-
-      return true;
-    }
-    catch {
-      return false;
-    }
-  }
-
-  public get auxPowArray(): AuxPoW[] {
-    if (!this.validAuxPowArray) {
-      return [];
-    }
-    
-    const _auxPowArray: any[] = JSON.parse(this.addAuxPowAuxPowJsonString);
-
-    const auxPowArray: AuxPoW[] = [];
-
-    _auxPowArray.forEach((auxPow: any) => auxPowArray.push(AuxPoW.parse(auxPow)));
-
-    return auxPowArray;
-  }
-
   public async addAuxPow(): Promise<void> {
     this.addingAuxPow = true;
     this.addAuxPowResult = undefined;
@@ -442,5 +512,11 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
 
     this.addingAuxPow = false;
   }
+
+  public setCurrentToolsTab(tab: ToolsTab): void {
+    this.currentToolsTab = tab;
+  }
+
+  // #endregion
 
 }
