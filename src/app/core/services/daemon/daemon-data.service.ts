@@ -1,12 +1,20 @@
 import { EventEmitter, Injectable, NgZone, inject } from '@angular/core';
-import { DaemonService } from './daemon.service';
-import { BlockCount, BlockHeader, Chain, CoreIsBusyError, DaemonInfo, MinerData, MiningStatus, NetHashRateHistory, NetStats, NetStatsHistory, ProcessStats, SyncInfo, TimeUtils, TxBacklogEntry, TxPool, TxPoolStats } from '../../../../common';
 import { ElectronService } from '../electron/electron.service';
+import { DaemonService } from './daemon.service';
+import { 
+  BlockCount, BlockHeader, Chain, CoreIsBusyError, DaemonInfo,
+  MinerData, MiningStatus, NetHashRateHistory, NetStats, 
+  NetStatsHistory, ProcessStats, SyncInfo, TimeUtils, TxBacklogEntry, 
+  TxPool, TxPoolStats 
+} from '../../../../common';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DaemonDataService {
+
+  // #region Attributes
+
   private daemonService = inject(DaemonService);
   private electronService = inject(ElectronService);
   private ngZone = inject(NgZone);
@@ -45,7 +53,9 @@ export class DaemonDataService {
   private _netStatsHistory: NetStatsHistory = new NetStatsHistory();
   private _gettingNetStats: boolean = false;
 
+  private _netHashRateHistory: NetHashRateHistory = new NetHashRateHistory();
   private _hashRateHistory: NetHashRateHistory = new NetHashRateHistory();
+  private _netDifficultyHistory: NetHashRateHistory = new NetHashRateHistory();
 
   private _miningStatus?: MiningStatus;
   private _gettingMiningStatus: boolean = false;
@@ -64,9 +74,13 @@ export class DaemonDataService {
   private _gettingTxPoolStats: boolean = false;
 
   private _runningOnBattery?: boolean;
-  public get runningOnBattery(): boolean {
-    return this._runningOnBattery === true;
-  }
+
+  private osType?: { platform: string };
+  
+  public batteryLevel: number = 0;
+
+  public syncDisabledByWifiPolicy: boolean = false;
+  public syncDisabledByPeriodPolicy: boolean = false; 
 
   public readonly syncStart: EventEmitter<{ first: boolean }> = new EventEmitter<{ first: boolean }>();
   public readonly syncEnd: EventEmitter<void> = new EventEmitter<void>();
@@ -78,10 +92,13 @@ export class DaemonDataService {
   public readonly netStatsRefreshStart: EventEmitter<void> = new EventEmitter<void>();
   public readonly netStatsRefreshEnd: EventEmitter<void> = new EventEmitter<void>();
 
+  // #endregion
+
   constructor() {
 
     this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
       this.ngZone.run(() => {
+        this._netHashRateHistory = new NetHashRateHistory();
         this._hashRateHistory = new NetHashRateHistory();
         if (running) {
           this._daemonRunning = true;
@@ -97,6 +114,12 @@ export class DaemonDataService {
     this.electronService.onBatteryPower.subscribe(() => this._runningOnBattery = true);
 
     this.electronService.isOnBatteryPower().then((value: boolean) => this._runningOnBattery = value).catch((error: any) => console.error(error));
+  }
+
+  // #region Getters
+
+  public get runningOnBattery(): boolean {
+    return this._runningOnBattery === true;
   }
 
   public get initializing(): boolean {
@@ -236,12 +259,32 @@ export class DaemonDataService {
   }
 
   public get netHashRateHistory(): NetHashRateHistory {
+    return this._netHashRateHistory;
+  }
+
+  public get hashRateHistory(): NetHashRateHistory {
     return this._hashRateHistory;
   }
+
+  public get netDifficultyHistory(): NetHashRateHistory {
+    return this._netDifficultyHistory;
+  }
+
+  private get tooEarlyForRefresh(): boolean {
+    return Date.now() - this._lastRefresh <= this.refreshTimeoutMs;
+  }
+
+  // #endregion
+
+  // #region Public Methods
 
   public setRefreshTimeout(ms: number = 5000): void {
     this.refreshTimeoutMs = ms;
   }
+
+  // #endregion
+
+  // #region Private Methods
 
   private startLoop(): void {
     if (this.refreshInterval != undefined) {
@@ -275,10 +318,6 @@ export class DaemonDataService {
     this.refreshInterval = undefined;
     this._refreshing = false;
     this._daemonRunning = false;
-  }
-
-  private get tooEarlyForRefresh(): boolean {
-    return Date.now() - this._lastRefresh <= this.refreshTimeoutMs;
   }
 
   private async refreshMiningStatus(): Promise<void> {
@@ -315,6 +354,21 @@ export class DaemonDataService {
     this._gettingMinerData = false;
   }
 
+  private async refreshMiningInfo(): Promise<void> {
+    await this.refreshMiningStatus();
+    await this.refreshMinerData();
+  }
+
+  private refreshMiningSpeed(): void {
+    const speed = this.miningStatus ? this.miningStatus.speed : 0;
+    this._hashRateHistory.add(speed);
+  }
+
+  private refreshNetDifficulty(): void {
+    const diff = this.info ? this.info.difficulty : 0;
+    this._netDifficultyHistory.add(diff);
+  }
+
   private async refreshAltChains(): Promise<void> {
     this._gettingAltChains = true;
 
@@ -328,13 +382,6 @@ export class DaemonDataService {
     this._gettingAltChains = false;
 
   }
-
-  public batteryLevel: number = 0;
-
-  public syncDisabledByWifiPolicy: boolean = false;
-  public syncDisabledByPeriodPolicy: boolean = false;
-
-  private osType?: { platform: string };
 
   private async refresh(): Promise<void> {
     if (this.refreshing || this.tooEarlyForRefresh || this.daemonService.stopping || !this._daemonRunning) {
@@ -447,7 +494,7 @@ export class DaemonDataService {
       this._gettingDaemonInfo = false;
 
       if (this._daemonInfo.synchronized) {
-        this._hashRateHistory.add(this._daemonInfo.gigaHashRate);
+        this._netHashRateHistory.add(this._daemonInfo.gigaHashRate);
       }
 
       if (this.daemonService.settings.upgradeAutomatically && this._daemonInfo.updateAvailable) {
@@ -485,9 +532,11 @@ export class DaemonDataService {
       this._gettingNetStats = false;
 
       if (this._daemonInfo.coreSynchronized) {
-        await this.refreshMiningStatus();
-        await this.refreshMinerData();
+        await this.refreshMiningInfo();
       }
+
+      this.refreshMiningSpeed();
+      this.refreshNetDifficulty();
 
       if (this._daemonInfo.synchronized && this._daemonInfo.txPoolSize > 0) {
         this._gettingTransactionPool = true;
@@ -545,5 +594,7 @@ export class DaemonDataService {
 
     this._gettingProcessStats = false;
   }
+
+  // #endregion
 
 }

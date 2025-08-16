@@ -22,6 +22,10 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   private daemonData = inject(DaemonDataService);
   private ngZone = inject(NgZone);
 
+  private netHashRateChart?: Chart;
+  private hashRateChart?: Chart;
+  private netDifficultyChart?: Chart;
+
   public currentToolsTab: ToolsTab = 'generateBlocks';
 
   public gettingBlockTemplate: boolean = false;
@@ -47,8 +51,6 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   public generateBlockPrevBlock: string = '';
   public generateStartingNonce: number = 0;
 
-  private netHashRateChart?: Chart;
-
   public startMiningDoBackgroundMining: boolean = false;
   public startMiningIgnoreBattery: boolean = false;
   public startMiningMinerAddress: string = '';
@@ -71,6 +73,52 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   // #endregion
 
   // #region Getters
+
+  public get estimatedDailyIncome(): string {
+    const d = this.miningStatus;
+    const e = this.minerData;
+    const i = this.daemonData.info;
+
+    if (!d || !d.active) return "0 XMR";
+    if (!e || !i) return "Calculating ...";
+
+    const hashrate = d.speed;
+    const netHashrate = i.hashRate;
+    if (netHashrate === 0) return "Very Much XMR";
+    const reward = d.blockReward;
+
+    const income = (hashrate * reward * 720) / netHashrate;
+
+    return `${(income / 1e12).toFixed(6)} XMR`;
+  }
+
+  public get timeToFindBlock(): string {
+    const d = this.miningStatus;
+    if (!d || d.speed === 0) return "never";
+    const hashrate = d.speed;
+    const difficulty = d.difficulty;
+    const seconds = parseInt(`${ difficulty / hashrate}`);
+    const minutes = parseInt(`${seconds / 60}`);
+    const hours = parseInt(`${minutes / 60}`);
+    const days = parseInt(`${hours / 24}`);
+    const weeks = parseInt(`${days / 7}`);
+    const months = parseInt(`${days / 30}`);
+    const years = parseInt(`${days / 365}`);
+    
+    if (years > 0) return `${years} years`;
+    if (months > 0) return `${months} months`;
+    if (weeks > 0) return `${weeks} weeks`;
+    if (days > 0) return `${days} days`;
+    if (hours > 0) return `${hours} hours`;
+    if (minutes > 0) return `${minutes} minutes`;
+    return `${seconds} seconds`;
+  }
+
+  public get miningType(): string {
+    const d = this.miningStatus;
+    if (!d || !d.active) return 'none';
+    return 'solo-mining';
+  }
 
   public get majorVersion(): number {
     return this.minerData ? this.minerData.majorVersion : 0;
@@ -223,12 +271,6 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     return `${(d.alreadyGeneratedCoins / 1e12).toFixed(2)} XMR`;
   }
 
-  public get miningWideDifficulty(): number {
-    const d = this.miningStatus;
-    if (!d) return 0;
-    return d.difficulty;
-  }
-
   public get miningSpeed(): string {
     const d = this.miningStatus;
     if (!d) return "0 H/s";
@@ -241,6 +283,8 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   }
 
   public get miningBlockReward(): string {
+    const i = this.daemonData.lastBlockHeader;
+    if (i) return `${i.rewardXMR} XMR`;
     const d = this.miningStatus;
     return d ? `${(d.blockReward / 1e12).toFixed(6)} XMR` : '0 XMR';
   }
@@ -296,18 +340,30 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   // #region Private Methods
 
   private initNetHashRateChart(): void {
+    this.initChart('netHashRateChart', this.buildNetHashRateData());
+  }
+
+  private initHashRateChart(): void {
+    this.initChart('hashRateChart', this.buildHashRateData());
+  }
+
+  private initNetDifficultyChart(): void {
+    this.initChart('netDifficultyChart', this.buildNetDifficultyData());
+  }
+
+  private initChart(chart: string, data: ChartData): void {
     setTimeout(() => {
       this.ngZone.run(() => {
-        const ctx = <HTMLCanvasElement>document.getElementById('netHashRateChart');
-  
+        const ctx = <HTMLCanvasElement>document.getElementById(chart);
+        
         if (!ctx) {
-          console.warn("Could not find net hash rate chart");
+          console.warn("Could not find chart: " + chart);
           return;
         }
-    
-        this.netHashRateChart = new Chart(ctx, {
+
+        const c = new Chart(ctx, {
           type: 'line',
-          data: this.buildNetHashRateData(),
+          data: data,
           options: {
             animation: false,
             plugins: {
@@ -324,38 +380,73 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
             }
           }
         });
+
+        if (chart === 'netHashRateChart') {
+          this.netHashRateChart = c;
+        } else if (chart === 'hashRateChart') {
+          this.hashRateChart = c;
+        } else if (chart === 'netDifficultyChart')
+          this.netDifficultyChart = c;
       });
     }, 0);
   }
 
   private refreshNetHashRateHistory(): void {
-    if (!this.synchronized) {
-      return;
+    if (!this.synchronized) return;
+    if (!this.netHashRateChart) this.initNetHashRateChart();
+    if (!this.hashRateChart) this.initHashRateChart();
+    if (!this.netDifficultyChart) this.initNetDifficultyChart();
+
+    if (this.netHashRateChart) {
+      const last = this.daemonData.netHashRateHistory.last;
+
+      if (!last) {
+        return;
+      }
+
+      const label = `${last.date.toLocaleDateString()} ${last.date.toLocaleTimeString()}`;
+
+      this.netHashRateChart.data.labels?.push(label);
+      this.netHashRateChart.data.datasets.forEach((dataset) => {
+        dataset.data.push(last.gigaHashRate);
+      });
+
+      this.netHashRateChart.update();
     }
 
-    if (!this.netHashRateChart) {
-      this.initNetHashRateChart();
+    if (this.hashRateChart) {
+      const last = this.daemonData.hashRateHistory.last;
+
+      if (!last) {
+        return;
+      }
+
+      const label = `${last.date.toLocaleDateString()} ${last.date.toLocaleTimeString()}`;
+
+      this.hashRateChart.data.labels?.push(label);
+      this.hashRateChart.data.datasets.forEach((dataset) => {
+        dataset.data.push(last.gigaHashRate);
+      });
+
+      this.hashRateChart.update();
     }
 
-    if (!this.netHashRateChart) {
-      console.warn("Net hash rate chart is not initiliazed");
-      return;
+    if (this.netDifficultyChart) {
+      const last = this.daemonData.netDifficultyHistory.last;
+
+      if (!last) {
+        return;
+      }
+
+      const label = `${last.date.toLocaleDateString()} ${last.date.toLocaleTimeString()}`;
+
+      this.netDifficultyChart.data.labels?.push(label);
+      this.netDifficultyChart.data.datasets.forEach((dataset) => {
+        dataset.data.push(last.gigaHashRate);
+      });
+
+      this.netDifficultyChart.update();
     }
-
-    const last = this.daemonData.netHashRateHistory.last;
-
-    if (!last) {
-      return;
-    }
-
-    const label = `${last.date.toLocaleDateString()} ${last.date.toLocaleTimeString()}`;
-
-    this.netHashRateChart.data.labels?.push(label);
-    this.netHashRateChart.data.datasets.forEach((dataset) => {
-      dataset.data.push(last.gigaHashRate);
-    });
-
-    this.netHashRateChart.update();
   }
 
   private buildNetHashRateData(): ChartData {
@@ -379,6 +470,48 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     };
   }
 
+  private buildHashRateData(): ChartData {
+    const labels: string [] = [];
+    const data: number[] = [];
+    this.daemonData.hashRateHistory.history.forEach((entry: NetHashRateHistoryEntry) => {
+      labels.push(`${entry.date.toLocaleTimeString()} ${entry.date.toLocaleDateString()}`);
+      data.push(entry.gigaHashRate);
+    });
+
+    return {
+      labels: labels,
+      datasets: [{
+        data: data,
+        backgroundColor: 'transparent',
+        borderColor: '#33ff5fff',
+        borderWidth: 4,
+        pointBackgroundColor: '#33ff36ff',
+        radius: 0
+      }]
+    };
+  }
+
+  private buildNetDifficultyData(): ChartData {
+    const labels: string [] = [];
+    const data: number[] = [];
+    this.daemonData.netDifficultyHistory.history.forEach((entry: NetHashRateHistoryEntry) => {
+      labels.push(`${entry.date.toLocaleTimeString()} ${entry.date.toLocaleDateString()}`);
+      data.push(entry.gigaHashRate);
+    });
+
+    return {
+      labels: labels,
+      datasets: [{
+        data: data,
+        backgroundColor: 'transparent',
+        borderColor: '#ff339cff',
+        borderWidth: 4,
+        pointBackgroundColor: '#ff3396ff',
+        radius: 0
+      }]
+    };
+  }
+
   private loadTables(): void {
     this.loadChainsTable();
   }
@@ -394,6 +527,10 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   private refresh(): void {
     this.loadChainsTable();
     this.refreshNetHashRateHistory();
+
+    if (this.startingMining && this.miningStatus && this.miningStatus.active) {
+      this.startingMining = false;
+    }
   }
 
   // #endregion
@@ -468,11 +605,8 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     catch(error: any) {
       this.startMiningSuccess = false;
       this.startMiningError = `${error}`;
+      this.startingMining = false;
     }
-
-    this.stopMiningError = '';
-    this.stopMiningSuccess = false;
-    this.startingMining = false;
   }
 
   public async stopMining(): Promise<void> {
