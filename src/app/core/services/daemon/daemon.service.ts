@@ -34,6 +34,9 @@ import { TorDaemonService } from '../tor/tor-daemon.service';
   providedIn: 'root'
 })
 export class DaemonService {
+
+  // #region Attributes
+
   private installer = inject(MoneroInstallerService);
   private electronService = inject(ElectronService);
   private i2pService = inject(I2pDaemonService);
@@ -42,18 +45,50 @@ export class DaemonService {
   private readonly versionApiUrl: string = 'https://api.github.com/repos/monero-project/monero/releases/latest';
   private dbName = 'DaemonSettingsDB';
   private storeName = 'settingsStore';
+  
   private openDbPromise: Promise<IDBPDatabase>;
-
   private daemonRunning?: boolean;
+  private isRunningPromise?: Promise<boolean>;
+  private _quitting: boolean = false;
+
+  private mLatestVersion?: DaemonVersion;
+  public version?: DaemonVersion;
+
+  public stopping: boolean = false;
+  public starting: boolean = false;
+  public restarting: boolean = false;
+  public disablingSync: boolean = false;
+  public enablingSync: boolean = false;
+  public startedAt?: Date;
+  public startHeight: number = 0;
+
+  public settings: DaemonSettings;
+
+  // #region Events
+
+  public readonly onDaemonStatusChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
+  public readonly onDaemonStopStart: EventEmitter<void> = new EventEmitter<void>();
+  public readonly onDaemonStopEnd: EventEmitter<void> = new EventEmitter<void>();
+  public readonly onSavedSettings: EventEmitter<DaemonSettings> = new EventEmitter<DaemonSettings>();
+
+  // #endregion
+
+  // #endregion
+
+  // #region Getters
+
   private get url(): string {
     return `http://127.0.0.1:${this.port}`;
   }
 
-  public settings: DaemonSettings;
   private _limits?: { 
     peers: { in: number, out: number },
     bandwidth: { in: number, out: number }
   };
+
+  public get quitting(): boolean {
+    return this._quitting;
+  }
 
   public get limits(): { 
     peers: { in: number, out: number },
@@ -97,18 +132,6 @@ export class DaemonService {
     return 38081;
   }
 
-  //private url: string = "http://node2.monerodevs.org:28089";
-  //private url: string = "https://testnet.xmr.ditatompel.com";
-  //private url: string = "https://xmr.yemekyedim.com:18081";
-  //private url: string = "https://moneronode.org:18081";
-  public stopping: boolean = false;
-  public starting: boolean = false;
-  public restarting: boolean = false;
-  public disablingSync: boolean = false;
-  public enablingSync: boolean = false;
-  public startedAt?: Date;
-  public startHeight: number = 0;
-
   public get startingI2pService(): boolean {
     return this.i2pService.starting;
   }
@@ -125,12 +148,7 @@ export class DaemonService {
     return this.i2pService.stopping;
   }
 
-  public readonly onDaemonStatusChanged: EventEmitter<boolean> = new EventEmitter<boolean>();
-  public readonly onDaemonStopStart: EventEmitter<void> = new EventEmitter<void>();
-  public readonly onDaemonStopEnd: EventEmitter<void> = new EventEmitter<void>();
-  public readonly onSavedSettings: EventEmitter<DaemonSettings> = new EventEmitter<DaemonSettings>();
-
-  private isRunningPromise?: Promise<boolean>;
+  // #endregion
 
   constructor() {
     this.openDbPromise = this.openDatabase();
@@ -148,6 +166,130 @@ export class DaemonService {
     });
 
   }
+
+  // #region Private Methods
+
+  private onClose(): void {
+    this.stopping = true;
+    const handler = () => {
+      this.daemonRunning = false;
+      this.starting = false;
+      this.stopping = false;
+      this.onDaemonStatusChanged.emit(false);
+      this.onDaemonStopEnd.emit();
+    };
+    const promises = [];
+    
+    if (this.i2pService.running && !this.i2pService.stopping) {
+      promises.push(this.i2pService.stop());
+    }
+
+    if (this.torService.running && !this.torService.stopping) {
+      promises.push(this.torService.stop());
+    }
+
+    Promise.all(promises).catch((error: any) => console.error(error)).finally(handler);
+  }
+
+  private async openDatabase(): Promise<IDBPDatabase<any>> {
+    return await openDB<any>(this.dbName, 1, {
+      upgrade(db) {
+        // Crea un archivio (store) per i settings se non esiste già
+        if (!db.objectStoreNames.contains('settingsStore')) {
+          db.createObjectStore('settingsStore', {
+            keyPath: 'id',
+            autoIncrement: true
+          });
+        }
+      },
+    });
+  }
+
+  private raiseRpcError(error: RpcError): void {
+    if (error.code == -9) {
+      throw new CoreIsBusyError();
+    }
+    else if (error.code == -32601) {
+      throw new MethodNotFoundError();
+    }
+    else 
+    {
+      throw new Error(error.message);
+    }
+  }
+
+  private async delay(ms: number = 0): Promise<void> {
+    await new Promise<void>(f => setTimeout(f, ms));
+  }
+
+  private getLogin(): { 'username': string; 'password': string; } | undefined {
+    if (this.settings.rpcLogin != '') {
+      try {
+        const components = this.settings.rpcLogin.split(":");
+
+        if (components.length == 2) {
+          return {
+            'username': components[0],
+            'password': components[1]
+          }
+        }
+      }
+      catch {
+        return undefined;
+      }
+    }
+
+    return undefined;
+  }
+
+  private async callRpc(request: RPCRequest): Promise<{ [key: string]: any }> {
+    try {
+      let method: string = '';
+
+      if (request instanceof JsonRPCRequest) {
+        method = 'json_rpc';
+      }
+      else {
+        method = request.method;
+      }
+
+      const response = await this.electronService.post(`${this.url}/${method}`, request.toDictionary());
+
+      if (response.error) {
+        this.raiseRpcError(<RpcError>response.error);
+      }
+
+      return response;
+    }
+    catch (error: any) {
+      if (error instanceof HttpErrorResponse) {
+        const errorMessage: string = error.status == 0 ? `No connection` : `${error.message}`;
+
+        throw new Error(errorMessage);
+      }
+
+      throw error;
+    }
+  }
+
+  private async checkDaemonIsRunning(): Promise<boolean> {
+    try {
+      await this.callRpc(new EmptyRpcRequest());
+    }
+    catch(error: any) {
+      if (error instanceof MethodNotFoundError) {
+        return true;
+      }
+
+      console.error(error);
+    }
+
+    return false;
+  }
+
+  // #endregion
+
+  // #region Public Methods
 
   public async disableSync(): Promise<void> {
     this.disablingSync = true;
@@ -219,42 +361,6 @@ export class DaemonService {
     }
 
     this.enablingSync = false;
-  }
-
-  private onClose(): void {
-    this.stopping = true;
-    const handler = () => {
-      this.daemonRunning = false;
-      this.starting = false;
-      this.stopping = false;
-      this.onDaemonStatusChanged.emit(false);
-      this.onDaemonStopEnd.emit();
-    };
-    const promises = [];
-    
-    if (this.i2pService.running && !this.i2pService.stopping) {
-      promises.push(this.i2pService.stop());
-    }
-
-    if (this.torService.running && !this.torService.stopping) {
-      promises.push(this.torService.stop());
-    }
-
-    Promise.all(promises).catch((error: any) => console.error(error)).finally(handler);
-  }
-
-  private async openDatabase(): Promise<IDBPDatabase<any>> {
-    return await openDB<any>(this.dbName, 1, {
-      upgrade(db) {
-        // Crea un archivio (store) per i settings se non esiste già
-        if (!db.objectStoreNames.contains('settingsStore')) {
-          db.createObjectStore('settingsStore', {
-            keyPath: 'id',
-            autoIncrement: true
-          });
-        }
-      },
-    });
   }
 
   public async saveSettings(settings: DaemonSettings, restartDaemon: boolean = true): Promise<void> {
@@ -347,74 +453,6 @@ export class DaemonService {
   public async deleteSettings(): Promise<void> {
     const db = await this.openDbPromise;
     await db.delete(this.storeName, 1);
-  }
-
-  private raiseRpcError(error: RpcError): void {
-    if (error.code == -9) {
-      throw new CoreIsBusyError();
-    }
-    else if (error.code == -32601) {
-      throw new MethodNotFoundError();
-    }
-    else 
-    {
-      throw new Error(error.message);
-    }
-  }
-
-  private async delay(ms: number = 0): Promise<void> {
-    await new Promise<void>(f => setTimeout(f, ms));
-  }
-
-  private getLogin(): { 'username': string; 'password': string; } | undefined {
-    if (this.settings.rpcLogin != '') {
-      try {
-        const components = this.settings.rpcLogin.split(":");
-
-        if (components.length == 2) {
-          return {
-            'username': components[0],
-            'password': components[1]
-          }
-        }
-      }
-      catch {
-        return undefined;
-      }
-    }
-
-    return undefined;
-  }
-
-
-  private async callRpc(request: RPCRequest): Promise<{ [key: string]: any }> {
-    try {
-      let method: string = '';
-
-      if (request instanceof JsonRPCRequest) {
-        method = 'json_rpc';
-      }
-      else {
-        method = request.method;
-      }
-
-      const response = await this.electronService.post(`${this.url}/${method}`, request.toDictionary());
-
-      if (response.error) {
-        this.raiseRpcError(<RpcError>response.error);
-      }
-
-      return response;
-    }
-    catch (error: any) {
-      if (error instanceof HttpErrorResponse) {
-        const errorMessage: string = error.status == 0 ? `No connection` : `${error.message}`;
-
-        throw new Error(errorMessage);
-      }
-
-      throw error;
-    }
   }
 
   public async startDaemon(customSettings?: DaemonSettings): Promise<void> {
@@ -604,21 +642,6 @@ export class DaemonService {
     if (err) {
       throw err;
     }
-  }
-
-  private async checkDaemonIsRunning(): Promise<boolean> {
-    try {
-      await this.callRpc(new EmptyRpcRequest());
-    }
-    catch(error: any) {
-      if (error instanceof MethodNotFoundError) {
-        return true;
-      }
-
-      console.error(error);
-    }
-
-    return false;
   }
 
   public async isRunning(force: boolean = false): Promise<boolean> {
@@ -844,8 +867,6 @@ export class DaemonService {
     return SyncInfo.parse(response.result);
   }
 
-  private mLatestVersion?: DaemonVersion;
-
   public async getLatestVersion(force: boolean = false): Promise<DaemonVersion> {
     if (!force && this.mLatestVersion) {
       return this.mLatestVersion;
@@ -873,8 +894,6 @@ export class DaemonService {
 
     return this.mLatestVersion;
   }
-
-  public version?: DaemonVersion;
 
   public async getVersion(dontUseRpc: boolean = false): Promise<DaemonVersion> {
     if(!dontUseRpc && this.daemonRunning) {
@@ -1396,12 +1415,6 @@ export class DaemonService {
     });
   }
 
-  private _quitting: boolean = false;
-
-  public get quitting(): boolean {
-    return this._quitting;
-  }
-
   public async quit(): Promise<void> {
     if (this._quitting) throw new Error("Already quitting daemon");
     
@@ -1416,6 +1429,8 @@ export class DaemonService {
 
     this._quitting = false;
   }
+
+  // endregion
 
 }
 
