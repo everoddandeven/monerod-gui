@@ -1,12 +1,15 @@
 import { AfterContentInit, AfterViewInit, Component, NgZone, OnDestroy, inject } from '@angular/core';
 import { DaemonService, DaemonDataService } from '../../core/services';
 import { NavbarPill } from '../../shared/components';
-import { AddedAuxPow, AuxPoW, BlockTemplate, GeneratedBlocks, MiningStatus, MinerData, Chain, NetHashRateHistoryEntry } from '../../../common';
+import { AddedAuxPow, AuxPoW, BlockTemplate, GeneratedBlocks, MiningStatus, MinerData, Chain, NetHashRateHistoryEntry, P2PoolSettings } from '../../../common';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { Chart, ChartData } from 'chart.js';
 import { Subscription } from 'rxjs';
+import { P2poolService } from '../../core/services/p2pool/p2pool.service';
 
 type ToolsTab = 'generateBlocks' | 'getBlockTemplate' | 'calculatePoW' | 'addAuxPoW';
+type MiningType = 'solo-mining' | 'p2pool-main' | 'p2pool-mini';
+type DashboardTab = 'overview' | 'p2pool';
 
 @Component({
     selector: 'app-mining',
@@ -18,15 +21,17 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   
   // #region Attributes
   
-  private daemonService = inject(DaemonService);
-  private daemonData = inject(DaemonDataService);
-  private ngZone = inject(NgZone);
+  private readonly daemonService = inject(DaemonService);
+  private readonly daemonData = inject(DaemonDataService);
+  private readonly p2poolService = inject(P2poolService);
+  private readonly ngZone = inject(NgZone);
 
   private netHashRateChart?: Chart;
   private hashRateChart?: Chart;
   private netDifficultyChart?: Chart;
 
   public currentToolsTab: ToolsTab = 'generateBlocks';
+  public currentDashboardTab: DashboardTab = 'overview';
 
   public gettingBlockTemplate: boolean = false;
   public getBlockTemplateAddress: string = '';
@@ -58,6 +63,7 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   public startingMining: boolean = false;
   public startMiningSuccess: boolean = false;
   public startMiningError: string = '';
+  public startMiningType: MiningType = 'solo-mining';
 
   public stoppingMining: boolean = false;
   public stopMiningError: string = '';
@@ -117,7 +123,7 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   public get miningType(): string {
     const d = this.miningStatus;
     if (!d || !d.active) return 'none';
-    return 'solo-mining';
+    return !this.p2poolService.running ? 'solo-mining' : this.startMiningType === 'p2pool-main' ? 'P2Pool (main)' : 'P2Pool (mini)';
   }
 
   public get majorVersion(): number {
@@ -190,7 +196,7 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   }
 
   public get daemonStopping(): boolean {
-    return this.daemonService.stopping;
+    return this.daemonService.stopping || this.daemonService.quitting;
   }
 
   public get validStartMiningMinerAddress(): boolean {
@@ -234,7 +240,9 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
 
     if (!d) return "disabled";
     
-    return d.active ? 'mining' : 'not mining';
+    if (this.startingMining) return "starting ..."
+
+    return d.active ? 'mining ...' : 'not mining';
   }
 
   public get powAlgorithm(): string {
@@ -316,6 +324,113 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     const d = this.miningStatus;
     if (!d) return 0;
     return d.bgTarget;
+  }
+
+  // P2Pool
+
+  public get p2poolState(): string {
+    const i = this.p2poolService.settings;
+    if (i.path === '') return 'not installed';
+    return this.p2poolService.status;
+  }
+
+  public get p2poolPool(): string {
+    return this.p2poolService.pool;
+  }
+
+  public get p2poolCurrentHashrate(): string {
+    const i = this.p2poolService.minerStats;
+    return i ? `${i.currentHashrate} H/s` : '0 H/s';
+  }
+
+  public get p2poolTotalHashes(): string {
+    const i = this.p2poolService.minerStats;
+    return i ? `${i.totalHashes}` : '0';
+  }
+
+  public get p2poolSharesFound(): string {
+    const i = this.p2poolService.minerStats;
+    return i ? `${i.sharesFound}` : '0';
+  }
+
+  public get p2poolSharesFailed(): number {
+    const i = this.p2poolService.minerStats;
+    return i ? i.sharesFailed : 0;
+  }
+
+  public get p2poolRewardShare(): string {
+    const i = this.p2poolService.minerStats;
+    return i ? `${i.blockRewardSharePercent} %` : '0 %';
+  }
+
+  public get p2poolHashrate(): string {
+    const i = this.p2poolService.poolStats;
+    return i ? `${i.hashrate} H/s` : '0 H/s';
+  }
+
+  public get p2poolSidechainDifficulty(): string {
+    const i = this.p2poolService.poolStats;
+    return i ? `${i.sidechainDifficulty}` : '0';
+  }
+
+  public get p2poolSidechainHeight(): string {
+    const i = this.p2poolService.poolStats;
+    return i ? `${i.sidechainHeight}` : '0';
+  }
+
+  public get p2poolMiners(): string {
+    const i = this.p2poolService.poolStats;
+    return i ? `${i.miners}` : '0';
+  }
+
+  public get p2poolPoolTotalHashes(): string {
+    const i = this.p2poolService.poolStats;
+    return i ? `${i.totalHashes}` : '0';
+  }
+
+  public get p2poolLastBlockFound(): number {
+    const i = this.p2poolService.poolStats;
+    return i ? i.lastBlockFound : 0;
+  }
+
+  public get p2poolTotalBlocksFound(): number {
+    const i = this.p2poolService.poolStats;
+    return i ? i.totalBlocksFound : 0;
+  }
+
+  public get p2poolPplnsWeight(): number {
+    const i = this.p2poolService.poolStats;
+    return i ? i.pplnsWeight : 0;
+  }
+
+  public get p2poolPplnsWindowSize(): number {
+    const i = this.p2poolService.poolStats;
+    return i ? i.pplnsWindowSize : 0;
+  }
+  
+  public get p2poolHashrate15m(): string {
+    const i = this.p2poolService.stratum;
+    return i ? `${i.hashrate15m} H/s` : '0 H/s';
+  }
+
+  public get p2poolHashrate1h(): string {
+    const i = this.p2poolService.stratum;
+    return i ? `${i.hashrate1h} H/s` : '0 H/s';
+  }
+
+  public get p2poolHashrate24h(): string {
+    const i = this.p2poolService.stratum;
+    return i ? `${i.hashrate24h} H/s` : '0 H/s';
+  }
+
+  public get p2poolCurrentEffort(): string {
+    const i = this.p2poolService.stratum;
+    return i ? `${i.currentEffort}` : '0';
+  }
+
+  public get p2poolAverageEffort(): string {
+    const i = this.p2poolService.stratum;
+    return i ? `${i.averageEffort}` : '0';
   }
 
   // #endregion
@@ -533,6 +648,14 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     }
   }
 
+  private loadStartMiningParams(): void {
+    const c = this.daemonService.settings;
+    if (this.startMiningMinerAddress === '') this.startMiningMinerAddress = c.startMining;
+    if (this.startMiningThreadsCount === 0) this.startMiningThreadsCount = c.miningThreads;
+    this.startMiningDoBackgroundMining = c.bgMiningEnable;
+    this.startMiningIgnoreBattery = c.bgMiningIgnoreBattery;
+  }
+
   // #endregion
 
   // #region Public Methods
@@ -542,6 +665,7 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   public ngAfterViewInit(): void {
     this.loadTables();
     this.initNetHashRateChart();
+    this.loadStartMiningParams();
   }
 
   public override ngOnDestroy(): void {
@@ -595,16 +719,51 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     this.generatingBlocks = false;
   }
 
+  private async startP2PoolMining(): Promise<void> {
+    const conf = this.daemonService.settings;
+
+    if (conf.noZmq) throw new Error("P2Pool mining requires a monero ZMQ interface, enable it on node settings.");
+    
+    const p2poolConf = P2PoolSettings.fromDaemonSettings(conf);
+    const type = this.startMiningType;
+
+    if (type === 'p2pool-mini') {
+      p2poolConf.mini = true;
+    } else if (type === 'p2pool-main') {
+      p2poolConf.nano = true;
+    } else throw new Error("Invalid p2pool pool selected");
+
+    p2poolConf.path = this.p2poolService.settings.path;
+    p2poolConf.startMining = this.startMiningThreadsCount;
+    p2poolConf.wallet = this.startMiningMinerAddress;
+
+    await this.p2poolService.start(p2poolConf);
+
+    this.startingMining = false;
+  }
+
+  private async stopP2PoolMining(): Promise<void> {
+    await this.p2poolService.stop();
+  }
+
   public async startMining(): Promise<void> {
-    this.startingMining = true;
     try {
-      await this.daemonService.startMining(this.startMiningDoBackgroundMining, this.startMiningIgnoreBattery, this.startMiningMinerAddress, this.startMiningThreadsCount)
+      if (this.startingMining) throw new Error("Mining already starting");
+      this.startingMining = true;
+      const miningType = this.startMiningType;
+      
+      if (miningType === 'solo-mining') {
+        await this.daemonService.startMining(this.startMiningDoBackgroundMining, this.startMiningIgnoreBattery, this.startMiningMinerAddress, this.startMiningThreadsCount)
+      } else {
+        await this.startP2PoolMining();
+      }
+
       this.startMiningError = '';
       this.startMiningSuccess = true;
     }
     catch(error: any) {
       this.startMiningSuccess = false;
-      this.startMiningError = `${error}`;
+      this.startMiningError = `${error}`.replaceAll('Error: ', '');
       this.startingMining = false;
     }
   }
@@ -613,7 +772,9 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     this.stoppingMining = true;
 
     try {
-      await this.daemonService.stopMining();
+      const type = this.startMiningType;
+      if (type === 'p2pool-mini' || type === 'p2pool-main') await this.stopP2PoolMining();
+      else await this.daemonService.stopMining();
 
       this.stopMiningSuccess = true;
       this.stopMiningError = '';
@@ -649,6 +810,10 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
 
   public setCurrentToolsTab(tab: ToolsTab): void {
     this.currentToolsTab = tab;
+  }
+
+  public setCurrentDashboardTab(tab: DashboardTab): void {
+    this.currentDashboardTab = tab;
   }
 
   // #endregion

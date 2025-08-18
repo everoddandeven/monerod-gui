@@ -7,6 +7,7 @@ import {
   NetStatsHistory, ProcessStats, SyncInfo, TimeUtils, TxBacklogEntry, 
   TxPool, TxPoolStats 
 } from '../../../../common';
+import { P2poolService } from '../p2pool/p2pool.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,10 +16,10 @@ export class DaemonDataService {
 
   // #region Attributes
 
-  private daemonService = inject(DaemonService);
-  private electronService = inject(ElectronService);
-  private ngZone = inject(NgZone);
-
+  private readonly daemonService = inject(DaemonService);
+  private readonly p2poolService = inject(P2poolService);
+  private readonly electronService = inject(ElectronService);
+  private readonly ngZone = inject(NgZone);
 
   private refreshTimeoutMs: number = 5000;
   private refreshInterval?: NodeJS.Timeout;
@@ -324,7 +325,11 @@ export class DaemonDataService {
     this._gettingMiningStatus = true;
 
     try {
-      this._miningStatus = await this.daemonService.miningStatus();
+      if (this.p2poolService.running) {
+        await this.p2poolService.updateData();
+        this._miningStatus = this.p2poolService.miningStatus;
+      }
+      else this._miningStatus = await this.daemonService.miningStatus();
     }
     catch(error) {
       console.error(error);
@@ -380,10 +385,17 @@ export class DaemonDataService {
     }
 
     this._gettingAltChains = false;
-
   }
 
-  private async refresh(): Promise<void> {
+  public async checkDaemon(): Promise<boolean> {
+    this._daemonRunning = await this.daemonService.isRunning(true);
+    
+    if (this._daemonRunning) this.startLoop();
+    
+    return this._daemonRunning;
+  }
+
+  public async refresh(): Promise<void> {
     if (this.refreshing || this.tooEarlyForRefresh || this.daemonService.stopping || !this._daemonRunning) {
       return;
     }

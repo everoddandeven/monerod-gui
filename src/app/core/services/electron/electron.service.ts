@@ -11,11 +11,15 @@ import { StringUtils } from '../../utils';
   providedIn: 'root'
 })
 export class ElectronService {
+
+  // #region Attributes
+
   private ngZone = inject(NgZone);
 
   childProcess!: typeof childProcess;
   fs!: typeof fs;
 
+  private _osType?: { platform: string; arch: string; };
   private _isPortable?: boolean;
   private _isAutoLaunched?: boolean;
   private _online: boolean = false;
@@ -30,9 +34,23 @@ export class ElectronService {
   public readonly onAcPower: EventEmitter<void> = new EventEmitter<void>();
   public readonly onBatteryPower: EventEmitter<void> = new EventEmitter<void>();
 
+  // #endregion
+
+  // #region Getters
+
   public get isProduction(): boolean {
     return this._isProduction;
   }
+
+  public get online(): boolean {
+    return this._online;
+  }
+
+  get isElectron(): boolean {
+    return !!(window && window.process && window.process.type);
+  }
+
+  // #endregion
 
   constructor() {
     this._online = navigator.onLine;
@@ -46,14 +64,6 @@ export class ElectronService {
     window.electronAPI.onAc(() => { 
       this.onAcPower.emit()
     });
-  }
-
-  public get online(): boolean {
-    return this._online;
-  }
-
-  get isElectron(): boolean {
-    return !!(window && window.process && window.process.type);
   }
 
   public async get(uri: string): Promise<{[key: string]: any}> {
@@ -224,7 +234,6 @@ export class ElectronService {
     await promise;
   }
 
-
   public async disableAutoLaunch(): Promise<void> {
     if (await this.isPortable()) {
       throw new Error("Cannot disable auto launch");
@@ -312,6 +321,21 @@ export class ElectronService {
     return await selectPromise;
   }
 
+  public async createFolder(path: string): Promise<void> {
+    const promise = new Promise<void>((resolve, reject) => {
+      window.electronAPI.createFolder(path, (result) => {
+        if (result.error) reject(new Error(result.error));
+        else if (result.path !== undefined) {
+          if (result.path !== path) console.warn("Path created differs from specified: " + result.path);
+          resolve();
+        }
+        else reject(new Error('Unknown error'));
+      });
+    });
+    
+    return await promise;
+  }
+
   public async getPath(path: 'home' | 'appData' | 'userData' | 'sessionData' | 'temp' | 'exe' | 'module' | 'desktop' | 'documents' | 'downloads' | 'music' | 'pictures' | 'videos' | 'recent' | 'logs' | 'crashDumps'): Promise<string> {
     const promise = new Promise<string>((resolve) => {
       window.electronAPI.getPath(path, (result: string) => {
@@ -325,8 +349,6 @@ export class ElectronService {
   public async getAppDataPath(): Promise<string> {
     return await this.getPath('appData');
   }
-
-  private _osType?: { platform: string; arch: string; };
 
   public async getOsType(): Promise<{ platform: string, arch: string }> {
     if (this._osType) return this._osType;

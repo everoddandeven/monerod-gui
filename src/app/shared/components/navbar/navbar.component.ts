@@ -3,7 +3,6 @@ import { NavbarService } from './navbar.service';
 import { NavbarPill } from './navbar.model';
 import { DaemonService } from '../../../core/services/daemon/daemon.service';
 import { DaemonDataService, MoneroInstallerService } from '../../../core/services';
-import { DaemonSettings } from '../../../../common';
 import { Subscription } from 'rxjs';
 import { Tooltip } from 'bootstrap';
 import { DaemonStatusService } from '../daemon-not-running/daemon-status.service';
@@ -24,9 +23,6 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
   private installerService = inject(MoneroInstallerService);
   private statusService = inject(DaemonStatusService);
   private ngZone = inject(NgZone);
-
-  private _running: boolean = false;
-  private daemonSettings: DaemonSettings = new DaemonSettings();
   private subscriptions: Subscription[] = [];
   private tooltips: Tooltip[] = [];
 
@@ -54,7 +50,7 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
   }
 
   public get running(): boolean {
-    return this._running;
+    return this.daemonData.running;
   }
 
   public get starting(): boolean {
@@ -70,7 +66,7 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
   }
 
   public get daemonConfigured(): boolean {
-    return this.daemonSettings.monerodPath != '';
+    return this.daemonService.settings.monerodPath != '';
   }
 
   public get syncDisabled(): boolean {
@@ -92,37 +88,7 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
   // #endregion
 
   constructor() {
-    const onSavedSettingsSub: Subscription = this.daemonService.onSavedSettings.subscribe((settings: DaemonSettings) => {
-      this.daemonSettings = settings;
-    });
-
-    this.daemonService.getSettings().then((settings: DaemonSettings) => {
-      this.daemonSettings = settings;
-      this.enableToolTips();
-    }).catch((error: any) => {
-      console.error(error);
-      this.enableToolTips();
-    });
-
-    this.daemonService.isRunning().then((running: boolean) => {
-      this.ngZone.run(() => {
-        this._running = running;
-        this.enableToolTips();
-      });
-    }).catch((error) => {
-      console.error(error);
-      this._running = false;
-      this.enableToolTips();
-    });
-
-    const onStatusChangedSub: Subscription = this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
-      this.ngZone.run(() => {
-        this._running = running;
-        this.enableToolTips();
-      });
-    });
-
-    this.subscriptions.push(onSavedSettingsSub, onStatusChangedSub);
+    
   }
 
   // #region Private Methods
@@ -161,6 +127,16 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
   //#region Angular Methods
 
   public ngAfterViewInit(): void {
+
+    const onStatusChangedSub: Subscription = this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
+      console.log(running);
+      this.ngZone.run(() => {
+        this.enableToolTips();
+      });
+    });
+
+    this.subscriptions.push(onStatusChangedSub);
+
     this.enableToolTips();
   }
 

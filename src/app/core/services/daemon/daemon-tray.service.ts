@@ -10,12 +10,6 @@ export class DaemonTrayService {
 
   constructor() {
     this.registerIpcEvents();
-    this.daemonService.isRunning()
-      .then((running: boolean) => this.loadTrayItems(running))
-      .catch((error: any) => {
-        console.error(error);
-        this.loadTrayItems(false);
-      });
   }
 
   private registerIpcEvents(): void {

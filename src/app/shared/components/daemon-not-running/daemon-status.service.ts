@@ -97,7 +97,10 @@ export class DaemonStatusService {
   }
 
   private subscriptions: Subscription[] = [];
-  private settings?: DaemonSettings;
+
+  private get settings(): DaemonSettings {
+    return this.daemonService.settings;
+  }
   
   private _runningOnBattery: boolean = false;
   private _batteryTooLow: boolean = false;
@@ -127,9 +130,7 @@ export class DaemonStatusService {
   }
 
   public refresh(): void {
-    //await this.daemonService.isRunning();
     this.ngZone.run(async () => {
-      this.settings = await this.daemonService.getSettings();
       this._runningOnBattery = await this.electronService.isOnBatteryPower();
 
       if (this._runningOnBattery) this._batteryLevel = await this.electronService.getBatteryLevel();

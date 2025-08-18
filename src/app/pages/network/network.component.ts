@@ -6,10 +6,12 @@ import { Ban, Connection, HardForkInfo, LocalDestinationsData, MainData, NetStat
 import { Subscription } from 'rxjs';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { LogsService } from '../logs/logs.service';
+import { P2poolService } from '../../core/services/p2pool/p2pool.service';
 
 type OverviewTab = 'overview' | 'connections' | 'hardfork';
 type ToolsTab = 'limitBandwidth' | 'limitPeers' | 'setBans';
 type PeersTab = 'p2p' | 'rpc' | 'inPeers' | 'outPeers' | 'bans';
+type P2PoolTab = 'dashboard' | 'logs';
 type AnonNetTab = 'dashboard' | 'logs' | 'commands' | 'localDestinations' | 'tunnels';
 
 @Component({
@@ -19,11 +21,12 @@ type AnonNetTab = 'dashboard' | 'logs' | 'commands' | 'localDestinations' | 'tun
     standalone: false
 })
 export class NetworkComponent extends BasePageComponent implements AfterViewInit, OnDestroy {
-  private daemonService = inject(DaemonService);
-  private daemonData = inject(DaemonDataService);
-  private i2pService = inject(I2pDaemonService);
-  private torService = inject(TorDaemonService);
-  private logsService = inject(LogsService);
+  private readonly daemonService = inject(DaemonService);
+  private readonly daemonData = inject(DaemonDataService);
+  private readonly i2pService = inject(I2pDaemonService);
+  private readonly torService = inject(TorDaemonService);
+  private readonly logsService = inject(LogsService);
+  private readonly p2poolService = inject(P2poolService);
 
   private connections?: Connection[];
   private netStatsBytesInChart?: Chart;
@@ -53,6 +56,7 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
   public currentPeersTab: PeersTab = 'p2p';
   public currentTorTab: AnonNetTab = 'dashboard';
   public currentI2pTab: AnonNetTab = 'dashboard';
+  public currentP2PoolTab: P2PoolTab = 'dashboard';
 
   public refreshingPeerList: boolean = false;
   public refreshingPublicNodes: boolean = false;
@@ -185,6 +189,22 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
     return `http://${ip}:${port}`;
   }
 
+  public get zmqHost(): string {
+    const conf = this.daemonService.settings;
+    if (conf.noZmq) return 'disabled';
+    const port = conf.getZmqPort();
+    const ip = conf.zmqRpcBindIp;
+    return `http://${ip}:${port}`;
+  }
+
+  public get zmqPub(): string {
+    const conf = this.daemonService.settings;
+    if (conf.noZmq) return 'disabled';
+    const zmqPub = conf.getZmqPub();
+    if (zmqPub === '') return 'not set';
+    return zmqPub;
+  }
+
   // #region Tor
 
   public get torP2pHost(): string {
@@ -301,6 +321,34 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
 
   public get i2pdLogs(): string {
     return this.initingLogs ? '' : this.i2pdLines.join("\n");
+  }
+
+  // #endregion
+
+  // #region P2Pool
+
+  public get p2poolLines(): string [] {
+    return this.logsService.logs.p2pool;
+  }
+
+  public get p2poolLogs(): string {
+    return this.initingLogs ? '' : this.p2poolLines.join("\n");
+  }
+
+  public get p2poolStopping(): boolean {
+    return this.p2poolService.stopping || this.daemonService.stopping;
+  }
+
+  public get p2poolStarting(): boolean {
+    return this.p2poolService.starting;
+  }
+
+  public get p2pRunning(): boolean {
+    return this.p2poolService.running;
+  }
+
+  public get p2poolEnabled(): boolean {
+    return this.p2poolService.settings.path !== '';
   }
 
   // #endregion
@@ -538,6 +586,7 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
       new NavbarPill('net-overview', 'Overview'),
       new NavbarPill('net-peers', 'Peers'),
       new NavbarPill('net-stats', 'Statistics'),
+      new NavbarPill('net-p2pool', 'P2Pool'),
       new NavbarPill('net-tor', 'Tor'),
       new NavbarPill('net-i2p', 'I2P'),
       new NavbarPill('net-tools', 'Tools')
@@ -915,6 +964,10 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
     this.currentI2pTab = tab;
   }
 
+  public setCurrentP2PoolTab(tab: P2PoolTab): void {
+    this.currentP2PoolTab = tab;
+  }
+
   public override ngOnDestroy(): void {
     if (this.netStatsBytesInChart) {
       this.netStatsBytesInChart.destroy();
@@ -956,7 +1009,7 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
 
   // #region Logs
 
-  private onLog(type: 'monerod' | 'i2pd' | 'tor'): void {
+  private onLog(type: 'monerod' | 'p2pool' | 'i2pd' | 'tor'): void {
     if (type !== 'i2pd' && type !== 'tor') return;
     if (this.scrolling) return;
 
@@ -969,6 +1022,10 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
 
   public clearTorLogs(): void{
     this.logsService.clear('tor');
+  }
+
+  public clearP2PoolLogs(): void {
+    this.logsService.clear('p2pool');
   }
 
   private registerScrollEvents(): void {
@@ -991,11 +1048,13 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
     const table1 = document.getElementById('monerod-log-table');
     const table2 = document.getElementById('i2pd-log-table');
     const table3 = document.getElementById('tor-log-table');
+    const table4 = document.getElementById('p2pool-log-table');
     const result: HTMLElement[] = [];
 
     if (table1) result.push(table1);
     if (table2) result.push(table2);
     if (table3) result.push(table3);
+    if (table4) result.push(table4);
 
     return result;
   }

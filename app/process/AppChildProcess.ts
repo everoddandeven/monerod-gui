@@ -173,7 +173,7 @@ export class AppChildProcess {
     this._process.on('close', callback);
   }
 
-  public async start(): Promise<void> {
+  public async start(detached: boolean = false): Promise<void> {
     if (this._starting) {
       throw new Error("Process is already starting");
     }
@@ -192,7 +192,7 @@ export class AppChildProcess {
 
     this._starting = true;
 
-    const process = spawn(this._command, this._args, {});
+    const process = spawn(this._command, this._args, { detached });
     this._process = process;
 
     const promise = new Promise<void>((resolve, reject) => {
@@ -229,6 +229,16 @@ export class AppChildProcess {
     await new Promise<void>((resolve) => setTimeout(resolve, d));
   }
 
+  protected _stop(proc?: ChildProcessWithoutNullStreams): void {
+    if (!proc) {
+      console.log("No process to stop");
+      return;
+    }
+    if (!proc.kill()) {
+      throw new Error("Could not kill process: " + proc.pid);
+    }
+  }
+
   public async stop(): Promise<number | null> {
     if (this._starting) {
       throw new Error("Process is starting");
@@ -261,9 +271,7 @@ export class AppChildProcess {
       });
     });
 
-    if (!proc.kill()) {
-      throw new Error("Could not kill monerod process: " + proc.pid);
-    }
+    this._stop(proc);
 
     return await promise;
   }

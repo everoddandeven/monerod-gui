@@ -129,6 +129,53 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('on-ip2d-stderr', handlerStdErr)
     ipcRenderer.on('on-ip2d-stdout', handlerStdOut);
   },
+  checkValidP2PoolPath: (path, callback) => {
+    const eventId = `on-check-valid-p2pool-path-${newId()}`;
+
+    const handler = (event, result) => {
+      callback(result);
+    };
+
+    ipcRenderer.once(eventId, handler);
+    ipcRenderer.invoke('check-valid-p2pool-path', { eventId, path });
+  },
+  startP2Pool: (options, callback) => {
+    const eventId = `on-start-p2pool-${newId()}`;
+    const handler = (event, result) => {
+      callback(result);
+    };
+
+    ipcRenderer.once(eventId, handler);
+    ipcRenderer.invoke('start-p2pool', { eventId, options });
+  },
+  stopP2Pool: (callback) => {
+    const eventId = `on-stop-p2pool-${newId()}`;
+    const handler = (event, result) => {
+      callback(result);
+    };
+
+    ipcRenderer.once(eventId, handler);
+    ipcRenderer.invoke('stop-p2pool', { eventId });
+  },
+  onP2PoolOutput: (callback) => {
+    ipcRenderer.removeAllListeners('on-p2pool-stdout');
+    ipcRenderer.removeAllListeners('on-p2pool-stderr');
+
+    const handlerStdOut = (event, stdout) => {
+      callback({ stdout });
+    };
+
+    const handlerStdErr = (event, stderr) => {
+      callback({ stderr });
+    };
+    
+    ipcRenderer.on('on-p2pool-stderr', handlerStdErr)
+    ipcRenderer.on('on-p2pool-stdout', handlerStdOut);
+  },
+  onP2PoolClose: (callback) => {
+    const handler = (event, result) => callback(result);
+    ipcRenderer.once('p2pool-close', handler);
+  },
   httpPost: (params, callback) => {
     const { id } = params;
     
@@ -335,7 +382,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.once('got-os-type', handler);
     ipcRenderer.invoke('get-os-type');
   },
-
   showNotification: (options) => {
     ipcRenderer.invoke('show-notification', options);
   },
@@ -357,13 +403,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.once('on-is-auto-launch-enabled', handler);
     ipcRenderer.invoke('is-auto-launch-enabled');
   },
-
   disableAutoLaunch: (callback) => {
     const handler = (event, result) => callback(result);
     ipcRenderer.once('on-disable-auto-launch', handler);
     ipcRenderer.invoke('disable-auto-launch');
   },
-
   isPortable: (callback) => {
     const handler = (event, result) => {
       callback(result);
@@ -402,5 +446,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   showErrorBox: (title, content) => {
     ipcRenderer.invoke('show-error-box', title, content);
+  },
+  createFolder: (path, callback) => {
+    const eventId = `on-start-i2pd-${newId()}`;
+    
+    const handler = (event, result) => {
+      callback(result);
+    };
+    
+    ipcRenderer.once(eventId, handler);
+    ipcRenderer.invoke('create-folder', { eventId, path });
   }
 });

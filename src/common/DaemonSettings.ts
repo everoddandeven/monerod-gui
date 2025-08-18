@@ -187,6 +187,27 @@ export class DaemonSettings extends Comparable<DaemonSettings> {
 
     return 0;
   }
+
+  public getZmqPort(): number {
+    if (this.zmqRpcBindPort > 0) return this.zmqRpcBindPort;
+    if (this.mainnet) return 18082;
+    else if (this.testnet) return 28082;
+    else if (this.stagenet) return 38082;
+    return 0; 
+  }
+
+  public getZmqPubPort(): number {
+    const p = this.getZmqPort();
+    if (p === 0) return 0;
+    return p + 1;
+  }
+
+  public getZmqPub(): string {
+    const pub = this.zmqPub;
+    if (pub !== '') return pub;
+
+    return `tcp://127.0.0.1:${this.getZmqPubPort()}`;
+  }
   
   public getPort(): number {
     if (this.p2pBindPort > 0) return this.p2pBindPort;
@@ -662,7 +683,8 @@ export class DaemonSettings extends Comparable<DaemonSettings> {
     if (this.noZmq) options.push(`--no-zmq`);
     if (!this.noZmq && this.zmqRpcBindIp != '') options.push(`--zmq-rpc-bind-ip`, this.zmqRpcBindIp);
     if (!this.noZmq && this.zmqRpcBindPort) options.push(`--zmq-rpc-bind-port`, `${this.zmqRpcBindPort}`);
-    if (!this.noZmq && this.zmqPub != '') options.push(`--zmq-pub`, this.zmqPub);
+    const zmqPub = this.getZmqPub();
+    if (!this.noZmq && zmqPub != '') options.push(`--zmq-pub`, zmqPub);
     if (this.testDropDownload) options.push(`--test-drop-download`);
     if (this.testDropDownload && this.testDropDownloadHeight) options.push(`--test-drop-download-height`);
     if (this.testDbgLockSleep) options.push(`--test-dbg-lock-sleep`, `${this.testDbgLockSleep}`);

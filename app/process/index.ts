@@ -5,6 +5,7 @@ export { AppMainProcess } from "./AppMainProcess";
 export { ProcessStats } from "./ProcessStats";
 export { AppChildProcess } from "./AppChildProcess";
 export { MonerodProcess } from "./MonerodProcess";
+export { P2PoolProcess } from "./P2PoolProcess";
 export { PrivateTestnet } from "./PrivateTestnet";
 export * from "./I2pdProcess";
 export * from "./TorProcess";

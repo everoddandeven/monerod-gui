@@ -89,6 +89,12 @@ declare global {
       checkValidI2pdPath: (path: string, callback: (valid: boolean) => void) => void;
       onI2pdClose: (callback: (code: number) => void) => void;
 
+      startP2Pool: (options: string[], callback: (result: {error?: any}) => void) => void;
+      stopP2Pool: (callback: (error?: any) => void) => void;
+      onP2PoolOutput: (callback: (output: {stdout?: string, stderr?: string}) => void) => void;
+      checkValidP2PoolPath: (path: string, callback: (valid: boolean) => void) => void;
+      onP2PoolClose: (callback: (code: number) => void) => void;
+
       startTor: (options: { path: string; port?: number; rpcPort?: number; }, callback: (error?: any) => void) => void;
       stopTor: (callback: (error?: any) => void) => void;
       onTorOutput: (callback: (output: {stdout?: string, stderr?: string}) => void) => void;
@@ -102,6 +108,7 @@ declare global {
       monitorProcess: (process: 'monerod' | 'i2pd' | 'tor', callback: (result: {stats?: ProcessInfo, error?: any}) => void) => void;
 
       selectFolder: (callback: (path: string) => void) => void;
+      createFolder: (path: string, callback: (result: { error?: string; path?: string; }) => void) => void;
       selectFile: (extensions: string[], callback: (path: string) => void) => void;
 
       readFile: (filePath: string, callback: (result: { data?: string; error?: string; }) => void) => void;

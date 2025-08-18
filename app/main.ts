@@ -9,7 +9,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
-import { ProcessStats, AppMainProcess, I2pdProcess, MonerodProcess, PrivateTestnet, TorControlCommand, TorProcess, MoneroI2pdProcess } from './process';
+import { ProcessStats, AppMainProcess, I2pdProcess, MonerodProcess, PrivateTestnet, TorControlCommand, TorProcess, MoneroI2pdProcess, P2PoolProcess } from './process';
 import { BatteryUtils, FileUtils, NetworkUtils } from './utils';
 const appName = 'Monero Daemon';
 app.setName(appName);
@@ -36,6 +36,7 @@ console.log('dirname: ' + dirname);
 let monerodProcess: MonerodProcess | null = null;
 let i2pdProcess: I2pdProcess | null = null;
 let torProcess: TorProcess | null = null;
+let p2poolProcess: P2PoolProcess | null = null;
 
 const iconRelPath: string = 'assets/icons/monero-symbol-on-white-480.png';
 //const wdwIcon = `${dirname}/${iconRelPath}`;
@@ -492,6 +493,11 @@ function showSecurityWarning(msg: string): void {
 }
 
 try {
+  powerMonitor.on('on-ac', () => win?.webContents.send('on-ac'));
+  powerMonitor.on('on-battery', () => win?.webContents.send('on-battery'));
+
+  // #region App Events
+
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
@@ -559,8 +565,6 @@ try {
     win?.webContents.send('on-quit', undefined);
   });
 
-  // #region Security 
-
   app.on('web-contents-created', (event, webContents: WebContents) => {
     webContents.setWindowOpenHandler((details: HandlerDetails) => {
       const msg = `Prevented unsafe content: ${details.url}`;
@@ -578,6 +582,8 @@ try {
   });
 
   // #endregion
+
+  // #region IPC Events
 
   ipcMain.handle('detect-installation', async (event: IpcMainInvokeEvent, params: { eventId: string; program: string }) => {
     const { eventId, program } = params;
@@ -621,6 +627,44 @@ try {
     win?.webContents.send(eventId, error);
   });
 
+  ipcMain.handle('start-p2pool', async (event: IpcMainInvokeEvent, params: { eventId: string; options: string[] }) => {
+    const { eventId, options } = params;
+    
+    const p = options.shift();
+    const path = p ? p : '';
+
+    let error: string | undefined = undefined;
+
+    if (p2poolProcess && p2poolProcess.running) {
+      error = 'p2pool already started';
+    }
+    else if (!P2PoolProcess.isValidPath(path)) {
+      error = 'invalid i2pd p2pool provided: ' + path;
+    }
+    else {
+      try {
+        p2poolProcess = new P2PoolProcess({ cmd: path, flags: options, isExe: true });
+        await p2poolProcess.start();
+        p2poolProcess.onStdOut((out: string) => win?.webContents.send('on-p2pool-stdout', out));
+        p2poolProcess.onStdErr((out: string) => win?.webContents.send('on-p2pool-stderr', out));
+        p2poolProcess.onClose((_code: number | null) => {
+          const code = _code != null ? _code : -Number.MAX_SAFE_INTEGER;
+          const msg = `Process p2pool ${p2poolProcess?.pid} exited with code: ${code}`;
+          console.log(msg);
+          win?.webContents.send('p2pool-stdout', msg);
+          win?.webContents.send('p2pool-close', code);
+          monerodProcess = null;
+        });
+      }
+      catch (err: any) {
+        error = `${err}`;
+        p2poolProcess = null;
+      }
+    }
+
+    win?.webContents.send(eventId, error);
+  });
+
   ipcMain.handle('stop-i2pd', async (event: IpcMainInvokeEvent, params: { eventId: string; }) => {
     let err: string | undefined = undefined;
     const { eventId } = params;
@@ -632,6 +676,26 @@ try {
       try {
         await i2pdProcess.stop();
         i2pdProcess = null;
+      }
+      catch(error: any) {
+        err = `${error}`;
+      }
+    }
+
+    win?.webContents.send(eventId, err);
+  });
+
+  ipcMain.handle('stop-p2pool', async (event: IpcMainInvokeEvent, params: { eventId: string; }) => {
+    let err: string | undefined = undefined;
+    const { eventId } = params;
+
+    if (p2poolProcess == null) err = 'Already stopped p2pool';
+    else if (p2poolProcess.stopping) err = 'Alrady stopping p2pool';
+    else if (p2poolProcess.starting) err = 'p2pool is starting';
+    else {
+      try {
+        await p2poolProcess.stop();
+        p2poolProcess = null;
       }
       catch(error: any) {
         err = `${error}`;
@@ -733,9 +797,6 @@ try {
     win.webContents.send(params.eventId, onBattery);
   });
 
-  powerMonitor.on('on-ac', () => win?.webContents.send('on-ac'));
-  powerMonitor.on('on-battery', () => win?.webContents.send('on-battery'));
-
   ipcMain.handle('is-auto-launched', (event: IpcMainInvokeEvent) => {    
     win?.webContents.send('on-is-auto-launched', AppMainProcess.autoLaunched);
   });
@@ -758,9 +819,11 @@ try {
 
         if (i2pdProcess && i2pdProcess.running) await i2pdProcess.stop();
         if (torProcess && torProcess.running) await torProcess.stop();
+        if (p2poolProcess && p2poolProcess.running) await p2poolProcess.stop();
 
         i2pdProcess = null;
         torProcess = null;
+        p2poolProcess = null;
       }
     }
     catch (error: any) {
@@ -815,7 +878,6 @@ try {
     getTorVersion(configFilePath);
   });
 
-  // Gestione IPC
   ipcMain.handle('download-monerod', async (event: IpcMainInvokeEvent, downloadUrl: string, destination: string) => {
     try {
       const hashUrl = 'https://www.getmonero.org/downloads/hashes.txt';
@@ -859,6 +921,8 @@ try {
       });
     }
   });
+
+  // #region File Utils
 
   ipcMain.handle('download-file', async (event: IpcMainInvokeEvent, url: string, destination: string) => {
     try {
@@ -961,6 +1025,21 @@ try {
     win?.webContents.send('on-get-path', app.getPath(path));
   });
 
+  ipcMain.handle('create-folder', (event: IpcMainInvokeEvent, params: { eventId: string, path: string }) => {
+    const { eventId, path } = params;
+    try {
+      fs.mkdir(path, { recursive: true }, (err: NodeJS.ErrnoException | null, path2?: string) => {
+        if (err) win?.webContents.send(eventId, { error: `${err}` });
+        else win?.webContents.send(eventId, { path });
+      });
+    } catch (error: any) {
+      console.error(error);
+      win?.webContents.send(eventId, { error: `${error}` });
+    }
+  });
+
+  // #endregion
+
   ipcMain.handle('is-wifi-connected', async (event: IpcMainInvokeEvent) => {
     isWifiConnected();
   });
@@ -989,7 +1068,8 @@ try {
       }
   
       win?.webContents.send(eventId, { error: message });
-    }  });
+    }  
+  });
 
   ipcMain.handle('check-valid-monerod-path', (event: IpcMainInvokeEvent, path: string) => {
     checkValidMonerodPath(path);
@@ -1003,6 +1083,11 @@ try {
   ipcMain.handle('check-valid-tor-path', async (event: IpcMainInvokeEvent, params: { eventId: string, path: string }) => {
     const { eventId, path } = params;
     win?.webContents.send(eventId, await TorProcess.isValidPath(path));
+  });
+
+  ipcMain.handle('check-valid-p2pool-path', async (event: IpcMainInvokeEvent, params: { eventId: string, path: string }) => {
+    const { eventId, path } = params;
+    win?.webContents.send(eventId, await P2PoolProcess.isValidPath(path));
   });
 
   ipcMain.handle('show-notification', (event: IpcMainInvokeEvent, options?: NotificationConstructorOptions) => {
@@ -1114,6 +1199,8 @@ try {
     }
 
   });
+
+  // #endregion
 
 } catch (e: any) {
   // Catch Error

@@ -44,6 +44,16 @@
               </div>
 
               <div class="input-group mb-1">
+                <span class="input-group-text" id="blockchain-fast-sync-info">Fast Block Sync</span>
+                <input type="text" class="form-control" aria-label="Fast Block Sync" aria-describedby="blockchain-fast-sync-info" [value]="fastBlockSync" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="blockchain-pruned-sync-info">Pruned Block Sync</span>
+                <input type="text" class="form-control" aria-label="Pruned Block Sync" aria-describedby="blockchain-pruned-sync-info" [value]="syncPrunedBlocks" readonly>
+              </div>
+
+              <div class="input-group mb-1">
                 <span class="input-group-text" id="blockchain-inout-peers-info">Peers (In/Out)</span>
                 <input type="text" class="form-control" aria-label="Peers (In/Out)" aria-describedby="blockchain-inout-peers-info" [value]="inOutPeers" readonly>
               </div>

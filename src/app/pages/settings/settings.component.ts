@@ -1,9 +1,10 @@
 import { Component, NgZone, inject } from '@angular/core';
 import { NavbarPill } from '../../shared/components/navbar/navbar.model';
-import { DaemonSettings, DefaultPrivnetNode2Settings, I2pDaemonSettings, PrivnetDaemonSettings, TorDaemonSettings } from '../../../common';
+import { DaemonSettings, DefaultPrivnetNode2Settings, I2pDaemonSettings,  P2PoolSettings, PrivnetDaemonSettings, TorDaemonSettings } from '../../../common';
 import { DaemonService, I2pDaemonService, ElectronService, TorDaemonService } from '../../core/services';
 import { DaemonSettingsError } from '../../../common';
 import { BasePageComponent } from '../base-page/base-page.component';
+import { P2poolService } from '../../core/services/p2pool/p2pool.service';
 
 @Component({
     selector: 'app-settings',
@@ -12,13 +13,15 @@ import { BasePageComponent } from '../base-page/base-page.component';
     standalone: false
 })
 export class SettingsComponent extends BasePageComponent {
-  private daemonService = inject(DaemonService);
-  private i2pdService = inject(I2pDaemonService);
-  private torService = inject(TorDaemonService);
-  private electronService = inject(ElectronService);
-  private ngZone = inject(NgZone);
 
-  // #region Properties
+  // #region Attributes
+
+  private readonly daemonService = inject(DaemonService);
+  private readonly i2pdService = inject(I2pDaemonService);
+  private readonly torService = inject(TorDaemonService);
+  private readonly p2poolService = inject(P2poolService);
+  private readonly electronService = inject(ElectronService);
+  private readonly ngZone = inject(NgZone);
 
   public readonly navbarLinks: NavbarPill[];
 
@@ -46,47 +49,17 @@ export class SettingsComponent extends BasePageComponent {
   public rpcLoginUser: string = '';
   public rpcLoginPassword: string = '';
   
-  public get rpcLoginError(): string | undefined {
-    const userEmpty = this.rpcLoginUser.length === 0;
-    const passwordEmpty = this.rpcLoginPassword.length === 0;
-    const empty = userEmpty && passwordEmpty;
-    if (empty) return undefined;
-    if (userEmpty) return 'Must setup RPC user';
-    else if (passwordEmpty) return 'Must setup RPC password';
-
-    return undefined;
-  }
-
-  public get isValidRpcLogin(): boolean {
-    return this.rpcLoginError === undefined;
-  }
-
   public loading: boolean;
-
   public networkType: 'mainnet' | 'testnet' | 'stagenet' | 'privnet' = 'mainnet';
-  
-  public get currentSettings(): DaemonSettings {
-    if (this.isPrivnet) return this._privnetSettings;
-    return this._currentSettings;
-  }
 
   public originalI2pdSettings: I2pDaemonSettings;
   private _currentI2pdSettings: I2pDaemonSettings;
 
-  public get currentI2pdSettings(): I2pDaemonSettings {
-    return this._currentI2pdSettings;
-  }
-
   public originalTorSettings: TorDaemonSettings;
   private _currentTorSettings: TorDaemonSettings;
 
-  public get currentTorSettings(): TorDaemonSettings {
-    return this._currentTorSettings;
-  }
-
-  public get isPrivnet(): boolean {
-    return this._currentSettings.isPrivnet;
-  }
+  public originalP2PoolSettings: P2PoolSettings;
+  private _currentP2PoolSettings: P2PoolSettings;
 
   public successMessage: string = '';
   
@@ -109,41 +82,15 @@ export class SettingsComponent extends BasePageComponent {
   public seedNodeAddress: string = '';
   public seedNodePort: number = 0;
 
-  // #region Tx Proxy
-
   public torTxProxyIp: string = '';
   public torTxProxyPort: number = 0;
   public torTxProxyMaxConnections: number = 10;
   public torTxProxyDisableNoise: boolean = false;
 
-  public get torTxProxy(): string {
-    const torTxProxy = `tor,${this.torTxProxyIp}:${this.torTxProxyPort}${this.torTxProxyMaxConnections > 0 ? ',' + this.torTxProxyMaxConnections : ''}${this.torTxProxyDisableNoise ? ',disablenoise' : ''}`;
-
-    if (!DaemonSettings.isValidTorTxProxy(torTxProxy)) return '';
-
-    return torTxProxy;
-  }
-
-  public get validTorTxProxy(): boolean {
-    return this.torTxProxy !== '';
-  }
-
   public i2pTxProxyIp: string = '';
   public i2pTxProxyPort: number = 0;
   public i2pTxProxyMaxConnections: number = 10;
   public i2pTxProxyDisableNoise: boolean = false;
-
-  public get i2pTxProxy(): string {
-    const i2pTxProxy = `i2p,${this.i2pTxProxyIp}:${this.i2pTxProxyPort}${this.i2pTxProxyMaxConnections > 0 ? ',' + this.i2pTxProxyMaxConnections : ''}${this.i2pTxProxyDisableNoise ? ',disablenoise' : ''}`;
-
-    if (!DaemonSettings.isValidI2pTxProxy(i2pTxProxy)) return '';
-
-    return i2pTxProxy;
-  }
-
-  //#endregion
-
-  //#region Anonymous Inbound
 
   public torAnonymousInboundAddress: string = '';
   public torAnonymousInboundPort: number = 0;
@@ -151,27 +98,52 @@ export class SettingsComponent extends BasePageComponent {
   public torAnonymousInboundForwardPort: number = 0;
   public torAnonymousInboundMaxConnections: number = 0;
 
-  public get torAnonymousInbound(): string {
-    const torAnonymousInbound = `${this.torAnonymousInboundAddress}:${this.torAnonymousInboundPort},${this.torAnonymousInboundForwardIp}:${this.torAnonymousInboundForwardPort}${this.torTxProxyMaxConnections > -1 ? ',' + this.torAnonymousInboundMaxConnections : ''}`;
-    if (!DaemonSettings.isValidTorAnonymousInbound(torAnonymousInbound)) return '';
-
-    return torAnonymousInbound;
-  }
-
   public i2pAnonymousInboundAddress: string = '';
   public i2pAnonymousInboundPort: number = 0;
   public i2pAnonymousInboundForwardIp: string = '';
   public i2pAnonymousInboundForwardPort: number = 0;
   public i2pAnonymousInboundMaxConnections: number = 0;
 
-  public get i2pAnonymousInbound(): string {
-    const i2pAnonymousInbound = `${this.i2pAnonymousInboundAddress},${this.i2pAnonymousInboundForwardIp}:${this.i2pAnonymousInboundForwardPort}${this.i2pTxProxyMaxConnections > -1 ? ',' + this.i2pAnonymousInboundMaxConnections : ''}`;
-    if (!DaemonSettings.isValidI2pAnonymousInbound(i2pAnonymousInbound)) return '';
+  // #endregion
 
-    return i2pAnonymousInbound;
+  // #region Getters
+
+  public get rpcLoginError(): string | undefined {
+    const userEmpty = this.rpcLoginUser.length === 0;
+    const passwordEmpty = this.rpcLoginPassword.length === 0;
+    const empty = userEmpty && passwordEmpty;
+    if (empty) return undefined;
+    if (userEmpty) return 'Must setup RPC user';
+    else if (passwordEmpty) return 'Must setup RPC password';
+
+    return undefined;
   }
 
-  //#endregion
+  public get isValidRpcLogin(): boolean {
+    return this.rpcLoginError === undefined;
+  }
+  
+  public get currentSettings(): DaemonSettings {
+    if (this.isPrivnet) return this._privnetSettings;
+    return this._currentSettings;
+  }
+
+  public get currentI2pdSettings(): I2pDaemonSettings {
+    return this._currentI2pdSettings;
+  }
+
+  public get currentTorSettings(): TorDaemonSettings {
+    return this._currentTorSettings;
+  }
+
+  public get currentP2PoolSettings(): P2PoolSettings {
+    return this._currentP2PoolSettings;
+  }
+
+  public get isPrivnet(): boolean {
+    return this._currentSettings.isPrivnet;
+  }
+
   private get peers(): NodeInfo[] {
     const result: { address: string, port: number }[] = [];
 
@@ -253,6 +225,40 @@ export class SettingsComponent extends BasePageComponent {
   private get dbSyncMode(): string {
     return `${this.databaseSyncSpeed}:${this.databaseSyncMode}:${this.databaseSyncNBytesOrBlocks}${this.databaseSyncNPerMode}`;
   }
+
+  public get torAnonymousInbound(): string {
+    const torAnonymousInbound = `${this.torAnonymousInboundAddress}:${this.torAnonymousInboundPort},${this.torAnonymousInboundForwardIp}:${this.torAnonymousInboundForwardPort}${this.torTxProxyMaxConnections > -1 ? ',' + this.torAnonymousInboundMaxConnections : ''}`;
+    if (!DaemonSettings.isValidTorAnonymousInbound(torAnonymousInbound)) return '';
+
+    return torAnonymousInbound;
+  }
+
+  public get i2pAnonymousInbound(): string {
+    const i2pAnonymousInbound = `${this.i2pAnonymousInboundAddress},${this.i2pAnonymousInboundForwardIp}:${this.i2pAnonymousInboundForwardPort}${this.i2pTxProxyMaxConnections > -1 ? ',' + this.i2pAnonymousInboundMaxConnections : ''}`;
+    if (!DaemonSettings.isValidI2pAnonymousInbound(i2pAnonymousInbound)) return '';
+
+    return i2pAnonymousInbound;
+  }
+
+  public get torTxProxy(): string {
+    const torTxProxy = `tor,${this.torTxProxyIp}:${this.torTxProxyPort}${this.torTxProxyMaxConnections > 0 ? ',' + this.torTxProxyMaxConnections : ''}${this.torTxProxyDisableNoise ? ',disablenoise' : ''}`;
+
+    if (!DaemonSettings.isValidTorTxProxy(torTxProxy)) return '';
+
+    return torTxProxy;
+  }
+
+  public get validTorTxProxy(): boolean {
+    return this.torTxProxy !== '';
+  }
+
+  public get i2pTxProxy(): string {
+    const i2pTxProxy = `i2p,${this.i2pTxProxyIp}:${this.i2pTxProxyPort}${this.i2pTxProxyMaxConnections > 0 ? ',' + this.i2pTxProxyMaxConnections : ''}${this.i2pTxProxyDisableNoise ? ',disablenoise' : ''}`;
+
+    if (!DaemonSettings.isValidI2pTxProxy(i2pTxProxy)) return '';
+
+    return i2pTxProxy;
+  }
   
   // #region Validation
 
@@ -309,7 +315,6 @@ export class SettingsComponent extends BasePageComponent {
 
     return true;
   }
-
 
   public get canRemoveExclusiveNodes(): boolean {
     if (this.removingExclusiveNodes || this.exclusiveNodes.length === 0) {
@@ -371,18 +376,28 @@ export class SettingsComponent extends BasePageComponent {
     return !this.isPrivnet;
   }
 
-  public get modified(): boolean {
-    if (!this._currentSettings.equals(this.originalSettings)) {
-      return true;
-    }
-    if (!this._currentI2pdSettings.equals(this.originalI2pdSettings)) {
-      return true;
-    }
-    if (!this._currentTorSettings.equals(this.originalTorSettings)) {
-      return true;
-    }
+  public get settingsModified(): boolean {
+    return !this._currentSettings.equals(this.originalSettings);
+  }
 
-    return false;
+  public get torSettingsModified(): boolean {
+    return !this._currentTorSettings.equals(this.originalTorSettings);
+  }
+
+  public get i2pdSettingsModified(): boolean {
+    return !this._currentI2pdSettings.equals(this.originalI2pdSettings);
+  }
+
+  public get p2poolSettingsModified(): boolean {
+    return !this._currentP2PoolSettings.equals(this.originalP2PoolSettings);
+  }
+
+  public get needsReload(): boolean {
+    return this.settingsModified || this.torSettingsModified || this.i2pdSettingsModified;
+  }
+
+  public get modified(): boolean {
+    return this.needsReload || this.p2poolSettingsModified;
   }
 
   public get saveDisabled(): boolean {
@@ -414,6 +429,8 @@ export class SettingsComponent extends BasePageComponent {
     this._currentI2pdSettings = this.originalI2pdSettings.clone();
     this.originalTorSettings = this.torService.settings;
     this._currentTorSettings = this.originalTorSettings.clone();
+    this.originalP2PoolSettings = this.p2poolService.settings;
+    this._currentP2PoolSettings = this.originalP2PoolSettings.clone();
   }
 
   public onTorTxProxyChange(): void {
@@ -689,7 +706,6 @@ export class SettingsComponent extends BasePageComponent {
   private loadPriorityNodesTable(loading: boolean = false): void {
     this.loadTable('priorityNodesTable', this.priorityNodes, loading);
   }
-
   
   private loadPeersTable(loading: boolean = false): void {
     this.loadTable('peersNodesTable', this.priorityNodes, loading);
@@ -813,16 +829,21 @@ export class SettingsComponent extends BasePageComponent {
 
       const oldStartMinimized: boolean = this.originalSettings.startAtLoginMinimized;
 
-      await this.daemonService.saveSettings(this._currentSettings);
       this.i2pdService.setSettings(this._currentI2pdSettings);
       await this.i2pdService.saveSettings();
 
       this.torService.setSettings(this._currentTorSettings);
       await this.torService.saveSettings();
 
+      this.p2poolService.setSettings(this._currentP2PoolSettings);
+      await this.p2poolService.saveSettings();
+
+      await this.daemonService.saveSettings(this._currentSettings, this.needsReload);
+
       this.originalSettings = this._currentSettings.clone();
       this.originalI2pdSettings = this._currentI2pdSettings.clone();
       this.originalTorSettings = this._currentTorSettings.clone();
+      this.originalP2PoolSettings = this._currentP2PoolSettings.clone();
 
       const minimizedChanged: boolean = oldStartMinimized != this.originalSettings.startAtLoginMinimized;
 
@@ -871,6 +892,10 @@ export class SettingsComponent extends BasePageComponent {
   }
 
   private async getTorFileSpec(): Promise<{ extensions?: string[]; mimeType: string; }> {
+    return await this.getExecutableFileSpec();
+  }
+
+  private async getP2PoolFileSpec(): Promise<{ extensions?: string[]; mimeType: string; }> {
     return await this.getExecutableFileSpec();
   }
 
@@ -953,6 +978,10 @@ export class SettingsComponent extends BasePageComponent {
     this._currentTorSettings.path = '';
   }
 
+  public removeP2PoolFile(): void {
+    this._currentP2PoolSettings.path = '';
+  }
+
   public async chooseMonerodFile(): Promise<void> {
     const spec = await this.getMonerodFileSpec();
     const file = await this.electronService.selectFile(spec.extensions);
@@ -1005,6 +1034,25 @@ export class SettingsComponent extends BasePageComponent {
     if (valid) {
       this.ngZone.run(() => {
         this.currentTorSettings.path = file;
+      });
+    }
+    else {
+      window.electronAPI.showErrorBox('Invalid tor path', `Invalid tor path provided: ${file}`);
+    }
+  }
+
+  public async chooseP2PoolFile(): Promise<void> {
+    const spec = await this.getP2PoolFileSpec();
+    const file = await this.electronService.selectFile(spec.extensions);
+
+    if (file == '') {
+      return;
+    }
+
+    const valid = await this.p2poolService.isValidPath(file);
+    if (valid) {
+      this.ngZone.run(() => {
+        this.currentP2PoolSettings.path = file;
       });
     }
     else {

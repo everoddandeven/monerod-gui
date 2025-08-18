@@ -217,7 +217,7 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
 
   public get bootstrapEnabled(): string {
     const info = this.daemonData.info;
-    if (info && info.bootstrapDaemonAddress != '') return "Enabled";
+    if (info && info.bootstrapDaemonAddress != '') return info.bootstrapDaemonAddress;
     else if (info && info.bootstrapDaemonAddress == 'auto') return "Automatic";
     return "Disabled";
   }
@@ -236,6 +236,16 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
     const height = this.height;
     const targetHeight = this.targetHeight;
     return `${height} / ${targetHeight}`; 
+  }
+
+  public get fastBlockSync(): string {
+    const i = this.daemonService.settings;
+    return i.fastBlockSync ? 'enabled' : 'disabled';
+  }
+
+  public get syncPrunedBlocks(): string {
+    const i = this.daemonService.settings;
+    return i.syncPrunedBlocks ? 'enabled' : 'disabled';
   }
 
   public get capacity(): number {

@@ -29,6 +29,7 @@ import { ElectronService } from '../electron/electron.service';
 import { openDB, IDBPDatabase } from "idb"
 import { I2pDaemonService } from '../i2p/i2p-daemon.service';
 import { TorDaemonService } from '../tor/tor-daemon.service';
+import { P2poolService } from '../p2pool/p2pool.service';
 
 @Injectable({
   providedIn: 'root'
@@ -37,10 +38,11 @@ export class DaemonService {
 
   // #region Attributes
 
-  private installer = inject(MoneroInstallerService);
-  private electronService = inject(ElectronService);
-  private i2pService = inject(I2pDaemonService);
-  private torService = inject(TorDaemonService);
+  private readonly installer = inject(MoneroInstallerService);
+  private readonly electronService = inject(ElectronService);
+  private readonly i2pService = inject(I2pDaemonService);
+  private readonly torService = inject(TorDaemonService);
+  private readonly p2poolService = inject(P2poolService);
 
   private readonly versionApiUrl: string = 'https://api.github.com/repos/monero-project/monero/releases/latest';
   private dbName = 'DaemonSettingsDB';
@@ -63,6 +65,7 @@ export class DaemonService {
   public startHeight: number = 0;
 
   public settings: DaemonSettings;
+  private _firstRun: boolean = true;
 
   // #region Events
 
@@ -186,6 +189,10 @@ export class DaemonService {
 
     if (this.torService.running && !this.torService.stopping) {
       promises.push(this.torService.stop());
+    }
+
+    if (this.p2poolService.running && !this.p2poolService.stopping) {
+      promises.push(this.p2poolService.stop());
     }
 
     Promise.all(promises).catch((error: any) => console.error(error)).finally(handler);
@@ -423,12 +430,23 @@ export class DaemonService {
     return await checkPromise;
   }
 
-  public async getSettings(checkValidPath: boolean = true): Promise<DaemonSettings> {
+  public async loadSettings(): Promise<void> {
+    this.settings = await this.getSettings(true, false);
+  }
+
+  public async getSettings(checkValidPath: boolean = true, checkIsRunning: boolean = true): Promise<DaemonSettings> {
+    console.log(`DaemonService.getSettings(${checkValidPath}, ${checkIsRunning})`);
     const db = await this.openDbPromise;
     const result = await db.get(this.storeName, 1);
     if (result) {
+      console.log('daemon settings loaded:', result);
       const settings = DaemonSettings.parse(result);
-      const running = await this.isRunning();
+      if (this._firstRun) {
+        this.settings = settings;
+        console.log("OVERRIDED DAEMON SETTINGS")
+        this._firstRun = false;
+      }
+      const running = checkIsRunning ? await this.isRunning() : false;
 
       if (!running && checkValidPath && settings.monerodPath != '' && !await this.checkValidMonerodPath(settings.monerodPath)) {
         settings.monerodPath = '';
@@ -446,6 +464,7 @@ export class DaemonService {
     }
     else
     {
+      console.warn("Daemon settings database not found");
       return new DaemonSettings();
     }
   }
@@ -1128,6 +1147,14 @@ export class DaemonService {
       body: this.quitting ? 'Monero daemon is quiting' : this.restarting ? 'Monero daemon is restarting' : 'Monero daemon is stopping'
     });
     
+    if (this.p2poolService.running) {
+      console.log("Stopping p2pool service");
+
+      await this.p2poolService.stop();
+
+      console.log("Stopped p2pool service");
+    }
+
     if (this.settings.privnet) {
       await new Promise<void>((resolve, reject) => {
         window.electronAPI.stopMonerod(({ error }: { error?: string; code?: number; }) => {

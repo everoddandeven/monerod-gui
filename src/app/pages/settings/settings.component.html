@@ -1033,6 +1033,23 @@
               </div>
       
           </div>
+
+          <hr class="my-4">
+
+          <div class="row g-3">
+            <h4 class="mb-3">P2Pool</h4>
+
+            <div class="col-md-12">
+              <label for="p2pool-path" class="form-label">P2Pool path</label>
+              <div class="input-group mb-3">
+                <input id="p2pool-path" type="text" class="form-control form-control-sm" placeholder="" aria-label="P2Pool path" aria-describedby="basic-addon2" [value]="currentP2PoolSettings.path" readonly>
+                <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseP2PoolFile()"><i class="bi bi-filetype-exe"></i> Choose executable</button></span>            
+                <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeP2PoolFile()" [disabled]="currentP2PoolSettings.path === ''"><i class="bi bi-file-x"></i> Remove</button></span>
+              </div>
+              <small class="text-body-secondary">Path to p2pool executable</small>
+            </div>
+
+          </div>
     
         </form>
       </div>
@@ -1213,7 +1230,6 @@
       </div>
     </div>
   </div>
-
 
   <div class="tab-pane fade" id="pills-i2p" role="tabpanel" aria-labelledby="pills-i2p-tab" tabindex="0">
     <div class="row g-5 p-3">

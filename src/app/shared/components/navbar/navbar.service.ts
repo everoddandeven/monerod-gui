@@ -1,16 +1,20 @@
 import { EventEmitter, Injectable, NgZone, inject } from '@angular/core';
 import { NavbarPill } from './navbar.model';
-import { DaemonService } from '../../../core/services';
+import { DaemonDataService, DaemonService } from '../../../core/services';
 
 @Injectable({
   providedIn: 'root'
 })
 export class NavbarService {
   private daemonService = inject(DaemonService);
+  private daemonDataService = inject(DaemonDataService);
   private zone = inject(NgZone);
 
   private _navbarLinks: NavbarPill[] = [];
-  private daemonRunning: boolean = false;
+
+  private get daemonRunning(): boolean {
+    return this.daemonDataService.running;
+  }
 
   public get links(): NavbarPill[] {
     return this._navbarLinks;
@@ -22,17 +26,11 @@ export class NavbarService {
 
   constructor() {
     this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
-      this.daemonRunning = running;
+      console.log(running);
       this.refreshLinks();
     });
 
-    this.daemonService.isRunning().then((running: boolean) => {
-      this.daemonRunning = running;
-    }).catch((error: any) => {
-      console.error(error);
-    }).finally(() => {
-      this.refreshLinks();
-    });
+    this.refreshLinks();
   }
 
   private refreshLinks(): void {

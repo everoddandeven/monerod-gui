@@ -71,6 +71,16 @@
                 <input type="text" class="form-control" aria-label="RPC Endpoint" aria-describedby="net-rpc-host-info" [value]="rpcHost" readonly>
               </div>
 
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-zmq-host-info">ZMQ Endpoint</span>
+                <input type="text" class="form-control" aria-label="ZMQ Endpoint" aria-describedby="net-zmq-host-info" [value]="zmqHost" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="net-zmq-pub-info">ZMQ Pub</span>
+                <input type="text" class="form-control" aria-label="ZMQ Pub" aria-describedby="net-zmq-pub-info" [value]="zmqPub" readonly>
+              </div>
+
           </div>
 
           <div class="col-md-4">
@@ -561,6 +571,104 @@
 
     <h2><i class="bi bi-cloud-arrow-up m-4"></i> Upload ({{ currentNetStats.totalGigaBytesOut.toFixed(2) }} GB)</h2>
     <canvas class="my-4 w-100" id="netStatsBytesOutChart" width="900" height="380"></canvas>
+  </div>
+
+  <div class="tab-pane fade" id="pills-net-p2pool" role="tabpanel" aria-labelledby="pills-net-p2pool-tab" tabindex="0">
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <ul class="nav nav-pills m-3" id="pills-tab" role="tablist">
+        
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentP2PoolTab === 'dashboard' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="p2poolNetOverview" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentP2PoolTab('dashboard')">Dashboard</button>
+        </li>
+        
+        <li class="nav-item mr-2" role="presentation">
+          <button [class]="currentP2PoolTab === 'logs' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="torLogsLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentP2PoolTab('logs')">Logs</button>
+        </li>
+
+      </ul>
+    </div>
+
+    <div class="card p-1" [hidden]="currentP2PoolTab !== 'dashboard'">
+      <div class="card-header bg-primary text-white d-flex">
+        <h4><i class="bi bi-diagram-3"></i>&nbsp;&nbsp;Dashboard</h4>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4">
+              <h6>Info</h6>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="tor-uptime-info">Uptime</span>
+                <input type="text" class="form-control" aria-label="Uptime" aria-describedby="tor-uptime-info" [value]="torUptime" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="tor-circuit-info">Circuit</span>
+                <input type="text" class="form-control" aria-label="Circuit" aria-describedby="tor-circuit-info" [value]="torCircuit" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="tor-bootstrap-info">Bootstrap</span>
+                <input type="text" class="form-control" aria-label="Bootstrap" aria-describedby="tor-bootstrap-info" [value]="torBootstrap" readonly>
+              </div>
+
+          </div>
+
+          <div class="col-md-4">
+              <h6>Statistics</h6>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="tor-pid-info">PID</span>
+                <input type="text" class="form-control" aria-label="Tor PID" aria-describedby="tor-pid-info" [value]="torPid" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="tor-cpu-info">CPU</span>
+                <input type="text" class="form-control" aria-label="Tor CPU" aria-describedby="tor-cpu-info" [value]="torCpu" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="tor-ram-info">RAM</span>
+                <input type="text" class="form-control" aria-label="Download" aria-describedby="tor-ram-info" [value]="torRam" readonly>
+              </div>
+
+          </div>
+
+          <div class="col-md-4">
+              <h6>Traffic</h6>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="tor-upload-info">Upload</span>
+                <input type="text" class="form-control" aria-label="Upload" aria-describedby="tor-upload-info" [value]="torSent" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="tor-download-info">Download</span>
+                <input type="text" class="form-control" aria-label="Download" aria-describedby="tor-download-info" [value]="torReceived" readonly>
+              </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <div [hidden]="currentP2PoolTab !== 'logs'">
+      <button *ngIf="p2poolLines.length > 0" class="w-100 btn btn-primary btn-lg" type="submit" (click)="clearP2PoolLogs()">Clear</button>
+
+      <div *ngIf="p2poolLines.length === 0" class="h-100 p-5 text-bg-dark rounded-3 m-4 text-center">
+        <h2><i class="bi bi-exclamation-diamond m-4"></i> No logs</h2>
+        <p>Start P2Pool mining to enable session logging</p>
+      </div>
+      
+      <div *ngIf="p2poolLogs.length > 0" class="terminal bg-dark text-light p-3 m-4" #logTerminal>
+          <div class="terminal-output" id="p2pool-log-table">
+{{ p2poolLogs }}
+          </div>
+      </div>
+    </div>
+
   </div>
 
   <div class="tab-pane fade" id="pills-net-tor" role="tabpanel" aria-labelledby="pills-net-tor-tab" tabindex="0">
