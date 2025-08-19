@@ -7,7 +7,7 @@ import { ElectronService } from '../electron/electron.service';
   providedIn: 'root'
 })
 export class TorDaemonService {
-  private electronService = inject(ElectronService);
+  private readonly electronService = inject(ElectronService);
 
   private readonly versionApiUrl: string = 'https://gitlab.torproject.org/api/v4/projects/426/repository/tags';
   private _detectedInstallation?: { path: string; configFile?: string; tunnelConfig?: string; tunnelsConfigDir?: string; pidFile?: string; isRunning?: boolean; };

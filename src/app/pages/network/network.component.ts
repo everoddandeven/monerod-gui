@@ -112,6 +112,16 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
 
   // #region I2p
 
+  private _i2pProcessStats: ProcessStats = {
+    cpu: 0,
+    memory: 0,
+    ppid: 0,
+    pid: 0,
+    ctime: 0,
+    elapsed: 0,
+    timestamp: 0
+  };
+
   private refreshing: boolean = false;
 
   public mainData: MainData = new MainData();
@@ -299,19 +309,19 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
     return "disabled";
   }
 
-  public get stopping(): boolean {
+  public get i2pStopping(): boolean {
     return this.i2pService.stopping || this.daemonService.stopping;
   }
 
-  public get starting(): boolean {
+  public get i2pStarting(): boolean {
     return this.i2pService.starting;
   }
 
-  public get running(): boolean {
+  public get i2pRunning(): boolean {
     return this.i2pService.running;
   }
 
-  public get enabled(): boolean {
+  public get i2pEnabled(): boolean {
     return this.i2pService.settings.enabled;
   }
 
@@ -387,6 +397,8 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
   public get torStatus(): string {
     const tor = this.torService;
     const enabled = tor.settings.enabled;
+    const installed = tor.settings.path !== '';
+    if (!installed) return "not configured";
     if (tor.starting) return "starting";
     if (tor.stopping) return "stopping";
     if (tor.running) return "running";
@@ -398,6 +410,8 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
   public get i2pStatus(): string {
     const i2p = this.i2pService;
     const enabled = i2p.settings.enabled;
+    const installed = i2p.settings.path !== '';
+    if (!installed) return "not configured";
     if (i2p.starting) return "starting";
     if (i2p.stopping) return "stopping";
     if (i2p.running) return "running";
@@ -482,6 +496,18 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
     rawBans.forEach((rawBan) => bans.push(Ban.parse(rawBan)));
 
     return bans;
+  }
+
+  public get i2pCpu(): string {
+    return `${this._i2pProcessStats.cpu.toFixed(2)}%`;
+  }
+
+  public get i2pRam(): string {
+    return `${(this._i2pProcessStats.memory / 1024 / 1024).toFixed(2)} MB`;
+  }
+
+  public get i2pPid(): number {
+    return this._i2pProcessStats.pid;
   }
 
   public get torProcessStats(): ProcessStats {
@@ -673,9 +699,12 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
   private loadTables(): void {
     this.loadPeerListTable();
     this.loadPublicNodesTable();
+    this.loadConnectionsTable();
     this.loadPeersTable();
     this.loadSpansTable();
     this.refreshBansTable().then().catch((err: any) => console.error(err));
+    this.refreshPublicNodesTable().then().catch((err: any) => console.error(err));
+    this.refreshPeerListTable().then().catch((err: any) => console.error(err));
   }
 
   public async refreshConnectionsTable(): Promise<void> {
@@ -874,7 +903,7 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
     this.limitingPeers = true;
 
     try {
-    await this.daemonService.inPeers(this.limitInPeers);
+      await this.daemonService.inPeers(this.limitInPeers);
       await this.daemonService.outPeers(this.limitOutPeers);
       this.limitPeersError = '';
       this.limitPeersSuccess = true;
@@ -1105,6 +1134,15 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
       elapsed: 0,
       timestamp: 0
     };
+    this._i2pProcessStats = {
+      cpu: 0,
+      memory: 0,
+      ppid: 0,
+      pid: 0,
+      ctime: 0,
+      elapsed: 0,
+      timestamp: 0
+    };
   }
 
   private startLoop() {
@@ -1138,13 +1176,14 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
   }
 
   private async refreshI2p(): Promise<void> {
-    if (this.refreshing || !this.running) return;
+    if (this.refreshing || !this.i2pRunning) return;
     this.refreshing = true;
 
     try {
       this.mainData = await this.i2pService.getMainData();
       this.localDestinations = await this.i2pService.getLocalDestinations();
       this.i2pTunnels = await this.i2pService.getI2pTunnels();
+      this._i2pProcessStats = await this.i2pService.getProcessStats();
     }
     catch (error: any) {
       console.error(error);

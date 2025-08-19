@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, inject, NgZone } from '@angular/core';
 import { NavbarPill } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
-import { Block, BlockDetails, BlockHeader, FeeEstimate, HistogramEntry, MinerTx, Output, OutputDistribution, SpentKeyImage, SyncInfo, TxBacklogEntry, TxPoolHisto, TxPoolStats, UnconfirmedTx } from '../../../common';
+import { Block, BlockDetails, BlockHeader, Chain, FeeEstimate, HistogramEntry, MinerTx, Output, OutputDistribution, SpentKeyImage, SyncInfo, TxBacklogEntry, TxPoolHisto, TxPoolStats, UnconfirmedTx } from '../../../common';
 import { DaemonDataService } from '../../core/services';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { Subscription } from 'rxjs';
@@ -126,12 +126,16 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
 
   // #region Getters
 
+  private get alternateChains(): Chain[] {
+    return this.daemonData.altChains;
+  }
+
   public get daemonRunning(): boolean {
     return this.daemonData.running;
   }
 
   public get daemonStopping(): boolean {
-    return this.daemonData.stopping;
+    return this.daemonData.stopping || this.daemonService.quitting;
   }
 
   public get daemonStarting(): boolean {
@@ -534,7 +538,8 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
     this.setLinks([
       new NavbarPill('blockchain-info', 'Info', true),
       new NavbarPill('explorer', 'Explorer'),
-      new NavbarPill('tx-pool', 'Pool'),
+      new NavbarPill('tx-pool', 'Mempool'),
+      new NavbarPill('blockchain-consensus', 'Consensus'),
       new NavbarPill('blockchain-tools', 'Tools')
     ]);
 
@@ -591,10 +596,15 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
     this.loadTable('outHistogramsTable', this.getOutHistogramResult ? this.getOutHistogramResult : []);
   }
 
+  private loadChainsTable(): void {
+    this.loadTable('chainsTable', this.alternateChains);
+  }
+
   private loadTables(): void {
     this.loadSpentKeyImagesTable();
     this.loadTransactionsTable();
     this.loadTxPoolBacklogTable();
+    this.loadChainsTable();
   }
 
   // #endregion

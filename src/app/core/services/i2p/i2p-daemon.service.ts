@@ -1,5 +1,5 @@
 import { EventEmitter, Injectable } from '@angular/core';
-import { I2pDaemonSettings, LocalDestinationsData, MainData, RouterCommandResultData, TokenData, TunnelInfo, TunnelsData } from '../../../../common';
+import { I2pDaemonSettings, LocalDestinationsData, MainData, ProcessStats, RouterCommandResultData, TokenData, TunnelInfo, TunnelsData } from '../../../../common';
 import { IDBPDatabase, openDB } from 'idb';
 
 @Injectable({
@@ -444,6 +444,29 @@ export class I2pDaemonService {
 
     return result;
   }
+
+  public async getProcessStats(): Promise<ProcessStats> {
+      if (!this.running) {
+        throw new Error("Daemon not running");
+      }
+  
+      const getProcessStatsPromise = new Promise<ProcessStats>((resolve, reject) => {
+        window.electronAPI.monitorProcess('i2pd',(result) => {
+          const { error, stats } = result;
+  
+          if (error) {
+            if (error instanceof Error) reject(error);
+            else reject(new Error(`${error}`));
+          }
+          else if (stats) {
+            resolve(stats);
+          }
+        });
+      })
+  
+  
+      return await getProcessStatsPromise;
+    }
 
 }
 

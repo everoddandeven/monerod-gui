@@ -1,7 +1,7 @@
 import { AfterContentInit, AfterViewInit, Component, NgZone, OnDestroy, inject } from '@angular/core';
 import { DaemonService, DaemonDataService } from '../../core/services';
 import { NavbarPill } from '../../shared/components';
-import { AddedAuxPow, AuxPoW, BlockTemplate, GeneratedBlocks, MiningStatus, MinerData, Chain, NetHashRateHistoryEntry, P2PoolSettings } from '../../../common';
+import { AddedAuxPow, AuxPoW, BlockTemplate, GeneratedBlocks, MiningStatus, MinerData, NetHashRateHistoryEntry, P2PoolSettings } from '../../../common';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { Chart, ChartData } from 'chart.js';
 import { Subscription } from 'rxjs';
@@ -136,10 +136,6 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
 
   public get prevId(): string {
     return this.minerData ? this.minerData.prevId : '';
-  }
-
-  private get alternateChains(): Chain[] {
-    return this.daemonData.altChains;
   }
 
   public get networkHashRate(): string {
@@ -441,7 +437,6 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     this.setLinks([
       new NavbarPill('mining-status', 'Status'),
       new NavbarPill('hashrate', 'Statistics'),
-      new NavbarPill('alternate-chains', 'Alternate Chains'),
       new NavbarPill('mining-tools', 'Tools')
     ]);
     
@@ -627,20 +622,11 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     };
   }
 
-  private loadTables(): void {
-    this.loadChainsTable();
-  }
-
-  private loadChainsTable(): void {
-    this.loadTable('chainsTable', this.alternateChains);
-  }
-
   private loadAuxPowTable(): void {
     this.loadTable('auxPowTable', this.addAuxPowResult ? this.addAuxPowResult.auxPoW : []);
   }
 
   private refresh(): void {
-    this.loadChainsTable();
     this.refreshNetHashRateHistory();
 
     if (this.startingMining && this.miningStatus && this.miningStatus.active) {
@@ -663,7 +649,6 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   // #region Angular Methods
 
   public ngAfterViewInit(): void {
-    this.loadTables();
     this.initNetHashRateChart();
     this.loadStartMiningParams();
   }

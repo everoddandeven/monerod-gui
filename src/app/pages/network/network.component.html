@@ -211,7 +211,7 @@
 
     <div class="card p-1" [hidden]="currentOverviewTab !== 'connections'">
       <div class="card-header bg-primary text-white d-flex">
-        <h4>Connections</h4>
+        <h4><i class="bi bi-ethernet"></i>&nbsp;&nbsp;Connections</h4>
       </div>
       <div class="card-body">
 
@@ -357,7 +357,7 @@
 
     <div class="card p-1" [hidden]="currentPeersTab !== 'p2p'">
       <div class="card-header bg-primary text-white d-flex">
-        <h4>P2P Peers</h4>
+        <h4><i class="bi bi-people-fill"></i>&nbsp;&nbsp;P2P Peers</h4>
       </div>
       <div class="card-body">
 
@@ -401,7 +401,7 @@
 
     <div class="card p-1" [hidden]="currentPeersTab !== 'rpc'">
       <div class="card-header bg-primary text-white d-flex">
-        <h4>RPC Peers</h4>
+        <h4><i class="bi bi-people-fill"></i>&nbsp;&nbsp;RPC Peers</h4>
       </div>
       <div class="card-body">
 
@@ -445,7 +445,7 @@
 
     <div class="card p-1" [hidden]="currentPeersTab !== 'inPeers'">
       <div class="card-header bg-primary text-white d-flex">
-        <h4>In Peers</h4>
+        <h4><i class="bi bi-people-fill"></i>&nbsp;&nbsp;In Peers</h4>
       </div>
       <div class="card-body">
 
@@ -484,7 +484,7 @@
 
     <div class="card p-1" [hidden]="currentPeersTab !== 'outPeers'">
       <div class="card-header bg-primary text-white d-flex">
-        <h4>Out Peers</h4>
+        <h4><i class="bi bi-people-fill"></i>&nbsp;&nbsp;Out Peers</h4>
       </div>
       <div class="card-body">
 
@@ -525,7 +525,7 @@
 
     <div class="card p-1" [hidden]="currentPeersTab !== 'bans'">
       <div class="card-header bg-primary text-white d-flex">
-        <h4>Banned Peers</h4>
+        <h4><i class="bi bi-person-fill-slash"></i>&nbsp;&nbsp;Banned Peers</h4>
       </div>
       <div class="card-body">
 
@@ -582,7 +582,7 @@
         </li>
         
         <li class="nav-item mr-2" role="presentation">
-          <button [class]="currentP2PoolTab === 'logs' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="torLogsLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentP2PoolTab('logs')">Logs</button>
+          <button [class]="currentP2PoolTab === 'logs' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="p2poolLogsLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentP2PoolTab('logs')">Logs</button>
         </li>
 
       </ul>
@@ -691,12 +691,17 @@
 
     <div class="card p-1" [hidden]="currentTorTab !== 'dashboard'">
       <div class="card-header bg-primary text-white d-flex">
-        <h4><i class="bi bi-diagram-3"></i>&nbsp;&nbsp;Dashboard</h4>
+        <h4><i class="bi bi-bullseye"></i>&nbsp;&nbsp;Tor Dashboard</h4>
       </div>
       <div class="card-body">
         <div class="row">
           <div class="col-md-4">
               <h6>Info</h6>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="tor-status-info">Status</span>
+                <input type="text" class="form-control" aria-label="Status" aria-describedby="tor-status-info" [value]="torStatus" readonly>
+              </div>
 
               <div class="input-group mb-1">
                 <span class="input-group-text" id="tor-uptime-info">Uptime</span>
@@ -755,21 +760,6 @@
       </div>
     </div>
 
-    <div [hidden]="currentTorTab !== 'logs'">
-      <button *ngIf="torLines.length > 0" class="w-100 btn btn-primary btn-lg" type="submit" (click)="clearTorLogs()">Clear</button>
-
-      <div *ngIf="torLines.length === 0" class="h-100 p-5 text-bg-dark rounded-3 m-4 text-center">
-        <h2><i class="bi bi-exclamation-diamond m-4"></i> No logs</h2>
-        <p>Start TOR daemon to enable session logging</p>
-      </div>
-      
-      <div *ngIf="torLogs.length > 0" class="terminal bg-dark text-light p-3 m-4" #logTerminal>
-          <div class="terminal-output" id="tor-log-table">
-{{ torLogs }}
-          </div>
-      </div>
-    </div>
-
     <div [hidden]="currentTorTab !== 'commands'">
       <div class="row g-5 p-3">
         <div class="col-md-12 col-lg-12">
@@ -807,6 +797,22 @@
         </div>
       </div>
     </div>
+
+    <div [hidden]="currentTorTab !== 'logs'">
+      <button *ngIf="torLines.length > 0" class="w-100 btn btn-primary btn-lg" type="submit" (click)="clearTorLogs()">Clear</button>
+
+      <div *ngIf="torLines.length === 0" class="h-100 p-5 text-bg-dark rounded-3 m-4 text-center">
+        <h2><i class="bi bi-exclamation-diamond m-4"></i> No logs</h2>
+        <p>Start TOR daemon to enable session logging</p>
+      </div>
+      
+      <div *ngIf="torLogs.length > 0" class="terminal bg-dark text-light p-3 m-4" #logTerminal>
+          <div class="terminal-output" id="tor-log-table">
+{{ torLogs }}
+          </div>
+      </div>
+    </div>
+
   </div>
 
   <div class="tab-pane fade" id="pills-net-i2p" role="tabpanel" aria-labelledby="pills-net-i2p-tab" tabindex="0">
@@ -837,47 +843,128 @@
 
     </div>
 
-    <div [hidden]="currentI2pTab !== 'dashboard'">
-      <div class="card p-1">
-        <div class="card-body">
-          <div class="row">
-            <div class="col-md-6">
+    <div class="card p-1" [hidden]="currentI2pTab !== 'dashboard'">
+      <div class="card-header bg-primary text-white d-flex">
+        <h4><i class="bi bi-hurricane"></i>&nbsp;&nbsp;I2P Dashboard</h4>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4">
               <h6>Info</h6>
-              <ul class="list-group">
-                <li class="list-group-item"><strong>Uptime:</strong> {{ mainData.uptime }}</li>
-                <li class="list-group-item"><strong>Network Status:</strong> {{ mainData.networkStatus }}</li>
-                <li class="list-group-item"><strong>Client Tunnels:</strong> {{ mainData.clientTunnels }}</li>
-                <li class="list-group-item"><strong>Transit Tunnels:</strong> {{ mainData.transitTunnels }}</li>
-                <li class="list-group-item"><strong>Tunnel Creation Success Rate:</strong> {{ mainData.tunnelCreationSuccessRate }}</li>
-                <li class="list-group-item"><strong>Data Path:</strong> {{ mainData.dataPath }}</li>
-                <li class="list-group-item"><strong>Router Identity:</strong> {{ mainData.routerIdent }}</li>
-                <li class="list-group-item"><strong>Router Caps:</strong> {{ mainData.routerCaps }}</li>
-                <li class="list-group-item"><strong>Routers:</strong> {{ mainData.routers }}</li>
-                <li class="list-group-item"><strong>Version:</strong> {{ mainData.version }}</li>
-              </ul>
-            </div>
-            <div class="col-md-6">
-              <h6>Services</h6>
-              <ul class="list-group">
-                <li class="list-group-item"><strong>HTTP Proxy:</strong> {{ mainData.services.httpProxy ? 'Enabled' : 'Disabled' }}</li>
-                <li class="list-group-item"><strong>SOCKS Proxy:</strong> {{ mainData.services.socksProxy ? 'Enabled' : 'Disabled' }}</li>
-                <li class="list-group-item"><strong>BOB:</strong> {{ mainData.services.bob ? 'Enabled' : 'Disabled' }}</li>
-                <li class="list-group-item"><strong>SAME:</strong> {{ mainData.services.same ? 'Enabled' : 'Disabled' }}</li>
-                <li class="list-group-item"><strong>I2CP:</strong> {{ mainData.services.i2cp ? 'Enabled' : 'Disabled' }}</li>
-                <li class="list-group-item"><strong>I2PControl:</strong> {{ mainData.services.i2pControl ? 'Enabled' : 'Disabled' }}</li>
-              </ul>
-            </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="i2p-status-info">State</span>
+                <input type="text" class="form-control" aria-label="Status" aria-describedby="i2p-status-info" [value]="i2pStatus" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="i2p-uptime-info">Uptime</span>
+                <input type="text" class="form-control" aria-label="Uptime" aria-describedby="i2p-uptime-info" [value]="mainData.uptime" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="i2p-network-status-info">Network Status</span>
+                <input type="text" class="form-control" aria-label="Network Status" aria-describedby="i2p-network-status-info" [value]="mainData.networkStatus" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="i2p-client-tunnels-info">Client Tunnels</span>
+                <input type="text" class="form-control" aria-label="Client Tunnels" aria-describedby="i2p-client-tunnels-info" [value]="mainData.clientTunnels" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="i2p-transit-tunnels-info">Transit Tunnels</span>
+                <input type="text" class="form-control" aria-label="Transit Tunnels" aria-describedby="i2p-transit-tunnels-info" [value]="mainData.transitTunnels" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="i2p-router-identity-info">Router Identity</span>
+                <input type="text" class="form-control" aria-label="Router Identity" aria-describedby="i2p-router-identity-info" [value]="mainData.routerIdent" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="i2p-router-caps-info">Router Caps</span>
+                <input type="text" class="form-control" aria-label="Router Caps" aria-describedby="i2p-router-caps-info" [value]="mainData.routerCaps" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="i2p-routers-info">Routers</span>
+                <input type="text" class="form-control" aria-label="Routers" aria-describedby="i2p-routers-info" [value]="mainData.routers" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="i2p-version-info">Version</span>
+                <input type="text" class="form-control" aria-label="Version" aria-describedby="i2p-version-info" [value]="mainData.version" readonly>
+              </div>
+
           </div>
-          <div class="row mt-4">
-            <div class="col-md-12">
-              <h6>Network</h6>
-              <ul class="list-group">
-                <li class="list-group-item"><strong>Sent:</strong> {{ mainData.sent }}</li>
-                <li class="list-group-item"><strong>Received:</strong> {{ mainData.received }}</li>
-              </ul>
+
+          <div class="col-md-4">
+            <h6>Services</h6>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="i2p-http-proxy-info">HTTP Proxy</span>
+              <input type="text" class="form-control" aria-label="Tor PID" aria-describedby="i2p-http-proxy-info" [value]="mainData.services.httpProxy" readonly>
             </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="i2p-bob-info">BOB</span>
+              <input type="text" class="form-control" aria-label="BOB" aria-describedby="i2p-bob-info" [value]="mainData.services.bob" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="i2p-same-info">SAME</span>
+              <input type="text" class="form-control" aria-label="SAME" aria-describedby="i2p-same-info" [value]="mainData.services.same" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="i2p-i2cp-info">I2CP</span>
+              <input type="text" class="form-control" aria-label="I2CP" aria-describedby="i2p-i2cp-info" [value]="mainData.services.i2cp" readonly>
+            </div>
+            
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="i2p-control-info">I2P Control</span>
+              <input type="text" class="form-control" aria-label="I2P Control" aria-describedby="i2p-control-info" [value]="mainData.services.i2pControl" readonly>
+            </div>
+
+
           </div>
+
+          <div class="col-md-4">
+            <h6>Statistics</h6>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="i2p-pid-info">PID</span>
+              <input type="text" class="form-control" aria-label="I2P PID" aria-describedby="i2p-pid-info" [value]="i2pPid" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="i2p-cpu-info">CPU</span>
+              <input type="text" class="form-control" aria-label="I2P CPU" aria-describedby="i2p-cpu-info" [value]="i2pCpu" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="i2p-ram-info">RAM</span>
+              <input type="text" class="form-control" aria-label="I2P RAM" aria-describedby="i2p-ram-info" [value]="i2pRam" readonly>
+            </div>
+
+            <br />
+            <h6>Traffic</h6>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="i2p-upload-info">Upload</span>
+              <input type="text" class="form-control" aria-label="Upload" aria-describedby="i2p-upload-info" [value]="mainData.sent" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="i2p-download-info">Download</span>
+              <input type="text" class="form-control" aria-label="Download" aria-describedby="i2p-download-info" [value]="mainData.received" readonly>
+            </div>
+
+          </div>
+
         </div>
+
       </div>
     </div>
 
@@ -916,21 +1003,6 @@
             </ul>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div [hidden]="currentI2pTab !== 'logs'">
-      <button *ngIf="i2pdLines.length > 0" class="w-100 btn btn-primary btn-lg" type="submit" (click)="clearI2pdLogs()">Clear</button>
-
-      <div *ngIf="i2pdLines.length === 0" class="h-100 p-5 text-bg-dark rounded-3 m-4 text-center">
-        <h2><i class="bi bi-exclamation-diamond m-4"></i> No logs</h2>
-        <p>Start I2P daemon to enable session logging</p>
-      </div>
-      
-      <div *ngIf="i2pdLogs.length > 0" class="terminal bg-dark text-light p-3 m-4" #logTerminal>
-          <div class="terminal-output" id="i2pd-log-table">
-{{ i2pdLogs }}
-          </div>
       </div>
     </div>
 
@@ -998,6 +1070,22 @@
         </div>
       </div>
     </div>
+
+    <div [hidden]="currentI2pTab !== 'logs'">
+      <button *ngIf="i2pdLines.length > 0" class="w-100 btn btn-primary btn-lg" type="submit" (click)="clearI2pdLogs()">Clear</button>
+
+      <div *ngIf="i2pdLines.length === 0" class="h-100 p-5 text-bg-dark rounded-3 m-4 text-center">
+        <h2><i class="bi bi-exclamation-diamond m-4"></i> No logs</h2>
+        <p>Start I2P daemon to enable session logging</p>
+      </div>
+      
+      <div *ngIf="i2pdLogs.length > 0" class="terminal bg-dark text-light p-3 m-4" #logTerminal>
+          <div class="terminal-output" id="i2pd-log-table">
+{{ i2pdLogs }}
+          </div>
+      </div>
+    </div>
+
   </div>
 
   <div class="tab-pane fade" id="pills-net-tools" role="tabpanel" aria-labelledby="pills-net-tools-tab" tabindex="0">

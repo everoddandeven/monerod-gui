@@ -208,10 +208,10 @@
 
         <hr *ngIf="!coreBusy" class="my-4">
 
-        <button *ngIf="!coreBusy && !stoppingMining && !startingMining && (!miningStatus || !miningStatus.active)" class="w-100 btn btn-primary btn-lg" type="button" (click)="startMining()" [disabled]="!validStartMiningMinerAddress">Start Mining</button>
+        <button *ngIf="!coreBusy && !stoppingMining && !startingMining && (!miningStatus || !miningStatus.active)" class="w-100 btn btn-primary btn-lg" type="button" (click)="startMining()" [disabled]="!validStartMiningMinerAddress"><i class="bi bi-play-fill"></i>&nbsp;&nbsp;Start Mining</button>
         <button *ngIf="!coreBusy && !stoppingMining && startingMining && (!miningStatus || !miningStatus.active)" class="w-100 btn btn-primary btn-lg" type="button" disabled>Starting Mining ...</button>
 
-        <button *ngIf="!coreBusy && !stoppingMining && !startingMining && miningStatus && miningStatus.active" class="w-100 btn btn-primary btn-lg" type="button" (click)="stopMining()">Stop Mining</button>
+        <button *ngIf="!coreBusy && !stoppingMining && !startingMining && miningStatus && miningStatus.active" class="w-100 btn btn-primary btn-lg" type="button" (click)="stopMining()"><i class="bi bi-stop-fill"></i>&nbsp;&nbsp;Stop Mining</button>
         <button *ngIf="!coreBusy && stoppingMining && !startingMining && miningStatus" class="w-100 btn btn-primary btn-lg" type="button" disabled><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Stopping Mining ...</button>
 
       </div>
@@ -377,31 +377,6 @@
         <canvas class="my-4 w-100" id="hashRateChart" width="900" height="380"></canvas>
       </div>
   
-    </div>
-  </div>
-
-  <div class="tab-pane fade" id="pills-alternate-chains" role="tabpanel" aria-labelledby="pills-alternate-chains-tab" tabindex="0">
-    <h4 class="mb-3">Alternative chains seen by the node</h4>
-    <div class="m-3">
-      <table
-        id="chainsTable"
-        data-toggle="chainsTable"
-        data-toolbar="#toolbar"
-        data-search="true"
-        data-pagination="true"
-        data-show-columns="true"
-        data-show-columns-search="true"
-        >
-        <thead>
-          <tr>
-            <th data-field="blockHash">Block Hash</th>
-            <th data-field="height">Height</th>
-            <th data-field="length">Length</th>
-            <th data-field="mainChainParentBlock">Main Chain Parent Block</th>
-            <th data-field="wideDifficulty">Wide Difficulty</th>
-          </tr>
-        </thead>
-      </table>
     </div>
   </div>
 

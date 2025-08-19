@@ -1637,6 +1637,31 @@
 
   </div>
 
+  <div class="tab-pane fade" id="pills-blockchain-consensus" role="tabpanel" aria-labelledby="pills-blockchain-consensus-tab" tabindex="0">
+    <h4 class="mb-3">Alternative chains seen by the node</h4>
+    <div class="m-3">
+      <table
+        id="chainsTable"
+        data-toggle="chainsTable"
+        data-toolbar="#toolbar"
+        data-search="true"
+        data-pagination="true"
+        data-show-columns="true"
+        data-show-columns-search="true"
+        >
+        <thead>
+          <tr>
+            <th data-field="height">Height</th>
+            <th data-field="length">Length</th>
+            <th data-field="blockHash">Block Hash</th>
+            <th data-field="wideDifficulty">Wide Difficulty</th>
+            <th data-field="mainChainParentBlock">Main Chain Parent Block</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+  </div>
+
   <div class="tab-pane fade" id="pills-blockchain-tools" role="tabpanel" aria-labelledby="pills-blockchain-tools-tab" tabindex="0">
     <div class="btn-toolbar mb-2 mb-md-0">
       <ul class="nav nav-pills m-3" id="pills-tab" role="tablist">

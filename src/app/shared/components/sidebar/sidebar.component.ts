@@ -48,9 +48,9 @@ export class SidebarComponent {
     //       new NavLink('XMRig', '/xmrig', 'icon-xr text-primary'),
     this.navLinks = [
       new NavLink('Dashboard', '/detail', 'bi bi-speedometer2'),
-      new NavLink('Blockchain', '/blockchain', 'bi bi-bounding-box'),
+      new NavLink('Blockchain', '/blockchain', 'bi bi-boxes'),
       new NavLink('Mining', '/mining', 'bi bi-minecart-loaded'),
-      new NavLink('Network', '/network', 'bi bi-hdd-network', 'bottom'),
+      new NavLink('Network', '/network', 'bi bi-globe', 'bottom'),
       new NavLink('Logs', '/logs', 'bi bi-terminal', 'bottom'),
       new NavLink('Version', '/version', 'bi bi-git', 'bottom'),
       new NavLink('Settings', '/settings', 'bi bi-gear', 'bottom'),
