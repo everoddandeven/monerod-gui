@@ -11,7 +11,7 @@
       </ul>
     </div>
 </div>
-<div *ngIf="daemonRunning && !daemonStopping && !daemonStarting" class="tab-content tab-grow" id="pills-tabContent">
+<div *ngIf="daemonRunning && !daemonStopping" class="tab-content tab-grow" id="pills-tabContent">
   
   <div class="tab-pane fade show active" id="pills-blockchain-info" role="tabpanel" aria-labelledby="pills-blockchain-info-tab" tabindex="0">
     <div class="card p-1">
@@ -1637,29 +1637,92 @@
 
   </div>
 
-  <div class="tab-pane fade" id="pills-blockchain-consensus" role="tabpanel" aria-labelledby="pills-blockchain-consensus-tab" tabindex="0">
-    <h4 class="mb-3">Alternative chains seen by the node</h4>
-    <div class="m-3">
-      <table
-        id="chainsTable"
-        data-toggle="chainsTable"
-        data-toolbar="#toolbar"
-        data-search="true"
-        data-pagination="true"
-        data-show-columns="true"
-        data-show-columns-search="true"
-        >
-        <thead>
-          <tr>
-            <th data-field="height">Height</th>
-            <th data-field="length">Length</th>
-            <th data-field="blockHash">Block Hash</th>
-            <th data-field="wideDifficulty">Wide Difficulty</th>
-            <th data-field="mainChainParentBlock">Main Chain Parent Block</th>
-          </tr>
-        </thead>
-      </table>
+  <div class="tab-pane fade" id="pills-blockchain-consensus" role="tabpanel" aria-labelledby="pills-blockchain-consensus-tab" tabindex="0" style="height: 100%">
+    
+    <div class="card p-1" style="height: 100%">
+      <div class="card-header bg-primary text-white d-flex">
+        <h4><i class="bi bi-bar-chart-steps"></i>&nbsp;&nbsp;Block Reorgs</h4>
+      </div>
+      <div class="card-body">
+        <div class="row" style="height: 100%">
+          <div class="col-md-6">
+            <div id="consensusMap" class="map">
+              <div id="consensusMapInfo"></div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <h4>Info</h4>
+            
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-block-range">Blockchain Range (24h)</span>
+              <input type="text" class="form-control" aria-label="Blockchain Range (24h)" aria-describedby="pool-block-range" [value]="blockRangeTxt" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-total-blocks-reorgs">Total Block Reorgs (24h)</span>
+              <input type="text" class="form-control" aria-label="Blockchain Reorgs (24h)" aria-describedby="pool-total-blocks-reorgs" [value]="blockReorgs" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-max-blocks-reorgs">Max Block Reorg Length (24h)</span>
+              <input type="text" class="form-control" aria-label="Max Block Reorg Length (24h)" aria-describedby="pool-max-blocks-reorgs" [value]="maxBlockReorgLength" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-total-orphaned-blocks">Orphaned Blocks (24h)</span>
+              <input type="text" class="form-control" aria-label="Orphaned Blocks (24h)" aria-describedby="pool-total-orphaned-blocks" [value]="orphanedBlocks" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-total-orphaned-blocks-rate">Orphaned Blocks Rate (24h)</span>
+              <input type="text" class="form-control" aria-label="Orphaned Blocks Rate (24h)" aria-describedby="pool-total-orphaned-blocks-rate" [value]="orphanedBlocksRate" readonly>
+            </div>
+
+            <div class="input-group mb-1">
+              <span class="input-group-text" id="pool-keep-orphaned-blocks">Keep Orphaned Blocks</span>
+              <input type="text" class="form-control" aria-label="Keep Orphaned Blocks" aria-describedby="pool-keep-orphaned-blocks" [value]="keepOrphanedBlocks" readonly>
+            </div>
+
+            <br />
+            <br />
+
+            <h4>Alternative Chains (24h)</h4>
+
+            <div class="row mt-4">
+              <div class="col-md-12">
+                <li class="list-group-item">
+                <div class="m-3">
+                  <table
+                    id="chainsTable"
+                    data-toggle="chainsTable"
+                    data-toolbar="#toolbar"
+                    data-search="true"
+                    data-pagination="true"
+                    data-show-columns="true"
+                    data-show-columns-search="true"
+                    >
+                    <thead>
+                      <tr>
+                        <th data-field="height">Height</th>
+                        <th data-field="length">Length</th>
+                        <th data-field="blockHash">Block Hash</th>
+                        <th data-field="wideDifficulty">Wide Difficulty</th>
+                        <th data-field="mainChainParentBlock">Main Chain Parent Block</th>
+                      </tr>
+                    </thead>
+                  </table>
+                </div>
+                </li>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        
+      </div>
     </div>
+    
   </div>
 
   <div class="tab-pane fade" id="pills-blockchain-tools" role="tabpanel" aria-labelledby="pills-blockchain-tools-tab" tabindex="0">

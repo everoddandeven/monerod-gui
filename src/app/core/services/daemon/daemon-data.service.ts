@@ -93,28 +93,15 @@ export class DaemonDataService {
   public readonly netStatsRefreshStart: EventEmitter<void> = new EventEmitter<void>();
   public readonly netStatsRefreshEnd: EventEmitter<void> = new EventEmitter<void>();
 
+  public readonly syncRefreshLast24hBlocks: EventEmitter<BlockHeader[]> = new EventEmitter<BlockHeader[]>();
+
+  public last720Blocks: BlockHeader[] = [];
+  public last720BlocksHeight: number = 0;
+
   // #endregion
 
   constructor() {
-
-    this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
-      this.ngZone.run(() => {
-        this._netHashRateHistory = new NetHashRateHistory();
-        this._hashRateHistory = new NetHashRateHistory();
-        if (running) {
-          this._daemonRunning = true;
-          this.startLoop();
-        }
-        else {
-          if (this.refreshInterval) this.stopLoop();
-        }
-      });
-    });
-
-    this.electronService.onAcPower.subscribe(() => this._runningOnBattery = false);
-    this.electronService.onBatteryPower.subscribe(() => this._runningOnBattery = true);
-
-    this.electronService.isOnBatteryPower().then((value: boolean) => this._runningOnBattery = value).catch((error: any) => console.error(error));
+    this.registerEvents();
   }
 
   // #region Getters
@@ -287,6 +274,27 @@ export class DaemonDataService {
 
   // #region Private Methods
 
+  private registerEvents(): void {
+    this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
+      this.ngZone.run(() => {
+        this._netHashRateHistory = new NetHashRateHistory();
+        this._hashRateHistory = new NetHashRateHistory();
+        if (running) {
+          this._daemonRunning = true;
+          this.startLoop();
+        }
+        else {
+          if (this.refreshInterval) this.stopLoop();
+        }
+      });
+    });
+
+    this.electronService.onAcPower.subscribe(() => this._runningOnBattery = false);
+    this.electronService.onBatteryPower.subscribe(() => this._runningOnBattery = true);
+
+    this.electronService.isOnBatteryPower().then((value: boolean) => this._runningOnBattery = value).catch((error: any) => console.error(error));
+  }
+  
   private startLoop(): void {
     if (this.refreshInterval != undefined) {
       throw new Error("Loop already started");
@@ -568,6 +576,8 @@ export class DaemonDataService {
         this._txPoolStats = undefined;
       }
 
+      await this.refreshLast720Blocks();
+
       this._lastRefresh = Date.now();
     } catch(error: any) {
       console.error(error);
@@ -605,6 +615,43 @@ export class DaemonDataService {
     }
 
     this._gettingProcessStats = false;
+  }
+
+  private async refreshLast720Blocks(): Promise<void> {
+    const info = this.lastBlockHeader;
+    
+    if (!info) {
+      console.warn("Skipping last 24h blocks refresh, last block header not available");
+      return;
+    }
+
+    const currentHeight = info.height;
+
+    if (this.last720BlocksHeight === 0) this.last720BlocksHeight = currentHeight - 720;
+    if (this.last720BlocksHeight === currentHeight) {
+      console.warn("Skipping last 24h blocks refresh, already synchronized");
+      return;
+    }
+
+    const blocksToFetch = currentHeight - this.last720BlocksHeight;
+
+    console.log(`Fetching ${blocksToFetch} blocks...`);
+
+    const headers = await this.daemonService.getBlockHeadersRange(this.last720BlocksHeight, currentHeight, false);
+
+    console.log(`Fetched ${headers.length} blocks`);
+
+    for (let i = 0; i < blocksToFetch; i++) {
+      this.last720Blocks.shift();
+    }
+
+    for(const h of headers) {
+      this.last720Blocks.push(h);
+    }
+
+    this.last720BlocksHeight = currentHeight;
+
+    if (headers.length > 0) this.syncRefreshLast24hBlocks.emit(headers);
   }
 
   // #endregion

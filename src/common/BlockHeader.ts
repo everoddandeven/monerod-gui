@@ -82,5 +82,9 @@ export class BlockHeader {
         const wideDifficulty: string = blockHeader.wide_difficulty;
         
         return new BlockHeader(blockSize, blockWeight, cumulativeDifficulty, cumulativeDifficultyTop64, depth, difficulty, difficultyTop64, hash, height, longTermWeight, majorVersion, minerTxHash, minorVersion, nonce, numTxes, orphanStatus, powHash, prevHash, reward, timestamp, wideCumulativeDifficulty, wideDifficulty);
-    } 
+    }
+
+    public static createSimple(height: number, hash: string): BlockHeader {
+        return new BlockHeader(0, 0, 0, 0, 0, 0, 0, hash, height, 0, 0, '', 0, 0, 0, false, '', '', 0, 0, '', '');
+    }
 }

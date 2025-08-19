@@ -5,6 +5,16 @@ import { Block, BlockDetails, BlockHeader, Chain, FeeEstimate, HistogramEntry, M
 import { DaemonDataService } from '../../core/services';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { Subscription } from 'rxjs';
+import { Feature, Map as olMap, View } from 'ol';
+import VectorLayer from 'ol/layer/Vector';
+import VectorSource from 'ol/source/Vector';
+import { LineString, Polygon } from 'ol/geom';
+import { createEmpty, extend, Extent, getCenter, getHeight, getWidth } from 'ol/extent';
+import Style from 'ol/style/Style';
+import Stroke from 'ol/style/Stroke';
+import Fill from 'ol/style/Fill';
+import Text from 'ol/style/Text';
+import Control from 'ol/control/Control';
 
 type TxPoolTab = 'statistics' | 'transactions' | 'keyImages' | 'backlog' | 'flush';
 type ExplorerTab = 'getBlock' | 'getTransaction' | 'getOuts' | 'checkKeyImage' | 'histogram' | 'distribution';
@@ -122,12 +132,79 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
   public currentExplorerTab: ExplorerTab = 'getBlock';
   public currentToolsTab: ToolsTab = 'broadcast';
 
+  private consensusMap?: olMap;
+  private consensusMapInfo?: HTMLDivElement;
+  private consensusMapExtent: Extent = createEmpty();
+  private consensusMapExtentAll: Extent = createEmpty();
+  private consensusLayer?: VectorLayer;
+  private lastConsensusHeight: number = 0;
+  private hoveredBlock?: Feature<Polygon>;
+  public loadingConsensusMap: boolean = false;
+
   // #endregion
 
   // #region Getters
 
   private get alternateChains(): Chain[] {
-    return this.daemonData.altChains;
+    return this.daemonData.altChains.filter((c) => c.height > this.firstBlockHeight);
+  }
+
+  public get blockReorgs(): number {
+    return this.alternateChains.length;
+  }
+
+  public get maxBlockReorgLength(): number {
+    let max: number = 0;
+    const chains = this.alternateChains;
+
+    for (const c of chains) {
+      if (c.length > max) max = c.length;
+    }
+
+    return max;
+  }
+
+  public get orphanedBlocks(): number {
+    const chains = this.alternateChains;
+    let blocks: number = 0;
+
+    for(const c of chains) {
+      blocks += c.length;
+    }
+
+    return blocks;
+  }
+
+  public get orphanedBlocksRate(): string {
+    const o = this.orphanedBlocks * 100;
+    return `${(o / 720).toFixed(2)} %`;
+  }
+
+  public get keepOrphanedBlocks(): string {
+    const s = this.daemonService.settings;
+
+    return s.keepAltBlocks ? 'enabled' : 'disabled';
+  }
+
+  public get lastBlockHeight(): number {
+    const i = this.daemonData.lastBlockHeader;
+    if (!i) return 0;
+
+    return i.height;
+  }
+
+  public get firstBlockHeight(): number {
+    const block = this.daemonData.last720Blocks[0];
+    if (!block) return 0;
+    return block.height;
+  }
+
+  public get blockRange(): [number, number] {
+    return [this.firstBlockHeight, this.lastBlockHeight];
+  }
+
+  public get blockRangeTxt(): string {
+    return `${this.firstBlockHeight} - ${this.lastBlockHeight}`;
   }
 
   public get daemonRunning(): boolean {
@@ -548,8 +625,95 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
 
   // #region Private Methods
 
+  private displayFeatureInfo (pixel: any, target: any) {
+    const info = this.consensusMapInfo;
+    if (!info) return;
+    const map = this.consensusMap;
+    if (!map) return;
+    const feature = target.closest('.ol-control')
+      ? undefined
+      : map.forEachFeatureAtPixel(pixel, function (feature) {
+          return feature;
+        });
+    if (feature) {
+      info.style.left = pixel[0] + 'px';
+      info.style.top = pixel[1] + 'px';
+      if (feature !== this.hoveredBlock) {
+        const desc =feature.get('DESCRIPTION');
+        
+        if (desc) {
+          info.innerText = desc
+          info.style.visibility = 'visible';
+        } else info.style.visibility = 'hidden';
+      }
+    } else {
+      info.style.visibility = 'hidden';
+    }
+    if (info.style.visibility === 'visible') this.hoveredBlock = feature as Feature<Polygon>;
+    else this.hoveredBlock = undefined;
+  };
+
+  private refreshBlockGraph(result: {new: BlockHeader[], old: BlockHeader[], altChains: Chain[]}): void {
+    console.log(result);
+    if (result.altChains.length > 0) {
+      this.loadConsensusMap();
+      return;
+    }
+    const v = this.consensusLayer;
+    if (!v) return;
+    const s = v.getSource();
+    if (!s) return;
+    let i = 720 - result.new.length;
+    const features: Feature<Polygon>[] = [];
+    const featuresToRemove: Feature<Polygon>[] = [];
+    const links: Feature<LineString>[] = [];
+
+    s.forEachFeature((f) => {
+      this.moveBlockDown(f, result.new.length * 6000);
+    });
+
+    for(const h of result.new) {
+      const f = this.createBlockFeature(0, i*6000, `#${h.height}`);
+      f.setId(h.hash);
+      f.set('DESCRIPTION', `Height: #${h.height}\nHash: ${h.hash.slice(0, 4)}...${h.hash.slice(-4)}`);
+      f.set('height', h.height);
+      const old = s.getFeatureById(h.prevHash);
+      if (old) {
+        const link = this.createLinkFeature(f, old);
+        link.set('height', h.height);
+        links.push(link)
+      }
+      features.push(f);
+      i++;
+    }
+
+    s.addFeatures(features);
+    s.addFeatures(links);
+
+    let oldHeight: number = 0;
+
+    for(const h of result.old) {
+      const f = s.getFeatureById(h.hash);
+      if (f) featuresToRemove.push(f);
+      oldHeight = h.height;
+    }
+
+    s.forEachFeature((bf) => {
+      if (bf.get('height') <= oldHeight) featuresToRemove.push(bf);
+    });
+
+    s.removeFeatures(featuresToRemove);
+           
+    const map = this.consensusMap;
+    if (!map) return;
+    map.updateSize();
+  }
+
   private registerEvents(): void {
-    this.subscriptions.push(this.daemonData.syncEnd.subscribe(() => this.onRefresh()));
+    this.subscriptions.push(
+      this.daemonData.syncEnd.subscribe(() => this.onRefresh()),
+      this.daemonData.syncRefreshLast24hBlocks.subscribe((result) => this.refreshBlockGraph(result))
+    );
   }
 
   private onRefresh(): void {
@@ -607,6 +771,276 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
     this.loadChainsTable();
   }
 
+  private createPanButton(label: string, dx: number, dy: number, map: olMap): Control {
+    const button = document.createElement('button');
+    button.innerHTML = label;
+
+    button.addEventListener('click', () => {
+      const view = map.getView();
+      const center = view.getCenter();
+      if (center) {
+        view.setCenter([center[0] + dx, center[1] + dy]);
+      }
+    });
+
+    const element = document.createElement('div');
+    element.className = 'ol-unselectable ol-control';
+    element.appendChild(button);
+
+    return new Control({ element });
+  }
+
+  private createLinkFeature(blockA: Feature<Polygon>, blockB: Feature<Polygon>): Feature<LineString> {
+    const geomA = blockA.getGeometry();
+    const geomB = blockB.getGeometry();
+    if (!geomA || !geomB) {
+      throw new Error('Entrambe le feature devono avere una geometria valida');
+    }
+
+    const extentA = geomA.getExtent();
+    const extentB = geomB.getExtent();
+
+    const midBottomA: [number, number] = [(extentA[0] + extentA[2]) / 2, extentA[1] ];
+
+    const midTopB: [number, number] = [(extentB[0] + extentB[2]) / 2, extentB[3] ];
+
+    return new Feature<LineString>({ geometry: new LineString([midBottomA, midTopB]) });
+  }
+
+  private createLinkAltFeature(blockA: Feature<Polygon>, blockB: Feature<Polygon>): Feature<LineString> {
+    const geomA = blockA.getGeometry();
+    const geomB = blockB.getGeometry();
+    if (!geomA || !geomB) {
+      throw new Error('Entrambe le feature devono avere una geometria valida');
+    }
+
+    const extentA = geomA.getExtent();
+    const extentB = geomB.getExtent();
+
+    const midRightA: [number, number] = [extentA[2], (extentA[1] + extentA[3]) / 2];
+
+    const midBottomB: [number, number] = [(extentB[0] + extentB[2]) / 2, extentB[1]];
+
+    return new Feature<LineString>({ geometry: new LineString([midRightA, midBottomB]) });
+  }
+
+  private createBlockFeature(x: number, y: number, label: string = '', width: number = 10000, height: number = 5000): Feature<Polygon> {
+    const coords = [
+      [x, y],
+      [x + width, y],
+      [x + width, y + height],
+      [x, y + height],
+      [x, y]
+    ];
+    return new Feature({
+      geometry: new Polygon([coords]),
+      label: label
+    });
+  }
+
+  private moveBlockDown(feature: Feature<Polygon>, deltaY: number): void {
+    const geom = feature.getGeometry();
+    if (geom) {
+      geom.translate(0, -deltaY);
+    }
+  }
+
+  private calculateExtent(last: Feature<Polygon>, features: Feature<Polygon>[]): void {
+    this.consensusMapExtent = createEmpty();
+    const geom = last.getGeometry();
+    if (!geom) return;
+    extend(this.consensusMapExtent, geom.getExtent());
+
+    let width = getWidth(this.consensusMapExtent);
+    let height = getHeight(this.consensusMapExtent);
+    const factor = 0.5; // 20% di margine
+
+    this.consensusMapExtent[0] -= width * factor;
+    this.consensusMapExtent[2] += width * factor;
+    this.consensusMapExtent[1] -= height * factor;
+    this.consensusMapExtent[3] += height * factor;
+
+    this.consensusMapExtentAll = createEmpty();
+    features.forEach(b => {
+      const geom = b.getGeometry();
+      if (!geom) return;
+      extend(this.consensusMapExtentAll, geom.getExtent());
+    });
+
+    width = getWidth(this.consensusMapExtentAll);
+    height = getHeight(this.consensusMapExtentAll);
+
+    this.consensusMapExtentAll[0] -= width * factor;
+    this.consensusMapExtentAll[2] += width * factor;
+    this.consensusMapExtentAll[1] -= height * factor;
+    this.consensusMapExtentAll[3] += height * factor;
+  }
+
+  private getAltChains(): { [key: number]: BlockHeader[]} {
+    const result: { [key: number]: BlockHeader[]} = { };
+    for (const altChain of this.alternateChains) {
+      const headers: BlockHeader[] = [];
+
+      let height = altChain.height;
+      for(const blockHash of altChain.blockHashes) {
+        const header = BlockHeader.createSimple(height, blockHash);
+        headers.push(header);
+        height++;
+      }
+
+      result[altChain.height] = headers;
+    }
+
+    return result;
+  }
+
+  private loadConsensusLayer(): VectorLayer {
+    const headers = this.daemonData.last720Blocks;
+    const altChains = this.getAltChains();
+    const source = new VectorSource<Feature<Polygon | LineString>>();
+
+    let i: number = 0;
+    const index: { [key: number]: number } = {};
+    const features: Feature<Polygon>[] = [];
+    const altChainFeatures: Feature<Polygon>[] = [];
+    const links: Feature<LineString>[] = [];
+    for(const h of headers) {
+
+      const f = this.createBlockFeature(0, i*6000, `#${h.height}`);
+      f.setId(h.hash);
+      f.set('height', h.height);
+      index[h.height] = i;
+      f.set('DESCRIPTION', `Height: #${h.height}\nHash: ${h.hash.slice(0, 4)}...${h.hash.slice(-4)}`);
+      features.push(f);
+      if (i > 0){ 
+        const link = this.createLinkFeature(f, features[i - 1]);
+        link.set('height', h.height);
+        links.push(link);
+      }
+
+      const altChain = altChains[h.height];
+      if (altChain) {
+        const altFeatures: Feature<Polygon>[] = [];
+        altChain.forEach((b, j) => {
+          const altFeature = this.createBlockFeature(12000, (j+i)*6000, `#${b.height}`);
+          altFeature.setId(b.hash);
+          altFeature.set('DESCRIPTION', `Height: #${b.height}\nHash: ${b.hash.slice(0, 4)}...${b.hash.slice(-4)}`);
+          altFeature.set('height', b.height);
+          if (j > 0) {
+            const link = this.createLinkFeature(altFeature, altFeatures[j - 1]);
+            link.set('height', b.height);
+            links.push(link);
+          }
+          else {
+            const link = this.createLinkAltFeature(features[i - 1], altFeature);
+            link.set('height', b.height);
+            links.push(link);
+          }
+          altFeatures.push(altFeature); 
+        });
+
+        altChainFeatures.push(...altFeatures);
+      }
+      i++;
+    }
+
+    const last = features[features.length - 1];
+    features.push(...altChainFeatures);
+
+    source.addFeatures(features);
+    source.addFeatures(links);
+
+    this.calculateExtent(last, features);
+
+    const vector = new VectorLayer({
+      source: source,
+      style: function (feature) {
+        return new Style({
+          stroke: new Stroke({
+            color: '#f96800ff',
+            width: 4
+          }),
+          fill: new Fill({
+            color: '#666666ff'
+          }),
+          text: new Text({
+            text: feature.get('label'),
+            
+            font: 'bold 12px Arial',
+            fill: new Fill({color: '#000000ff'}),
+            overflow: false,
+            placement: 'point',
+            textAlign: 'center',
+            textBaseline: 'middle'
+          }),
+        });
+      }
+    });
+
+    return vector;
+  }
+
+  private loadConsensusMap(): void {
+    if (this.consensusMap) {
+      this.consensusMap.dispose();
+      this.consensusMap = undefined;
+    }
+    let err: any = null;
+    if (this.loadingConsensusMap) throw new Error("Consensus map is loading");
+    this.loadingConsensusMap = true;
+
+    try {
+      const layer = this.loadConsensusLayer();
+      this.consensusLayer = layer;
+      const map = new olMap({
+        target: 'consensusMap',
+        view: new View({
+          center: getCenter(this.consensusMapExtent),
+          extent: this.consensusMapExtentAll,
+          zoom: 4,
+          projection: 'EPSG:3857',
+        }),
+        layers: [layer],
+        controls: []
+      });
+
+      map.on('pointermove',(evt) => {
+        const info = this.consensusMapInfo;
+        if (!info) return;
+        if (evt.dragging) {
+          info.style.visibility = 'hidden';
+          this.hoveredBlock = undefined;
+          return;
+        }
+        this.displayFeatureInfo(evt.pixel, evt.originalEvent.target);
+      });
+
+      map.on('click', (evt) => {
+        this.displayFeatureInfo(evt.pixel, evt.originalEvent.target);
+      });
+
+      map.getTargetElement().addEventListener('pointerleave', () => {
+        const info = this.consensusMapInfo;
+        if (!info) return;
+        this.hoveredBlock = undefined;
+        info.style.visibility = 'hidden';
+      });
+
+      map.addControl(this.createPanButton('↓', 0, -12000, map));
+      map.addControl(this.createPanButton('↑', 0, 12000, map));
+
+      this.consensusMapInfo = document.getElementById('consensusMapInfo') as HTMLDivElement;
+      this.consensusMap = map;
+
+    } catch (error: any) {
+      err = error;
+    }
+
+    this.lastConsensusHeight = this.daemonData.last720BlocksHeight;
+    this.loadingConsensusMap = false;
+    if (err) throw err;
+  }
+
   // #endregion
 
   // #region Public Methods
@@ -614,7 +1048,7 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
   public ngAfterViewInit(): void {
     this.ngZone.run(() => {      
       this.loadTables();
-
+      this.loadConsensusMap();
       const onSyncEndSub: Subscription = this.daemonData.syncEnd.subscribe(() => this.refresh());
 
       const statusSub: Subscription = this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
