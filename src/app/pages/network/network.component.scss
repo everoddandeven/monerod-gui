@@ -1,0 +1,11 @@
+.terminal {
+  overflow-y: auto;
+  font-family: monospace;
+  border: 1px solid #333;
+  border-radius: 5px;
+}
+  
+.terminal-output {
+  white-space: pre-wrap;
+  font-size: small;
+}
