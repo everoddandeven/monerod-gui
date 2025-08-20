@@ -12,11 +12,11 @@
   "dependencies": {
     "adm-zip": "^0.5.16",
     "applescript": "^1.0.0",
-    "axios": "^1.8.4",
+    "axios": "^1.11.0",
     "network": "^0.7.0",
     "node-battery-ts": "^1.0.0",
     "os": "^0.1.2",
-    "pidusage": "^4.0.0",
+    "pidusage": "^4.0.1",
     "tar": "^7.4.3",
     "tor-ctrl": "^0.2.0",
     "unbzip2-stream": "^1.4.3",
