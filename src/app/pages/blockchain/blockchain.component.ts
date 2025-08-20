@@ -1026,8 +1026,8 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
         info.style.visibility = 'hidden';
       });
 
-      map.addControl(this.createPanButton('↓', 0, -12000, map));
       map.addControl(this.createPanButton('↑', 0, 12000, map));
+      map.addControl(this.createPanButton('↓', 0, -12000, map));
 
       this.consensusMapInfo = document.getElementById('consensusMapInfo') as HTMLDivElement;
       this.consensusMap = map;

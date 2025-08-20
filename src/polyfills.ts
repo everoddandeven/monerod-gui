@@ -64,6 +64,22 @@ interface ProcessInfo {
   elapsed: number;
   timestamp: number;
 };
+interface CpuInfo {
+model: string;
+speed: number;
+times: {
+    /** The number of milliseconds the CPU has spent in user mode. */
+    user: number;
+    /** The number of milliseconds the CPU has spent in nice mode. */
+    nice: number;
+    /** The number of milliseconds the CPU has spent in sys mode. */
+    sys: number;
+    /** The number of milliseconds the CPU has spent in idle mode. */
+    idle: number;
+    /** The number of milliseconds the CPU has spent in irq mode. */
+    irq: number;
+};
+};
 type TorControlCommand = 'authenticate' | 'getVersion' | 'getCircuitStatus' | 'getNetworkStatus' | 'changeIdentity' | 'reload' | 'getBootstrapPhase' | 'getCircuitEstablished' | 'getUptime' | 'getTrafficInfo' | 'shutdown' | 'clearDnsCache';
 
 declare global {
@@ -139,7 +155,7 @@ declare global {
       isOnBatteryPower: (callback: (onBattery: boolean) => void) => void;
       onBattery: (callback: () => void) => void;
       onAc: (callback: () => void) => void;
-
+      getOsDetails: (callback: (result: { platform: string, arch: string, cpus: CpuInfo[]; }) => void) => void;
       downloadFile: (
         url: string, 
         destination: string,

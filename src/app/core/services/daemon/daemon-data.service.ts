@@ -329,7 +329,7 @@ export class DaemonDataService {
     this._daemonRunning = false;
   }
 
-  private async refreshMiningStatus(): Promise<void> {
+  public async refreshMiningStatus(): Promise<void> {
     this._gettingMiningStatus = true;
 
     try {

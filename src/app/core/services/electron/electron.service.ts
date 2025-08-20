@@ -7,6 +7,24 @@ import { APP_CONFIG } from '../../../../environments/environment';
 import { AxiosHeaders, AxiosResponse } from 'axios';
 import { StringUtils } from '../../utils';
 
+export interface CpuInfo {
+  model: string;
+  speed: number;
+  times: {
+      /** The number of milliseconds the CPU has spent in user mode. */
+      user: number;
+      /** The number of milliseconds the CPU has spent in nice mode. */
+      nice: number;
+      /** The number of milliseconds the CPU has spent in sys mode. */
+      sys: number;
+      /** The number of milliseconds the CPU has spent in idle mode. */
+      idle: number;
+      /** The number of milliseconds the CPU has spent in irq mode. */
+      irq: number;
+  };
+};
+export interface OsDetails  { platform: string, arch: string, cpus: CpuInfo[]; };
+
 @Injectable({
   providedIn: 'root'
 })
@@ -33,6 +51,8 @@ export class ElectronService {
 
   public readonly onAcPower: EventEmitter<void> = new EventEmitter<void>();
   public readonly onBatteryPower: EventEmitter<void> = new EventEmitter<void>();
+
+  public osDetails: OsDetails = { platform: 'unknown', cpus: [], arch: 'unknown' };
 
   // #endregion
 
@@ -64,6 +84,8 @@ export class ElectronService {
     window.electronAPI.onAc(() => { 
       this.onAcPower.emit()
     });
+
+    this.getOsDetails().then((res) => this.osDetails = res).catch((error: any) => console.error(error));
   }
 
   public async get(uri: string): Promise<{[key: string]: any}> {
@@ -372,6 +394,16 @@ export class ElectronService {
   public async downloadFile(url: string, destination: string, progressFunction?: (info: { progress: number, status: string }) => void): Promise<string> {
     const promise = new Promise<string>((resolve, reject) => {
       window.electronAPI.downloadFile(url, destination, progressFunction ? progressFunction : (info) => console.log(info), (fileName: string) => resolve(fileName), (error: string) => reject(new Error(error)));
+    });
+
+    return await promise;
+  }
+
+  public async getOsDetails(): Promise<OsDetails> {
+    const promise = new Promise<OsDetails>((resolve) => {
+      window.electronAPI.getOsDetails((result) => {
+        resolve(result);
+      });
     });
 
     return await promise;

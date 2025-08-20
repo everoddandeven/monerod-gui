@@ -643,7 +643,6 @@ try {
     else {
       try {
         p2poolProcess = new P2PoolProcess({ cmd: path, flags: options, isExe: true });
-        await p2poolProcess.start();
         p2poolProcess.onStdOut((out: string) => win?.webContents.send('on-p2pool-stdout', out));
         p2poolProcess.onStdErr((out: string) => win?.webContents.send('on-p2pool-stderr', out));
         p2poolProcess.onClose((_code: number | null) => {
@@ -654,6 +653,7 @@ try {
           win?.webContents.send('p2pool-close', code);
           monerodProcess = null;
         });
+        await p2poolProcess.start();
       }
       catch (err: any) {
         error = `${err}`;
@@ -1156,6 +1156,11 @@ try {
   ipcMain.handle('copy-to-clipboard', (event: IpcMainInvokeEvent, content: string) => {
     if (os.platform() == 'linux') clipboard.writeText(content, "selection");
     clipboard.writeText(content, "clipboard");
+  });
+
+  ipcMain.handle('get-os-details', (event: IpcMainInvokeEvent, params: { eventId: string }) => {
+    const { eventId } = params;
+    win?.webContents.send(eventId, { platform: os.platform(), cpus: os.cpus(), arch: os.arch() });
   });
 
   ipcMain.handle('http-post', async (event: IpcMainInvokeEvent, params: { id: string; url: string; data?: any; config?: AxiosRequestConfig<any> }) => {

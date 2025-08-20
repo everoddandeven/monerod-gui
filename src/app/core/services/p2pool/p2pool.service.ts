@@ -15,6 +15,18 @@ export class P2PoolMinerStats {
   public blockRewardSharePercent: number = 0;
   public threads: number = 0;
 
+  public get KHashrate(): number {
+    return parseFloat(`${(this.currentHashrate / 1024).toFixed(2)}`);
+  }
+
+  public get MHashrate(): number {
+    return parseFloat(`${(this.KHashrate / 1024).toFixed(2)}`);
+  }
+
+  public get GHashrate(): number {
+    return parseFloat(`${(this.MHashrate / 1024).toFixed(2)}`);
+  }
+
   public static parse(s: any): P2PoolMinerStats {
     const r = new P2PoolMinerStats();
 
@@ -42,6 +54,18 @@ export class P2PoolStats {
   public sidechainHeight: number = 0;
   public pplnsWeight: number = 0;
   public pplnsWindowSize: number = 0;
+
+  public get KHashrate(): number {
+    return parseFloat(`${(this.hashrate / 1024).toFixed(2)}`);
+  }
+
+  public get MHashrate(): number {
+    return parseFloat(`${(this.KHashrate / 1024).toFixed(2)}`);
+  }
+
+  public get GHashrate(): number {
+    return parseFloat(`${(this.MHashrate / 1024).toFixed(2)}`);
+  }
 
   public static parse(s: any): P2PoolStats {
     const stats = new P2PoolStats();
@@ -105,6 +129,26 @@ export class P2PoolStratum {
 
 }
 
+export class P2PoolNetworkStats {
+  public difficulty: number = 0;
+  public hash: string = '';
+  public height: number = 0;
+  public reward: number = 0;
+  public timestamp: number = 0;
+
+  public static parse(s: any): P2PoolNetworkStats {
+    const r = new P2PoolNetworkStats();
+
+    r.difficulty = s.difficulty as number;
+    r.hash = s.hash as string;
+    r.height = s.height as number;
+    r.reward = s.reward as number;
+    r.timestamp = s.timestamp as number;
+
+    return r;
+  }
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -135,6 +179,7 @@ export class P2poolService {
   public minerStats?: P2PoolMinerStats;
   public poolStats?: P2PoolStats;
   public stratum?: P2PoolStratum;
+  public networkStat?: P2PoolNetworkStats;
 
 
   // #endregion
@@ -197,6 +242,10 @@ export class P2poolService {
     return `${this.apiFolder}${s}local${s}stratum`;
   }
 
+  private get apiNetworkPath(): string {
+    const s = this.separator;
+    return `${this.apiFolder}${s}network${s}stats`;
+  }
 
   // #endregion
 
@@ -245,6 +294,12 @@ export class P2poolService {
     return P2PoolStratum.parse(jsonObj);
   }
 
+  public async getNetworkStats(): Promise<P2PoolNetworkStats> {
+    const content = await this.electronService.readFile(this.apiNetworkPath);
+    const jsonObj = JSON.parse(content);
+    return P2PoolNetworkStats.parse(jsonObj);
+  }
+
   public async loadSettings(): Promise<P2PoolSettings> {
     const db = await this.openDbPromise;
     const result = await db.get(this.storeName, 1);
@@ -264,7 +319,7 @@ export class P2poolService {
 
   public async start(config?: P2PoolSettings): Promise<void> {
     const _config = config ? config : this._settings;
-    
+    if (_config.path === '') throw new Error("P2Pool not configured. Go to Settings -> Mining");
     if (this.running) throw new Error("Already running p2pool");
     if (this.stopping) throw new Error("p2pool is stopping");
     if (this.starting) throw new Error("Alrady starting p2pool");
@@ -334,6 +389,11 @@ export class P2poolService {
       console.log("STOPPING P2POOL...");
       
       await promise;
+      this.minerStats = undefined;
+      this.miningStatus = undefined;
+      this.poolStats = undefined;
+      this.stratum = undefined;
+      this.networkStat = undefined;
       this._status = 'stopped';
       console.log("STOPPED P2Pool...");
     }
@@ -402,7 +462,8 @@ export class P2poolService {
 
   public async getMiningStatus(): Promise<MiningStatus> {
     const stats = await this.getMinerStats();
-    return new MiningStatus(this.running, this.settings.wallet, 0, 0, 0, 0, 0, 0, 0, false, 'randomX', stats.currentHashrate, stats.threads, '');
+    const net = this.networkStat ? this.networkStat : new P2PoolNetworkStats();
+    return new MiningStatus(this.running, this.settings.wallet, 0, 0, 0, net.reward, 120, net.difficulty, 0, false, 'RandomX', stats.currentHashrate, stats.threads, 'unknown');
   }
 
   public async updateData(): Promise<void> {
@@ -412,6 +473,7 @@ export class P2poolService {
       if (this.updatingData) throw new Error("Already updating data");
       this.updatingData = true;
 
+      this.networkStat = await this.getNetworkStats();
       this.miningStatus = await this.getMiningStatus();
       this.minerStats = await this.getMinerStats();
       this.poolStats = await this.getPoolStats();

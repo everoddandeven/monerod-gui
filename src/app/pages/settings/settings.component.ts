@@ -25,6 +25,10 @@ export class SettingsComponent extends BasePageComponent {
 
   public readonly navbarLinks: NavbarPill[];
 
+  public get maxThreadsCount(): number {
+    return this.electronService.osDetails.cpus.length;
+  }
+
   public i2pOutproxyIp: string = '';
   public i2pOutproxyPort: number = 0;
 

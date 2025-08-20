@@ -13,12 +13,12 @@ import { StringUtils } from '../../core/utils';
     standalone: false
 })
 export class VersionComponent implements AfterViewInit {
-  private daemonData = inject(DaemonDataService);
-  private daemonService = inject(DaemonService);
-  private electronService = inject(ElectronService);
-  private moneroInstaller = inject(MoneroInstallerService);
-  private torService = inject(TorDaemonService);
-  private ngZone = inject(NgZone);
+  private readonly daemonData = inject(DaemonDataService);
+  private readonly daemonService = inject(DaemonService);
+  private readonly electronService = inject(ElectronService);
+  private readonly moneroInstaller = inject(MoneroInstallerService);
+  private readonly torService = inject(TorDaemonService);
+  private readonly ngZone = inject(NgZone);
 
   public readonly links: NavbarPill[];
   public cards: SimpleBootstrapCard[];

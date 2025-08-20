@@ -456,5 +456,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
     
     ipcRenderer.once(eventId, handler);
     ipcRenderer.invoke('create-folder', { eventId, path });
+  },
+  getOsDetails: (callback) => {
+    const eventId = `on-get-os-details-${newId}`;
+    const handler = (event, result) => {
+      callback(result);
+    };
+    
+    ipcRenderer.once(eventId, handler);
+    ipcRenderer.invoke('get-os-details', { eventId });
   }
 });

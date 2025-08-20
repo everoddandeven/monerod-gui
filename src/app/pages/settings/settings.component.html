@@ -979,7 +979,7 @@
 
             <div class="col-md-2">
               <label for="mining-threads" class="form-label">Threads</label>
-              <input [disabled]="!canEditNodeSettings" type="number" min="0" class="form-control" id="mining-threds" placeholder="1" [(ngModel)]="currentSettings.miningThreads" [ngModelOptions]="{standalone: true}">
+              <input [disabled]="!canEditNodeSettings" type="number" min="0" [max]="maxThreadsCount" class="form-control" id="mining-threds" placeholder="1" [(ngModel)]="currentSettings.miningThreads" [ngModelOptions]="{standalone: true}">
               <small class="text-body-secondary">Specify mining threads count. By default only one thread will be used.</small>
             </div>
             

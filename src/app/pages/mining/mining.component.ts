@@ -1,5 +1,5 @@
 import { AfterContentInit, AfterViewInit, Component, NgZone, OnDestroy, inject } from '@angular/core';
-import { DaemonService, DaemonDataService } from '../../core/services';
+import { DaemonService, DaemonDataService, ElectronService } from '../../core/services';
 import { NavbarPill } from '../../shared/components';
 import { AddedAuxPow, AuxPoW, BlockTemplate, GeneratedBlocks, MiningStatus, MinerData, NetHashRateHistoryEntry, P2PoolSettings } from '../../../common';
 import { BasePageComponent } from '../base-page/base-page.component';
@@ -26,6 +26,7 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   private readonly daemonData = inject(DaemonDataService);
   private readonly p2poolService = inject(P2poolService);
   private readonly logsService = inject(LogsService);
+  private readonly electronService = inject(ElectronService);
   private readonly ngZone = inject(NgZone);
 
   private netHashRateChart?: Chart;
@@ -66,6 +67,7 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   public startMiningSuccess: boolean = false;
   public startMiningError: string = '';
   public startMiningType: MiningType = 'solo-mining';
+  public startMiningLightMode: boolean = false;
 
   public stoppingMining: boolean = false;
   public stopMiningError: string = '';
@@ -89,6 +91,10 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
 
   // #region Getters
 
+  public get maxThreadsCount(): number {
+    return this.electronService.osDetails.cpus.length;
+  }
+
   public get estimatedDailyIncome(): string {
     const d = this.miningStatus;
     const e = this.minerData;
@@ -104,7 +110,7 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
 
     const income = (hashrate * reward * 720) / netHashrate;
 
-    return `${(income / 1e12).toFixed(6)} XMR`;
+    return `${(income / 1e12).toFixed(12)} XMR`;
   }
 
   public get timeToFindBlock(): string {
@@ -129,7 +135,33 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     return `${seconds} seconds`;
   }
 
+  public get p2poolTimeToFindBlock(): string {
+    const poolStats = this.p2poolService.poolStats;
+    const netStats = this.p2poolService.networkStat;
+    if (!poolStats || !netStats) return "unknown";
+    const d = { difficulty: netStats.difficulty, speed: poolStats.hashrate };
+    if (!d || d.speed === 0) return "never";
+    const hashrate = d.speed;
+    const difficulty = d.difficulty;
+    const seconds = parseInt(`${ difficulty / hashrate}`);
+    const minutes = parseInt(`${seconds / 60}`);
+    const hours = parseInt(`${minutes / 60}`);
+    const days = parseInt(`${hours / 24}`);
+    const weeks = parseInt(`${days / 7}`);
+    const months = parseInt(`${days / 30}`);
+    const years = parseInt(`${days / 365}`);
+    
+    if (years > 0) return `${years} years`;
+    if (months > 0) return `${months} months`;
+    if (weeks > 0) return `${weeks} weeks`;
+    if (days > 0) return `${days} days`;
+    if (hours > 0) return `${hours} hours`;
+    if (minutes > 0) return `${minutes} minutes`;
+    return `${seconds} seconds`;
+  }
+
   public get miningType(): string {
+    if (this.stoppingMining) return 'none';
     const d = this.miningStatus;
     if (!d || !d.active) return 'none';
     return !this.p2poolService.running ? 'solo-mining' : this.startMiningType === 'p2pool-main' ? 'P2Pool (main)' : 'P2Pool (mini)';
@@ -345,7 +377,11 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
 
   public get p2poolCurrentHashrate(): string {
     const i = this.p2poolService.minerStats;
-    return i ? `${i.currentHashrate} H/s` : '0 H/s';
+    if (!i) return '0 H/s';
+    if (i.GHashrate > 0.5) return `${i.GHashrate} GH/s`;
+    if (i.MHashrate > 0.5) return `${i.MHashrate} MH/s`;
+    if (i.KHashrate > 0.5) return `${i.KHashrate} KH/s`;
+    return `${i.currentHashrate} H/s`;
   }
 
   public get p2poolTotalHashes(): string {
@@ -370,7 +406,11 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
 
   public get p2poolHashrate(): string {
     const i = this.p2poolService.poolStats;
-    return i ? `${i.hashrate} H/s` : '0 H/s';
+    if (!i) return '0 H/s';
+    if (i.GHashrate > 0.5) return `${i.GHashrate} GH/s`;
+    if (i.MHashrate > 0.5) return `${i.MHashrate} MH/s`;
+    if (i.KHashrate > 0.5) return `${i.KHashrate} KH/s`;
+    return `${i.hashrate} H/s`;
   }
 
   public get p2poolSidechainDifficulty(): string {
@@ -446,6 +486,10 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
 
   public get p2poolLogs(): string {
     return this.initingLogs ? '' : this.p2poolLines.join("\n");
+  }
+
+  public get startingP2Pool(): boolean {
+    return this.startMiningType === 'p2pool-main' || this.startMiningType === 'p2pool-mini';
   }
 
   // #endregion
@@ -818,11 +862,14 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
       p2poolConf.nano = true;
     } else throw new Error("Invalid p2pool pool selected");
 
+    if (this.startMiningLightMode) p2poolConf.lightMode = true;
+
     p2poolConf.path = this.p2poolService.settings.path;
     p2poolConf.startMining = this.startMiningThreadsCount;
     p2poolConf.wallet = this.startMiningMinerAddress;
 
     await this.p2poolService.start(p2poolConf);
+    await this.daemonData.refreshMiningStatus();
 
     this.startingMining = false;
   }
@@ -857,8 +904,7 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     this.stoppingMining = true;
 
     try {
-      const type = this.startMiningType;
-      if (type === 'p2pool-mini' || type === 'p2pool-main') await this.stopP2PoolMining();
+      if (this.p2poolService.running) await this.stopP2PoolMining();
       else await this.daemonService.stopMining();
 
       this.stopMiningSuccess = true;

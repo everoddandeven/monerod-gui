@@ -182,24 +182,31 @@
                 </small>
               </div>
 
-              <div class="col-sm-4">
+              <div class="col-sm-8">
                 <label for="start-mining-threads-count" class="form-label">Threads Count</label>
-                <input type="number" min="0" class="form-control" id="start-mining-threads-count" placeholder="" [(ngModel)]="startMiningThreadsCount" [ngModelOptions]="{standalone: true}">
+                <input type="number" min="1" [max]="maxThreadsCount" class="form-control" id="start-mining-threads-count" placeholder="" [(ngModel)]="startMiningThreadsCount" [ngModelOptions]="{standalone: true}">
                 <small class="text-body-secondary">Number of mining thread to run</small>
               </div>
 
-              <div class="form-check form-switch col-md-6">
+              <div class="form-check form-switch col-md-4">
                 <label for="start-mining-do-background-mining" class="form-check-label">Do Background Mining</label>
                 <input class="form-control form-check-input" type="checkbox" role="switch" id="start-mining-do-background-mining" [disabled]="startMiningType !== 'solo-mining'" [checked]="startMiningDoBackgroundMining && startMiningType === 'solo-mining'" [(ngModel)]="startMiningDoBackgroundMining" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">States if the mining should run in background (true) or foreground (false)</small>
               </div>
               
-              <div class="form-check form-switch col-md-6">
+              <div class="form-check form-switch col-md-4">
                 <label for="start-mining-ignore-battery" class="form-check-label">Ignore Battery</label>
                 <input class="form-control form-check-input" type="checkbox" role="switch" id="start-mining-ignore-battery" [disabled]="startMiningType !== 'solo-mining'" [checked]="startMiningIgnoreBattery && startMiningType === 'solo-mining'" [(ngModel)]="startMiningIgnoreBattery" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">States if battery state (on laptop) should be ignored (true) or not (false)</small>
+              </div>
+
+              <div class="form-check form-switch col-md-4">
+                <label for="start-mining-light-mode" class="form-check-label">Light Mode</label>
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="start-mining-light-mode" [disabled]="!startingP2Pool" [checked]="startMiningLightMode && startingP2Pool" [(ngModel)]="startMiningLightMode" [ngModelOptions]="{standalone: true}">
+                <br>
+                <small class="text-body-secondary">Don't allocate RandomX dataset, saves 2GB of RAM</small>
               </div>
 
             </div>
@@ -329,6 +336,11 @@
               <div class="input-group mb-1">
                 <span class="input-group-text" id="p2pool-total-blocks-found-info">Total Blocks Found</span>
                 <input type="text" class="form-control" aria-label="Total Blocks Found" aria-describedby="p2pool-total-blocks-found-info" [value]="p2poolTotalBlocksFound" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="p2pool-time-next-block-info">Est. Time to Find Next Block</span>
+                <input type="text" class="form-control" aria-label="Est. Time to Find Next Block" aria-describedby="p2pool-time-next-block-info" [value]="p2poolTimeToFindBlock" readonly>
               </div>
 
               <div class="input-group mb-1">
