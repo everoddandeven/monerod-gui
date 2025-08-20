@@ -1154,7 +1154,8 @@ try {
   });
 
   ipcMain.handle('copy-to-clipboard', (event: IpcMainInvokeEvent, content: string) => {
-    clipboard.writeText(content, "selection");
+    if (os.platform() == 'linux') clipboard.writeText(content, "selection");
+    clipboard.writeText(content, "clipboard");
   });
 
   ipcMain.handle('http-post', async (event: IpcMainInvokeEvent, params: { id: string; url: string; data?: any; config?: AxiosRequestConfig<any> }) => {
