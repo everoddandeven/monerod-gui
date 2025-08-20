@@ -6,12 +6,10 @@ import { Ban, Connection, HardForkInfo, LocalDestinationsData, MainData, NetStat
 import { Subscription } from 'rxjs';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { LogsService } from '../logs/logs.service';
-import { P2poolService } from '../../core/services/p2pool/p2pool.service';
 
 type OverviewTab = 'overview' | 'connections' | 'hardfork';
 type ToolsTab = 'limitBandwidth' | 'limitPeers' | 'setBans';
 type PeersTab = 'p2p' | 'rpc' | 'inPeers' | 'outPeers' | 'bans';
-type P2PoolTab = 'dashboard' | 'logs';
 type AnonNetTab = 'dashboard' | 'logs' | 'commands' | 'localDestinations' | 'tunnels';
 
 @Component({
@@ -26,7 +24,6 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
   private readonly i2pService = inject(I2pDaemonService);
   private readonly torService = inject(TorDaemonService);
   private readonly logsService = inject(LogsService);
-  private readonly p2poolService = inject(P2poolService);
 
   private connections?: Connection[];
   private netStatsBytesInChart?: Chart;
@@ -56,7 +53,6 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
   public currentPeersTab: PeersTab = 'p2p';
   public currentTorTab: AnonNetTab = 'dashboard';
   public currentI2pTab: AnonNetTab = 'dashboard';
-  public currentP2PoolTab: P2PoolTab = 'dashboard';
 
   public refreshingPeerList: boolean = false;
   public refreshingPublicNodes: boolean = false;
@@ -101,8 +97,8 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
   public torCircuitEstablished: boolean = false;
   public torBootstrapPhase: TorBootstrapPhase = new TorBootstrapPhase('NOTICE');
 
-  public torSent: number = 0;
-  public torReceived: number = 0;
+  private _torSent: number = 0;
+  private _torReceived: number = 0;
 
   private refreshingTor: boolean = false;
   private refreshInterval?: NodeJS.Timeout;
@@ -135,12 +131,40 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
 
   // #region Getters
 
+  public get torSent(): string {
+    const s = this._torSent;
+    if (s === 0) return '0 KB';
+    const kb = parseFloat(`${(s / 1024).toFixed(2)}`);
+    const mb = parseFloat(`${(kb / 1024).toFixed(2)}`);
+    const gb = parseFloat(`${(mb / 1024).toFixed(2)}`);
+
+    if (gb > 0) return `${gb} GB`;
+    if (mb > 0) return `${mb} MB`;
+    if (kb > 0) return `${kb} KB`;
+
+    return `0 B`;
+  }
+
+  public get torReceived(): string {
+    const s = this._torReceived;
+    if (s === 0) return '0 KB';
+    const kb = parseFloat(`${(s / 1024).toFixed(2)}`);
+    const mb = parseFloat(`${(kb / 1024).toFixed(2)}`);
+    const gb = parseFloat(`${(mb / 1024).toFixed(2)}`);
+
+    if (gb > 0) return `${gb} GB`;
+    if (mb > 0) return `${mb} MB`;
+    if (kb > 0) return `${kb} KB`;
+
+    return `0 B`;
+  }
+
   public get daemonRunning(): boolean {
     return this.daemonData.running;
   }
 
   public get daemonStopping(): boolean {
-    return this.daemonData.stopping;
+    return this.daemonData.stopping || this.daemonService.quitting;
   }
 
   public get networkStatus(): string {
@@ -218,23 +242,17 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
   // #region Tor
 
   public get torP2pHost(): string {
-    const tor = this.torService;
-    const enabled = tor.settings.enabled;
-    if (!enabled) return "disabled";
-    if (tor.starting) return "Loading ...";
-    if (!tor.running) return "unreachable";
-    if (tor.anonymousInbound === '') return "unknown";
-    return tor.anonymousInbound;
+    const s = this.torService.settings;
+    if (s.path === '') return 'not configured';
+    const r = this.torService.p2pHost;
+    return r ? r : 'disabled';
   }
 
   public get torRpcHost(): string {
-    const tor = this.torService;
-    const enabled = tor.settings.enabled;
-    if (!enabled) return "disabled";
-    if (tor.starting) return "Loading ...";
-    if (!tor.running) return "unreachable";
-    if (tor.anonymousInbound === '') return "unknown";
-    return tor.anonymousInbound;
+    const s = this.torService.settings;
+    if (s.path === '') return 'not configured';
+    const r = this.torService.rpcHost;
+    return r ? r : 'disabled';
   }
 
   public get torTxProxyEnabled(): string {
@@ -280,23 +298,17 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
   // #region I2p
 
   public get i2pP2pHost(): string {
-    const i2p = this.i2pService;
-    const enabled = i2p.settings.enabled;
-    if (!enabled) return "disabled";
-    if (i2p.starting) return "Loading ...";
-    if (!i2p.running) return "unreachable";
-    if (i2p.anonymousInbound === '') return "unknown";
-    return i2p.anonymousInbound;
+    const s = this.i2pService.settings;
+    if (s.path === '') return 'not configured';
+    const r = this.i2pService.p2pHost;
+    return r ? r : 'disabled';
   }
 
   public get i2pRpcHost(): string {
-    const i2p = this.i2pService;
-    const enabled = i2p.settings.enabled;
-    if (!enabled) return "disabled";
-    if (i2p.starting) return "Loading ...";
-    if (!i2p.running) return "unreachable";
-    if (i2p.anonymousInbound === '') return "unknown";
-    return i2p.anonymousInbound;
+    const s = this.i2pService.settings;
+    if (s.path === '') return 'not configured';
+    const r = this.i2pService.rpcHost;
+    return r ? r : 'disabled';
   }
 
   public get i2pTxProxyEnabled(): string {
@@ -331,34 +343,6 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
 
   public get i2pdLogs(): string {
     return this.initingLogs ? '' : this.i2pdLines.join("\n");
-  }
-
-  // #endregion
-
-  // #region P2Pool
-
-  public get p2poolLines(): string [] {
-    return this.logsService.logs.p2pool;
-  }
-
-  public get p2poolLogs(): string {
-    return this.initingLogs ? '' : this.p2poolLines.join("\n");
-  }
-
-  public get p2poolStopping(): boolean {
-    return this.p2poolService.stopping || this.daemonService.stopping;
-  }
-
-  public get p2poolStarting(): boolean {
-    return this.p2poolService.starting;
-  }
-
-  public get p2pRunning(): boolean {
-    return this.p2poolService.running;
-  }
-
-  public get p2poolEnabled(): boolean {
-    return this.p2poolService.settings.path !== '';
   }
 
   // #endregion
@@ -612,7 +596,6 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
       new NavbarPill('net-overview', 'Overview'),
       new NavbarPill('net-peers', 'Peers'),
       new NavbarPill('net-stats', 'Statistics'),
-      new NavbarPill('net-p2pool', 'P2Pool'),
       new NavbarPill('net-tor', 'Tor'),
       new NavbarPill('net-i2p', 'I2P'),
       new NavbarPill('net-tools', 'Tools')
@@ -693,6 +676,7 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
     this.refreshConnectionsTable().then().catch((error: any) => console.error(error));
     this.initTable('bansTable', true);
     this.loadTables();
+    this.initLogs();
     this.refreshTor().catch((error: any) => console.error(error));
   }
 
@@ -993,10 +977,6 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
     this.currentI2pTab = tab;
   }
 
-  public setCurrentP2PoolTab(tab: P2PoolTab): void {
-    this.currentP2PoolTab = tab;
-  }
-
   public override ngOnDestroy(): void {
     if (this.netStatsBytesInChart) {
       this.netStatsBytesInChart.destroy();
@@ -1053,10 +1033,6 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
     this.logsService.clear('tor');
   }
 
-  public clearP2PoolLogs(): void {
-    this.logsService.clear('p2pool');
-  }
-
   private registerScrollEvents(): void {
     if (this.scrollEventsRegistered) {
       console.warn("Scroll events already registered");
@@ -1077,13 +1053,11 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
     const table1 = document.getElementById('monerod-log-table');
     const table2 = document.getElementById('i2pd-log-table');
     const table3 = document.getElementById('tor-log-table');
-    const table4 = document.getElementById('p2pool-log-table');
     const result: HTMLElement[] = [];
 
     if (table1) result.push(table1);
     if (table2) result.push(table2);
     if (table3) result.push(table3);
-    if (table4) result.push(table4);
 
     return result;
   }
@@ -1164,8 +1138,8 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
       this._torUptime = await this.torService.getUptime();
       const trafficInfo = await this.torService.getTrafficInfo();
 
-      this.torSent = parseFloat((trafficInfo.sent / 1024).toFixed(2));
-      this.torReceived = parseFloat((trafficInfo.received / 1024).toFixed(2));
+      this._torSent = trafficInfo.sent;
+      this._torReceived = trafficInfo.received;
       this._torProcessStats = await this.torService.getProcessStats();
     }
     catch (error: any) {

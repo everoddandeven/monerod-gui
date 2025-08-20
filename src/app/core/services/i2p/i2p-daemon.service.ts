@@ -28,6 +28,8 @@ export class I2pDaemonService {
   private _loaded: boolean = false;
   private _logs: string[] = [];
   private _anonymousInbound: string = '';
+  private _p2pHost: string = '';
+  private _rpcHost: string = '';
 
   private _detectedInstallation?: { path: string; configFile?: string; tunnelConfig?: string; tunnelsConfigDir?: string; pidFile?: string; isRunning?: boolean; };
 
@@ -63,6 +65,14 @@ export class I2pDaemonService {
 
   public get loaded(): boolean {
     return this._loaded;
+  }
+
+  public get p2pHost(): string {
+    return this._p2pHost;
+  }
+
+  public get rpcHost(): string {
+    return this._rpcHost;
   }
 
   constructor() 
@@ -111,7 +121,8 @@ export class I2pDaemonService {
 
   public async start(config?: I2pDaemonSettings): Promise<void> {
     const _config = config ? config : this._settings;
-    
+    if (!_config.path) _config.path = this._settings.path;
+    if (_config.path === '') throw new Error("I2P not configured");
     if (this.running) throw new Error("Already running i2pd");
     if (this.stopping) throw new Error("i2pd is stopping");
     if (this.starting) throw new Error("Alrady starting i2pd");
@@ -161,6 +172,8 @@ export class I2pDaemonService {
     }
 
     this.setSettings(_config);
+    this._rpcHost = await this.getRPCHost();
+    this._p2pHost = await this.getP2PHost();
     this._running = true;
     this.onStart.emit();
   }
@@ -223,6 +236,8 @@ export class I2pDaemonService {
       this._stopping = false;
     }
 
+    this._p2pHost = '';
+    this._rpcHost = '';
     this._running = false;
     if (!this.restarting) this.onStop.emit();
 
@@ -409,6 +424,33 @@ export class I2pDaemonService {
     const tunnels = await this.getMoneroServerTunnels();
 
     return tunnels.find((t) => t.name === 'monero-node');
+  }
+
+  public async getHostname(): Promise<string> {
+    const tunnel = await this.getMoneroNodeServerTunnel();
+
+    if (!tunnel) return '';
+
+    const c = tunnel.address.split(':');
+
+    if (c.length != 2) return '';
+
+    return c[0];
+  }
+
+  public async getP2PHost(): Promise<string> {
+    const host = await this.getHostname();
+    const { port } = this._settings;
+
+    return `${host}:${port}`;
+  }
+
+  public async getRPCHost(): Promise<string> {
+    if (!this._settings.allowIncomingConnections) return 'disabled';
+    const host = await this.getHostname();
+    const { rpcPort } = this._settings;
+
+    return `${host}:${rpcPort}`;
   }
 
   public async getAnonymousInbound(): Promise<string> {

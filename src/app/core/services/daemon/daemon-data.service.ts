@@ -93,7 +93,7 @@ export class DaemonDataService {
   public readonly netStatsRefreshStart: EventEmitter<void> = new EventEmitter<void>();
   public readonly netStatsRefreshEnd: EventEmitter<void> = new EventEmitter<void>();
 
-  public readonly syncRefreshLast24hBlocks: EventEmitter<BlockHeader[]> = new EventEmitter<BlockHeader[]>();
+  public readonly syncRefreshLast24hBlocks: EventEmitter<{new: BlockHeader[], old: BlockHeader[], altChains: Chain[]}> = new EventEmitter<{new: BlockHeader[], old: BlockHeader[], altChains: Chain[]}>();
 
   public last720Blocks: BlockHeader[] = [];
   public last720BlocksHeight: number = 0;
@@ -382,17 +382,24 @@ export class DaemonDataService {
     this._netDifficultyHistory.add(diff);
   }
 
-  private async refreshAltChains(): Promise<void> {
+  private async refreshAltChains(): Promise<Chain[]> {
     this._gettingAltChains = true;
+    const newChains: Chain[] = [];
+    const oldChains: Chain[] = this._altChains;
 
     try {
       this._altChains = await this.daemonService.getAlternateChains();
+      this.altChains.forEach((chain) => {
+        if (oldChains.find((c) => c.height === chain.height)) return;
+        newChains.push(chain);
+      })
     }
     catch (error) {
       console.error(error);
     }
 
     this._gettingAltChains = false;
+    return newChains;
   }
 
   public async checkDaemon(): Promise<boolean> {
@@ -542,8 +549,6 @@ export class DaemonDataService {
         this._gettingLastBlockHeader = false;
       }
 
-      if (this._daemonInfo.synchronized && this._daemonInfo.altBlocksCount > 0) await this.refreshAltChains();
-
       this._gettingNetStats = true;
       this.netStatsRefreshStart.emit();
       this._netStats = await this.daemonService.getNetStats();
@@ -637,21 +642,29 @@ export class DaemonDataService {
 
     console.log(`Fetching ${blocksToFetch} blocks...`);
 
-    const headers = await this.daemonService.getBlockHeadersRange(this.last720BlocksHeight, currentHeight, false);
-
+    const headers = await this.daemonService.getBlockHeadersRange(this.last720BlocksHeight + 1, currentHeight, false);
+    const removed: BlockHeader[] = [];
     console.log(`Fetched ${headers.length} blocks`);
 
     for (let i = 0; i < blocksToFetch; i++) {
-      this.last720Blocks.shift();
+      const r = this.last720Blocks.shift();
+      if (r) removed.push(r);
     }
-
+    
     for(const h of headers) {
       this.last720Blocks.push(h);
     }
 
     this.last720BlocksHeight = currentHeight;
 
-    if (headers.length > 0) this.syncRefreshLast24hBlocks.emit(headers);
+    let altChains: Chain[] = [];
+    if (this._daemonInfo && this._daemonInfo.synchronized && this._daemonInfo.altBlocksCount > 0) altChains = await this.refreshAltChains();
+
+
+    if (headers.length > 0) {
+      altChains = altChains.filter((chain) => chain.height >= this.last720Blocks[0].height);
+      this.syncRefreshLast24hBlocks.emit({ new: headers, old: removed, altChains });
+    }
   }
 
   // #endregion

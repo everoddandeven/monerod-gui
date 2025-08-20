@@ -591,9 +591,9 @@ try {
     win?.webContents.send(eventId, await detectInstallation(program));
   });
 
-  ipcMain.handle('start-i2pd', async (event: IpcMainInvokeEvent, params: { eventId: string; path: string; port: number; rpcPort: number; outproxy?: { host: string; port: number; } }) => {
-    const { eventId, path, port, rpcPort, outproxy } = params;
-    
+  ipcMain.handle('start-i2pd', async (event: IpcMainInvokeEvent, params: { eventId: string; path: string; port: number; rpcPort: number; outproxy?: { host: string; port: number; }, allowIncomingConnections: boolean }) => {
+    const { eventId, path, port, rpcPort, outproxy, allowIncomingConnections } = params;
+    console.log('EVENT start-i2pd', params);
     let error: string | undefined = undefined;
 
     if (i2pdProcess && i2pdProcess.running) {
@@ -604,8 +604,7 @@ try {
     }
     else {
       try {
-        //i2pdProcess = new I2pdProcess({ i2pdPath: path, flags, isExe: true });
-        i2pdProcess = MoneroI2pdProcess.createSimple(path, port, rpcPort, outproxy);
+        i2pdProcess = MoneroI2pdProcess.createSimple(path, port, allowIncomingConnections ? rpcPort : undefined, outproxy);
         await i2pdProcess.start();
         i2pdProcess.onStdOut((out: string) => win?.webContents.send('on-ip2d-stdout', out));
         i2pdProcess.onStdErr((out: string) => win?.webContents.send('on-ip2d-stderr', out));
@@ -735,7 +734,7 @@ try {
         //torProcess = new TorProcess({ i2pdPath: path, flags, isExe: true });
 
         if (allowIncomingConnections) torProcess = new TorProcess({ path, port, rpcPort, createConfig: true });
-        else torProcess = new TorProcess({ path, createConfig: true });
+        else torProcess = new TorProcess({ path, port, createConfig: true });
         await torProcess.start();
         torProcess.onStdOut((out: string) => win?.webContents.send('on-tor-stdout', out));
         torProcess.onStdErr((out: string) => win?.webContents.send('on-tor-stderr', out));

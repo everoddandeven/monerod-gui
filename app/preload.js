@@ -96,14 +96,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('check-valid-i2pd-path', { eventId, path });
   },
   startI2pd: (options, callback) => {
-    const { path, port, rpcPort, outproxy } = options;
+    const { path, port, rpcPort, outproxy, allowIncomingConnections } = options;
     const eventId = `on-start-i2pd-${newId()}`;
     const handler = (event, result) => {
       callback(result);
     };
 
     ipcRenderer.once(eventId, handler);
-    ipcRenderer.invoke('start-i2pd', { eventId, path, port, rpcPort, outproxy });
+    ipcRenderer.invoke('start-i2pd', { eventId, path, port, rpcPort, outproxy, allowIncomingConnections });
   },
   stopI2pd: (callback) => {
     const eventId = `on-stop-i2pd-${newId()}`;

@@ -35,6 +35,16 @@ export class TorDaemonService {
   private _logs: string[] = [];
   private _reloading: boolean = false;
   private _changingIdentity: boolean = false;
+  private _rpcHost: string = '';
+  private _p2pHost: string = '';
+
+  public get rpcHost(): string {
+    return this._rpcHost;
+  }
+
+  public get p2pHost(): string {
+    return this._p2pHost;
+  }
 
   public get running(): boolean {
     return this._running;
@@ -140,6 +150,8 @@ export class TorDaemonService {
 
     this.setSettings(_config);
     this._anonymousInbound = await this.getAnonymousInbound();
+    this._rpcHost = await this.getRPCHost();
+    this._p2pHost = await this.getP2PHost();
     this._running = true;
     this.onStart.emit();
   }
@@ -167,7 +179,11 @@ export class TorDaemonService {
       this._stopping = false;
     }
 
+    this._p2pHost = '';
+    this._rpcHost = '';
+
     this._running = false;
+
     if (!this.restarting) this.onStop.emit();
 
     if (err) throw err;
@@ -273,6 +289,21 @@ export class TorDaemonService {
       console.error(error);
       return '';
     }
+  }
+
+  public async getP2PHost(): Promise<string> {
+    const host = await this.getHostname();
+    const { port } = this._settings;
+
+    return `${host}:${port}`;
+  }
+
+  public async getRPCHost(): Promise<string> {
+    if (!this._settings.allowIncomingConnections) return 'disabled';
+    const host = await this.getHostname();
+    const { rpcPort } = this._settings;
+
+    return `${host}:${rpcPort}`;
   }
 
   public async getVersion(): Promise<string> {

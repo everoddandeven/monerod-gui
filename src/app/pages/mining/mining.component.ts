@@ -6,6 +6,7 @@ import { BasePageComponent } from '../base-page/base-page.component';
 import { Chart, ChartData } from 'chart.js';
 import { Subscription } from 'rxjs';
 import { P2poolService } from '../../core/services/p2pool/p2pool.service';
+import { LogsService } from '../logs/logs.service';
 
 type ToolsTab = 'generateBlocks' | 'getBlockTemplate' | 'calculatePoW' | 'addAuxPoW';
 type MiningType = 'solo-mining' | 'p2pool-main' | 'p2pool-mini';
@@ -24,6 +25,7 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   private readonly daemonService = inject(DaemonService);
   private readonly daemonData = inject(DaemonDataService);
   private readonly p2poolService = inject(P2poolService);
+  private readonly logsService = inject(LogsService);
   private readonly ngZone = inject(NgZone);
 
   private netHashRateChart?: Chart;
@@ -75,6 +77,13 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   public addAuxPowSuccess: boolean = false;
   public addAuxPowError: string = '';
   public addAuxPowResult?: AddedAuxPow;
+
+  private scrollEventsRegistered: boolean = false;
+  private initingLogs: boolean = false;
+  private readonly scrollHandler: (ev: Event) => void = (ev: Event) => {
+    this.scrolling = ev.type === 'scroll';
+  };
+  public scrolling: boolean = false;
 
   // #endregion
 
@@ -429,6 +438,18 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     return i ? `${i.averageEffort}` : '0';
   }
 
+  // #region P2Pool
+
+  public get p2poolLines(): string [] {
+    return this.logsService.logs.p2pool;
+  }
+
+  public get p2poolLogs(): string {
+    return this.initingLogs ? '' : this.p2poolLines.join("\n");
+  }
+
+  // #endregion
+
   // #endregion
 
   constructor() {
@@ -440,14 +461,88 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
       new NavbarPill('mining-tools', 'Tools')
     ]);
     
+    const onLogSub: Subscription = this.logsService.onLog.subscribe(({ type } : { message: string; type: 'monerod' | 'i2pd'; }) => {
+      this.onLog(type);
+    });
+
     const syncEndSub: Subscription = this.daemonData.syncEnd.subscribe(() => {
       this.refresh();
     });
 
-    this.subscriptions.push(syncEndSub);
+    this.subscriptions.push(syncEndSub, onLogSub);
   }
 
   // #region Private Methods
+
+  public scrollTablesContentToBottom(): void {
+    this.scrollTableContentToBottom('pills-tabContent');
+  }
+
+  private initLogs(): void {
+    this.initingLogs = true;  
+    setTimeout(() => {
+      this.registerScrollEvents();
+      this.scrollTablesContentToBottom();
+      this.initingLogs = false;
+      
+      setTimeout(() => {
+        this.scrollTablesContentToBottom();
+      }, 500);
+    }, 500);  
+  }
+
+  private onLog(type: 'monerod' | 'p2pool' | 'i2pd' | 'tor'): void {
+    if (type !== 'p2pool') return;
+    if (this.scrolling) return;
+
+    this.scrollTableContentToBottom(`${type}-log-table`);
+  }
+
+  private getTableContents(): HTMLElement[] {
+    const table1 = document.getElementById('p2pool-log-table');
+    const result: HTMLElement[] = [];
+
+    if (table1) result.push(table1);
+
+    return result;
+  }
+
+  private registerScrollEvents(): void {
+    if (this.scrollEventsRegistered) {
+      console.warn("Scroll events already registered");
+      return;
+    }
+
+    const tabs = this.getTableContents();
+
+    tabs.forEach((tab) => {
+      tab.addEventListener('scroll', this.scrollHandler);
+      tab.addEventListener('scrollend', this.scrollHandler);
+    });
+
+    this.scrollEventsRegistered = true;
+  }
+
+  private unregisterScrollEvents(): void {
+    if (!this.scrollEventsRegistered) {
+      console.warn("Scroll events already unregistered");
+      return;
+    }
+
+    const tabs = this.getTableContents();
+
+    tabs.forEach((tab) => {
+      if (!tab) {
+        console.warn("Coult not find table content");
+        return;
+      }
+  
+      tab.removeEventListener('scroll', this.scrollHandler);
+      tab.removeEventListener('scrollend', this.scrollHandler);
+    });
+
+    this.scrollEventsRegistered = false;
+  }
 
   private initNetHashRateChart(): void {
     this.initChart('netHashRateChart', this.buildNetHashRateData());
@@ -651,6 +746,7 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   public ngAfterViewInit(): void {
     this.initNetHashRateChart();
     this.loadStartMiningParams();
+    this.initLogs();
   }
 
   public override ngOnDestroy(): void {
@@ -659,11 +755,15 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
       this.netHashRateChart = undefined;
     }
 
+    this.unregisterScrollEvents();
     super.ngOnDestroy();
   }
 
   // #endregion
 
+  public clearP2PoolLogs(): void {
+    this.logsService.clear('p2pool');
+  }
 
   public async getBlockTemplate(): Promise<void> {
     this.gettingBlockTemplate = true;
