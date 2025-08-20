@@ -1,8 +1,8 @@
 {
   "name": "monerod-gui",
-  "productName": "Monero Daemon",
-  "genericName": "Cryptocurrency Node Manager",
-  "version": "0.1.1",
+  "productName": "Monero Node Manager",
+  "genericName": "Monero Node Manager",
+  "version": "0.3.1",
   "dest": "release/",
   "icon": "src/assets/icons/favicon.ico",
   "tags": [
