@@ -183,9 +183,9 @@
               </div>
 
               <div class="col-sm-8">
-                <label for="start-mining-threads-count" class="form-label">Threads Count</label>
-                <input type="number" min="1" [max]="maxThreadsCount" class="form-control" id="start-mining-threads-count" placeholder="" [(ngModel)]="startMiningThreadsCount" [ngModelOptions]="{standalone: true}">
-                <small class="text-body-secondary">Number of mining thread to run</small>
+                <label for="start-mining-threads-count" class="form-label">Threads</label>
+                <input type="range" class="form-range" step="1" min="1" [max]="maxThreadsCount" id="start-mining-threads-count" [(ngModel)]="startMiningThreadsCount" [ngModelOptions]="{standalone: true}">
+                <output for="start-mining-threads-count" id="start-mining-threads-count-value" aria-hidden="true">{{ startMiningThreadsCount }}</output>
               </div>
 
               <div class="form-check form-switch col-md-4">
@@ -401,7 +401,7 @@
 
       <div class="col-md-12">
         <h2><i class="bi bi-speedometer m-4"></i>Hashrate: {{miningSpeed}}</h2>
-        <canvas class="my-4 w-100" id="hashRateChart" width="900" height="380"></canvas>
+        <canvas class="my-4 w-100" id="hashRateChart" width="900" height="240"></canvas>
       </div>
   
     </div>

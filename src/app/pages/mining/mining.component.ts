@@ -918,7 +918,7 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     catch(error: any) {
       console.error(error);
       this.stopMiningSuccess = false;
-      this.stopMiningError = `${error};`
+      this.stopMiningError = `${error}`;
     }
 
     this.startMiningError = '';
