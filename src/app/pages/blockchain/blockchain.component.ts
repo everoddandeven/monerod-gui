@@ -838,8 +838,9 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
     this.consensusMapExtentAll[3] += height * factor;
   }
 
-  private async getAltChains(): Promise<{ [key: number]: BlockHeader[]}> {
+  private async getAltChains(): Promise<{chains: { [key: number]: BlockHeader[]}, contestedHeights: number[] }> {
     const result: { [key: number]: BlockHeader[]} = { };
+    const cHeights: number[] = [];
     for (const altChain of this.alternateChains) {
       const headers: BlockHeader[] = [];
 
@@ -847,7 +848,7 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
       for(const blockHash of altChain.blockHashes) {
         const header = await this.daemonService.getBlockHeaderByHash(blockHash, false);
         headers.push(header);
-        
+        cHeights.push(header.height);
         if (height === 0 || header.height < height) height = header.height;
       }
 
@@ -855,12 +856,14 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
       result[height] = headers;
     }
 
-    return result;
+    return { chains: result, contestedHeights: cHeights };
   }
 
   private async loadConsensusLayer(): Promise<VectorLayer> {
     const headers = this.daemonData.last720Blocks;
-    const altChains = await this.getAltChains();
+    const r = await this.getAltChains();
+    const altChains = r.chains;
+    const cHeights = r.contestedHeights;
     const source = new VectorSource<Feature<Polygon | LineString>>();
 
     const features: Feature<Polygon>[] = [];
@@ -874,13 +877,14 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
     for (let i = last10Start; i < headers.length; i++) keep[i] = true;
 
     if (last10Start > 0) {
-      keep[0] = true;
-      keep[last10Start - 1] = true;
+      for(let i = 0; i < 10; i++) keep[i] = true;
+      //keep[0] = true;
+      //keep[last10Start - 1] = true;
     }
 
     for (let i = 0; i < last10Start; i++) {
       const h = headers[i];
-      const hasAlt = !!altChains[h.height]?.length;
+      const hasAlt = !!altChains[h.height]?.length || cHeights.includes(h.height);
       if (hasAlt) {
         keep[i] = true;
         if (i - 1 >= 0) keep[i - 1] = true;
