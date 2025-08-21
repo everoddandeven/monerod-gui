@@ -165,6 +165,8 @@ declare global {
       ) => void;
       
       showErrorBox: (title: string, content: string) => void;
+
+      validateMoneroAddress: (address: string, networkType: 'mainnet' | 'testnet' | 'stagenet', callback: (result: { error?: string }) => void) => void;
     };
   }
 }

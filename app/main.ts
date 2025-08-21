@@ -1,8 +1,9 @@
-import { app, BrowserWindow, ipcMain, screen, dialog, Tray, Menu, MenuItemConstructorOptions, 
-  IpcMainInvokeEvent, Notification, NotificationConstructorOptions, clipboard, powerMonitor,
-  WebContents,
-  HandlerDetails,
-  Event,
+import { 
+  app, BrowserWindow, ipcMain, screen, dialog, 
+  Tray, Menu, MenuItemConstructorOptions, 
+  IpcMainInvokeEvent, Notification, 
+  NotificationConstructorOptions, clipboard, powerMonitor,
+  WebContents, HandlerDetails, Event,
   WebContentsWillNavigateEventParams
 } from 'electron';
 import * as path from 'path';
@@ -11,6 +12,8 @@ import * as os from 'os';
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import { ProcessStats, AppMainProcess, I2pdProcess, MonerodProcess, PrivateTestnet, TorControlCommand, TorProcess, MoneroI2pdProcess, P2PoolProcess } from './process';
 import { BatteryUtils, FileUtils, NetworkUtils } from './utils';
+import { MoneroUtils, MoneroNetworkType } from 'monero-ts';
+
 const appName = 'Monero Daemon';
 app.setName(appName);
 app.setPath('userData', app.getPath('userData').replace(appName, 'MoneroDaemon'));
@@ -1203,6 +1206,19 @@ try {
       win?.webContents.send(eventId, { error: msg });
     }
 
+  });
+
+  ipcMain.handle('validate-monero-address', async (event: IpcMainInvokeEvent, params: { eventId: string, address: string, networkType: 'mainnet' | 'testnet' | 'stagenet' }) => {
+    const { eventId, address, networkType } = params;
+
+    try {
+      const netType = MoneroNetworkType.parse(networkType);
+      await MoneroUtils.validateAddress(address, netType);
+      win?.webContents.send(eventId, { });
+    } catch (error: any) {
+      const err = error instanceof Error ? error.message : `${error}`;
+      win?.webContents.send(eventId, { error: err });
+    }
   });
 
   // #endregion

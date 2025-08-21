@@ -1457,6 +1457,11 @@ export class DaemonService {
     this._quitting = false;
   }
 
+  public getNetworkType(): 'mainnet' | 'testnet' | 'stagenet' {
+    const { mainnet, stagenet } = this.settings;
+    return mainnet ? 'mainnet' : stagenet ? 'stagenet' : 'testnet';
+  }
+
   // endregion
 
 }

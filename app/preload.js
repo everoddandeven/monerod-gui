@@ -465,5 +465,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
     
     ipcRenderer.once(eventId, handler);
     ipcRenderer.invoke('get-os-details', { eventId });
+  },
+  validateMoneroAddress: (address, networkType, callback) => {
+    const eventId = `on-validate-monero-address-${newId()}`;
+    const handler = (event, result) => {
+      callback(result);
+    };
+
+    ipcRenderer.once(eventId, handler);
+    ipcRenderer.invoke('validate-monero-address', { eventId, address, networkType });
   }
 });

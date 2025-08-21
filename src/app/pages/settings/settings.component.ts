@@ -5,6 +5,7 @@ import { DaemonService, I2pDaemonService, ElectronService, TorDaemonService } fr
 import { DaemonSettingsError } from '../../../common';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { P2poolService } from '../../core/services/p2pool/p2pool.service';
+import { MoneroUtils } from '../../shared/utils';
 
 @Component({
     selector: 'app-settings',
@@ -819,6 +820,13 @@ export class SettingsComponent extends BasePageComponent {
     }
   }
 
+  private async validateAddress(): Promise<void> {
+    const address = this._currentSettings.startMining;
+    const { mainnet, stagenet } = this._currentSettings;
+    const nettype = mainnet ? 'mainnet' : stagenet ? 'stagenet' : 'testnet';
+    if (address.length > 0) await MoneroUtils.validateAddress(address, nettype);
+  }
+
   public async OnSave(): Promise<void> {
     if (!this.modified) {
       return;
@@ -830,6 +838,8 @@ export class SettingsComponent extends BasePageComponent {
       if (this.rpcLoginError) {
         throw new Error(this.rpcLoginError);
       }
+
+      await this.validateAddress();
 
       const oldStartMinimized: boolean = this.originalSettings.startAtLoginMinimized;
 

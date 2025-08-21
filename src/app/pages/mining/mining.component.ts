@@ -7,6 +7,7 @@ import { Chart, ChartData } from 'chart.js';
 import { Subscription } from 'rxjs';
 import { P2poolService } from '../../core/services/p2pool/p2pool.service';
 import { LogsService } from '../logs/logs.service';
+import { MoneroUtils } from '../../shared/utils';
 
 type ToolsTab = 'generateBlocks' | 'getBlockTemplate' | 'calculatePoW' | 'addAuxPoW';
 type MiningType = 'solo-mining' | 'p2pool-main' | 'p2pool-mini';
@@ -884,6 +885,10 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
       this.startingMining = true;
       const miningType = this.startMiningType;
       
+      const nettype = this.daemonService.getNetworkType();
+
+      await MoneroUtils.validateAddress(this.startMiningMinerAddress, nettype);
+
       if (miningType === 'solo-mining') {
         await this.daemonService.startMining(this.startMiningDoBackgroundMining, this.startMiningIgnoreBattery, this.startMiningMinerAddress, this.startMiningThreadsCount)
       } else {
