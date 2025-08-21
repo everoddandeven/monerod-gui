@@ -16,6 +16,7 @@ import Fill from 'ol/style/Fill';
 import Text from 'ol/style/Text';
 import Control from 'ol/control/Control';
 
+type InfoTab = 'overview' | 'lastBlockHeader';
 type TxPoolTab = 'statistics' | 'transactions' | 'keyImages' | 'backlog' | 'flush';
 type ExplorerTab = 'getBlock' | 'getTransaction' | 'getOuts' | 'checkKeyImage' | 'histogram' | 'distribution';
 type ToolsTab = 'broadcast' | 'submitBlock' | 'bootstrap' | 'coinbaseSum' | 'popBlocks' | 'save' | 'prune' | 'cache';
@@ -28,9 +29,9 @@ type ToolsTab = 'broadcast' | 'submitBlock' | 'bootstrap' | 'coinbaseSum' | 'pop
 })
 export class BlockchainComponent extends BasePageComponent implements AfterViewInit {
   // #region Attributes
-  private daemonService = inject(DaemonService);
-  private daemonData = inject(DaemonDataService);
-  private ngZone = inject(NgZone);
+  private readonly daemonService = inject(DaemonService);
+  private readonly daemonData = inject(DaemonDataService);
+  private readonly ngZone = inject(NgZone);
 
   public fullBlock: boolean = false;
   public gotFullBlock: boolean = false;
@@ -131,6 +132,7 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
   public currentPoolTab: TxPoolTab = 'statistics';
   public currentExplorerTab: ExplorerTab = 'getBlock';
   public currentToolsTab: ToolsTab = 'broadcast';
+  public currentInfoTab: InfoTab = 'overview';
 
   private consensusMap?: olMap;
   private consensusMapInfo?: HTMLDivElement;
@@ -144,6 +146,14 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
   // #endregion
 
   // #region Getters
+
+  public get keyImageStatusMessage(): string {
+    const s = this.keyImageStatus;
+    if (s === 0) return "Key image is unspent on blockchain.";
+    if (s === 1) return "Key image is spent on blockchain.";
+    if (s === 2) return "Key image is spent on mempool";
+    return "unknown";
+  }
 
   private get alternateChains(): Chain[] {
     return this.daemonData.altChains.filter((c) => c.height > this.firstBlockHeight);
@@ -653,60 +663,19 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
     else this.hoveredBlock = undefined;
   };
 
-  private refreshBlockGraph(result: {new: BlockHeader[], old: BlockHeader[], altChains: Chain[]}): void {
-    console.log(result);
-    if (result.altChains.length > 0) {
-      this.loadConsensusMap();
-      return;
+  private buildBlockDescription(h: BlockHeader): string {
+    return `Height: #${h.height}\nHash: ${h.hash.slice(0, 4)}...${h.hash.slice(-4)}\nTxs: ${h.numTxes}\nTimestamp: ${h.timestamp}`;
+  }
+
+  private async refreshBlockGraph(result: {new: BlockHeader[], old: BlockHeader[], altChains: Chain[]}): Promise<void> {
+    if (result.new.length === 0) return;
+    if (!this.consensusMap) return;
+    if (this.consensusLayer) {
+      this.consensusMap.removeLayer(this.consensusLayer);
+      this.consensusLayer.dispose();
+      this.consensusLayer = await this.loadConsensusLayer();
+      this.consensusMap.addLayer(this.consensusLayer);
     }
-    const v = this.consensusLayer;
-    if (!v) return;
-    const s = v.getSource();
-    if (!s) return;
-    let i = 720 - result.new.length;
-    const features: Feature<Polygon>[] = [];
-    const featuresToRemove: Feature<Polygon>[] = [];
-    const links: Feature<LineString>[] = [];
-
-    s.forEachFeature((f) => {
-      this.moveBlockDown(f, result.new.length * 6000);
-    });
-
-    for(const h of result.new) {
-      const f = this.createBlockFeature(0, i*6000, `#${h.height}`);
-      f.setId(h.hash);
-      f.set('DESCRIPTION', `Height: #${h.height}\nHash: ${h.hash.slice(0, 4)}...${h.hash.slice(-4)}`);
-      f.set('height', h.height);
-      const old = s.getFeatureById(h.prevHash);
-      if (old) {
-        const link = this.createLinkFeature(f, old);
-        link.set('height', h.height);
-        links.push(link)
-      }
-      features.push(f);
-      i++;
-    }
-
-    s.addFeatures(features);
-    s.addFeatures(links);
-
-    let oldHeight: number = 0;
-
-    for(const h of result.old) {
-      const f = s.getFeatureById(h.hash);
-      if (f) featuresToRemove.push(f);
-      oldHeight = h.height;
-    }
-
-    s.forEachFeature((bf) => {
-      if (bf.get('height') <= oldHeight) featuresToRemove.push(bf);
-    });
-
-    s.removeFeatures(featuresToRemove);
-           
-    const map = this.consensusMap;
-    if (!map) return;
-    map.updateSize();
   }
 
   private registerEvents(): void {
@@ -838,13 +807,6 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
     });
   }
 
-  private moveBlockDown(feature: Feature<Polygon>, deltaY: number): void {
-    const geom = feature.getGeometry();
-    if (geom) {
-      geom.translate(0, -deltaY);
-    }
-  }
-
   private calculateExtent(last: Feature<Polygon>, features: Feature<Polygon>[]): void {
     this.consensusMapExtent = createEmpty();
     const geom = last.getGeometry();
@@ -876,111 +838,156 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
     this.consensusMapExtentAll[3] += height * factor;
   }
 
-  private getAltChains(): { [key: number]: BlockHeader[]} {
+  private async getAltChains(): Promise<{ [key: number]: BlockHeader[]}> {
     const result: { [key: number]: BlockHeader[]} = { };
     for (const altChain of this.alternateChains) {
       const headers: BlockHeader[] = [];
 
-      let height = altChain.height;
+      let height: number = 0;
       for(const blockHash of altChain.blockHashes) {
-        const header = BlockHeader.createSimple(height, blockHash);
+        const header = await this.daemonService.getBlockHeaderByHash(blockHash, false);
         headers.push(header);
-        height++;
+        
+        if (height === 0 || header.height < height) height = header.height;
       }
 
-      result[altChain.height] = headers;
+      headers.reverse();
+      result[height] = headers;
     }
 
     return result;
   }
 
-  private loadConsensusLayer(): VectorLayer {
+  private async loadConsensusLayer(): Promise<VectorLayer> {
     const headers = this.daemonData.last720Blocks;
-    const altChains = this.getAltChains();
+    const altChains = await this.getAltChains();
     const source = new VectorSource<Feature<Polygon | LineString>>();
 
-    let i: number = 0;
-    const index: { [key: number]: number } = {};
     const features: Feature<Polygon>[] = [];
     const altChainFeatures: Feature<Polygon>[] = [];
     const links: Feature<LineString>[] = [];
-    for(const h of headers) {
 
-      const f = this.createBlockFeature(0, i*6000, `#${h.height}`);
+    const last10Start = Math.max(0, headers.length - 10);
+
+    const keep: boolean[] = new Array(headers.length).fill(false);
+
+    for (let i = last10Start; i < headers.length; i++) keep[i] = true;
+
+    if (last10Start > 0) {
+      keep[0] = true;
+      keep[last10Start - 1] = true;
+    }
+
+    for (let i = 0; i < last10Start; i++) {
+      const h = headers[i];
+      const hasAlt = !!altChains[h.height]?.length;
+      if (hasAlt) {
+        keep[i] = true;
+        if (i - 1 >= 0) keep[i - 1] = true;
+        if (i + 1 < last10Start) keep[i + 1] = true;
+      }
+    }
+
+    let y = 0;
+    let prevFeature: Feature<Polygon> | null = null;
+
+    const addMainBlock = (h: any, i: number) => {
+      const f = this.createBlockFeature(0, y, `#${h.height}`);
       f.setId(h.hash);
       f.set('height', h.height);
-      index[h.height] = i;
-      f.set('DESCRIPTION', `Height: #${h.height}\nHash: ${h.hash.slice(0, 4)}...${h.hash.slice(-4)}`);
+      f.set('DESCRIPTION', this.buildBlockDescription(h));
       features.push(f);
-      if (i > 0){ 
-        const link = this.createLinkFeature(f, features[i - 1]);
+
+      if (prevFeature) {
+        const link = this.createLinkFeature(f, prevFeature);
         link.set('height', h.height);
         links.push(link);
       }
+      const prev = prevFeature;
+      prevFeature = f;
 
-      const altChain = altChains[h.height];
-      if (altChain) {
-        const altFeatures: Feature<Polygon>[] = [];
-        altChain.forEach((b, j) => {
-          const altFeature = this.createBlockFeature(12000, (j+i)*6000, `#${b.height}`);
-          altFeature.setId(b.hash);
-          altFeature.set('DESCRIPTION', `Height: #${b.height}\nHash: ${b.hash.slice(0, 4)}...${b.hash.slice(-4)}`);
-          altFeature.set('height', b.height);
+      const chain = altChains[h.height];
+      if (chain && chain.length) {
+        const af: Feature<Polygon>[] = [];
+        chain.forEach((b: any, j: number) => {
+          const altF = this.createBlockFeature(12000, y + j * 6000, `#${b.height}`);
+          altF.setId(b.hash);
+          altF.set('DESCRIPTION', this.buildBlockDescription(b));
+          altF.set('height', b.height);
+
           if (j > 0) {
-            const link = this.createLinkFeature(altFeature, altFeatures[j - 1]);
-            link.set('height', b.height);
-            links.push(link);
+            const l = this.createLinkFeature(altF, af[j - 1]);
+            l.set('height', b.height);
+            links.push(l);
+          } else if (prev) {
+            const l = this.createLinkAltFeature(prev, altF);
+            l.set('height', b.height);
+            links.push(l);
           }
-          else {
-            const link = this.createLinkAltFeature(features[i - 1], altFeature);
-            link.set('height', b.height);
-            links.push(link);
-          }
-          altFeatures.push(altFeature); 
+          af.push(altF);
         });
-
-        altChainFeatures.push(...altFeatures);
+        altChainFeatures.push(...af);
       }
-      i++;
+
+      y += 6000;
+    };
+
+    for (let i = 0; i < headers.length; ) {
+      if (keep[i]) {
+        addMainBlock(headers[i], i);
+        i++;
+        continue;
+      }
+
+      let j = i;
+      while (j < last10Start && !keep[j]) j++;
+      const runLen = j - i;
+
+      if (runLen <= 0) { i = j; continue; }
+
+      if (runLen === 1) {
+        addMainBlock(headers[i], i);
+        i = i + 1;
+        continue;
+      }
+
+      const placeholder = this.createBlockFeature(0, y, '...');
+      placeholder.set('DESCRIPTION', `${runLen} blocchi compressi`);
+      features.push(placeholder);
+      if (prevFeature) {
+        const link = this.createLinkFeature(placeholder, prevFeature);
+        links.push(link);
+      }
+      prevFeature = placeholder;
+      y += 6000;
+
+      i = j;
     }
 
-    const last = features[features.length - 1];
     features.push(...altChainFeatures);
-
     source.addFeatures(features);
     source.addFeatures(links);
 
+    const last = features[features.length - 1];
     this.calculateExtent(last, features);
 
-    const vector = new VectorLayer({
-      source: source,
-      style: function (feature) {
-        return new Style({
-          stroke: new Stroke({
-            color: '#f96800ff',
-            width: 4
-          }),
-          fill: new Fill({
-            color: '#666666ff'
-          }),
-          text: new Text({
-            text: feature.get('label'),
-            
-            font: 'bold 12px Arial',
-            fill: new Fill({color: '#000000ff'}),
-            overflow: false,
-            placement: 'point',
-            textAlign: 'center',
-            textBaseline: 'middle'
-          }),
-        });
-      }
+    return new VectorLayer({
+      source,
+      style: (feature) => new Style({
+        stroke: new Stroke({ color: '#f96800ff', width: 4 }),
+        fill: new Fill({ color: '#666666ff' }),
+        text: new Text({
+          text: feature.get('label'),
+          font: 'bold 12px Arial',
+          fill: new Fill({ color: '#000000ff' }),
+          textAlign: 'center',
+          textBaseline: 'middle',
+        }),
+      }),
     });
-
-    return vector;
   }
 
-  private loadConsensusMap(): void {
+  private async loadConsensusMap(): Promise<void> {
     if (this.consensusMap) {
       this.consensusMap.dispose();
       this.consensusMap = undefined;
@@ -990,7 +997,7 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
     this.loadingConsensusMap = true;
 
     try {
-      const layer = this.loadConsensusLayer();
+      const layer = await this.loadConsensusLayer();
       this.consensusLayer = layer;
       const map = new olMap({
         target: 'consensusMap',
@@ -1048,7 +1055,7 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
   public ngAfterViewInit(): void {
     this.ngZone.run(() => {      
       this.loadTables();
-      this.loadConsensusMap();
+      this.loadConsensusMap().then().catch((error: any) => console.error(error));
       const onSyncEndSub: Subscription = this.daemonData.syncEnd.subscribe(() => this.refresh());
 
       const statusSub: Subscription = this.daemonService.onDaemonStatusChanged.subscribe((running: boolean) => {
@@ -1307,6 +1314,7 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
   public async checkKeyImage(): Promise<void> {
     if (this.checkingKeyImage) return;
     this.checkingKeyImage = true;
+    this.keyImageStatus = -1;
 
     try {
       const result = await this.daemonService.isKeyImageSpent(this.keyImage);
@@ -1318,6 +1326,7 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
     } catch (error: any) {
       console.error(error);
       this.checkKeyImageError = `${error}`;
+      this.keyImageStatus = -1;
     }
 
     this.checkingKeyImage = false;
@@ -1450,6 +1459,10 @@ public async getOutDistribution(): Promise<void> {
 
   public setCurrentToolsTab(tab: ToolsTab): void {
     this.currentToolsTab = tab;
+  }
+
+  public setCurrentInfoTab(tab: InfoTab): void {
+    this.currentInfoTab = tab;
   }
 
   // #endregion
