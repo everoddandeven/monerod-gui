@@ -654,7 +654,6 @@ try {
           console.log(msg);
           win?.webContents.send('p2pool-stdout', msg);
           win?.webContents.send('p2pool-close', code);
-          monerodProcess = null;
         });
         await p2poolProcess.start();
       }
@@ -734,8 +733,6 @@ try {
     }
     else {
       try {
-        //torProcess = new TorProcess({ i2pdPath: path, flags, isExe: true });
-
         if (allowIncomingConnections) torProcess = new TorProcess({ path, port, rpcPort, createConfig: true });
         else torProcess = new TorProcess({ path, port, createConfig: true });
         await torProcess.start();
@@ -813,6 +810,8 @@ try {
 
     try {
       if (monerodProcess && monerodProcess.running) {
+        if (p2poolProcess && p2poolProcess.running) await p2poolProcess.stop();
+
         if (PrivateTestnet.started) {
           await PrivateTestnet.stop();
         }
@@ -821,7 +820,6 @@ try {
 
         if (i2pdProcess && i2pdProcess.running) await i2pdProcess.stop();
         if (torProcess && torProcess.running) await torProcess.stop();
-        if (p2poolProcess && p2poolProcess.running) await p2poolProcess.stop();
 
         i2pdProcess = null;
         torProcess = null;
