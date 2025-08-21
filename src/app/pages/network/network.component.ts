@@ -980,13 +980,14 @@ export class NetworkComponent extends BasePageComponent implements AfterViewInit
   public override ngOnDestroy(): void {
     if (this.netStatsBytesInChart) {
       this.netStatsBytesInChart.destroy();
+      this.netStatsBytesInChart = undefined;
     }
     if (this.netStatsBytesOutChart) {
       this.netStatsBytesOutChart.destroy();
+      this.netStatsBytesOutChart = undefined;
     }
 
-    if (this.refreshInterval === undefined) return;
-    clearInterval(this.refreshInterval);
+    if (this.refreshInterval !== undefined) clearInterval(this.refreshInterval);
     this.unregisterScrollEvents();
 
     super.ngOnDestroy();
