@@ -996,6 +996,10 @@ export class SettingsComponent extends BasePageComponent {
     this._currentP2PoolSettings.path = '';
   }
 
+  public removeP2PoolSidechainFile(): void {
+    this._currentP2PoolSettings.path = '';
+  }
+
   public async chooseMonerodFile(): Promise<void> {
     const spec = await this.getMonerodFileSpec();
     const file = await this.electronService.selectFile(spec.extensions);
@@ -1072,6 +1076,18 @@ export class SettingsComponent extends BasePageComponent {
     else {
       window.electronAPI.showErrorBox('Invalid tor path', `Invalid tor path provided: ${file}`);
     }
+  }
+
+  public async chooseP2PoolSidechainFile(): Promise<void> {
+    const file = await this.electronService.selectFile();
+
+    if (file == '') {
+      return;
+    }
+
+    this.ngZone.run(() => {
+      this._currentP2PoolSettings.sidechainConfig = file;
+    });
   }
 
   public onI2pServiceEnabledChange(): void {

@@ -202,13 +202,6 @@
                 <small class="text-body-secondary">States if battery state (on laptop) should be ignored (true) or not (false)</small>
               </div>
 
-              <div class="form-check form-switch col-md-4">
-                <label for="start-mining-light-mode" class="form-check-label">Light Mode</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="start-mining-light-mode" [disabled]="!startingP2Pool" [checked]="startMiningLightMode && startingP2Pool" [(ngModel)]="startMiningLightMode" [ngModelOptions]="{standalone: true}">
-                <br>
-                <small class="text-body-secondary">Don't allocate RandomX dataset, saves 2GB of RAM</small>
-              </div>
-
             </div>
           </div>
         </div>
@@ -241,6 +234,11 @@
               <div class="input-group mb-1">
                 <span class="input-group-text" id="p2pool-pool-info">Pool</span>
                 <input type="text" class="form-control" aria-label="Pool" aria-describedby="p2pool-pool-info" [value]="p2poolPool" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="p2pool-proxy-info">Proxy</span>
+                <input type="text" class="form-control" aria-label="Proxy" aria-describedby="p2pool-proxy-info" [value]="p2poolProxy" readonly>
               </div>
 
               <div class="input-group mb-1">

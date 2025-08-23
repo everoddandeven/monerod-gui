@@ -12,7 +12,7 @@ export class P2PoolSettings extends Comparable<P2PoolSettings> {
   public peers: string[] = [];
   public stratumBanTime: number = 600;
   public lightMode: boolean = false;
-  public logLevel: number = 1;
+  public logLevel: number = 3;
   public dataDir: string = '';
   public sidechainConfig: string = '';
   public dataApi: string = '';
@@ -122,7 +122,7 @@ export class P2PoolSettings extends Comparable<P2PoolSettings> {
   }
 
   public static fromDaemonSettings(settings: DaemonSettings): P2PoolSettings {
-    const { startMining, noZmq } = settings;
+    const { startMining, noZmq, noIgd, rpcLogin } = settings;
     
     if (noZmq) throw new Error('Must enable daemon ZMQ interface');
     
@@ -138,6 +138,9 @@ export class P2PoolSettings extends Comparable<P2PoolSettings> {
     r.wallet = startMining;
     r.rpcPort = rpcPort;
     r.zmqPort = zmqPort;
+    r.noIgd = noIgd;
+    //r.socks5 = proxy;
+    r.rpcLogin = rpcLogin;
 
     return r;
   }

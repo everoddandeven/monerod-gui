@@ -1049,6 +1049,56 @@
               <small class="text-body-secondary">Path to p2pool executable</small>
             </div>
 
+            <div class="col-md-12">
+              <label for="p2pool-sidechain-path" class="form-label">Sidechain config</label>
+              <div class="input-group mb-3">
+                <input id="p2pool-path" type="text" class="form-control form-control-sm" placeholder="" aria-label="Sidechain config path" aria-describedby="basic-addon2" [value]="currentP2PoolSettings.sidechainConfig" readonly>
+                <span class="input-group-text" id="basic-addon2"><button type="button" class="btn btn-secondary btn-sm" (click)="chooseP2PoolSidechainFile()"><i class="bi bi-filetype-txt"></i> Choose file</button></span>            
+                <span class="input-group-text" id="basic-addon3"><button type="button" class="btn btn-secondary btn-sm" (click)="removeP2PoolSidechainFile()" [disabled]="currentP2PoolSettings.sidechainConfig === ''"><i class="bi bi-file-x"></i> Remove</button></span>
+              </div>
+              <small class="text-body-secondary">P2Pool sidechain parameters file (only use it if you run your own sidechain)</small>
+            </div>
+
+            <div class="col-sm-6">
+              <label for="p2pool-limit-in-peers" class="form-label">Limit In Peers</label>
+              <input type="range" class="form-range" step="1" min="10" max="450" id="p2pool-limit-in-ppers" [(ngModel)]="currentP2PoolSettings.inPeers" [ngModelOptions]="{standalone: true}">
+              <output for="start-mining-threads-count" id="p2pool-limit-in-peers-value" aria-hidden="true">{{ currentP2PoolSettings.inPeers }}</output>
+            </div>
+
+            <div class="col-sm-6">
+              <label for="p2pool-limit-out-peers" class="form-label">Limit Out Peers</label>
+              <input type="range" class="form-range" step="1" min="10" max="450" id="p2pool-limit-out-ppers" [(ngModel)]="currentP2PoolSettings.outPeers" [ngModelOptions]="{standalone: true}">
+              <output for="start-mining-threads-count" id="p2pool-limit-out-peers-value" aria-hidden="true">{{ currentP2PoolSettings.outPeers }}</output>
+            </div>
+
+            <div class="form-check form-switch col-md-4">
+              <label for="p2pool-light-mode" class="form-check-label">Light Mode</label>
+              <input class="form-control form-check-input" type="checkbox" role="switch" id="p2pool-light-mode" [disabled]="!canEditNodeSettings" [checked]="currentP2PoolSettings.lightMode" [(ngModel)]="currentP2PoolSettings.lightMode" [ngModelOptions]="{standalone: true}">
+              <br>
+              <small class="text-body-secondary">Don't allocate RandomX dataset, saves 2GB of RAM</small>
+            </div>
+
+            <div class="form-check form-switch col-md-6">
+              <label for="p2pool-no-autodiff" class="form-check-label">No Autodiff</label>
+              <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="p2pool-no-autodiff" [checked]="currentP2PoolSettings.noAutodiff" [(ngModel)]="currentP2PoolSettings.noAutodiff" [ngModelOptions]="{standalone: true}">
+              <br>
+              <small class="text-body-secondary">Disable automatic difficulty adjustment for miners connected to stratum (WARNING: incompatible with Nicehash and MRR)</small>
+            </div>
+
+            <div class="form-check form-switch col-md-6">
+              <label for="p2pool-no-randomx" class="form-check-label">No RandomX</label>
+              <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="p2pool-no-randomx" [checked]="currentP2PoolSettings.noRandomX" [(ngModel)]="currentP2PoolSettings.noRandomX" [ngModelOptions]="{standalone: true}">
+              <br>
+              <small class="text-body-secondary">Disable internal RandomX hasher: p2pool will use RPC calls to monerod to check PoW hashes</small>
+            </div>
+
+            <div class="form-check form-switch col-md-6">
+              <label for="p2pool-no-cache" class="form-check-label">No Cache</label>
+              <input [disabled]="!canEditNodeSettings" class="form-control form-check-input" type="checkbox" role="switch" id="p2pool-no-cache" [checked]="currentP2PoolSettings.noCache" [(ngModel)]="currentP2PoolSettings.noCache" [ngModelOptions]="{standalone: true}">
+              <br>
+              <small class="text-body-secondary">Disable p2pool.cache</small>
+            </div>
+
           </div>
     
         </form>

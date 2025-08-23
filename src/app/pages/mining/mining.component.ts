@@ -1,5 +1,5 @@
 import { AfterContentInit, AfterViewInit, Component, NgZone, OnDestroy, inject } from '@angular/core';
-import { DaemonService, DaemonDataService, ElectronService } from '../../core/services';
+import { DaemonService, DaemonDataService, ElectronService, TorDaemonService, I2pDaemonService } from '../../core/services';
 import { NavbarPill } from '../../shared/components';
 import { AddedAuxPow, AuxPoW, BlockTemplate, GeneratedBlocks, MiningStatus, MinerData, NetHashRateHistoryEntry, P2PoolSettings } from '../../../common';
 import { BasePageComponent } from '../base-page/base-page.component';
@@ -28,6 +28,8 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   private readonly p2poolService = inject(P2poolService);
   private readonly logsService = inject(LogsService);
   private readonly electronService = inject(ElectronService);
+  private readonly torService = inject(TorDaemonService);
+  private readonly i2pService = inject(I2pDaemonService);
   private readonly ngZone = inject(NgZone);
 
   private netHashRateChart?: Chart;
@@ -68,7 +70,6 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   public startMiningSuccess: boolean = false;
   public startMiningError: string = '';
   public startMiningType: MiningType = 'solo-mining';
-  public startMiningLightMode: boolean = false;
 
   public stoppingMining: boolean = false;
   public stopMiningError: string = '';
@@ -369,7 +370,7 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   public get p2poolState(): string {
     const i = this.p2poolService.settings;
     if (i.path === '') return 'not installed';
-    return this.p2poolService.status;
+    return this.p2poolService.syncing ? 'syncing ...' : this.p2poolService.status;
   }
 
   public get p2poolPool(): string {
@@ -477,6 +478,13 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   public get p2poolAverageEffort(): string {
     const i = this.p2poolService.stratum;
     return i ? `${i.averageEffort}` : '0';
+  }
+
+  public get p2poolProxy(): string {
+    const { socks5 } = this.p2poolService.settings;
+    const torEnabled = this.torService.running;
+    if (torEnabled && socks5 === this.torService.proxy) return 'Tor';
+    return socks5 !== '' ? socks5 : 'disabled';
   }
 
   // #region P2Pool
@@ -857,13 +865,17 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     const p2poolConf = P2PoolSettings.fromDaemonSettings(conf);
     const type = this.startMiningType;
 
+    const torEnabled = this.torService.running;
+    const i2pEnabled = this.i2pService.running;
+
+    if (torEnabled) p2poolConf.socks5 = this.torService.proxy;
+    else if (i2pEnabled && this.daemonService.settings.proxy !== this.i2pService.proxy) p2poolConf.socks5 = this.daemonService.settings.proxy;
+
     if (type === 'p2pool-mini') {
       p2poolConf.mini = true;
     } else if (type === 'p2pool-main') {
       p2poolConf.nano = true;
     } else throw new Error("Invalid p2pool pool selected");
-
-    if (this.startMiningLightMode) p2poolConf.lightMode = true;
 
     p2poolConf.path = this.p2poolService.settings.path;
     p2poolConf.startMining = this.startMiningThreadsCount;

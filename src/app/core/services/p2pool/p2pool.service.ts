@@ -186,6 +186,20 @@ export class P2poolService {
 
   // #region Getters
 
+  public get synchronized(): boolean {
+    const i = this.poolStats;
+    if (!i) return false;
+    return i.sidechainHeight > 1000;
+  }
+
+  public get syncing(): boolean {
+    const i = this.poolStats;
+    const r = this.running;
+    if (r && !i) return true;
+    if (!i) return false;
+    return i.sidechainHeight <= 1000;
+  }
+
   public get status(): Status {
     return this._status;
   }
