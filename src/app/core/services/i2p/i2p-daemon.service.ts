@@ -245,7 +245,7 @@ export class I2pDaemonService {
   }
 
   public async restart(): Promise<void> {
-    if (this.restarting) throw new Error("Already restarting ip2d");
+    if (this.restarting) throw new Error("Already restarting i2pd");
     if (this.starting) throw new Error("i2pd is starting");
     if (this.stopping) throw new Error("i2pd is stopping");
     if (!this.running) throw new Error("i2pd is not running");

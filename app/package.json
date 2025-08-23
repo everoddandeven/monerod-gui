@@ -13,6 +13,7 @@
     "adm-zip": "^0.5.16",
     "applescript": "^1.0.0",
     "axios": "^1.11.0",
+    "electron-sudo-universal": "file:electron-sudo-universal-4.0.12.tgz",
     "monero-ts": "^0.11.5",
     "network": "^0.7.0",
     "node-battery-ts": "^1.0.0",

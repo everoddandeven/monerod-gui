@@ -1,17 +1,18 @@
 import { AfterContentInit, AfterViewInit, Component, NgZone, OnDestroy, inject } from '@angular/core';
 import { DaemonService, DaemonDataService, ElectronService, TorDaemonService, I2pDaemonService } from '../../core/services';
 import { NavbarPill } from '../../shared/components';
-import { AddedAuxPow, AuxPoW, BlockTemplate, GeneratedBlocks, MiningStatus, MinerData, NetHashRateHistoryEntry, P2PoolSettings } from '../../../common';
+import { AddedAuxPow, AuxPoW, BlockTemplate, GeneratedBlocks, MiningStatus, MinerData, NetHashRateHistoryEntry, P2PoolSettings, XmrigSettings } from '../../../common';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { Chart, ChartData } from 'chart.js';
 import { Subscription } from 'rxjs';
 import { P2poolService } from '../../core/services/p2pool/p2pool.service';
 import { LogsService } from '../logs/logs.service';
 import { MoneroUtils } from '../../shared/utils';
+import { XmrigService } from '../../core/services/xmrig/xmrig.service';
 
 type ToolsTab = 'generateBlocks' | 'getBlockTemplate' | 'calculatePoW' | 'addAuxPoW';
 type MiningType = 'solo-mining' | 'p2pool-main' | 'p2pool-mini';
-type DashboardTab = 'overview' | 'p2pool';
+type DashboardTab = 'overview' | 'p2pool' | 'xmrig';
 
 @Component({
     selector: 'app-mining',
@@ -26,6 +27,7 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
   private readonly daemonService = inject(DaemonService);
   private readonly daemonData = inject(DaemonDataService);
   private readonly p2poolService = inject(P2poolService);
+  private readonly xmrigService = inject(XmrigService);
   private readonly logsService = inject(LogsService);
   private readonly electronService = inject(ElectronService);
   private readonly torService = inject(TorDaemonService);
@@ -503,6 +505,28 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
 
   // #endregion
 
+  // #region XMRig
+
+  public get xmrigState(): string {
+    const i = this.xmrigService.settings;
+    if (i.path === '') return 'not installed';
+    return this.xmrigService.status;
+  }
+
+  public get xmrigInstalled(): boolean {
+    return this.xmrigService.configured;
+  }
+
+  public get xmrigLines(): string [] {
+    return this.logsService.logs.xmrig;
+  }
+
+  public get xmrigLogs(): string {
+    return this.initingLogs ? '' : this.xmrigLines.join("\n");
+  }
+
+  // #endregion
+
   // #endregion
 
   constructor() {
@@ -818,6 +842,10 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     this.logsService.clear('p2pool');
   }
 
+  public clearXmrigLogs(): void {
+    this.logsService.clear('xmrig');
+  }
+
   public async getBlockTemplate(): Promise<void> {
     this.gettingBlockTemplate = true;
 
@@ -863,10 +891,12 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     if (conf.noZmq) throw new Error("P2Pool mining requires a monero ZMQ interface, enable it on node settings.");
     
     const p2poolConf = P2PoolSettings.fromDaemonSettings(conf);
+    const xmrigConf = XmrigSettings.fromDaemonSettings(conf);
     const type = this.startMiningType;
 
     const torEnabled = this.torService.running;
     const i2pEnabled = this.i2pService.running;
+    const xmrigInstalled = this.xmrigService.configured;
 
     if (torEnabled) p2poolConf.socks5 = this.torService.proxy;
     else if (i2pEnabled && this.daemonService.settings.proxy !== this.i2pService.proxy) p2poolConf.socks5 = this.daemonService.settings.proxy;
@@ -878,17 +908,62 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     } else throw new Error("Invalid p2pool pool selected");
 
     p2poolConf.path = this.p2poolService.settings.path;
-    p2poolConf.startMining = this.startMiningThreadsCount;
-    p2poolConf.wallet = this.startMiningMinerAddress;
+    xmrigConf.path = this.xmrigService.settings.path;
 
-    await this.p2poolService.start(p2poolConf);
-    await this.daemonData.refreshMiningStatus();
+    if (!xmrigInstalled) p2poolConf.startMining = this.startMiningThreadsCount;
+    else {
+      xmrigConf.threads = this.startMiningThreadsCount;
+      p2poolConf.startMining = 0;
+    }
+    
+    p2poolConf.wallet = this.startMiningMinerAddress;
+    xmrigConf.user = this.startMiningMinerAddress;
+
+    let err: any = null;
+
+    try {
+      await this.p2poolService.start(p2poolConf);
+      if (xmrigInstalled) await this.xmrigService.start(xmrigConf);
+      await this.daemonData.refreshMiningStatus();
+    } catch (error: any) {
+      err = error;
+      if (xmrigInstalled && !this.xmrigService.running && this.p2poolService.running) await this.p2poolService.stop();
+    }
 
     this.startingMining = false;
+    
+    if (err) throw err;
   }
 
   private async stopP2PoolMining(): Promise<void> {
+    if (this.xmrigService.running) await this.xmrigService.stop();
     await this.p2poolService.stop();
+  }
+
+  private async startSoloMining(): Promise<void> {
+    const conf = this.daemonService.settings;
+    if (this.xmrigInstalled) {
+      const xmrigConf = XmrigSettings.fromDaemonSettings(conf);
+
+      xmrigConf.url = '';
+      xmrigConf.user = this.startMiningMinerAddress;
+      xmrigConf.coin = 'monero';
+      xmrigConf.daemon = this.daemonService.url.replace('http://', '');
+      xmrigConf.daemonZmqPort = conf.getZmqPubPort();
+      xmrigConf.threads = this.startMiningThreadsCount;
+      xmrigConf.path = this.xmrigService.settings.path;
+
+      await this.xmrigService.start(xmrigConf);
+      this.startingMining = false;
+      this.startMiningError = '';
+      this.startMiningSuccess = true;
+      
+    } else await this.daemonService.startMining(this.startMiningDoBackgroundMining, this.startMiningIgnoreBattery, this.startMiningMinerAddress, this.startMiningThreadsCount);
+  }
+
+  private async stopSoloMining(): Promise<void> {
+    if (this.xmrigService.running) await this.xmrigService.stop();
+    else await this.daemonService.stopMining();
   }
 
   public async startMining(): Promise<void> {
@@ -896,13 +971,12 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
       if (this.startingMining) throw new Error("Mining already starting");
       this.startingMining = true;
       const miningType = this.startMiningType;
-      
       const nettype = this.daemonService.getNetworkType();
 
       await MoneroUtils.validateAddress(this.startMiningMinerAddress, nettype);
 
       if (miningType === 'solo-mining') {
-        await this.daemonService.startMining(this.startMiningDoBackgroundMining, this.startMiningIgnoreBattery, this.startMiningMinerAddress, this.startMiningThreadsCount)
+        await this.startSoloMining();
       } else {
         await this.startP2PoolMining();
       }
@@ -922,7 +996,7 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
 
     try {
       if (this.p2poolService.running) await this.stopP2PoolMining();
-      else await this.daemonService.stopMining();
+      else await this.stopSoloMining();
 
       this.stopMiningSuccess = true;
       this.stopMiningError = '';

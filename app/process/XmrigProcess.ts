@@ -1,34 +1,35 @@
-import { exec } from "child_process";
-import { AppChildProcess } from "./AppChildProcess";
+import { CustomChildProcess } from "electron-sudo-universal/dist/lib/types";
+import { AppChildProcess, sudo } from "./AppChildProcess";
 
-export class P2PoolProcess extends AppChildProcess {
+export class XmrigProcess extends AppChildProcess {
 
-  protected static readonly stdoutPattern: string = `monitor thread ready`;
+  protected static readonly stdoutPattern: string = `READY`;
 
   constructor({ cmd, flags, isExe }: { cmd: string, flags?: string[], isExe?: boolean }) {
     super({
       command: cmd,
       args: flags,
-      isExe: isExe
+      isExe: isExe,
+      admin: true
     })
   }
 
-  public static async isValidPath(p2poolPath: string): Promise<boolean> {
-    console.log(`P2PoolProcess.isValidP2PoolPath('${p2poolPath}')`);
+  public static async isValidPath(xmrigPath: string): Promise<boolean> {
+    console.log(`XmrigProcess.isValidXmrigPath('${xmrigPath}')`);
 
-    if (typeof p2poolPath !== 'string' || P2PoolProcess.replaceAll(p2poolPath, " ", "") == "") {
+    if (typeof xmrigPath !== 'string' || XmrigProcess.replaceAll(xmrigPath, " ", "") == "") {
       return false;
     }
 
     try {
-      P2PoolProcess.checkExecutable(p2poolPath);
+      XmrigProcess.checkExecutable(xmrigPath);
     }
     catch {
       return false;
     }
 
     const proc = new AppChildProcess({
-      command: p2poolPath,
+      command: xmrigPath,
       args: [ '--help' ],
       isExe: true
     });
@@ -37,12 +38,12 @@ export class P2PoolProcess extends AppChildProcess {
       let foundUsage: boolean = false;
 
       proc.onError((err: Error) => {
-        console.log(`P2PoolProcess.isValidP2PoolPath(): Error: '${err.message}'`);
+        console.log(`XmrigProcess.isValidXmrigPath(): Error: '${err.message}'`);
         resolve(false);
       });
 
       proc.onStdErr((err: string) => {
-        console.log(`P2PoolProcess.isValidP2PoolPath(): Std Error: '${err}'`);
+        console.log(`XmrigProcess.isValidXmrigPath(): Std Error: '${err}'`);
         resolve(false);
       });
 
@@ -51,13 +52,13 @@ export class P2PoolProcess extends AppChildProcess {
           return;
         }
 
-        if (`${data}`.includes('P2Pool')) {
+        if (`${data}`.includes('Usage: xmrig [OPTIONS]')) {
           foundUsage = true;
         }
       });
 
       proc.onClose((code: number | null) => {
-        console.log(`P2PoolProcess.isValidP2PoolPath(): exit code '${code}', found usage: ${foundUsage}`);
+        console.log(`XmrigProcess.isValidXmrigPath(): exit code '${code}', found usage: ${foundUsage}`);
         resolve(foundUsage && code == 0);
       });
     });
@@ -66,7 +67,7 @@ export class P2PoolProcess extends AppChildProcess {
       await proc.start();
     }
     catch(error: any) {
-      console.log(`P2PoolProcess.isValidP2PoolPath(): exit code '${error}'`);
+      console.log(`XmrigProcess.isValidXmrigPath(): exit code '${error}'`);
     }
 
     return await promise;
@@ -74,14 +75,14 @@ export class P2PoolProcess extends AppChildProcess {
 
   public override async start(): Promise<void> {
     if (this._isExe) {
-      const validPath = await P2PoolProcess.isValidPath(this._command);
+      const validPath = await XmrigProcess.isValidPath(this._command);
 
       if (!validPath) {
-        throw new Error("Invalid p2pool path provided: " + this._command);
+        throw new Error("Invalid xmrig path provided: " + this._command);
       }
     }
 
-    let message: string = "Starting p2pool process";
+    let message: string = "Starting xmrig process";
 
     message += `\n\t${this._isExe ? 'Path' : 'Command'}: ${this._command}`;
 
@@ -97,6 +98,7 @@ export class P2PoolProcess extends AppChildProcess {
       let firstStdout = true;
       let timeout: NodeJS.Timeout | undefined = undefined;
       let error: any = null;
+      let foundPattern: boolean = false;
 
       const onStdOut = (out: string) => {
         console.log(out);
@@ -113,11 +115,11 @@ export class P2PoolProcess extends AppChildProcess {
             }
             timeout = undefined;
 
-            reject(new Error("P2PoolProcess.start(): Timed out"));
+            reject(new Error("XmrigProcess.start(): Timed out"));
           }, 60*1000);
         }
 
-        const foundPattern = out.includes(P2PoolProcess.stdoutPattern);
+        foundPattern = out.includes(XmrigProcess.stdoutPattern);
 
         if (!foundPattern) {
           return;
@@ -125,22 +127,23 @@ export class P2PoolProcess extends AppChildProcess {
 
         if(timeout !== undefined) {
           clearTimeout(timeout);
-          console.log("P2PoolProcess.start(): Cleared timeout");
+          console.log("XmrigProcess.start(): Cleared timeout");
         }
         else {
-          console.log("P2PoolProcess.start(): No timeout found");
+          console.log("XmrigProcess.start(): No timeout found");
         }
         
         resolve();
       };
 
       const onStdErr = (out: string) => {
-        console.log('Std Err: ', out);
+        console.log('XmrigProcess.StdErr: ', out);
         const c = out.split(' ');
         c.shift();
         c.shift();
 
         error = c.join(' ');
+        console.log('XmrigProcess.StdErr: saved error: ' + error);
       }
 
       const onError = (err: any) => {
@@ -150,10 +153,11 @@ export class P2PoolProcess extends AppChildProcess {
 
       const onClose = (code: number | null) => {
         if (timeout) {
+          console.log('XmrigProcess.onClose(): clearing timeout, error: ' + error);
           clearTimeout(timeout);
           if (error) reject(new Error(`${error}`));
-          else reject("P2Pool closed unexpectedly: code " + code);
-        }
+          else reject("Xmrig closed unexpectedly: code " + code);
+        } else if (!foundPattern) reject(new Error(error ? error : 'An unkown error occured while starting xmrig'));
       };
 
       if (waitForPattern) {
@@ -170,16 +174,17 @@ export class P2PoolProcess extends AppChildProcess {
     if (waitForPattern) await this.wait(1000);
 
     if (!this._process || !this._process.pid || !this._running) {
-      throw new Error("P2Pool process did not start!");
+      throw new Error("Xmrig process did not start!");
     }
     try {            
-      console.log(`P2PoolProcess.start(): wait for pattern: ${waitForPattern}`);
+      console.log(`XmrigProcess.start(): wait for pattern: ${waitForPattern}`);
 
       if (waitForPattern) await patternPromise;
 
-      console.log("Started p2pool process pid: " + this._process.pid);    
+      console.log("Started xmrig process pid: " + this._process.pid);    
     }
-    catch(error: any) {            
+    catch(error: any) {      
+      console.log(`XmrigProcess.start(): error occured while waiting for start: ${error}`)      
       this._running = false;
       this._starting = false;
       this._stopping = false;
@@ -193,12 +198,48 @@ export class P2PoolProcess extends AppChildProcess {
     }
   }
 
-  public override _stop(): void {
-    exec('pkill p2pool');
+  public async stop(): Promise<number | null> {
+    if (this._starting) {
+      throw new Error("Process is starting");
+    }
+
+    if (this._stopping) {
+      throw new Error("Process is already stopping");
+    }
+
+    const proc = this._process;
+
+    if (!this._running || !proc) {
+      throw new Error("Process is not running");
+    }
+
+    this._stopping = true;
+
+    const promise = new Promise<number | null>((resolve) => {
+      proc.on('close', (code: number | null) => {
+        this._process = undefined;
+        this._running = false;
+        this._stopping = false;
+        resolve(code);
+      });
+      proc.on('exit', (code: | number) => {
+        this._process = undefined;
+        this._running = false;
+        this._stopping = false;
+        resolve(code);
+      });
+    });
+
+    const result = await sudo.exec('pkill xmrig');
+
+    if (result.stderr) console.log("LOG XMRIG: " + result.stdout);
+    if (result.stderr) console.log("ERROR KILLING XMRIG: " + result.stderr);
+
+    return await promise;
   }
 
   public async getVersion(): Promise<string> {
-    const proc = new P2PoolProcess({
+    const proc = new XmrigProcess({
       cmd: this._command,
       flags: [ '--version' ],
       isExe: this._isExe
@@ -206,13 +247,13 @@ export class P2PoolProcess extends AppChildProcess {
 
     const promise = new Promise<string>((resolve, reject) => {
       proc.onError((err: Error) => {
-        console.log("P2PoolProcess.getVersion(): proc.onError():");
+        console.log("XmrigProcess.getVersion(): proc.onError():");
         console.error(err);
         reject(err)
       });
       
       proc.onStdErr((err: string) => {
-        console.log("P2PoolProcess.getVersion(): proc.onStdErr()");
+        console.log("XmrigProcess.getVersion(): proc.onStdErr()");
         console.error(err);
         reject(new Error(err));
       });
@@ -222,15 +263,15 @@ export class P2PoolProcess extends AppChildProcess {
           return;
         }
 
-        console.log("P2PoolProcess.getVersion(): proc.onStdOut():");
+        console.log("XmrigProcess.getVersion(): proc.onStdOut():");
         console.log(version);
         resolve(version);
       });
     });
 
-    console.log("P2PoolProcess.getVersion(): Before proc.start()");
+    console.log("XmrigProcess.getVersion(): Before proc.start()");
     await proc.start();
-    console.log("P2PoolProcess.getVersion(): After proc.start()");
+    console.log("XmrigProcess.getVersion(): After proc.start()");
 
     return await promise;
   }

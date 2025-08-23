@@ -10,7 +10,11 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
-import { ProcessStats, AppMainProcess, I2pdProcess, MonerodProcess, PrivateTestnet, TorControlCommand, TorProcess, MoneroI2pdProcess, P2PoolProcess } from './process';
+import { 
+  ProcessStats, AppMainProcess, I2pdProcess, MonerodProcess, 
+  PrivateTestnet, TorControlCommand, TorProcess, 
+  MoneroI2pdProcess, P2PoolProcess, XmrigProcess
+} from './process';
 import { BatteryUtils, FileUtils, NetworkUtils } from './utils';
 import { MoneroUtils, MoneroNetworkType } from 'monero-ts';
 
@@ -40,6 +44,7 @@ let monerodProcess: MonerodProcess | null = null;
 let i2pdProcess: I2pdProcess | null = null;
 let torProcess: TorProcess | null = null;
 let p2poolProcess: P2PoolProcess | null = null;
+let xmrigProcess: XmrigProcess | null = null;
 
 const iconRelPath: string = 'assets/icons/monero-symbol-on-white-480.png';
 //const wdwIcon = `${dirname}/${iconRelPath}`;
@@ -609,14 +614,14 @@ try {
       try {
         i2pdProcess = MoneroI2pdProcess.createSimple(path, port, allowIncomingConnections ? rpcPort : undefined, outproxy);
         await i2pdProcess.start();
-        i2pdProcess.onStdOut((out: string) => win?.webContents.send('on-ip2d-stdout', out));
-        i2pdProcess.onStdErr((out: string) => win?.webContents.send('on-ip2d-stderr', out));
+        i2pdProcess.onStdOut((out: string) => win?.webContents.send('on-i2pd-stdout', out));
+        i2pdProcess.onStdErr((out: string) => win?.webContents.send('on-i2pd-stderr', out));
         i2pdProcess.onClose((_code: number | null) => {
           const code = _code != null ? _code : -Number.MAX_SAFE_INTEGER;
           const msg = `Process i2pd ${i2pdProcess?.pid} exited with code: ${code}`;
           console.log(msg);
-          win?.webContents.send('i2pd-stdout', msg);
-          win?.webContents.send('i2pd-close', code);
+          win?.webContents.send('on-i2pd-stdout', msg);
+          win?.webContents.send('on-i2pd-close', code);
           monerodProcess = null;
         });
       }
@@ -641,7 +646,7 @@ try {
       error = 'p2pool already started';
     }
     else if (!P2PoolProcess.isValidPath(path)) {
-      error = 'invalid i2pd p2pool provided: ' + path;
+      error = 'invalid p2pool path provided: ' + path;
     }
     else {
       try {
@@ -652,8 +657,8 @@ try {
           const code = _code != null ? _code : -Number.MAX_SAFE_INTEGER;
           const msg = `Process p2pool ${p2poolProcess?.pid} exited with code: ${code}`;
           console.log(msg);
-          win?.webContents.send('p2pool-stdout', msg);
-          win?.webContents.send('p2pool-close', code);
+          win?.webContents.send('on-p2pool-stdout', msg);
+          win?.webContents.send('on-p2pool-close', code);
         });
         await p2poolProcess.start();
       }
@@ -665,6 +670,44 @@ try {
 
     win?.webContents.send(eventId, error);
   });
+
+  ipcMain.handle('start-xmrig', async (event: IpcMainInvokeEvent, params: { eventId: string; options: string[] }) => {
+    const { eventId, options } = params;
+    
+    const p = options.shift();
+    const path = p ? p : '';
+
+    let error: string | undefined = undefined;
+
+    if (xmrigProcess && xmrigProcess.running) {
+      error = 'xmrig already started';
+    }
+    else if (!XmrigProcess.isValidPath(path)) {
+      error = 'invalid xmrig path provided: ' + path;
+    }
+    else {
+      try {
+        xmrigProcess = new XmrigProcess({ cmd: path, flags: options, isExe: true });
+        xmrigProcess.onStdOut((out: string) => win?.webContents.send('on-xmrig-stdout', out));
+        xmrigProcess.onStdErr((out: string) => win?.webContents.send('on-xmrig-stderr', out));
+        xmrigProcess.onClose((_code: number | null) => {
+          const code = _code != null ? _code : -Number.MAX_SAFE_INTEGER;
+          const msg = `Process xmrig ${xmrigProcess?.pid} exited with code: ${code}`;
+          console.log(msg);
+          win?.webContents.send('on-xmrig-stdout', msg);
+          win?.webContents.send('on-xmrig-close', code);
+        });
+        await xmrigProcess.start();
+      }
+      catch (err: any) {
+        error = `${err}`;
+        xmrigProcess = null;
+      }
+    }
+
+    win?.webContents.send(eventId, error);
+  });
+
 
   ipcMain.handle('stop-i2pd', async (event: IpcMainInvokeEvent, params: { eventId: string; }) => {
     let err: string | undefined = undefined;
@@ -697,6 +740,26 @@ try {
       try {
         await p2poolProcess.stop();
         p2poolProcess = null;
+      }
+      catch(error: any) {
+        err = `${error}`;
+      }
+    }
+
+    win?.webContents.send(eventId, err);
+  });
+
+  ipcMain.handle('stop-xmrig', async (event: IpcMainInvokeEvent, params: { eventId: string; }) => {
+    let err: string | undefined = undefined;
+    const { eventId } = params;
+
+    if (xmrigProcess == null) err = 'Already stopped xmrig';
+    else if (xmrigProcess.stopping) err = 'Alrady stopping xmrig';
+    else if (xmrigProcess.starting) err = 'xmrig is starting';
+    else {
+      try {
+        await xmrigProcess.stop();
+        xmrigProcess = null;
       }
       catch(error: any) {
         err = `${error}`;
@@ -742,8 +805,8 @@ try {
           const code = _code != null ? _code : -Number.MAX_SAFE_INTEGER;
           const msg = `Process tor ${torProcess?.pid} exited with code: ${code}`;
           console.log(msg);
-          win?.webContents.send('tor-stdout', msg);
-          win?.webContents.send('tor-close', code);
+          win?.webContents.send('on-tor-stdout', msg);
+          win?.webContents.send('on-tor-close', code);
           monerodProcess = null;
         });
       }
@@ -810,6 +873,7 @@ try {
 
     try {
       if (monerodProcess && monerodProcess.running) {
+        if (xmrigProcess && xmrigProcess.running) await xmrigProcess.stop();
         if (p2poolProcess && p2poolProcess.running) await p2poolProcess.stop();
 
         if (PrivateTestnet.started) {
@@ -824,6 +888,7 @@ try {
         i2pdProcess = null;
         torProcess = null;
         p2poolProcess = null;
+        xmrigProcess = null;
       }
     }
     catch (error: any) {
@@ -1088,6 +1153,11 @@ try {
   ipcMain.handle('check-valid-p2pool-path', async (event: IpcMainInvokeEvent, params: { eventId: string, path: string }) => {
     const { eventId, path } = params;
     win?.webContents.send(eventId, await P2PoolProcess.isValidPath(path));
+  });
+
+  ipcMain.handle('check-valid-xmrig-path', async (event: IpcMainInvokeEvent, params: { eventId: string, path: string }) => {
+    const { eventId, path } = params;
+    win?.webContents.send(eventId, await XmrigProcess.isValidPath(path));
   });
 
   ipcMain.handle('show-notification', (event: IpcMainInvokeEvent, options?: NotificationConstructorOptions) => {

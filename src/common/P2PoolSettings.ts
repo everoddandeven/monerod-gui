@@ -12,7 +12,7 @@ export class P2PoolSettings extends Comparable<P2PoolSettings> {
   public peers: string[] = [];
   public stratumBanTime: number = 600;
   public lightMode: boolean = false;
-  public logLevel: number = 3;
+  public logLevel: number = 1;
   public dataDir: string = '';
   public sidechainConfig: string = '';
   public dataApi: string = '';
@@ -23,7 +23,7 @@ export class P2PoolSettings extends Comparable<P2PoolSettings> {
   public noRandomX: boolean = false;
   public outPeers: number = 10;
   public inPeers: number = 10;
-  public startMining: number = 1;
+  public startMining: number = 0;
   public mini: boolean = false;
   public nano: boolean = false;
   public noAutodiff: boolean = false;

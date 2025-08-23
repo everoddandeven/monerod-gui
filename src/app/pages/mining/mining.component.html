@@ -25,6 +25,12 @@
           <button [class]="currentDashboardTab === 'p2pool' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="miningP2PoolLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentDashboardTab('p2pool')">P2Pool</button>
         </li>
 
+        @if(xmrigInstalled) {
+          <li class="nav-item mr-2" role="presentation">
+            <button [class]="currentDashboardTab === 'xmrig' ? 'nav-link active btn-sm' : 'nav-link btn-sm'" id="xmrigLink" data-bs-toggle="pill" type="button" role="tab" (click)="setCurrentDashboardTab('xmrig')">XMRig</button>
+          </li>
+        }
+
       </ul>
     </div>
 
@@ -45,7 +51,7 @@
       </div>
 
       <div class="card-header bg-primary text-white d-flex">
-        <h4><i class="bi bi-speedometer2"></i>&nbsp;&nbsp;Dashboard</h4>
+        <h4><i class="bi bi-motherboard"></i>&nbsp;&nbsp;Dashboard</h4>
       </div>
       <div class="card-body">
         <div class="row">
@@ -219,7 +225,7 @@
 
     <div class="card p-1" [hidden]="currentDashboardTab !== 'p2pool'">
       <div class="card-header bg-primary text-white d-flex">
-        <h4><i class="bi bi-diagram-3"></i>&nbsp;&nbsp;P2Pool</h4>
+        <h4><i class="bi bi-flower2"></i>&nbsp;&nbsp;P2Pool</h4>
       </div>
       <div class="card-body">
         <div class="row">
@@ -373,6 +379,42 @@
       </div>
     </div>
 
+    <div class="card p-1" [hidden]="currentDashboardTab !== 'xmrig'">
+      <div class="card-header bg-primary text-white d-flex">
+        <h4><i class="bi bi-fan"></i>&nbsp;&nbsp;XMRig</h4>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4">
+              <h6>Status</h6>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="p2pool-state-info">State</span>
+                <input type="text" class="form-control" aria-label="State" aria-describedby="p2pool-state-info" [value]="xmrigState" readonly>
+              </div>
+
+          </div>
+
+          <div class="col-md-12">
+          <div *ngIf="xmrigLines.length === 0" class="h-100 p-5 text-bg-dark rounded-3 mb-4 text-center">
+              <h2><i class="bi bi-exclamation-diamond m-4"></i> No logs</h2>
+              <p>Start mining to enable session logging</p>
+            </div>
+            
+            <div *ngIf="xmrigLogs.length > 0" class="terminal bg-dark text-light p-3 m-4" #logTerminal>
+                <div class="terminal-output" id="xmrig-log-table">
+{{ xmrigLogs }}
+                </div>
+            </div>
+
+            <button *ngIf="xmrigLines.length > 0" class="w-100 btn btn-primary btn-lg" type="submit" (click)="clearXmrigLogs()">Clear</button>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+    
   </div>
   
   <div class="tab-pane fade" id="pills-hashrate" role="tabpanel" aria-labelledby="pills-hashrate-tab" tabindex="0">

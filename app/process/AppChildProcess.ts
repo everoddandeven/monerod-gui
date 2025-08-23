@@ -3,9 +3,11 @@ import * as os from 'os';
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import { ProcessStats } from './ProcessStats';
 import { app } from 'electron';
-
-
+import Sudoer from 'electron-sudo-universal';
+import { CustomChildProcess } from 'electron-sudo-universal/dist/lib/types';
 const pidusage = require('pidusage');
+//const electronSudo = require('electron-sudo').default;
+export const sudo = new Sudoer({ name: 'Monero Daemon' });
 
 export class AppChildProcess {
 
@@ -37,8 +39,9 @@ export class AppChildProcess {
   protected _stopping: boolean = false;
   protected _running: boolean = false;
   protected _isExe: boolean = true;
+  protected _admin: boolean = false;
 
-  protected _process?: ChildProcessWithoutNullStreams;
+  protected _process?: CustomChildProcess | ChildProcessWithoutNullStreams;
   
   protected _command: string;
   protected readonly _args?: string[];
@@ -98,10 +101,15 @@ export class AppChildProcess {
     return this._starting;
   }
 
-  constructor({ command, args, isExe } : { command: string, args?: string[], isExe?: boolean}) {
+  public get admin(): boolean {
+    return this._admin;
+  }
+
+  constructor({ command, args, isExe, admin } : { command: string, args?: string[], isExe?: boolean, admin?: boolean}) {
     this._command = command;
     this._args = args;
     this._isExe = isExe === false ? false : true;
+    this._admin = admin === true ? true : false;
   }
 
   protected static replaceAll(value: string, oldValue: string, newValue: string): string {
@@ -140,6 +148,11 @@ export class AppChildProcess {
       return;
     }
 
+    if (!this._process.stdout) {
+      console.log("No stdout found!");
+      return;
+    }
+
     this._process.stdout.on('data', cbk);
   }
 
@@ -148,6 +161,11 @@ export class AppChildProcess {
 
     if (!this._process) {
       this._handlers.stderr.push(cbk);
+      return;
+    }
+
+    if (!this._process.stderr) {
+      console.log("No stdout found!");
       return;
     }
 
@@ -192,8 +210,13 @@ export class AppChildProcess {
 
     this._starting = true;
 
-    const process = spawn(this._command, this._args, { detached });
+    if (this.admin) console.log("STARTING ADMIN PROCESS: " + this._command);
+    else console.log("STARTING USER PROCESS: " + this._command)
+    const args = this._args ? this._args : [];
+    const process = this.admin ? await sudo.spawn(this._command, args, { detached }) : spawn(this._command, this._args, { detached });
     this._process = process;
+
+    if (this.admin) console.log("SPAWNED PROCESS");
 
     const promise = new Promise<void>((resolve, reject) => {
       const onSpawnError = (err: Error) => {
@@ -205,8 +228,8 @@ export class AppChildProcess {
       process.on('error', this.mOnErrorDefaultHandler);
       this._handlers.onclose.forEach((listener) => process.on('close', listener));
       this._handlers.onerror.forEach((listener) => process.on('error', listener));
-      this._handlers.stdout.forEach((listener) => process.stdout.on('data', listener));
-      this._handlers.stderr.forEach((listener) => process.stderr.on('data', listener));
+      this._handlers.stdout.forEach((listener) => process.stdout?.on('data', listener));
+      this._handlers.stderr.forEach((listener) => process.stderr?.on('data', listener));
       const onSpawn = () => {
         this._starting = false;
         this._running = true;
@@ -229,12 +252,17 @@ export class AppChildProcess {
     await new Promise<void>((resolve) => setTimeout(resolve, d));
   }
 
-  protected _stop(proc?: ChildProcessWithoutNullStreams): void {
+  protected _stop(proc?: CustomChildProcess | ChildProcessWithoutNullStreams): void {
     if (!proc) {
       console.log("No process to stop");
       return;
     }
-    if (!proc.kill()) {
+
+    console.log(`Stopping process pid ${proc.pid}...`);
+
+    if (!proc.kill()) 
+    {
+      console.log("Could not kill process: " + proc.pid);
       throw new Error("Could not kill process: " + proc.pid);
     }
   }

@@ -1,11 +1,12 @@
 import { Component, NgZone, inject } from '@angular/core';
 import { NavbarPill } from '../../shared/components/navbar/navbar.model';
-import { DaemonSettings, DefaultPrivnetNode2Settings, I2pDaemonSettings,  P2PoolSettings, PrivnetDaemonSettings, TorDaemonSettings } from '../../../common';
+import { DaemonSettings, DefaultPrivnetNode2Settings, I2pDaemonSettings,  P2PoolSettings, PrivnetDaemonSettings, TorDaemonSettings, XmrigSettings } from '../../../common';
 import { DaemonService, I2pDaemonService, ElectronService, TorDaemonService } from '../../core/services';
 import { DaemonSettingsError } from '../../../common';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { P2poolService } from '../../core/services/p2pool/p2pool.service';
 import { MoneroUtils } from '../../shared/utils';
+import { XmrigService } from '../../core/services/xmrig/xmrig.service';
 
 @Component({
     selector: 'app-settings',
@@ -21,6 +22,7 @@ export class SettingsComponent extends BasePageComponent {
   private readonly i2pdService = inject(I2pDaemonService);
   private readonly torService = inject(TorDaemonService);
   private readonly p2poolService = inject(P2poolService);
+  private readonly xmrigService = inject(XmrigService);
   private readonly electronService = inject(ElectronService);
   private readonly ngZone = inject(NgZone);
 
@@ -65,6 +67,9 @@ export class SettingsComponent extends BasePageComponent {
 
   public originalP2PoolSettings: P2PoolSettings;
   private _currentP2PoolSettings: P2PoolSettings;
+
+  public originalXmrigSettings: XmrigSettings;
+  private _currentXmrigSettings: XmrigSettings;
 
   public successMessage: string = '';
   
@@ -143,6 +148,10 @@ export class SettingsComponent extends BasePageComponent {
 
   public get currentP2PoolSettings(): P2PoolSettings {
     return this._currentP2PoolSettings;
+  }
+
+  public get currentXmrigSettings(): XmrigSettings {
+    return this._currentXmrigSettings;
   }
 
   public get isPrivnet(): boolean {
@@ -397,12 +406,16 @@ export class SettingsComponent extends BasePageComponent {
     return !this._currentP2PoolSettings.equals(this.originalP2PoolSettings);
   }
 
+  public get xmrigSettingsModified(): boolean {
+    return !this._currentXmrigSettings.equals(this.originalXmrigSettings);
+  }
+
   public get needsReload(): boolean {
     return this.settingsModified || this.torSettingsModified || this.i2pdSettingsModified;
   }
 
   public get modified(): boolean {
-    return this.needsReload || this.p2poolSettingsModified;
+    return this.needsReload || this.p2poolSettingsModified || this.xmrigSettingsModified;
   }
 
   public get saveDisabled(): boolean {
@@ -436,6 +449,8 @@ export class SettingsComponent extends BasePageComponent {
     this._currentTorSettings = this.originalTorSettings.clone();
     this.originalP2PoolSettings = this.p2poolService.settings;
     this._currentP2PoolSettings = this.originalP2PoolSettings.clone();
+    this.originalXmrigSettings = this.xmrigService.settings;
+    this._currentXmrigSettings = this.originalXmrigSettings.clone();
   }
 
   public onTorTxProxyChange(): void {
@@ -852,12 +867,16 @@ export class SettingsComponent extends BasePageComponent {
       this.p2poolService.setSettings(this._currentP2PoolSettings);
       await this.p2poolService.saveSettings();
 
+      this.xmrigService.setSettings(this._currentXmrigSettings);
+      await this.xmrigService.saveSettings();
+
       await this.daemonService.saveSettings(this._currentSettings, this.needsReload);
 
       this.originalSettings = this._currentSettings.clone();
       this.originalI2pdSettings = this._currentI2pdSettings.clone();
       this.originalTorSettings = this._currentTorSettings.clone();
       this.originalP2PoolSettings = this._currentP2PoolSettings.clone();
+      this.originalXmrigSettings = this._currentXmrigSettings.clone();
 
       const minimizedChanged: boolean = oldStartMinimized != this.originalSettings.startAtLoginMinimized;
 
@@ -1000,6 +1019,10 @@ export class SettingsComponent extends BasePageComponent {
     this._currentP2PoolSettings.path = '';
   }
 
+  public removeXmrigFile(): void {
+    this._currentXmrigSettings.path = '';
+  }
+
   public async chooseMonerodFile(): Promise<void> {
     const spec = await this.getMonerodFileSpec();
     const file = await this.electronService.selectFile(spec.extensions);
@@ -1074,7 +1097,7 @@ export class SettingsComponent extends BasePageComponent {
       });
     }
     else {
-      window.electronAPI.showErrorBox('Invalid tor path', `Invalid tor path provided: ${file}`);
+      window.electronAPI.showErrorBox('Invalid p2pool path', `Invalid p2pool path provided: ${file}`);
     }
   }
 
@@ -1222,14 +1245,23 @@ export class SettingsComponent extends BasePageComponent {
     this._currentSettings.dataDir = '';
   }
 
-  public chooseXmrigFile(): void {
-    const input = document.getElementById('general-xmrig-path');
+  public async chooseXmrigFile(): Promise<void> {
+    const spec = await this.getP2PoolFileSpec();
+    const file = await this.electronService.selectFile(spec.extensions);
 
-    if (!input) {
+    if (file == '') {
       return;
     }
 
-    input.click();
+    const valid = await this.xmrigService.isValidPath(file);
+    if (valid) {
+      this.ngZone.run(() => {
+        this.currentXmrigSettings.path = file;
+      });
+    }
+    else {
+      window.electronAPI.showErrorBox('Invalid xmrig path', `Invalid xmrig path provided: ${file}`);
+    }
   }
 
   public async chooseExtraMessagesFile(): Promise<void> {

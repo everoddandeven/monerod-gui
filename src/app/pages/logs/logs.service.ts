@@ -2,6 +2,9 @@ import { EventEmitter, Injectable, NgZone, inject } from '@angular/core';
 import { LogCategories } from '../../../common';
 import { I2pDaemonService, TorDaemonService } from '../../core/services';
 import { P2poolService } from '../../core/services/p2pool/p2pool.service';
+import { XmrigService } from '../../core/services/xmrig/xmrig.service';
+
+type ProcessType = 'monerod' | 'p2pool' | 'i2pd' | 'tor' | 'xmrig';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +14,7 @@ export class LogsService {
   private readonly i2pService = inject(I2pDaemonService);
   private readonly torService = inject(TorDaemonService);
   private readonly p2poolService = inject(P2poolService);
+  private readonly xmrigService = inject(XmrigService);
   
   private readonly torLogHandler: (message: string) => void = (message: string) => {
     this.log(message, 'tor');
@@ -28,17 +32,23 @@ export class LogsService {
     this.log(message, 'p2pool');
   }
 
-  public readonly onLog: EventEmitter<{ message: string, type: 'monerod' | 'p2pool' | 'i2pd' | 'tor' }> = new EventEmitter<{ message: string, type: 'monerod' | 'p2pool' | 'i2pd' | 'tor' }>();
+  private readonly xmrigLogHandler: (message: string) => void = (message: string) => {
+    this.log(message, 'xmrig');
+  }
+
+  public readonly onLog: EventEmitter<{ message: string, type: ProcessType }> = new EventEmitter<{ message: string, type: ProcessType }>();
   public readonly logs: {
     monerod: string[];
     i2pd: string[];
     tor: string[];
     p2pool: string[];
+    xmrig: string[];
   } = {
     monerod: [],
     i2pd: [],
     tor: [],
-    p2pool: []
+    p2pool: [],
+    xmrig: []
   }
   public readonly maxLines: number = 250;
   public readonly categories: LogCategories = new LogCategories();
@@ -51,13 +61,15 @@ export class LogsService {
     this.torService.std.err.subscribe(this.torLogHandler);
     this.p2poolService.std.out.subscribe(this.p2poolLogHandler);
     this.p2poolService.std.err.subscribe(this.p2poolLogHandler);
+    this.xmrigService.std.out.subscribe(this.xmrigLogHandler);
+    this.xmrigService.std.err.subscribe(this.xmrigLogHandler);
   }
 
   public cleanLog(message: string): string {
     return message.replace(/\u001b\[[0-9;]*m/g, '').replace(/[\r\n]+/g, '\n').trim(); // eslint-disable-line
   }
 
-  public clear(program: 'monerod' | 'p2pool' | 'i2pd' | 'tor'): void {
+  public clear(program: ProcessType): void {
     if (program === 'monerod') {
       this.logs.monerod = [];
     }
@@ -66,13 +78,27 @@ export class LogsService {
     }
     else if (program === 'tor') {
       this.logs.tor = [];
-    } else if (program === 'p2pool') {
+    } 
+    else if (program === 'p2pool') {
       this.logs.p2pool = [];
+    }
+    else if (program === 'xmrig') {
+      this.logs.xmrig = [];
     }
   }
 
-  public log(message: string, type: 'monerod' | 'p2pool' | 'i2pd' | 'tor'): void {
-    const lines = type === 'monerod' ? this.logs.monerod : type === 'tor' ? this.logs.tor : type === 'p2pool' ? this.logs.p2pool : this.logs.i2pd;
+  private getLines(type: ProcessType): string[] {
+    const logs = this.logs;
+    if (type === 'monerod') return logs.monerod;
+    else if (type === 'p2pool') return logs.p2pool;
+    else if (type === 'xmrig') return logs.xmrig;
+    else if (type === 'tor') return logs.tor;
+    else if (type === 'i2pd') return logs.i2pd;
+    return [];
+  }
+
+  public log(message: string, type: ProcessType): void {
+    const lines = this.getLines(type);
     
     this.ngZone.run(() => {
       message = this.cleanLog(message);

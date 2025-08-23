@@ -111,6 +111,12 @@ declare global {
       checkValidP2PoolPath: (path: string, callback: (valid: boolean) => void) => void;
       onP2PoolClose: (callback: (code: number) => void) => void;
 
+      startXmrig: (options: string[], callback: (result: {error?: any}) => void) => void;
+      stopXmrig: (callback: (error?: any) => void) => void;
+      onXmrigOutput: (callback: (output: {stdout?: string, stderr?: string}) => void) => void;
+      checkValidXmrigPath: (path: string, callback: (valid: boolean) => void) => void;
+      onXmrigClose: (callback: (code: number) => void) => void;
+
       startTor: (options: { path: string; port?: number; rpcPort?: number; }, callback: (error?: any) => void) => void;
       stopTor: (callback: (error?: any) => void) => void;
       onTorOutput: (callback: (output: {stdout?: string, stderr?: string}) => void) => void;

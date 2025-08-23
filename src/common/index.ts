@@ -43,6 +43,7 @@ export { TxPoolStats, TxPoolHisto } from './TxPoolStats';
 export { ProcessStats } from './ProcessStats';
 export { NetHashRateHistory, NetHashRateHistoryEntry } from './NetHashRateHistory';
 export { P2PoolSettings } from './P2PoolSettings';
+export { XmrigSettings } from './XmrigSettings';
 
 export * from './error';
 export * from './request';

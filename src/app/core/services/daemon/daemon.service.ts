@@ -30,6 +30,7 @@ import { openDB, IDBPDatabase } from "idb"
 import { I2pDaemonService } from '../i2p/i2p-daemon.service';
 import { TorDaemonService } from '../tor/tor-daemon.service';
 import { P2poolService } from '../p2pool/p2pool.service';
+import { XmrigService } from '../xmrig/xmrig.service';
 
 @Injectable({
   providedIn: 'root'
@@ -43,6 +44,7 @@ export class DaemonService {
   private readonly i2pService = inject(I2pDaemonService);
   private readonly torService = inject(TorDaemonService);
   private readonly p2poolService = inject(P2poolService);
+  private readonly xmrigService = inject(XmrigService);
 
   private readonly versionApiUrl: string = 'https://api.github.com/repos/monero-project/monero/releases/latest';
   private dbName = 'DaemonSettingsDB';
@@ -80,7 +82,7 @@ export class DaemonService {
 
   // #region Getters
 
-  private get url(): string {
+  public get url(): string {
     return `http://127.0.0.1:${this.port}`;
   }
 
@@ -183,6 +185,10 @@ export class DaemonService {
     };
     const promises = [];
     
+    if (this.xmrigService.running && !this.xmrigService.stopping) {
+      promises.push(this.xmrigService.stop());
+    }
+
     if (this.i2pService.running && !this.i2pService.stopping) {
       promises.push(this.i2pService.stop());
     }

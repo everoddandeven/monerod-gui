@@ -115,8 +115,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('stop-i2pd', { eventId });
   },
   onI2pdOutput: (callback) => {
-    ipcRenderer.removeAllListeners('on-ip2d-stdout');
-    ipcRenderer.removeAllListeners('on-ip2d-stderr');
+    ipcRenderer.removeAllListeners('on-i2pd-stdout');
+    ipcRenderer.removeAllListeners('on-i2pd-stderr');
 
     const handlerStdOut = (event, stdout) => {
       callback({ stdout });
@@ -126,8 +126,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       callback({ stderr });
     };
     
-    ipcRenderer.on('on-ip2d-stderr', handlerStdErr)
-    ipcRenderer.on('on-ip2d-stdout', handlerStdOut);
+    ipcRenderer.on('on-i2pd-stderr', handlerStdErr)
+    ipcRenderer.on('on-i2pd-stdout', handlerStdOut);
   },
   checkValidP2PoolPath: (path, callback) => {
     const eventId = `on-check-valid-p2pool-path-${newId()}`;
@@ -157,6 +157,34 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.once(eventId, handler);
     ipcRenderer.invoke('stop-p2pool', { eventId });
   },
+  checkValidXmrigPath: (path, callback) => {
+    const eventId = `on-check-valid-xmrig-path-${newId()}`;
+
+    const handler = (event, result) => {
+      callback(result);
+    };
+
+    ipcRenderer.once(eventId, handler);
+    ipcRenderer.invoke('check-valid-xmrig-path', { eventId, path });
+  },
+  startXmrig: (options, callback) => {
+    const eventId = `on-start-xmrig-${newId()}`;
+    const handler = (event, result) => {
+      callback(result);
+    };
+
+    ipcRenderer.once(eventId, handler);
+    ipcRenderer.invoke('start-xmrig', { eventId, options });
+  },
+  stopXmrig: (callback) => {
+    const eventId = `on-stop-xmrig-${newId()}`;
+    const handler = (event, result) => {
+      callback(result);
+    };
+
+    ipcRenderer.once(eventId, handler);
+    ipcRenderer.invoke('stop-xmrig', { eventId });
+  },
   onP2PoolOutput: (callback) => {
     ipcRenderer.removeAllListeners('on-p2pool-stdout');
     ipcRenderer.removeAllListeners('on-p2pool-stderr');
@@ -175,6 +203,25 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onP2PoolClose: (callback) => {
     const handler = (event, result) => callback(result);
     ipcRenderer.once('p2pool-close', handler);
+  },
+  onXmrigOutput: (callback) => {
+    ipcRenderer.removeAllListeners('on-xmrig-stdout');
+    ipcRenderer.removeAllListeners('on-xmrig-stderr');
+
+    const handlerStdOut = (event, stdout) => {
+      callback({ stdout });
+    };
+
+    const handlerStdErr = (event, stderr) => {
+      callback({ stderr });
+    };
+    
+    ipcRenderer.on('on-xmrig-stderr', handlerStdErr)
+    ipcRenderer.on('on-xmrig-stdout', handlerStdOut);
+  },
+  onXmrigClose: (callback) => {
+    const handler = (event, result) => callback(result);
+    ipcRenderer.once('xmrig-close', handler);
   },
   httpPost: (params, callback) => {
     const { id } = params;

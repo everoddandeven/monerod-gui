@@ -8,6 +8,7 @@ import {
   TxPool, TxPoolStats 
 } from '../../../../common';
 import { P2poolService } from '../p2pool/p2pool.service';
+import { XmrigService } from '../xmrig/xmrig.service';
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +19,7 @@ export class DaemonDataService {
 
   private readonly daemonService = inject(DaemonService);
   private readonly p2poolService = inject(P2poolService);
+  private readonly xmrigService = inject(XmrigService);
   private readonly electronService = inject(ElectronService);
   private readonly ngZone = inject(NgZone);
 
@@ -333,7 +335,11 @@ export class DaemonDataService {
     this._gettingMiningStatus = true;
 
     try {
-      if (this.p2poolService.running) {
+      if (this.xmrigService.running) {
+        await this.xmrigService.refreshMiningStatus();
+        this._miningStatus = this.xmrigService.miningStatus;
+      }
+      else if (this.p2poolService.running) {
         await this.p2poolService.updateData();
         this._miningStatus = this.p2poolService.miningStatus;
       }
