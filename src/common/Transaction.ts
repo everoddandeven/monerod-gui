@@ -69,7 +69,7 @@ export class Transaction {
   }
 
   public static parseRpcResponse(r: any): Transaction[] {
-    return Transaction.parseMultiple(r.txs ? r.txs : []);
+    return Transaction.parseMultiple(r.txs ? r.txs as any[] : []);
   }
 
 }

@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, inject, NgZone } from '@angular/core';
 import { NavbarPill } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
-import { Block, BlockDetails, BlockHeader, Chain, FeeEstimate, HistogramEntry, MinerTx, Output, OutputDistribution, SpentKeyImage, SyncInfo, TxBacklogEntry, TxPoolHisto, TxPoolStats, UnconfirmedTx, Transaction } from '../../../common';
+import { Block, BlockDetails, BlockHeader, Chain, FeeEstimate, HistogramEntry, MinerTx, Output, OutputDistribution, SpentKeyImage, SyncInfo, TxBacklogEntry, TxPoolHisto, TxPoolStats, UnconfirmedTx, Transaction, CoinbaseTxSum } from '../../../common';
 import { DaemonDataService } from '../../core/services';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { Subscription } from 'rxjs';
@@ -15,6 +15,8 @@ import Stroke from 'ol/style/Stroke';
 import Fill from 'ol/style/Fill';
 import Text from 'ol/style/Text';
 import Control from 'ol/control/Control';
+import {  } from 'ol/events/Event';
+import { Pixel } from 'ol/pixel';
 
 type InfoTab = 'overview' | 'lastBlockHeader';
 type TxPoolTab = 'statistics' | 'transactions' | 'keyImages' | 'backlog' | 'flush';
@@ -102,6 +104,7 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
   public coinbaseTxSumCount: number = 0;
   public getCoinbaseTxSumSuccess: boolean = false;
   public getCoinbaseTxSumError: string = '';
+  public coinbaseTxSum?: CoinbaseTxSum;
 
   public getOutsJsonString: string = '';
   public getOutsGetTxId: boolean = false;
@@ -636,12 +639,12 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
 
   // #region Private Methods
 
-  private displayFeatureInfo (pixel: any, target: any) {
+  private displayFeatureInfo (pixel: Pixel, target: any) {
     const info = this.consensusMapInfo;
     if (!info) return;
     const map = this.consensusMap;
     if (!map) return;
-    const feature = target.closest('.ol-control')
+    const feature = target?.closest('.ol-control')
       ? undefined
       : map.forEachFeatureAtPixel(pixel, function (feature) {
           return feature;
@@ -682,7 +685,9 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
   private registerEvents(): void {
     this.subscriptions.push(
       this.daemonData.syncEnd.subscribe(() => this.onRefresh()),
-      this.daemonData.syncRefreshLast24hBlocks.subscribe((result) => this.refreshBlockGraph(result))
+      this.daemonData.syncRefreshLast24hBlocks.subscribe((result) => {
+        this.refreshBlockGraph(result).then().catch((err) => console.error(err));
+      })
     );
   }
 
@@ -896,7 +901,7 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
     let y = 0;
     let prevFeature: Feature<Polygon> | null = null;
 
-    const addMainBlock = (h: any, i: number) => {
+    const addMainBlock = (h: BlockHeader) => {
       const f = this.createBlockFeature(0, y, `#${h.height}`);
       f.setId(h.hash);
       f.set('height', h.height);
@@ -939,7 +944,7 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
 
     for (let i = 0; i < headers.length; ) {
       if (keep[i]) {
-        addMainBlock(headers[i], i);
+        addMainBlock(headers[i]);
         i++;
         continue;
       }
@@ -951,7 +956,7 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
       if (runLen <= 0) { i = j; continue; }
 
       if (runLen === 1) {
-        addMainBlock(headers[i], i);
+        addMainBlock(headers[i]);
         i = i + 1;
         continue;
       }
@@ -1376,12 +1381,11 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
   }
 
   public async onGetCoinbaseTxSum(): Promise<void> {
+    this.coinbaseTxSum = undefined;
     try {
-      throw new Error("Not implemented");
-      //const coinbaseTxSum = await this.daemonService.getCoinbaseTxSum(this.coinbaseTxSumHeight, this.coinbaseTxSumCount);
-      // TO DO Implement
-      //this.getCoinbaseTxSumSuccess = true;
-      //this.getCoinbaseTxSumError = '';
+      this.coinbaseTxSum = await this.daemonService.getCoinbaseTxSum(this.coinbaseTxSumHeight, this.coinbaseTxSumCount);
+      this.getCoinbaseTxSumSuccess = true;
+      this.getCoinbaseTxSumError = '';
     }
     catch(error: any) {
       console.error(error);
