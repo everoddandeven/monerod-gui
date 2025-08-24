@@ -389,8 +389,23 @@
               <h6>Status</h6>
 
               <div class="input-group mb-1">
-                <span class="input-group-text" id="p2pool-state-info">State</span>
-                <input type="text" class="form-control" aria-label="State" aria-describedby="p2pool-state-info" [value]="xmrigState" readonly>
+                <span class="input-group-text" id="xmrig-state-info">State</span>
+                <input type="text" class="form-control" aria-label="State" aria-describedby="xmrig-state-info" [value]="xmrigState" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="xmri-hash10s-info">Hashrate 10s</span>
+                <input type="text" class="form-control" aria-label="Hashrate 10s" aria-describedby="xmrig-hash10s-info" [value]="xmrigHash10s" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="xmri-hash60s-info">Hashrate 60s</span>
+                <input type="text" class="form-control" aria-label="Hashrate 60s" aria-describedby="xmrig-hash60s-info" [value]="xmrigHash60s" readonly>
+              </div>
+
+              <div class="input-group mb-1">
+                <span class="input-group-text" id="xmri-hash15m-info">Hashrate 15m</span>
+                <input type="text" class="form-control" aria-label="Hashrate 15m" aria-describedby="xmrig-hash15m-info" [value]="xmrigHash15m" readonly>
               </div>
 
           </div>

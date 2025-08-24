@@ -336,8 +336,10 @@ export class DaemonDataService {
 
     try {
       if (this.xmrigService.running) {
-        await this.xmrigService.refreshMiningStatus();
+        const i = this.info;
+        await this.xmrigService.refreshMiningStatus(i ? i.difficulty : 0);
         this._miningStatus = this.xmrigService.miningStatus;
+        
       }
       else if (this.p2poolService.running) {
         await this.p2poolService.updateData();

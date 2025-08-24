@@ -919,7 +919,7 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
       const chain = altChains[h.height];
       if (chain && chain.length) {
         const af: Feature<Polygon>[] = [];
-        chain.forEach((b: any, j: number) => {
+        chain.forEach((b: BlockHeader, j: number) => {
           const altF = this.createBlockFeature(12000, y + j * 6000, `#${b.height}`);
           altF.setId(b.hash);
           altF.set('DESCRIPTION', this.buildBlockDescription(b));

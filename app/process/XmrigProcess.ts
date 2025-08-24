@@ -270,4 +270,21 @@ export class XmrigProcess extends AppChildProcess {
     return await promise;
   }
 
+  public async sendCommand(cmd: string): Promise<void> {
+    const p = this._process;
+    if(!p) throw new Error("Xmrig process not running");
+    if (!p.stdin) throw new Error("Xmrig stdin is undefined");
+
+    const stdin = p.stdin;
+
+    await new Promise<void>((resolve, reject) => {
+      const result = stdin.write(cmd, (error?: Error | null) => {
+        if (error) reject(error);
+        else resolve();
+      });
+
+      console.log(`XmrigProcess.sendCommand(cmd=${cmd}), result: ${result}`);
+    });
+  }
+
 }

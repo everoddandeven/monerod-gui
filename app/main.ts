@@ -708,6 +708,26 @@ try {
     win?.webContents.send(eventId, error);
   });
 
+  ipcMain.handle('xmrig-cmd', async (event: IpcMainInvokeEvent, params: { eventId: string; cmd: string }) => {
+    const { eventId, cmd } = params;
+    
+    if (!xmrigProcess || !xmrigProcess.running) {
+      win?.webContents.send(eventId, { error: 'Xmrig not running' });
+      return;
+    }
+
+    if (!cmd) {
+      win?.webContents.send(eventId, { error: 'No command provided' });
+      return;
+    }
+
+    try {
+      await xmrigProcess.sendCommand(cmd);
+      win?.webContents.send(eventId, {});
+    } catch (error: any) {
+      win?.webContents.send(eventId, { error: `${error}` });
+    }
+  });
 
   ipcMain.handle('stop-i2pd', async (event: IpcMainInvokeEvent, params: { eventId: string; }) => {
     let err: string | undefined = undefined;

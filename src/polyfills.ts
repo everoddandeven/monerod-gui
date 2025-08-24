@@ -128,6 +128,7 @@ declare global {
       isWifiConnected: (callback: (connected: boolean) => void) => void;
 
       monitorProcess: (process: 'monerod' | 'i2pd' | 'tor', callback: (result: {stats?: ProcessInfo, error?: any}) => void) => void;
+      xmrigCmd: (cmd: string, callback: (result: { error?: string }) => void) => void;
 
       selectFolder: (callback: (path: string) => void) => void;
       createFolder: (path: string, callback: (result: { error?: string; path?: string; }) => void) => void;

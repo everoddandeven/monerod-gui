@@ -513,6 +513,18 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     return this.xmrigService.status;
   }
 
+  public get xmrigHash10s(): string {
+    return `${this.xmrigService.lastHash10s} H/s`;
+  }
+
+  public get xmrigHash60s(): string {
+    return `${this.xmrigService.lastHash60s} H/s`;
+  }
+
+  public get xmrigHash15m(): string {
+    return `${this.xmrigService.lastHash15m} H/s`;
+  }
+
   public get xmrigInstalled(): boolean {
     return this.xmrigService.configured;
   }

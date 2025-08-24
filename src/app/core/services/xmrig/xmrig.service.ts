@@ -24,6 +24,11 @@ export class XmrigService {
   private _status: Status = 'stopped';
   private _logs: string[] = [];
 
+  private _lastHashStatus: string = '';
+  private _lastHash10s: number = 0;
+  private _lastHash60s: number = 0;
+  private _lastHash15m: number = 0;
+
   public miningStatus?: MiningStatus;
 
   public readonly std: XmrigStd = { out: new EventEmitter<string>(), err: new EventEmitter<string>() };
@@ -33,6 +38,18 @@ export class XmrigService {
   // #endregion
 
   // #region Getters
+
+  public get lastHash10s(): number {
+    return this._lastHash10s;
+  }
+
+  public get lastHash60s(): number {
+    return this._lastHash60s;
+  }
+
+  public get lastHash15m(): number {
+    return this._lastHash15m;
+  }
 
   public get configured(): boolean {
     return this.settings.path !== '';
@@ -89,6 +106,10 @@ export class XmrigService {
     });
   }
 
+  private cleanLog(message: string): string {
+    return message.replace(/\u001b\[[0-9;]*m/g, '').replace(/[\r\n]+/g, '\n').trim(); // eslint-disable-line
+  }
+
   // #endregion
 
   // #region Public Methods
@@ -122,9 +143,37 @@ export class XmrigService {
     this._logs = [];
   }
 
-  public async refreshMiningStatus(): Promise<void> {
+  public async refreshMiningStatus(networkDifficulty: number): Promise<void> {
     const _config = this._settings;
-    this.miningStatus = new MiningStatus(true, _config.user, 0, 0, 0, 0.6, 120, 0, 0, false, 'RandomX', 0, _config.threads, '');
+    
+    await new Promise<void>((resolve, reject) => {
+      window.electronAPI.xmrigCmd('h', (result: { error?: string}) => {
+        if (result.error) reject(new Error(result.error));
+        else resolve();
+      });
+    });
+
+    const lastHash = this._lastHashStatus;
+    const info = lastHash.split('\n')[4]
+    if (info) {
+      const c = info.split(' ').filter(x => x !== '');
+      const hash10s = c[5];
+      const hash60s = c[6];
+      const hash15m = c[7];
+
+      try {
+        this._lastHash10s = parseFloat(hash10s);
+        this._lastHash60s = parseFloat(hash60s);
+        this._lastHash15m = parseFloat(hash15m);
+      } catch (error: any) {
+        console.error(error);
+        this._lastHash10s = 0;
+        this._lastHash60s = 0;
+        this._lastHash15m = 0;
+      }
+    }
+
+    this.miningStatus = new MiningStatus(true, _config.user, 0, 0, 0, 0.6, 120, networkDifficulty, 0, false, 'RandomX', this._lastHash10s, _config.threads, '');
   }
 
   public async start(config?: XmrigSettings): Promise<void> {
@@ -141,12 +190,17 @@ export class XmrigService {
         
         window.electronAPI.onXmrigOutput(({stdout, stderr} : { stdout?: string, stderr?: string }) => {
           if (stdout) {
-            this._logs.push(stdout);
-            this.std.out.emit(stdout);
+            stdout = this.cleanLog(stdout);
+            if (stdout.includes("CPU") && stdout.includes("AFFINITY")) {
+              this._lastHashStatus = stdout;
+            } else {
+              this._logs.push(stdout);
+              this.std.out.emit(stdout);
+            }
           } else if (stderr) {
+            stderr = this.cleanLog(stderr);
             this._logs.push(stderr);
             this.std.err.emit(stderr);
-            //this._status = 'stopped';
           }
         });
 
@@ -167,7 +221,7 @@ export class XmrigService {
 
       this.setSettings(_config);
       this._status = 'running';
-      await this.refreshMiningStatus();
+      await this.refreshMiningStatus(0);
       this.onStart.emit();
     } catch (error: any) {
       console.error(error);

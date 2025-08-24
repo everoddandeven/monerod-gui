@@ -176,6 +176,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.once(eventId, handler);
     ipcRenderer.invoke('start-xmrig', { eventId, options });
   },
+  xmrigCmd: (cmd, callback) => {
+    const eventId = `on-xmrig-cmd-${newId()}`;
+    const handler = (event, result) => {
+      callback(result);
+    };
+
+    ipcRenderer.once(eventId, handler);
+    ipcRenderer.invoke('xmrig-cmd', { eventId, cmd });
+  },
   stopXmrig: (callback) => {
     const eventId = `on-stop-xmrig-${newId()}`;
     const handler = (event, result) => {
