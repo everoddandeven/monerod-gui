@@ -976,201 +976,73 @@
       <button *ngIf="!gettingTx" class="w-100 btn btn-primary btn-lg" type="button" (click)="getTx()">Search Tx</button>
       <button *ngIf="gettingTx" class="w-100 btn btn-primary btn-lg" type="button" disabled>Searching Tx ...</button>
 
-      <hr *ngIf="block" class="my-4">
-    <!-- TODO TX DETAILS
-      <div *ngIf="block" class="card">
+      <hr *ngIf="tx && !gettingTx" class="my-4">
+      <div *ngIf="tx && !gettingTx" class="card">
         <div class="card-header bg-dark text-white">
-          <h4><i class="bi bi-box"></i> Block Details (#{{ block.blockHeader.height }})</h4>
+          <h4><i class="bi bi-credit-card-2-front"></i>&nbsp;&nbsp;Transaction (#{{ tx.hashShort }})</h4>
         </div>
         <div class="card-body">
-          @if(block) {
+          @if(tx) {
             <div class="row">
               <div class="col-md-4">
-                <h6>Block Information</h6>
+                <h6>Info</h6>
 
                 <div class="input-group mb-1">
-                  <span class="input-group-text" id="get-block-size-info">Block Size</span>
-                  <input type="text" class="form-control" aria-label="Block Size" aria-describedby="get-block-size-info" [value]="block.blockHeader.blockSize + ' bytes'" readonly>
+                  <span class="input-group-text" id="get-block-weight-info">Height</span>
+                  <input type="text" class="form-control" aria-label="Block Height" aria-describedby="get-block-size-info" [value]="tx.blockHeight" readonly>
                 </div>
 
                 <div class="input-group mb-1">
-                  <span class="input-group-text" id="get-block-weight-info">Block Weight</span>
-                  <input type="text" class="form-control" aria-label="Block Weight" aria-describedby="get-block-size-info" [value]="block.blockHeader.blockWeight + ' units'" readonly>
+                  <span class="input-group-text" id="get-block-height-info">Timestamp</span>
+                  <input type="text" class="form-control" aria-label="Block Height" aria-describedby="get-block-height-info" [value]="tx.blockTimestampMs | date: 'medium'" readonly>
                 </div>
 
                 <div class="input-group mb-1">
-                  <span class="input-group-text" id="get-block-height-info">Height</span>
-                  <input type="text" class="form-control" aria-label="Block Height" aria-describedby="get-block-height-info" [value]="block.blockHeader.height" readonly>
+                  <span class="input-group-text" id="get-block-version-info">Confirmations</span>
+                  <input type="text" class="form-control" aria-label="Version" aria-describedby="get-block-version-info" [value]="tx.confirmations" readonly>
                 </div>
 
                 <div class="input-group mb-1">
-                  <span class="input-group-text" id="get-block-version-info">Version</span>
-                  <input type="text" class="form-control" aria-label="Version" aria-describedby="get-block-version-info" [value]="block.blockHeader.majorVersion + '.' + block.blockHeader.minorVersion" readonly>
+                  <span class="input-group-text" id="get-block-nonce-info">Fee</span>
+                  <input type="text" class="form-control" aria-label="Nonce" aria-describedby="get-block-nonce-info" [value]="tx.feeXMR + ' XMR'" readonly>
                 </div>
 
                 <div class="input-group mb-1">
-                  <span class="input-group-text" id="get-block-nonce-info">Nonce</span>
-                  <input type="text" class="form-control" aria-label="Nonce" aria-describedby="get-block-nonce-info" [value]="block.blockHeader.nonce" readonly>
+                  <span class="input-group-text" id="get-block-reward-info">Double Spend</span>
+                  <input type="text" class="form-control" aria-label="Reward" aria-describedby="get-block-reward-info" [value]="tx.doubleSpend" readonly>
                 </div>
 
                 <div class="input-group mb-1">
-                  <span class="input-group-text" id="get-block-txs-info">Transactions</span>
-                  <input type="text" class="form-control" aria-label="Transactions" aria-describedby="get-block-txs-info" [value]="block.blockHeader.numTxes" readonly>
+                  <span class="input-group-text" id="get-block-timestamp-info">Version</span>
+                  <input type="text" class="form-control" aria-label="Timestamp" aria-describedby="get-block-timestamp-info" [value]="tx.version" readonly>
                 </div>
 
-                <div class="input-group mb-1">
-                  <span class="input-group-text" id="get-block-reward-info">Reward</span>
-                  <input type="text" class="form-control" aria-label="Reward" aria-describedby="get-block-reward-info" [value]="block.blockHeader.rewardXMR + ' XMR'" readonly>
-                </div>
-
-                <div class="input-group mb-1">
-                  <span class="input-group-text" id="get-block-timestamp-info">Timestamp</span>
-                  <input type="text" class="form-control" aria-label="Timestamp" aria-describedby="get-block-timestamp-info" [value]="block.blockHeader.timestampMs | date:'medium'" readonly>
-                </div>
-
-                <div class="input-group mb-1">
-                  <span class="input-group-text" id="get-block-orphan-info">Is Orphan</span>
-                  <input type="text" class="form-control" aria-label="Is Orphan" aria-describedby="get-block-orphan-info" [value]="block.blockHeader.orphanStatus ? 'Yes' : 'No'" readonly>
-                </div>
-
-                <div class="input-group mb-1">
-                  <span class="input-group-text" id="get-block-depth-info">Depth</span>
-                  <input type="text" class="form-control" aria-label="Depth" aria-describedby="get-block-depth-info" [value]="block.blockHeader.depth" readonly>
-                </div>
-
-                <div class="input-group mb-1">
-                  <span class="input-group-text" id="get-block-long-term-weight-info">Long Term Weight</span>
-                  <input type="text" class="form-control" aria-label="Long Term Weight" aria-describedby="get-block-long-term-weight-info" [value]="block.blockHeader.longTermWeight" readonly>
-                </div>
               </div>
+
               <div class="col-md-8">
-                <h6>Hashes</h6>
+                <h6>ID</h6>
 
                 <div class="input-group mb-1">
-                  <span class="input-group-text" id="get-block-hash-info">Block Hash</span>
-                  <input type="text" class="form-control" aria-label="Block Hash" aria-describedby="get-block-hash-info" [value]="block.blockHeader.hash" readonly>
-                </div>
-
-                <div class="input-group mb-1">
-                  <span class="input-group-text" id="get-block-previous-hash-info">Previous Hash</span>
-                  <input type="text" class="form-control" aria-label="Previous Hash" aria-describedby="get-block-previous-hash-info" [value]="block.blockHeader.prevHash" readonly>
-                </div>
-
-                <div *ngIf="fillPoWHash" class="input-group mb-1">
-                  <span class="input-group-text" id="get-block-pow-hash-info">PoW Hash</span>
-                  <input type="text" class="form-control" aria-label="PoW Hash" aria-describedby="get-block-pow-hash-info" [value]="block.blockHeader.powHash" readonly>
-                </div>
-
-                <div class="input-group mb-1">
-                  <span class="input-group-text" id="get-block-miner-tx-hash-info">Miner Tx Hash</span>
-                  <input type="text" class="form-control" aria-label="Miner Tx Hash" aria-describedby="get-block-miner-tx-hash-info" [value]="block.blockHeader.minerTxHash" readonly>
+                  <span class="input-group-text" id="get-block-size-info">Hash</span>
+                  <input type="text" class="form-control" aria-label="Block Size" aria-describedby="get-block-size-info" [value]="tx.hash" readonly>
                 </div>
 
                 <br />
+                <h6>Key Images</h6>
 
-                <h6>Difficulty</h6>
-
-                <div class="input-group mb-1">
-                  <span class="input-group-text" id="get-block-cumulative-difficulty-info">Cumulative Difficulty</span>
-                  <input type="text" class="form-control" aria-label="Cumulative Difficulty" aria-describedby="get-block-cumulative-difficulty-info" [value]="block.blockHeader.cumulativeDifficulty" readonly>
-                </div>
-
-                <div class="input-group mb-1">
-                  <span class="input-group-text" id="get-block-wide-cumulative-difficulty-info">Wide Cumulative Difficulty</span>
-                  <input type="text" class="form-control" aria-label="Wide Cumulative Difficulty" aria-describedby="get-block-wide-cumulative-difficulty-info" [value]="block.blockHeader.wideCumulativeDifficulty" readonly>
-                </div>
-
-                <div class="input-group mb-1">
-                  <span class="input-group-text" id="get-block-difficulty-info">Difficulty</span>
-                  <input type="text" class="form-control" aria-label="Difficulty" aria-describedby="get-block-difficulty-info" [value]="block.blockHeader.difficulty" readonly>
-                </div>
-
-                <div class="input-group mb-1">
-                  <span class="input-group-text" id="get-block-wide-difficulty-info">Wide Difficulty</span>
-                  <input type="text" class="form-control" aria-label="Wide Difficulty" aria-describedby="get-block-wide-difficulty-info" [value]="block.blockHeader.wideDifficulty" readonly>
-                </div>
-
-              </div>
-            </div>
-            <div *ngIf="gotFullBlock && block" class="row mt-4">
-              <div *ngIf="block.details && block.details.minerTx" class="col-md-4">
-                <h6>Miner Tx</h6>
-
-                <div class="input-group mb-1">
-                  <span class="input-group-text" id="get-miner-tx-version-info">Version</span>
-                  <input type="text" class="form-control" aria-label="Version" aria-describedby="get-miner-tx-version-info" [value]="block.details.minerTx.version" readonly>
-                </div>
-
-                <div class="input-group mb-1">
-                  <span class="input-group-text" id="get-miner-tx-unlock-time-info">Unlock Time</span>
-                  <input type="text" class="form-control" aria-label="Unlock Time" aria-describedby="get-miner-tx-unlock-time-info" [value]="block.details.minerTx.unlockTime" readonly>
-                </div>
-
-                <div class="input-group mb-1">
-                  <span class="input-group-text" id="get-miner-tx-inputs-info">Tx Inputs</span>
-                  <input type="text" class="form-control" aria-label="Tx Inputs" aria-describedby="get-miner-tx-inputs-info" [value]="block.details.minerTx.vin.length" readonly>
-                </div>
-
-                <div class="input-group mb-1">
-                  <span class="input-group-text" id="get-miner-tx-outputs-info">Tx Outputs</span>
-                  <input type="text" class="form-control" aria-label="Tx Outputs" aria-describedby="get-miner-tx-outputs-info" [value]="block.details.minerTx.vout.length" readonly>
-                </div>
-
-                <div class="input-group mb-1">
-                  <span class="input-group-text" id="get-miner-tx-extra-info">Extra</span>
-                  <input type="text" class="form-control" aria-label="Extra" aria-describedby="get-miner-tx-extra-info" [value]="block.details.minerTx.extra.toString()" readonly>
-                </div>
+                @for(ki of tx.keyImages; track ki; let idx = $index) {
+                  <div class="input-group mb-1">
+                    <span class="input-group-text" [id]="ki">{{ idx }}</span>
+                    <input type="text" class="form-control" aria-label="Key Image" [attr.aria-describedby]="ki" [value]="ki" readonly>
+                  </div>
+                }
 
               </div>
 
-              <div class="col-md-8">
-                <h6>Block Blob</h6>
-
-                <div class="input-group">
-                  <span class="input-group-text">Hex</span>
-                  <textarea class="form-control" aria-label="Hex" [value]="block.blob" readonly></textarea>
-                </div>
-              </div>
-            </div>
-          }
-          @else {
-            <div class="row">
-              <div class="col-md-4">
-                <h6>Block Information</h6>
-                <ul class="list-group">
-                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                </ul>
-              </div>
-              <div class="col-md-8">
-                <h6>Hashes</h6>
-                <ul class="list-group">
-                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                </ul>
-
-                <h6>Difficulty</h6>
-                <ul class="list-group">
-                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                  <li class="list-group-item placeholder col-7"><span class="placeholder col-6"></span></li>
-                </ul>
-              </div>
             </div>
           }
         </div>
       </div>
-    -->
     </div>
 
     <div [hidden]="currentExplorerTab !== 'checkKeyImage'">

@@ -112,7 +112,7 @@ export class DetailComponent extends BasePageComponent implements AfterViewInit 
   }
 
   public get stoppingDaemon(): boolean {
-    return this.daemonData.stopping;
+    return this.daemonService.stopping || this.daemonService.quitting;
   }
 
   public get syncDisabledByWifiPolicy(): boolean {

@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, inject, NgZone } from '@angular/core';
 import { NavbarPill } from '../../shared/components/navbar/navbar.model';
 import { DaemonService } from '../../core/services/daemon/daemon.service';
-import { Block, BlockDetails, BlockHeader, Chain, FeeEstimate, HistogramEntry, MinerTx, Output, OutputDistribution, SpentKeyImage, SyncInfo, TxBacklogEntry, TxPoolHisto, TxPoolStats, UnconfirmedTx } from '../../../common';
+import { Block, BlockDetails, BlockHeader, Chain, FeeEstimate, HistogramEntry, MinerTx, Output, OutputDistribution, SpentKeyImage, SyncInfo, TxBacklogEntry, TxPoolHisto, TxPoolStats, UnconfirmedTx, Transaction } from '../../../common';
 import { DaemonDataService } from '../../core/services';
 import { BasePageComponent } from '../base-page/base-page.component';
 import { Subscription } from 'rxjs';
@@ -72,6 +72,7 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
   public getTxHash: string = '';
   public gettingTx: boolean = false;
   public getTxError: string = '';
+  public tx?: Transaction;
 
   public clearingCache: boolean = false;
   public clearCacheError: string = '';
@@ -139,9 +140,9 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
   private consensusMapExtent: Extent = createEmpty();
   private consensusMapExtentAll: Extent = createEmpty();
   private consensusLayer?: VectorLayer;
-  private lastConsensusHeight: number = 0;
   private hoveredBlock?: Feature<Polygon>;
   public loadingConsensusMap: boolean = false;
+
 
   // #endregion
 
@@ -1047,7 +1048,6 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
       err = error;
     }
 
-    this.lastConsensusHeight = this.daemonData.last720BlocksHeight;
     this.loadingConsensusMap = false;
     if (err) throw err;
   }
@@ -1115,11 +1115,9 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
     this.gettingTx = true;
 
     try {
-      throw new Error("Not implemented");
-      // TODO implement getTx()
-      //const txs = await this.daemonService.getTransactions([this.getTxHash]);      
-      //if (txs.length === 0) throw new Error("No transaction found");
-      //this.tx = txs[0];
+      const txs = await this.daemonService.getTransactions(this.getTxHash);      
+      if (txs.length === 0) throw new Error("No transaction found");
+      this.tx = txs[0];
       
       //this.getTxError = '';
     } catch (error: any) {

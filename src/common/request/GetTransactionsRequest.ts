@@ -1,7 +1,7 @@
 import { RPCRequest } from "./RPCRequest";
 
 export class GetTransactionsRequest extends RPCRequest {
-    public override readonly method: string = 'get_transactions';
+    public override readonly method: string = 'gettransactions';
     public override readonly restricted: boolean = false;
     public readonly txHashes: string[];
     public readonly decodeAsJson: boolean;
@@ -18,10 +18,8 @@ export class GetTransactionsRequest extends RPCRequest {
 
     public toDictionary(): { [key: string]: any; } {
         return {
-            "tx_hashes": this.txHashes,
-            "decodeAsJson": this.decodeAsJson,
-            "prune": this.prune,
-            "split": this.split
+            "txs_hashes": this.txHashes,
+            "decode_as_json": this.decodeAsJson
         }
     }
 }

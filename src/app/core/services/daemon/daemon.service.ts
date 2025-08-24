@@ -21,7 +21,9 @@ import {
   Ban, HistogramEntry, SyncInfo, DaemonVersion, FeeEstimate, Chain, AddedAuxPow, TxInfo,
   RelayTxRequest, TxBacklogEntry, BlockchainPruneInfo, MinerData, CoreIsBusyError, NetStats,
   AuxPoW, OutputDistribution, CoinbaseTxSum, Block, Output, OutKey, UpdateInfo, PublicNode,
-  PeerInfo, ProcessStats, TimeUtils, TxPool, TxPoolStats, BlockCount
+  PeerInfo, ProcessStats, TimeUtils, TxPool, TxPoolStats, BlockCount,
+  GetTransactionsRequest,
+  Transaction
 } from '../../../../common';
 
 import { MoneroInstallerService } from '../monero-installer/monero-installer.service';
@@ -1343,6 +1345,15 @@ export class DaemonService {
     }
 
     return response.tx_hashes;
+  }
+
+  public async getTransactions(...hashes: string[]): Promise<any> {
+    const response = await this.callRpc(new GetTransactionsRequest(hashes, true, false, false));
+    const missedTxs = response.missed_tx as string[];
+    
+    if (Array.isArray(missedTxs) && missedTxs.length > 0) throw new Error(`Could not find txs: ${missedTxs.join(' ')}`);
+
+    return Transaction.parseRpcResponse(response);
   }
 
   public async popBlocks(nBlocks: number): Promise<number> {
