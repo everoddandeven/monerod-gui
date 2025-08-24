@@ -1,4 +1,3 @@
-import { CustomChildProcess } from "electron-sudo-universal/dist/lib/types";
 import { AppChildProcess, sudo } from "./AppChildProcess";
 
 export class XmrigProcess extends AppChildProcess {
@@ -138,12 +137,7 @@ export class XmrigProcess extends AppChildProcess {
 
       const onStdErr = (out: string) => {
         console.log('XmrigProcess.StdErr: ', out);
-        const c = out.split(' ');
-        c.shift();
-        c.shift();
-
-        error = c.join(' ');
-        console.log('XmrigProcess.StdErr: saved error: ' + error);
+        error = out;
       }
 
       const onError = (err: any) => {
