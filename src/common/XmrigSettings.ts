@@ -14,6 +14,7 @@ export class XmrigSettings extends Comparable<XmrigSettings> {
   public daemonZmqPort: number = 0;
   public background: boolean = false;
   public pauseOnBattery: boolean = false;
+  public noColor: boolean = true;
 
   public override clone(): XmrigSettings {
     const result = Object.assign(new XmrigSettings(), this);
@@ -29,13 +30,15 @@ export class XmrigSettings extends Comparable<XmrigSettings> {
     if (this.threads) cmdList.push(`--threads=${this.threads}`);
     if (this.rigId) cmdList.push(`--rig-id=${this.rigId}`);
     if (this.url) cmdList.push(`--url=${this.url}`);
-    if (this.httpHost) cmdList.push(`--http-host=${this.httpHost}`);
-    if (this.httpPort > 0) cmdList.push(`--http-port=${this.httpPort}`);
+    //if (this.httpHost) cmdList.push(`--http-host=${this.httpHost}`);
+    //if (this.httpPort > 0) cmdList.push(`--http-port=${this.httpPort}`);
     if (this.daemon) cmdList.push('--daemon');
     if (this.daemonZmqPort > 0) cmdList.push(`--daemon-zmq-port=${this.daemonZmqPort}`);
     if (this.coin) cmdList.push(`--coin=${this.coin}`);
     if (this.background) cmdList.push(`--background`);
     if (this.pauseOnBattery) cmdList.push(`--pause-on-battery`);
+    if (this.noColor) cmdList.push(`--no-color`);
+    
     return cmdList;
   }
 

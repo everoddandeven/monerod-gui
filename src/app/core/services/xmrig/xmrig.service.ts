@@ -1,6 +1,7 @@
-import { EventEmitter, Injectable } from '@angular/core';
+import { EventEmitter, inject, Injectable } from '@angular/core';
 import { MiningStatus, XmrigSettings } from '../../../../common';
 import { IDBPDatabase, openDB } from 'idb';
+import { P2poolService } from '../p2pool/p2pool.service';
 
 type Status = 'running' | 'stopped' | 'starting' | 'restarting' | 'stopping';
 
@@ -15,6 +16,8 @@ export interface XmrigStd {
 export class XmrigService {
   
   // #region Attributes
+
+  private readonly p2poolService = inject(P2poolService);
 
   private readonly openDbPromise: Promise<IDBPDatabase>;
   private readonly dbName = 'XmrigSettingsDB';
@@ -149,18 +152,22 @@ export class XmrigService {
     this._logs = [];
   }
 
-  public async refreshMiningStatus(networkDifficulty: number): Promise<void> {
-    const _config = this._settings;
-    
-    await new Promise<void>((resolve, reject) => {
-      window.electronAPI.xmrigCmd('h', (result: { error?: string}) => {
+  private async sendCommand(cmd: 'h' | 'p' | 'r' | 'c'): Promise<void> {
+    return await new Promise<void>((resolve, reject) => {
+      window.electronAPI.xmrigCmd(cmd, (result: { error?: string}) => {
         if (result.error) reject(new Error(result.error));
         else resolve();
       });
     });
+  }
+
+  public async refreshMiningStatus(networkDifficulty: number): Promise<void> {
+    const _config = this._settings;
+
+    await this.sendCommand('h');
 
     const lastHash = this._lastHashStatus;
-    const info = lastHash.split('\n')[4]
+    const info = lastHash.split('\n').find((line) => line.includes('speed'));
     if (info) {
       const c = info.split(' ').filter(x => x !== '');
       const hash10s = c[5];
@@ -194,7 +201,7 @@ export class XmrigService {
       '');
   }
 
-  public async start(config?: XmrigSettings): Promise<void> {
+  public async start(config?: XmrigSettings, waitForP2Pool: boolean = false): Promise<void> {
     const _config = config ? config : this._settings;
     if (_config.path === '') throw new Error("Xmrig not configured. Go to Settings -> Mining");
     if (this.running) throw new Error("Already running xmrig");
@@ -204,12 +211,14 @@ export class XmrigService {
     this._status = 'starting';
 
     try {
+      if (waitForP2Pool) await this.p2poolService.waitForSidechainSync();
+
       const promise = new Promise<void>((resolve, reject) => {
         
         window.electronAPI.onXmrigOutput(({stdout, stderr} : { stdout?: string, stderr?: string }) => {
           if (stdout) {
             stdout = this.cleanLog(stdout);
-            if (stdout.includes("CPU") && stdout.includes("AFFINITY")) {
+            if (stdout.includes("speed")) {
               this._lastHashStatus = stdout;
             } else {
               this._logs.push(stdout);
@@ -226,6 +235,9 @@ export class XmrigService {
           console.log(code);
           this._status = 'stopped';
           this._startedAt = 0;
+          this._lastHash10s = 0;
+          this._lastHash60s = 0;
+          this._lastHash15m = 0;
           this.onStop.emit();
         });
 

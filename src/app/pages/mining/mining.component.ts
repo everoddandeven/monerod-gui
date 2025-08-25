@@ -971,6 +971,8 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     }
     
     p2poolConf.wallet = this.startMiningMinerAddress;
+    xmrigConf.url = '127.0.0.1:3333';
+    xmrigConf.daemon = false;
     xmrigConf.user = this.startMiningMinerAddress;
     xmrigConf.background = this.startMiningDoBackgroundMining;
     xmrigConf.pauseOnBattery = this.startMiningIgnoreBattery === false;
@@ -979,7 +981,7 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
 
     try {
       await this.p2poolService.start(p2poolConf);
-      if (xmrigInstalled) await this.xmrigService.start(xmrigConf);
+      if (xmrigInstalled) await this.xmrigService.start(xmrigConf, true);
       await this.daemonData.refreshMiningStatus();
     } catch (error: any) {
       err = error;
@@ -1001,6 +1003,7 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     if (this.xmrigInstalled) {
       const xmrigConf = XmrigSettings.fromDaemonSettings(conf);
 
+      xmrigConf.url = '';
       xmrigConf.user = this.startMiningMinerAddress;
       xmrigConf.coin = 'monero';
       xmrigConf.daemon = true;
