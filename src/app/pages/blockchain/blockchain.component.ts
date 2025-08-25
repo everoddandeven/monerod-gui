@@ -962,7 +962,7 @@ export class BlockchainComponent extends BasePageComponent implements AfterViewI
       }
 
       const placeholder = this.createBlockFeature(0, y, '...');
-      placeholder.set('DESCRIPTION', `${runLen} blocchi compressi`);
+      placeholder.set('DESCRIPTION', `${runLen} uncontested blocks`);
       features.push(placeholder);
       if (prevFeature) {
         const link = this.createLinkFeature(placeholder, prevFeature);
