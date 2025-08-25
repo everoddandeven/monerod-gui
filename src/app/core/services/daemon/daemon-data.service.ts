@@ -555,6 +555,10 @@ export class DaemonDataService {
         this._gettingLastBlockHeader = true;
         this._lastBlockHeader = await this.daemonService.getLastBlockHeader(true);
         this._gettingLastBlockHeader = false;
+      } else if (this._daemonInfo.height > 0) {
+        this._gettingLastBlockHeader = true;
+        this._lastBlockHeader = await this.daemonService.getBlockHeaderByHeight(this._daemonInfo.height - 1);
+        this._gettingLastBlockHeader = false;
       }
 
       this._gettingNetStats = true;
@@ -666,9 +670,8 @@ export class DaemonDataService {
     this.last720BlocksHeight = currentHeight;
 
     let altChains: Chain[] = [];
-    if (this._daemonInfo && this._daemonInfo.synchronized && this._daemonInfo.altBlocksCount > 0) altChains = await this.refreshAltChains();
-
-
+    if (this._daemonInfo && this._daemonInfo.altBlocksCount > 0) altChains = await this.refreshAltChains();
+    
     if (headers.length > 0) {
       altChains = altChains.filter((chain) => chain.height >= this.last720Blocks[0].height);
       this.syncRefreshLast24hBlocks.emit({ new: headers, old: removed, altChains });
