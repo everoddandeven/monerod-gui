@@ -1436,7 +1436,7 @@ export class DaemonService {
   }
 
   public getGuiVersion(): string {
-    return "1.3.0-main";
+    return "1.4.0-main";
   }
 
   public async getProcessStats(): Promise<ProcessStats> {
