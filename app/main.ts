@@ -344,13 +344,13 @@ async function startMoneroDaemon(commandOptions: string[]): Promise<void> {
 
   if (!monerodPath) {
     const error = `Invalid monerod path provided: ${monerodPath}`;
-    win?.webContents.send('monero-stderr', error);
+    win?.webContents.send('monerod-started', { error });
     throw new Error("Invalid monerod path provided");
   }
 
-  if (monerodProcess != null) {
+  if (monerodProcess != null && monerodProcess.running) {
     const error: string = 'Monero daemon already started';
-    win?.webContents.send('monero-stderr', error);
+    win?.webContents.send('monerod-started', { error });
     throw new Error("Monerod already started");
   }
 
