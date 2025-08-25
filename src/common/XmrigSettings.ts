@@ -10,7 +10,7 @@ export class XmrigSettings extends Comparable<XmrigSettings> {
   public httpHost: string = '127.0.0.1';
   public httpPort: number = 18088;
   public coin: string = '';
-  public daemon: string = '';
+  public daemon: boolean = true;
   public daemonZmqPort: number = 0;
 
   public override clone(): XmrigSettings {
@@ -23,15 +23,15 @@ export class XmrigSettings extends Comparable<XmrigSettings> {
     const cmdList: string[] = [];
     if (!this.path) throw new Error("Xmrig path not configured");
     cmdList.push(this.path);
-    if (this.user) cmdList.push('--user', this.user);
-    if (this.threads) cmdList.push('--threads', `${this.threads}`);
-    if (this.rigId) cmdList.push('--rig-id', this.rigId);
-    if (this.url) cmdList.push('--url', this.url);
-    if (this.httpHost) cmdList.push('--http-host', this.httpHost);
-    if (this.httpPort > 0) cmdList.push('--http-port', `${this.httpPort}`);
-    if (this.daemon) cmdList.push('--daemon', this.daemon);
-    if (this.daemonZmqPort > 0) cmdList.push('--daemon-zmq-port', `${this.daemonZmqPort}`);
-    if (this.coin) cmdList.push('--coin', this.coin);
+    if (this.user) cmdList.push('--user=' + this.user);
+    if (this.threads) cmdList.push(`--threads=${this.threads}`);
+    if (this.rigId) cmdList.push(`--rig-id=${this.rigId}`);
+    if (this.url) cmdList.push(`--url=${this.url}`);
+    if (this.httpHost) cmdList.push(`--http-host=${this.httpHost}`);
+    if (this.httpPort > 0) cmdList.push(`--http-port=${this.httpPort}`);
+    if (this.daemon) cmdList.push('--daemon');
+    if (this.daemonZmqPort > 0) cmdList.push(`--daemon-zmq-port=${this.daemonZmqPort}`);
+    if (this.coin) cmdList.push(`--coin=${this.coin}`);
     return cmdList;
   }
 

@@ -957,10 +957,9 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     if (this.xmrigInstalled) {
       const xmrigConf = XmrigSettings.fromDaemonSettings(conf);
 
-      xmrigConf.url = '';
       xmrigConf.user = this.startMiningMinerAddress;
       xmrigConf.coin = 'monero';
-      xmrigConf.daemon = this.daemonService.url.replace('http://', '');
+      xmrigConf.daemon = true;
       xmrigConf.daemonZmqPort = conf.getZmqPubPort();
       xmrigConf.threads = this.startMiningThreadsCount;
       xmrigConf.path = this.xmrigService.settings.path;
