@@ -201,14 +201,14 @@
 
               <div class="form-check form-switch col-md-4">
                 <label for="start-mining-do-background-mining" class="form-check-label">Do Background Mining</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="start-mining-do-background-mining" [disabled]="startMiningType !== 'solo-mining'" [checked]="startMiningDoBackgroundMining && startMiningType === 'solo-mining'" [(ngModel)]="startMiningDoBackgroundMining" [ngModelOptions]="{standalone: true}">
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="start-mining-do-background-mining" [disabled]="startMiningType !== 'solo-mining' && !xmrigInstalled" [checked]="startMiningDoBackgroundMining && startMiningType === 'solo-mining'" [(ngModel)]="startMiningDoBackgroundMining" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">States if the mining should run in background (true) or foreground (false)</small>
               </div>
               
               <div class="form-check form-switch col-md-4">
                 <label for="start-mining-ignore-battery" class="form-check-label">Ignore Battery</label>
-                <input class="form-control form-check-input" type="checkbox" role="switch" id="start-mining-ignore-battery" [disabled]="startMiningType !== 'solo-mining'" [checked]="startMiningIgnoreBattery && startMiningType === 'solo-mining'" [(ngModel)]="startMiningIgnoreBattery" [ngModelOptions]="{standalone: true}">
+                <input class="form-control form-check-input" type="checkbox" role="switch" id="start-mining-ignore-battery" [disabled]="startMiningType !== 'solo-mining' && !xmrigInstalled" [checked]="startMiningIgnoreBattery && startMiningType === 'solo-mining'" [(ngModel)]="startMiningIgnoreBattery" [ngModelOptions]="{standalone: true}">
                 <br>
                 <small class="text-body-secondary">States if battery state (on laptop) should be ignored (true) or not (false)</small>
               </div>

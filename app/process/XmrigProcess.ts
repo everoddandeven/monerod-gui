@@ -2,7 +2,7 @@ import { AppChildProcess, sudo } from "./AppChildProcess";
 
 export class XmrigProcess extends AppChildProcess {
 
-  protected static readonly stdoutPattern: string = `READY`;
+  protected static readonly stdoutPattern: string = `* COMMANDS`;
 
   constructor({ cmd, flags, isExe }: { cmd: string, flags?: string[], isExe?: boolean }) {
     super({
@@ -108,11 +108,15 @@ export class XmrigProcess extends AppChildProcess {
             return;
           }
 
-          timeout = setTimeout(() => {
+          timeout = setTimeout(async () => {
             if (this._process && this._process.exitCode == null) {
               this._process.kill();
             }
             timeout = undefined;
+
+            if (this._process) {
+              await this.kill();
+            }
 
             reject(new Error("XmrigProcess.start(): Timed out"));
           }, 60*1000);
@@ -192,24 +196,14 @@ export class XmrigProcess extends AppChildProcess {
     }
   }
 
-  public async stop(): Promise<number | null> {
-    if (this._starting) {
-      throw new Error("Process is starting");
-    }
-
-    if (this._stopping) {
-      throw new Error("Process is already stopping");
-    }
-
-    const proc = this._process;
-
-    if (!this._running || !proc) {
-      throw new Error("Process is not running");
-    }
-
-    this._stopping = true;
-
+  private async kill(): Promise<number | null> {
     const promise = new Promise<number | null>((resolve) => {
+      const proc = this._process;
+      if (!proc) {
+        console.error("Could not kill xmrig process, not found");
+        return;
+      }
+
       proc.on('close', (code: number | null) => {
         this._process = undefined;
         this._running = false;
@@ -230,6 +224,26 @@ export class XmrigProcess extends AppChildProcess {
     if (result.stderr) console.log("ERROR KILLING XMRIG: " + result.stderr);
 
     return await promise;
+  }
+
+  public async stop(): Promise<number | null> {
+    if (this._starting) {
+      throw new Error("Process is starting");
+    }
+
+    if (this._stopping) {
+      throw new Error("Process is already stopping");
+    }
+
+    const proc = this._process;
+
+    if (!this._running || !proc) {
+      throw new Error("Process is not running");
+    }
+
+    this._stopping = true;
+
+    return await this.kill();
   }
 
   public async getVersion(): Promise<string> {

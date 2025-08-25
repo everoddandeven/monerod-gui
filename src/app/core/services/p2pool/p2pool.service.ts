@@ -2,6 +2,7 @@ import { EventEmitter, inject, Injectable } from '@angular/core';
 import { MiningStatus, P2PoolSettings } from '../../../../common';
 import { IDBPDatabase, openDB } from 'idb';
 import { ElectronService } from '../electron/electron.service';
+import { Subscription } from 'rxjs';
 
 type Status = 'running' | 'stopped' | 'starting' | 'restarting' | 'stopping';
 type Pool = 'main' | 'mini';
@@ -170,8 +171,10 @@ export class P2poolService {
   private _loaded: boolean = false;
   private _logs: string[] = [];
   private _startedAt = 0;
+  private _synchronized: boolean = false;
   public readonly onStart: EventEmitter<void> = new EventEmitter<void>();
   public readonly onStop: EventEmitter<void> = new EventEmitter<void>();
+  public readonly onSynced: EventEmitter<void> = new EventEmitter<void>();
 
   // Cached data
 
@@ -354,6 +357,7 @@ export class P2poolService {
         window.electronAPI.onP2PoolOutput(({stdout, stderr} : { stdout?: string, stderr?: string }) => {
           if (stdout) {
             this._logs.push(stdout);
+            if (stdout.includes('SideChain SYNCHRONIZED')) this.onSynced.emit();
             this.std.out.emit(stdout);
           } else if (stderr) {
             this._logs.push(stderr);
@@ -392,6 +396,20 @@ export class P2poolService {
     if (err) throw err;
   }
   
+  public async waitForSidechainSync(): Promise<void> {
+    if (this.status === 'stopped' || this.status === 'stopping') throw new Error("P2Pool service not running")
+    if (this.synchronized) return;
+
+    await new Promise<void>((resolve) => {
+      let sub: Subscription;
+
+      sub = this.onSynced.subscribe(() => {
+        sub.unsubscribe();
+        resolve();
+      });
+    });
+  }
+
   public async stop(): Promise<void> {
     if (this.starting) throw new Error("p2pool is starting");
     if (!this.running) throw new Error("Already stopped p2pool");
