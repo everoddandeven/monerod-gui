@@ -367,6 +367,12 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     return d.bgTarget;
   }
 
+  public get miningAddress(): string {
+    const d = this.miningStatus;
+    if (!d) return '';
+    return d.address;
+  }
+
   // P2Pool
 
   public get p2poolState(): string {
@@ -930,6 +936,8 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     
     p2poolConf.wallet = this.startMiningMinerAddress;
     xmrigConf.user = this.startMiningMinerAddress;
+    xmrigConf.background = this.startMiningDoBackgroundMining;
+    xmrigConf.pauseOnBattery = this.startMiningIgnoreBattery === false;
 
     let err: any = null;
 
@@ -963,6 +971,8 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
       xmrigConf.daemonZmqPort = conf.getZmqPubPort();
       xmrigConf.threads = this.startMiningThreadsCount;
       xmrigConf.path = this.xmrigService.settings.path;
+      xmrigConf.background = this.startMiningDoBackgroundMining;
+      xmrigConf.pauseOnBattery = this.startMiningIgnoreBattery === false;
 
       await this.xmrigService.start(xmrigConf);
       this.startingMining = false;

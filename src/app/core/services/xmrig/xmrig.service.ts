@@ -165,6 +165,10 @@ export class XmrigService {
         this._lastHash10s = parseFloat(hash10s);
         this._lastHash60s = parseFloat(hash60s);
         this._lastHash15m = parseFloat(hash15m);
+
+        if (isNaN(this._lastHash10s)) this._lastHash10s = 0;
+        if (isNaN(this._lastHash60s)) this._lastHash60s = 0;
+        if (isNaN(this._lastHash15m)) this._lastHash15m = 0;
       } catch (error: any) {
         console.error(error);
         this._lastHash10s = 0;
@@ -173,7 +177,15 @@ export class XmrigService {
       }
     }
 
-    this.miningStatus = new MiningStatus(true, _config.user, 0, 0, 0, 0.6, 120, networkDifficulty, 0, false, 'RandomX', this._lastHash10s, _config.threads, '');
+    this.miningStatus = new MiningStatus(
+      true, 
+      _config.user, 
+      0, 0, 0, 0.6, 120, 
+      networkDifficulty, 0, _config.background, 
+      'RandomX', 
+      this._lastHash10s, 
+      _config.threads, 
+      '');
   }
 
   public async start(config?: XmrigSettings): Promise<void> {

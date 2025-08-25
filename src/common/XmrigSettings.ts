@@ -12,6 +12,8 @@ export class XmrigSettings extends Comparable<XmrigSettings> {
   public coin: string = '';
   public daemon: boolean = true;
   public daemonZmqPort: number = 0;
+  public background: boolean = false;
+  public pauseOnBattery: boolean = false;
 
   public override clone(): XmrigSettings {
     const result = Object.assign(new XmrigSettings(), this);
@@ -32,6 +34,8 @@ export class XmrigSettings extends Comparable<XmrigSettings> {
     if (this.daemon) cmdList.push('--daemon');
     if (this.daemonZmqPort > 0) cmdList.push(`--daemon-zmq-port=${this.daemonZmqPort}`);
     if (this.coin) cmdList.push(`--coin=${this.coin}`);
+    if (this.background) cmdList.push(`--background`);
+    if (this.pauseOnBattery) cmdList.push(`--pause-on-battery`);
     return cmdList;
   }
 
