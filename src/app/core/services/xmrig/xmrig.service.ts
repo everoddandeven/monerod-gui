@@ -29,6 +29,8 @@ export class XmrigService {
   private _lastHash60s: number = 0;
   private _lastHash15m: number = 0;
 
+  private _startedAt: number = 0;
+
   public miningStatus?: MiningStatus;
 
   public readonly std: XmrigStd = { out: new EventEmitter<string>(), err: new EventEmitter<string>() };
@@ -38,6 +40,10 @@ export class XmrigService {
   // #endregion
 
   // #region Getters
+
+  public get startedAt(): number {
+    return this._startedAt;
+  }
 
   public get lastHash10s(): number {
     return this._lastHash10s;
@@ -219,6 +225,7 @@ export class XmrigService {
         window.electronAPI.onXmrigClose((code: number) => {
           console.log(code);
           this._status = 'stopped';
+          this._startedAt = 0;
           this.onStop.emit();
         });
 
@@ -230,6 +237,8 @@ export class XmrigService {
       });
 
       await promise;
+
+      this._startedAt = Date.now();
 
       this.setSettings(_config);
       this._status = 'running';

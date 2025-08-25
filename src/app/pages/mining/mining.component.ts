@@ -171,6 +171,42 @@ export class MiningComponent extends BasePageComponent implements AfterViewInit,
     return !this.p2poolService.running ? 'solo-mining' : this.startMiningType === 'p2pool-main' ? 'P2Pool (main)' : 'P2Pool (mini)';
   }
 
+  public get miningUptime(): string {
+    let startedAt: number = 0;
+
+    const miningType = this.miningType;
+
+    if (this.xmrigService.running) startedAt = this.xmrigService.startedAt;
+    else if (miningType === 'solo-mining') startedAt = this.daemonService.miningStartedAt;
+    else startedAt = this.p2poolService.startedAt;
+
+    if (!startedAt) {
+      return '00:00:00';
+    }
+
+    const now = new Date();
+
+    let elapsedMilliseconds = now.getTime() - startedAt;
+
+    if (elapsedMilliseconds < 0) {
+      console.warn("Elapsed time is negative");
+      this.daemonService.startedAt = now;
+      elapsedMilliseconds = 0;
+    }
+
+    const seconds = Math.floor((elapsedMilliseconds / 1000) % 60);
+    const minutes = Math.floor((elapsedMilliseconds / (1000 * 60)) % 60);
+    const hours = Math.floor(elapsedMilliseconds / (1000 * 60 * 60));
+
+    const r = {
+      hours: hours < 10 ? `0${hours}` : `${hours}`,
+      minutes: minutes < 10 ? `0${minutes}` : `${minutes}`,
+      seconds: seconds < 10 ? `0${seconds}` : `${seconds}`
+    }
+
+    return `${r.hours}:${r.minutes}:${r.seconds}`;
+  }
+
   public get majorVersion(): number {
     return this.minerData ? this.minerData.majorVersion : 0;
   }

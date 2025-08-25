@@ -56,6 +56,7 @@ export class DaemonService {
   private daemonRunning?: boolean;
   private isRunningPromise?: Promise<boolean>;
   private _quitting: boolean = false;
+  private _miningStartedAt: number = 0;
 
   private mLatestVersion?: DaemonVersion;
   public version?: DaemonVersion;
@@ -83,6 +84,10 @@ export class DaemonService {
   // #endregion
 
   // #region Getters
+
+  public get miningStartedAt(): number {
+    return this._miningStartedAt;
+  }
 
   public get url(): string {
     return `http://127.0.0.1:${this.port}`;
@@ -1117,6 +1122,8 @@ export class DaemonService {
     if (typeof response.status == 'string' && response.status != 'OK') {
       throw new Error(`Could not start mining: ${response.status}`);
     }
+
+    this._miningStartedAt = Date.now();
   }
 
   public async stopMining(): Promise<void> {
@@ -1125,6 +1132,8 @@ export class DaemonService {
     if (typeof response.status == 'string' && response.status != 'OK') {
       throw new Error(`Could not stop mining: ${response.status}`);
     }
+
+    this._miningStartedAt = 0;
   }
 
   public async miningStatus(): Promise<MiningStatus> {

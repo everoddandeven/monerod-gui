@@ -169,6 +169,7 @@ export class P2poolService {
   private _settings: P2PoolSettings = new P2PoolSettings();
   private _loaded: boolean = false;
   private _logs: string[] = [];
+  private _startedAt = 0;
   public readonly onStart: EventEmitter<void> = new EventEmitter<void>();
   public readonly onStop: EventEmitter<void> = new EventEmitter<void>();
 
@@ -185,6 +186,10 @@ export class P2poolService {
   // #endregion
 
   // #region Getters
+
+  public get startedAt(): number {
+    return this._startedAt;
+  }
 
   public get synchronized(): boolean {
     const i = this.poolStats;
@@ -359,6 +364,7 @@ export class P2poolService {
 
         window.electronAPI.onP2PoolClose((code: number) => {
           console.log(code);
+          this._startedAt = 0;
           this._status = 'stopped';
           this.onStop.emit();
         });
@@ -371,6 +377,8 @@ export class P2poolService {
       });
 
       await promise;
+
+      this._startedAt = Date.now();
 
       this.setSettings(_config);
       this._status = 'running';
