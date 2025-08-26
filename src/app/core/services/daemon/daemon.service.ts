@@ -1436,7 +1436,7 @@ export class DaemonService {
   }
 
   public getGuiVersion(): string {
-    return "1.3.1 Fortitude";
+    return "1.3.2 Fortitude";
   }
 
   public async getProcessStats(): Promise<ProcessStats> {
