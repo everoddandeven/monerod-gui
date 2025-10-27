@@ -55,7 +55,7 @@ jobs:
       run: npm run electron:build:deb
 
     - name: Upload DEB artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: monerod-gui-linux-installer-deb
         path: dist/installers/*.deb
@@ -64,7 +64,7 @@ jobs:
       run: npm run electron:build
 
     - name: Upload AppImage artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: monerod-gui-linux-appimage
         path: release/*.AppImage
@@ -73,7 +73,7 @@ jobs:
       run: npm run electron:build:rpm
 
     - name: Upload RPM artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: monerod-gui-linux-installer-rpm
         path: dist/installers/*.rpm

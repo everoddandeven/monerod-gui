@@ -55,13 +55,13 @@ jobs:
       run: npm run electron:build
 
     - name: Upload EXE artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: monerod-gui-windows-portable
         path: release/*.exe
 
     - name: Upload MSI artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: monerod-gui-windows-installer
         path: release/*.msi
