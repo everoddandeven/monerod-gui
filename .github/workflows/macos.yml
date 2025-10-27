@@ -58,13 +58,13 @@ jobs:
       run: ls release/
     
     - name: Upload DMG artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: monerod-gui-darwin-dmg
         path: release/*.dmg
     
     - name: Upload PKG artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: monerod-gui-darwin-pkg
         path: release/*.pkg
@@ -73,7 +73,7 @@ jobs:
 #      run: npm run electron:build:mac
 
 #    - name: Upload DMG installer artifact
-#      uses: actions/upload-artifact@v4
+#      uses: actions/upload-artifact@v5
 #      with:
 #        name: monerod-gui-darwin-installer-dmg
 #        path: dist/installers/*.dmg
